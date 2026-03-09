@@ -15,8 +15,6 @@ import { useState, useEffect, useRef } from "react";
 
 const GlobalStyles = () => (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@300;400;900&family=Inter:wght@400;500;600;700&family=VT323&display=swap');
-
     /* ── AthenaX Brand Tokens v2 ── */
     :root {
       --cream:          #FDFBF7;
@@ -40,11 +38,11 @@ const GlobalStyles = () => (
     html { font-size: 16px; }
     body, #root {
       background: var(--cream); color: var(--ink);
-      font-family: 'Inter', sans-serif;
+      font-family: var(--font-space-grotesk), sans-serif;
       min-height: 100vh; -webkit-font-smoothing: antialiased;
     }
-    h1,h2,h3,h4,.font-heading { font-family: 'Londrina Solid', cursive; letter-spacing: 0.01em; }
-    .vt { font-family: 'VT323', monospace; }
+    h1,h2,h3,h4,.font-heading { font-family: var(--font-londrina), cursive; letter-spacing: 0.01em; }
+    .vt { font-family: var(--font-vt323), monospace; }
 
     /* ── Window cards ── */
     .window-card {
@@ -65,7 +63,7 @@ const GlobalStyles = () => (
     .window-header {
       background: var(--ink); color: var(--cream);
       padding: 7px 14px; display: flex; align-items: center; gap: 10px;
-      font-family: 'VT323', monospace; font-size: 14px; letter-spacing: 0.08em;
+      font-family: var(--font-vt323), monospace; font-size: 14px; letter-spacing: 0.08em;
       user-select: none; flex-shrink: 0;
     }
     .window-body   { padding: 20px; }
@@ -83,7 +81,7 @@ const GlobalStyles = () => (
     .terminal-panel {
       background: var(--ink); color: var(--cream);
       border: var(--border); box-shadow: var(--shadow);
-      font-family: 'VT323', monospace; font-size: 17px; line-height: 1.55;
+      font-family: var(--font-vt323), monospace; font-size: 17px; line-height: 1.55;
       border-radius: var(--radius); overflow: hidden;
     }
     .terminal-panel .window-header { border-bottom: 1px solid rgba(255,255,255,0.15); }
@@ -95,7 +93,7 @@ const GlobalStyles = () => (
 
     /* ── Buttons — Inter 600, 3px border, 6px shadow ── */
     .btn {
-      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700;
+      font-family: var(--font-inter), sans-serif; font-size: 13px; font-weight: 700;
       letter-spacing: 0.05em; text-transform: uppercase;
       cursor: pointer; transition: box-shadow 0.14s ease, transform 0.14s ease;
       display: inline-flex; align-items: center; justify-content: center;
@@ -121,23 +119,23 @@ const GlobalStyles = () => (
     .btn-lg { font-size: 15px; padding: 13px 30px; }
 
     /* ── Tags — Inter 600, yellow only for small badges/section labels ── */
-    .tag         { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 9px; border: 2px solid var(--ink); display: inline-block; line-height: 1.5; border-radius: var(--radius-xs); background: var(--cream); }
-    .tag-accent  { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 9px; border: 2px solid var(--accent-red); color: var(--accent-red); display: inline-block; line-height: 1.5; border-radius: var(--radius-xs); background: rgba(230,54,54,0.07); }
-    .tag-green   { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 9px; border: 2px solid var(--success-green); color: var(--success-green); display: inline-block; line-height: 1.5; border-radius: var(--radius-xs); background: rgba(34,197,94,0.07); }
+    .tag         { font-family: var(--font-inter), sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 9px; border: 2px solid var(--ink); display: inline-block; line-height: 1.5; border-radius: var(--radius-xs); background: var(--cream); }
+    .tag-accent  { font-family: var(--font-inter), sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 9px; border: 2px solid var(--accent-red); color: var(--accent-red); display: inline-block; line-height: 1.5; border-radius: var(--radius-xs); background: rgba(230,54,54,0.07); }
+    .tag-green   { font-family: var(--font-inter), sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 9px; border: 2px solid var(--success-green); color: var(--success-green); display: inline-block; line-height: 1.5; border-radius: var(--radius-xs); background: rgba(34,197,94,0.07); }
     /* Yellow = small highlight badge ONLY — section tags, status labels, mini badges */
-    .tag-yellow  { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 7px; border: 2px solid #B45309; color: #78350F; display: inline-block; line-height: 1.5; border-radius: var(--radius-xs); background: var(--accent-yellow); }
-    .tag-blue    { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 9px; border: 2px solid #3B82F6; color: #1E40AF; display: inline-block; line-height: 1.5; border-radius: var(--radius-xs); background: var(--accent-blue); }
+    .tag-yellow  { font-family: var(--font-inter), sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 7px; border: 2px solid #B45309; color: #78350F; display: inline-block; line-height: 1.5; border-radius: var(--radius-xs); background: var(--accent-yellow); }
+    .tag-blue    { font-family: var(--font-inter), sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 9px; border: 2px solid #3B82F6; color: #1E40AF; display: inline-block; line-height: 1.5; border-radius: var(--radius-xs); background: var(--accent-blue); }
 
     /* ── Table ── */
     .retro-table { border-collapse: collapse; width: 100%; }
     .retro-table th {
       background: var(--ink); color: var(--cream);
-      font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
+      font-family: var(--font-inter), sans-serif; font-size: 11px; font-weight: 700;
       letter-spacing: 0.08em; text-transform: uppercase;
       padding: 9px 14px; text-align: left; white-space: nowrap;
     }
     .retro-table td {
-      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 400;
+      font-family: var(--font-inter), sans-serif; font-size: 13px; font-weight: 400;
       padding: 10px 14px; border-bottom: 1px solid rgba(31,41,55,0.12);
       vertical-align: middle;
     }
@@ -146,7 +144,7 @@ const GlobalStyles = () => (
 
     /* ── Forms ── */
     input, textarea, select {
-      font-family: 'Inter', sans-serif; font-weight: 400;
+      font-family: var(--font-inter), sans-serif; font-weight: 400;
       background: var(--cream); border: var(--border);
       outline: none; color: var(--ink); font-size: 13px;
       border-radius: var(--radius-sm);
@@ -154,25 +152,25 @@ const GlobalStyles = () => (
     input:focus, textarea:focus, select:focus { box-shadow: var(--shadow); }
     input::placeholder, textarea::placeholder { opacity: 0.4; }
     .form-field   { margin-bottom: 18px; }
-    .form-label   { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; display: block; margin-bottom: 6px; color: var(--ink); }
+    .form-label   { font-family: var(--font-inter), sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; display: block; margin-bottom: 6px; color: var(--ink); }
     .form-input   { width: 100%; padding: 10px 12px; display: block; }
     .form-select  { width: 100%; padding: 10px 12px; display: block; cursor: pointer; }
 
     /* ── Layout helpers ── */
     .page-container { max-width: 1200px; margin: 0 auto; padding: 56px 32px; }
-    .section-label  { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-red); margin-bottom: 10px; display: block; }
+    .section-label  { font-family: var(--font-inter), sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-red); margin-bottom: 10px; display: block; }
     /* Yellow badge for section tags — inline pill, not full background */
-    .section-badge  { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.10em; text-transform: uppercase; color: #78350F; background: var(--accent-yellow); border: 2px solid #B45309; border-radius: var(--radius-xs); padding: 2px 8px; display: inline-block; margin-bottom: 12px; }
-    .section-title  { font-family: 'Londrina Solid', cursive; font-size: clamp(36px,5vw,60px); line-height: 1.0; margin-bottom: 12px; }
-    .section-subtitle { font-family: 'Inter', sans-serif; font-weight: 400; font-size: 15px; line-height: 1.65; opacity: 0.65; max-width: 560px; }
+    .section-badge  { font-family: var(--font-inter), sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.10em; text-transform: uppercase; color: #78350F; background: var(--accent-yellow); border: 2px solid #B45309; border-radius: var(--radius-xs); padding: 2px 8px; display: inline-block; margin-bottom: 12px; }
+    .section-title  { font-family: var(--font-londrina), cursive; font-size: clamp(36px,5vw,60px); line-height: 1.0; margin-bottom: 12px; }
+    .section-subtitle { font-family: var(--font-inter), sans-serif; font-weight: 400; font-size: 15px; line-height: 1.65; opacity: 0.65; max-width: 560px; }
 
     .grid-2     { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
     .grid-3     { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
     .grid-auto  { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px,1fr)); gap: 16px; }
     .grid-auto-sm { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 14px; }
 
-    .stat-number { font-family: 'Londrina Solid', cursive; font-size: 48px; color: var(--accent-red); line-height: 1; }
-    .stat-label  { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.55; margin-top: 4px; }
+    .stat-number { font-family: var(--font-londrina), cursive; font-size: 48px; color: var(--accent-red); line-height: 1; }
+    .stat-label  { font-family: var(--font-inter), sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.55; margin-top: 4px; }
 
     .progress-track { height: 6px; background: rgba(31,41,55,0.1); border: 1px solid rgba(31,41,55,0.18); border-radius: 3px; }
     .progress-fill  { height: 100%; background: var(--accent-red); transition: width 0.3s ease; border-radius: 3px; }
@@ -297,7 +295,7 @@ const Toast = ({ msg, onClose }) => {
   return (
     <div className={`toast toast--${msg.type}`}>
       <span className="vt" style={{ fontSize: 20, color: iconColor, flexShrink: 0 }}>{icon}</span>
-      <span style={{ fontFamily: "'Inter',sans-serif", fontWeight:500, fontSize: 13, letterSpacing: "0.01em" }}>{msg.text}</span>
+      <span style={{ fontFamily: "var(--font-inter), sans-serif", fontWeight:500, fontSize: 13, letterSpacing: "0.01em" }}>{msg.text}</span>
     </div>
   );
 };
@@ -313,7 +311,7 @@ const Modal = ({ title, onClose, children }) => (
         </div>
         <button
           onClick={onClose}
-          style={{ background: "none", border: "none", color: "#FDFBF7", cursor: "pointer", fontFamily: "'VT323',monospace", fontSize: 20 }}
+          style={{ background: "none", border: "none", color: "#FDFBF7", cursor: "pointer", fontFamily: "var(--font-vt323), monospace", fontSize: 20 }}
         >✕ CLOSE</button>
       </div>
       <div style={{ padding: 24 }}>{children}</div>
@@ -339,13 +337,13 @@ const ResearchCard = ({ paper, onClick }) => (
         <span className="tag">{paper.university}</span>
         <span className="tag">{paper.lab}</span>
       </div>
-      <h3 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 22, lineHeight: 1.2, marginBottom: 8 }}>
+      <h3 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 22, lineHeight: 1.2, marginBottom: 8 }}>
         {paper.title}
       </h3>
       <p style={{ fontSize: 13, lineHeight: 1.6, opacity: 0.65, marginBottom: 14 }}>
         {paper.abstract.slice(0, 140)}…
       </p>
-      <div style={{ fontFamily: "'VT323',monospace", fontSize: 15, opacity: 0.7, display: "flex", gap: 16 }}>
+      <div style={{ fontFamily: "var(--font-vt323), monospace", fontSize: 15, opacity: 0.7, display: "flex", gap: 16 }}>
         <span>✦ {paper.citations} CITE</span>
         <span>↓ {paper.downloads.toLocaleString()} DL</span>
         <span>▲ {paper.votes} VOTES</span>
@@ -365,12 +363,12 @@ const LabCard = ({ lab, onClick }) => (
     </div>
     <div className="window-body">
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
-        <div style={{ width: 48, height: 48, background: "#1F2937", color: "#FDFBF7", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Londrina Solid',cursive", fontSize: 22, border: "2px solid #1F2937", flexShrink: 0 }}>
+        <div style={{ width: 48, height: 48, background: "#1F2937", color: "#FDFBF7", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-londrina), cursive", fontSize: 22, border: "2px solid #1F2937", flexShrink: 0 }}>
           {lab.name.charAt(0)}
         </div>
         <span className="tag-accent" style={{ fontSize: 12 }}>{lab.papers} PAPERS</span>
       </div>
-      <h3 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 24, marginBottom: 6 }}>{lab.name}</h3>
+      <h3 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 24, marginBottom: 6 }}>{lab.name}</h3>
       <p style={{ fontSize: 13, opacity: 0.65, marginBottom: 12, lineHeight: 1.5 }}>{lab.focus}</p>
       <div className="vt" style={{ fontSize: 13, opacity: 0.5, marginBottom: 10 }}>
         PARTNERS: {lab.partners.join(" · ")}
@@ -555,32 +553,32 @@ const LoginModal = ({ onClose, onSuccess, showToast }) => {
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(31,41,55,0.75)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div style={{background:"#FDFBF7",border:"3px solid #1F2937",boxShadow:"8px 8px 0 #1F2937",border:"3px solid #1F2937",borderRadius:10,maxWidth:460,width:"100%",maxHeight:"90vh",overflowY:"auto",overflow:"hidden"}}>
-        <div style={{background:"#1F2937",color:"#FDFBF7",padding:"7px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",fontFamily:"'VT323',monospace",fontSize:15,letterSpacing:"0.06em"}}>
+        <div style={{background:"#1F2937",color:"#FDFBF7",padding:"7px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",fontFamily:"var(--font-vt323), monospace",fontSize:15,letterSpacing:"0.06em"}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}><TrafficLights/><span>ATHENAX_LOGIN.sys</span></div>
-          <button onClick={onClose} style={{background:"none",border:"none",color:"#FDFBF7",cursor:"pointer",fontFamily:"'Inter',sans-serif",fontWeight:600,fontSize:13}}>✕ CLOSE</button>
+          <button onClick={onClose} style={{background:"none",border:"none",color:"#FDFBF7",cursor:"pointer",fontFamily:"var(--font-inter), sans-serif",fontWeight:600,fontSize:13}}>✕ CLOSE</button>
         </div>
         <div style={{padding:28}}>
           {[["EMAIL","email",email,setEmail,"researcher@university.edu"],["PASSWORD","password",pw,setPw,"••••••••"]].map(([label,type,val,setter,ph])=>(
             <div key={label} style={{marginBottom:16}}>
-              <label style={{fontFamily:"'Inter',sans-serif",fontWeight:600,fontSize:11,letterSpacing:"0.07em",textTransform:"uppercase",display:"block",marginBottom:6,color:"#1F2937"}}>{label}</label>
+              <label style={{fontFamily:"var(--font-inter), sans-serif",fontWeight:600,fontSize:11,letterSpacing:"0.07em",textTransform:"uppercase",display:"block",marginBottom:6,color:"#1F2937"}}>{label}</label>
               <input type={type} value={val} onChange={e=>setter(e.target.value)} placeholder={ph} onKeyDown={e=>e.key==="Enter"&&submit()}
-                style={{width:"100%",padding:"10px 12px",fontFamily:"'Inter',sans-serif",background:"#FDFBF7",border:"2px solid #1F2937",outline:"none",fontSize:13,display:"block"}}/>
+                style={{width:"100%",padding:"10px 12px",fontFamily:"var(--font-inter), sans-serif",background:"#FDFBF7",border:"2px solid #1F2937",outline:"none",fontSize:13,display:"block"}}/>
             </div>
           ))}
-          {error&&<div style={{fontFamily:"'Inter',sans-serif",fontWeight:600,color:"#E63636",fontSize:12,marginBottom:14,padding:"8px 10px",border:"1.5px solid #E63636",borderRadius:6,background:"rgba(230,54,54,0.06)"}}>✗ {error}</div>}
+          {error&&<div style={{fontFamily:"var(--font-inter), sans-serif",fontWeight:600,color:"#E63636",fontSize:12,marginBottom:14,padding:"8px 10px",border:"1.5px solid #E63636",borderRadius:6,background:"rgba(230,54,54,0.06)"}}>✗ {error}</div>}
           <button onClick={submit} disabled={loading}
-            style={{width:"100%",padding:"11px 0",fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:14,letterSpacing:"0.06em",background:"#E63636",color:"#FDFBF7",border:"3px solid #1F2937",boxShadow:"6px 6px 0 #1F2937",borderRadius:6,cursor:loading?"not-allowed":"pointer",opacity:loading?0.6:1,textTransform:"uppercase"}}>
+            style={{width:"100%",padding:"11px 0",fontFamily:"var(--font-inter), sans-serif",fontWeight:700,fontSize:14,letterSpacing:"0.06em",background:"#E63636",color:"#FDFBF7",border:"3px solid #1F2937",boxShadow:"6px 6px 0 #1F2937",borderRadius:6,cursor:loading?"not-allowed":"pointer",opacity:loading?0.6:1,textTransform:"uppercase"}}>
             {loading ? "SIGNING IN…" : "SIGN IN"}
           </button>
           <div style={{borderTop:"1px solid rgba(31,41,55,0.15)",margin:"22px 0 14px"}}/>
-          <div style={{fontFamily:"'VT323',monospace",fontSize:13,opacity:0.5,marginBottom:10,letterSpacing:"0.04em"}}>DEMO ACCOUNTS — CLICK TO PREFILL:</div>
+          <div style={{fontFamily:"var(--font-vt323), monospace",fontSize:13,opacity:0.5,marginBottom:10,letterSpacing:"0.04em"}}>DEMO ACCOUNTS — CLICK TO PREFILL:</div>
           {authSvc.DEMO_ACCOUNTS.map(acc=>(
             <div key={acc.email} onClick={()=>{setEmail(acc.email);setPw(acc.password);setError("");}}
               style={{cursor:"pointer",border:"1px solid rgba(31,41,55,0.2)",padding:"8px 12px",display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}
               onMouseEnter={e=>e.currentTarget.style.background="rgba(31,41,55,0.04)"}
               onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
               <span style={{fontSize:12}}>{acc.label}</span>
-              <span style={{fontFamily:"'VT323',monospace",color:"#E63636",fontSize:16}}>USE →</span>
+              <span style={{fontFamily:"var(--font-vt323), monospace",color:"#E63636",fontSize:16}}>USE →</span>
             </div>
           ))}
         </div>
@@ -604,8 +602,8 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
   const [error,setError]     = useState("");
   const [form,setForm]       = useState({ name:"",email:"",password:"",confirm:"",role:"researcher",university:"",lab:"",bio:"",organization:"" });
   const set = k => e => setForm(f=>({...f,[k]:e.target.value}));
-  const iStyle = { width:"100%",padding:"10px 12px",fontFamily:"'Inter',sans-serif",background:"#FDFBF7",border:"2px solid #1F2937",outline:"none",fontSize:13,marginTop:5,display:"block" };
-  const lStyle = { fontFamily:"'VT323',monospace",fontSize:14,letterSpacing:"0.06em",opacity:0.7,display:"block" };
+  const iStyle = { width:"100%",padding:"10px 12px",fontFamily:"var(--font-inter), sans-serif",background:"#FDFBF7",border:"2px solid #1F2937",outline:"none",fontSize:13,marginTop:5,display:"block" };
+  const lStyle = { fontFamily:"var(--font-vt323), monospace",fontSize:14,letterSpacing:"0.06em",opacity:0.7,display:"block" };
 
   const step1ok = () => {
     if(!form.name.trim()) return "Full name required.";
@@ -631,15 +629,15 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(31,41,55,0.75)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div style={{background:"#FDFBF7",border:"3px solid #1F2937",boxShadow:"8px 8px 0 #1F2937",border:"3px solid #1F2937",borderRadius:10,maxWidth:500,width:"100%",maxHeight:"90vh",overflowY:"auto",overflow:"hidden"}}>
-        <div style={{background:"#1F2937",color:"#FDFBF7",padding:"7px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",fontFamily:"'VT323',monospace",fontSize:15,letterSpacing:"0.06em"}}>
+        <div style={{background:"#1F2937",color:"#FDFBF7",padding:"7px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",fontFamily:"var(--font-vt323), monospace",fontSize:15,letterSpacing:"0.06em"}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}><TrafficLights/><span>CREATE_ACCOUNT.sys — STEP {step}/2</span></div>
-          <button onClick={onClose} style={{background:"none",border:"none",color:"#FDFBF7",cursor:"pointer",fontFamily:"'Inter',sans-serif",fontWeight:600,fontSize:13}}>✕ CLOSE</button>
+          <button onClick={onClose} style={{background:"none",border:"none",color:"#FDFBF7",cursor:"pointer",fontFamily:"var(--font-inter), sans-serif",fontWeight:600,fontSize:13}}>✕ CLOSE</button>
         </div>
         {/* step tabs */}
         <div style={{display:"flex",borderBottom:"1px solid rgba(31,41,55,0.15)"}}>
           {[["1","CREDENTIALS"],["2","PROFILE"]].map(([n,lbl])=>(
             <div key={n} style={{flex:1,padding:"9px 16px",borderBottom:step===+n?"3px solid #E63636":"3px solid transparent"}}>
-              <span style={{fontFamily:"'VT323',monospace",fontSize:15,color:step===+n?"#E63636":"rgba(31,41,55,0.35)",letterSpacing:"0.06em"}}>STEP {n}: {lbl}</span>
+              <span style={{fontFamily:"var(--font-vt323), monospace",fontSize:15,color:step===+n?"#E63636":"rgba(31,41,55,0.35)",letterSpacing:"0.06em"}}>STEP {n}: {lbl}</span>
             </div>
           ))}
         </div>
@@ -657,14 +655,14 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
                 style={{cursor:"pointer",border:form.role===role?"2px solid #E63636":"2px solid rgba(31,41,55,0.2)",padding:"10px 14px",marginBottom:6,background:form.role===role?"rgba(230,54,54,0.06)":"transparent",borderRadius:6,display:"flex",alignItems:"center",gap:12}}>
                 <div style={{width:13,height:13,borderRadius:"50%",border:form.role===role?"4px solid #E63636":"2px solid #1F2937",flexShrink:0}}/>
                 <div>
-                  <div style={{fontFamily:"'VT323',monospace",fontSize:17,textTransform:"uppercase",color:form.role===role?"#E63636":"#1F2937"}}>{role}</div>
+                  <div style={{fontFamily:"var(--font-vt323), monospace",fontSize:17,textTransform:"uppercase",color:form.role===role?"#E63636":"#1F2937"}}>{role}</div>
                   <div style={{fontSize:12,opacity:0.55,lineHeight:1.4}}>{ROLE_DESCS[role]}</div>
                 </div>
               </div>
             ))}
           </>}
           {step===2 && <>
-            <div style={{fontFamily:"'VT323',monospace",fontSize:15,color:"#E63636",marginBottom:16,letterSpacing:"0.06em"}}>ROLE: {form.role.toUpperCase()} · Complete your profile</div>
+            <div style={{fontFamily:"var(--font-vt323), monospace",fontSize:15,color:"#E63636",marginBottom:16,letterSpacing:"0.06em"}}>ROLE: {form.role.toUpperCase()} · Complete your profile</div>
             {form.role==="researcher" && <>
               <div style={{marginBottom:14}}><label style={lStyle}>UNIVERSITY / INSTITUTION</label><input value={form.university} onChange={set("university")} placeholder="MIT, Stanford, Oxford…" style={iStyle}/></div>
               <div style={{marginBottom:14}}><label style={lStyle}>LAB (optional)</label><input value={form.lab} onChange={set("lab")} placeholder="IF Labs, MIT DCI…" style={iStyle}/></div>
@@ -674,11 +672,11 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
               <textarea value={form.bio} onChange={set("bio")} placeholder="Brief research focus or mission…" style={{...iStyle,minHeight:76,resize:"vertical"}}/>
             </div>
           </>}
-          {error&&<div style={{fontFamily:"'Inter',sans-serif",fontWeight:600,color:"#E63636",fontSize:12,marginBottom:14,padding:"8px 10px",border:"1.5px solid #E63636",borderRadius:6,background:"rgba(230,54,54,0.06)"}}>✗ {error}</div>}
+          {error&&<div style={{fontFamily:"var(--font-inter), sans-serif",fontWeight:600,color:"#E63636",fontSize:12,marginBottom:14,padding:"8px 10px",border:"1.5px solid #E63636",borderRadius:6,background:"rgba(230,54,54,0.06)"}}>✗ {error}</div>}
           <div style={{display:"flex",gap:8}}>
-            {step===2&&<button onClick={()=>{setStep(1);setError("");}} style={{padding:"11px 18px",fontFamily:"'Inter',sans-serif",fontWeight:600,fontSize:13,background:"transparent",color:"#1F2937",border:"2px solid #1F2937",cursor:"pointer",letterSpacing:"0.06em"}}>← BACK</button>}
+            {step===2&&<button onClick={()=>{setStep(1);setError("");}} style={{padding:"11px 18px",fontFamily:"var(--font-inter), sans-serif",fontWeight:600,fontSize:13,background:"transparent",color:"#1F2937",border:"2px solid #1F2937",cursor:"pointer",letterSpacing:"0.06em"}}>← BACK</button>}
             <button onClick={submit} disabled={loading}
-              style={{flex:1,padding:"11px 0",fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:14,letterSpacing:"0.06em",background:"#E63636",color:"#FDFBF7",border:"3px solid #1F2937",boxShadow:"6px 6px 0 #1F2937",borderRadius:6,cursor:loading?"not-allowed":"pointer",opacity:loading?0.6:1,textTransform:"uppercase"}}>
+              style={{flex:1,padding:"11px 0",fontFamily:"var(--font-inter), sans-serif",fontWeight:700,fontSize:14,letterSpacing:"0.06em",background:"#E63636",color:"#FDFBF7",border:"3px solid #1F2937",boxShadow:"6px 6px 0 #1F2937",borderRadius:6,cursor:loading?"not-allowed":"pointer",opacity:loading?0.6:1,textTransform:"uppercase"}}>
               {loading?"CREATING…":step===1?"NEXT →":"CREATE ACCOUNT"}
             </button>
           </div>
@@ -704,17 +702,17 @@ const ArsBreakdown = ({ r }) => {
   return (
     <div>
       <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:18}}>
-        <span style={{fontFamily:"'Londrina Solid',cursive",fontSize:52,color:ars>=8?"#22C55E":ars>=5?"#F5A623":"#E63636",lineHeight:1}}>{ars.toFixed(1)}</span>
-        <div><div style={{fontFamily:"'VT323',monospace",fontSize:13,opacity:0.5,letterSpacing:"0.06em"}}>ATHENAX REPUTATION SCORE</div><div style={{fontSize:11,opacity:0.35}}>Max 10.0</div></div>
+        <span style={{fontFamily:"var(--font-londrina), cursive",fontSize:52,color:ars>=8?"#22C55E":ars>=5?"#F5A623":"#E63636",lineHeight:1}}>{ars.toFixed(1)}</span>
+        <div><div style={{fontFamily:"var(--font-vt323), monospace",fontSize:13,opacity:0.5,letterSpacing:"0.06em"}}>ATHENAX REPUTATION SCORE</div><div style={{fontSize:11,opacity:0.35}}>Max 10.0</div></div>
       </div>
       {comps.map(([label,raw,w,weight])=>{
         const contrib=parseFloat((w*weight).toFixed(2));
         return (
           <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 0",borderBottom:"1px solid rgba(31,41,55,0.07)"}}>
-            <span style={{fontSize:13}}>{label} <span style={{fontFamily:"'VT323',monospace",fontSize:12,opacity:0.4}}>×{weight}</span></span>
+            <span style={{fontSize:13}}>{label} <span style={{fontFamily:"var(--font-vt323), monospace",fontSize:12,opacity:0.4}}>×{weight}</span></span>
             <div style={{display:"flex",gap:12,alignItems:"center"}}>
-              <span style={{fontFamily:"'VT323',monospace",fontSize:13,opacity:0.5}}>{raw.toLocaleString()}</span>
-              <span style={{fontFamily:"'Londrina Solid',cursive",fontSize:17,color:"#E63636",minWidth:32,textAlign:"right"}}>{contrib}</span>
+              <span style={{fontFamily:"var(--font-vt323), monospace",fontSize:13,opacity:0.5}}>{raw.toLocaleString()}</span>
+              <span style={{fontFamily:"var(--font-londrina), cursive",fontSize:17,color:"#E63636",minWidth:32,textAlign:"right"}}>{contrib}</span>
             </div>
           </div>
         );
@@ -740,14 +738,14 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
     if(updated){ onUserUpdate(updated); showToast("Profile updated.","success"); cancelEdit(); }
   };
 
-  const iStyle = { width:"100%",padding:"9px 12px",fontFamily:"'Inter',sans-serif",background:"#FDFBF7",border:"2px solid #1F2937",outline:"none",fontSize:13,marginTop:4,display:"block" };
-  const lStyle = { fontFamily:"'VT323',monospace",fontSize:13,opacity:0.65,display:"block" };
+  const iStyle = { width:"100%",padding:"9px 12px",fontFamily:"var(--font-inter), sans-serif",background:"#FDFBF7",border:"2px solid #1F2937",outline:"none",fontSize:13,marginTop:4,display:"block" };
+  const lStyle = { fontFamily:"var(--font-vt323), monospace",fontSize:13,opacity:0.65,display:"block" };
 
   if (!user) return (
     <div style={{maxWidth:1200,margin:"0 auto",padding:"56px 32px"}}>
       <WindowCard title="AUTH_REQUIRED.sys" staticHover>
         <div style={{textAlign:"center",padding:"32px 0"}}>
-          <div style={{fontFamily:"'Londrina Solid',cursive",fontSize:26,color:"#E63636",marginBottom:12,letterSpacing:1}}>○ NOT SIGNED IN</div>
+          <div style={{fontFamily:"var(--font-londrina), cursive",fontSize:26,color:"#E63636",marginBottom:12,letterSpacing:1}}>○ NOT SIGNED IN</div>
           <button className="btn btn-primary" onClick={()=>setPage("login")}>SIGN IN</button>
         </div>
       </WindowCard>
@@ -762,7 +760,7 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
         <div style={{display:"flex",flexDirection:"column",gap:16}}>
           <WindowCard title="USER_PROFILE.sys">
             <div style={{textAlign:"center",marginBottom:16}}>
-              <div style={{width:68,height:68,background:"#1F2937",color:"#FDFBF7",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Londrina Solid',cursive",fontSize:30,border:"2px solid #1F2937",margin:"0 auto 12px"}}>
+              <div style={{width:68,height:68,background:"#1F2937",color:"#FDFBF7",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"var(--font-londrina), cursive",fontSize:30,border:"2px solid #1F2937",margin:"0 auto 12px"}}>
                 {user.avatar||user.name?.charAt(0)}
               </div>
               {editing && editForm ? (
@@ -781,11 +779,11 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
                 </div>
               ) : (
                 <>
-                  <div style={{fontFamily:"'Londrina Solid',cursive",fontSize:24,marginBottom:3}}>{user.name}</div>
+                  <div style={{fontFamily:"var(--font-londrina), cursive",fontSize:24,marginBottom:3}}>{user.name}</div>
                   <div style={{fontSize:12,opacity:0.45,marginBottom:8}}>{user.email}</div>
-                  {(researcher?.university||user.university)&&<div style={{fontFamily:"'VT323',monospace",fontSize:14,opacity:0.55,marginBottom:2}}>{researcher?.university||user.university}</div>}
-                  {(researcher?.lab||user.lab)&&<div style={{fontFamily:"'VT323',monospace",fontSize:13,opacity:0.4,marginBottom:10}}>{researcher?.lab||user.lab}</div>}
-                  {user.organization&&<div style={{fontFamily:"'VT323',monospace",fontSize:14,opacity:0.55,marginBottom:10}}>{user.organization}</div>}
+                  {(researcher?.university||user.university)&&<div style={{fontFamily:"var(--font-vt323), monospace",fontSize:14,opacity:0.55,marginBottom:2}}>{researcher?.university||user.university}</div>}
+                  {(researcher?.lab||user.lab)&&<div style={{fontFamily:"var(--font-vt323), monospace",fontSize:13,opacity:0.4,marginBottom:10}}>{researcher?.lab||user.lab}</div>}
+                  {user.organization&&<div style={{fontFamily:"var(--font-vt323), monospace",fontSize:14,opacity:0.55,marginBottom:10}}>{user.organization}</div>}
                   {(researcher?.bio||user.bio)&&<p style={{fontSize:12,lineHeight:1.55,opacity:0.6,marginBottom:12,textAlign:"left"}}>{researcher?.bio||user.bio}</p>}
                   <div style={{display:"flex",gap:5,justifyContent:"center",flexWrap:"wrap",marginBottom:14}}>
                     <span className={user.role==="researcher"?"tag-green":user.role==="sponsor"?"tag-yellow":"tag-accent"} style={{fontSize:12}}>{user.role.toUpperCase()}</span>
@@ -822,18 +820,18 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
           {user.role==="researcher"&&(
             <WindowCard title={`MY_PAPERS.archive (${papers.length})`}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-                <h3 style={{fontFamily:"'Londrina Solid',cursive",fontSize:24}}>Published Research</h3>
+                <h3 style={{fontFamily:"var(--font-londrina), cursive",fontSize:24}}>Published Research</h3>
                 <button className="btn btn-primary btn-sm" onClick={()=>setPage("submit-paper")}>+ SUBMIT</button>
               </div>
               {papers.length===0
-                ? <div style={{fontFamily:"'VT323',monospace",fontSize:16,opacity:0.35,textAlign:"center",padding:"20px 0"}}>NO PAPERS SUBMITTED YET</div>
+                ? <div style={{fontFamily:"var(--font-vt323), monospace",fontSize:16,opacity:0.35,textAlign:"center",padding:"20px 0"}}>NO PAPERS SUBMITTED YET</div>
                 : papers.map(p=>(
                   <div key={p.id} onClick={()=>setPage("paper_"+p.id)} style={{padding:"11px 0",borderBottom:"1px solid rgba(31,41,55,0.08)",cursor:"pointer"}}>
-                    <div style={{fontFamily:"'Londrina Solid',cursive",fontSize:19,lineHeight:1.2,marginBottom:4}}>{p.title}</div>
+                    <div style={{fontFamily:"var(--font-londrina), cursive",fontSize:19,lineHeight:1.2,marginBottom:4}}>{p.title}</div>
                     <div style={{display:"flex",gap:12}}>
-                      <span style={{fontFamily:"'VT323',monospace",fontSize:13,opacity:0.45}}>{p.year}</span>
-                      <span style={{fontFamily:"'VT323',monospace",fontSize:13,color:"#E63636"}}>{p.citations} CITE</span>
-                      <span style={{fontFamily:"'VT323',monospace",fontSize:13,opacity:0.45}}>{(p.status||"published").toUpperCase()}</span>
+                      <span style={{fontFamily:"var(--font-vt323), monospace",fontSize:13,opacity:0.45}}>{p.year}</span>
+                      <span style={{fontFamily:"var(--font-vt323), monospace",fontSize:13,color:"#E63636"}}>{p.citations} CITE</span>
+                      <span style={{fontFamily:"var(--font-vt323), monospace",fontSize:13,opacity:0.45}}>{(p.status||"published").toUpperCase()}</span>
                     </div>
                   </div>
                 ))
@@ -844,18 +842,18 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
           {user.role==="sponsor"&&(
             <WindowCard title={`MY_BOUNTIES.active (${bounties.length})`}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-                <h3 style={{fontFamily:"'Londrina Solid',cursive",fontSize:24}}>Posted Bounties</h3>
+                <h3 style={{fontFamily:"var(--font-londrina), cursive",fontSize:24}}>Posted Bounties</h3>
                 <button className="btn btn-primary btn-sm" onClick={()=>setPage("post-bounty")}>+ NEW</button>
               </div>
               {bounties.length===0
-                ? <div style={{fontFamily:"'VT323',monospace",fontSize:16,opacity:0.35,textAlign:"center",padding:"20px 0"}}>NO BOUNTIES POSTED YET</div>
+                ? <div style={{fontFamily:"var(--font-vt323), monospace",fontSize:16,opacity:0.35,textAlign:"center",padding:"20px 0"}}>NO BOUNTIES POSTED YET</div>
                 : bounties.map(b=>(
                   <div key={b.id} style={{padding:"11px 0",borderBottom:"1px solid rgba(31,41,55,0.08)"}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
                       <span style={{fontWeight:600,fontSize:13}}>{b.title}</span>
-                      <span style={{fontFamily:"'Londrina Solid',cursive",fontSize:18,color:"#E63636"}}>{b.reward}</span>
+                      <span style={{fontFamily:"var(--font-londrina), cursive",fontSize:18,color:"#E63636"}}>{b.reward}</span>
                     </div>
-                    <span style={{fontFamily:"'VT323',monospace",fontSize:13,color:b.status==="open"?"#22C55E":"rgba(31,41,55,0.4)"}}>{b.applicants} PROPOSALS · {(b.status||"open").toUpperCase()}</span>
+                    <span style={{fontFamily:"var(--font-vt323), monospace",fontSize:13,color:b.status==="open"?"#22C55E":"rgba(31,41,55,0.4)"}}>{b.applicants} PROPOSALS · {(b.status||"open").toUpperCase()}</span>
                   </div>
                 ))
               }
@@ -863,16 +861,16 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
           )}
 
           <WindowCard title={`COHORT_APPLICATIONS.log (${applications.length})`}>
-            <h3 style={{fontFamily:"'Londrina Solid',cursive",fontSize:24,marginBottom:14}}>Cohort Applications</h3>
+            <h3 style={{fontFamily:"var(--font-londrina), cursive",fontSize:24,marginBottom:14}}>Cohort Applications</h3>
             {applications.length===0
-              ? <div style={{fontFamily:"'VT323',monospace",fontSize:15,opacity:0.35,textAlign:"center",padding:"16px 0"}}>
+              ? <div style={{fontFamily:"var(--font-vt323), monospace",fontSize:15,opacity:0.35,textAlign:"center",padding:"16px 0"}}>
                   NO APPLICATIONS YET — <span style={{color:"#E63636",cursor:"pointer"}} onClick={()=>setPage("cohorts")}>APPLY TO A COHORT</span>
                 </div>
               : applications.map(a=>(
                 <div key={a.id} style={{padding:"10px 0",borderBottom:"1px solid rgba(31,41,55,0.08)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                   <div>
                     <div style={{fontWeight:600,fontSize:13,marginBottom:2}}>Cohort: {a.cohortId}</div>
-                    <div style={{fontFamily:"'VT323',monospace",fontSize:12,opacity:0.4}}>{a.track&&`Track: ${a.track} · `}{new Date(a.createdAt).toLocaleDateString()}</div>
+                    <div style={{fontFamily:"var(--font-vt323), monospace",fontSize:12,opacity:0.4}}>{a.track&&`Track: ${a.track} · `}{new Date(a.createdAt).toLocaleDateString()}</div>
                   </div>
                   <span className={a.status==="accepted"?"tag-green":a.status==="rejected"?"tag-accent":"tag-yellow"} style={{fontSize:11}}>
                     {(a.status||"pending").toUpperCase()}
@@ -884,7 +882,7 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
 
           {user.role==="admin"&&(
             <WindowCard title="ADMIN_ACCESS.sys">
-              <div style={{fontFamily:"'VT323',monospace",color:"#E63636",fontSize:16,marginBottom:8}}>● ADMIN PRIVILEGES ACTIVE</div>
+              <div style={{fontFamily:"var(--font-vt323), monospace",color:"#E63636",fontSize:16,marginBottom:8}}>● ADMIN PRIVILEGES ACTIVE</div>
               <p style={{fontSize:13,opacity:0.65,marginBottom:14,lineHeight:1.6}}>Full access to the AthenaX admin panel. Moderate papers, manage applications, review users.</p>
               <button className="btn btn-dark btn-sm" onClick={()=>setPage("admin")}>OPEN ADMIN PANEL →</button>
             </WindowCard>
@@ -893,8 +891,8 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
           <WindowCard title="ACCOUNT_INFO.sys" staticHover>
             {[["USER ID",user.id.slice(0,14)+"…"],["ROLE",user.role.toUpperCase()],["MEMBER SINCE",new Date(user.createdAt).toLocaleDateString("en-US",{month:"short",year:"numeric"})]].map(([k,v])=>(
               <div key={k} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:"1px solid rgba(31,41,55,0.08)"}}>
-                <span style={{fontFamily:"'VT323',monospace",fontSize:14}}>{k}</span>
-                <span style={{fontFamily:"'Londrina Solid',cursive",fontSize:18,color:"#E63636"}}>{v}</span>
+                <span style={{fontFamily:"var(--font-vt323), monospace",fontSize:14}}>{k}</span>
+                <span style={{fontFamily:"var(--font-londrina), cursive",fontSize:18,color:"#E63636"}}>{v}</span>
               </div>
             ))}
           </WindowCard>
@@ -971,7 +969,7 @@ const Navbar = ({ current, setPage, user, onAuthClick }) => {
     color: activeSection === id ? "#E63636" : "#1F2937",
     border: "none",
     cursor: "pointer",
-    fontFamily: "'Inter',sans-serif",
+    fontFamily: "var(--font-space-grotesk),sans-serif",
     fontWeight: activeSection === id ? 700 : 500,
     fontSize: 13,
     whiteSpace: "nowrap",
@@ -988,16 +986,14 @@ const Navbar = ({ current, setPage, user, onAuthClick }) => {
     >
       <div style={{ maxWidth:1200, margin:"0 auto", padding:"0 28px", width:"100%", display:"flex", alignItems:"center", justifyContent:"space-between", gap:8 }}>
 
-        {/* Logo lockup: ∞ icon + ATHENAX wordmark */}
+        {/* Logo lockup */}
         <div onClick={() => setPage("home")}
-          style={{ display:"flex", alignItems:"center", gap:10, cursor:"pointer", userSelect:"none", flexShrink:0 }}>
-          {/* Infinity icon */}
-          <div style={{ width:36, height:36, background:"#E63636", border:"2px solid #1F2937", borderRadius:6, display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"3px 3px 0 #1F2937", flexShrink:0 }}>
-            <span style={{ fontFamily:"'Londrina Solid',cursive", fontSize:22, color:"#FDFBF7", lineHeight:1, letterSpacing:"-1px" }}>∞</span>
+          style={{ display:"flex", alignItems:"center", gap:12, cursor:"pointer", userSelect:"none", flexShrink:0 }}>
+          <div style={{ width:32, height:32, background:"#111827", borderRadius:6, color:"#FFFFFF", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 1px 2px rgba(0,0,0,0.2)", flexShrink:0, padding:4 }}>
+            <img src="https://athenax.mypinx.store/Logo_Icon_White.png" alt="AthenaX Logo" style={{ width:"100%", height:"100%", objectFit:"contain" }} />
           </div>
-          {/* Wordmark */}
-          <span style={{ fontFamily:"'Londrina Solid',cursive", fontSize:24, letterSpacing:2, color:"#1F2937", lineHeight:1 }}>
-            ATHENAX
+          <span style={{ fontFamily:"var(--font-londrina), cursive", fontSize:30, letterSpacing:0, color:"#1F2937", lineHeight:1 }}>
+            AthenaX
           </span>
         </div>
 
@@ -1021,7 +1017,7 @@ const Navbar = ({ current, setPage, user, onAuthClick }) => {
               {item.dropdown && openMenu === item.id && (
                 <div style={{ position:"absolute", top:"calc(100% + 2px)", left:"50%", transform:"translateX(-50%)", background:"#FDFBF7", border:"3px solid #1F2937", boxShadow:"6px 6px 0 #1F2937", borderRadius:10, minWidth:220, zIndex:200, overflow:"hidden" }}>
                   {/* Dropdown header */}
-                  <div style={{ background:"#1F2937", padding:"7px 16px", fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:10, letterSpacing:"0.12em", textTransform:"uppercase", color:"rgba(253,251,247,0.5)" }}>
+                  <div style={{ background:"#1F2937", padding:"7px 16px", fontFamily:"var(--font-space-grotesk),sans-serif", fontWeight:700, fontSize:10, letterSpacing:"0.12em", textTransform:"uppercase", color:"rgba(253,251,247,0.5)" }}>
                     {item.label.toUpperCase()}_MENU.sys
                   </div>
                   {item.dropdown.map((sub, i) => (
@@ -1031,11 +1027,11 @@ const Navbar = ({ current, setPage, user, onAuthClick }) => {
                       onMouseEnter={e => e.currentTarget.style.background = "rgba(230,54,54,0.06)"}
                       onMouseLeave={e => e.currentTarget.style.background = "transparent"}
                     >
-                      <div style={{ fontFamily:"'Inter',sans-serif", fontWeight:600, fontSize:13, color: current===sub.id?"#E63636":"#1F2937" }}>
+                      <div style={{ fontFamily:"var(--font-space-grotesk),sans-serif", fontWeight:600, fontSize:13, color: current===sub.id?"#E63636":"#1F2937" }}>
                         {current === sub.id && <span style={{ color:"#E63636", marginRight:5 }}>▸</span>}
                         {sub.label}
                       </div>
-                      <div style={{ fontFamily:"'Inter',sans-serif", fontWeight:400, fontSize:11, opacity:0.5, marginTop:2 }}>{sub.desc}</div>
+                      <div style={{ fontFamily:"var(--font-space-grotesk),sans-serif", fontWeight:400, fontSize:11, opacity:0.5, marginTop:2 }}>{sub.desc}</div>
                     </div>
                   ))}
                 </div>
@@ -1050,17 +1046,17 @@ const Navbar = ({ current, setPage, user, onAuthClick }) => {
             <>
               {user.role === "admin" && (
                 <button onClick={() => setPage("admin")}
-                  style={{ padding:"4px 10px", background:"transparent", border:"none", cursor:"pointer", fontFamily:"'VT323',monospace", fontSize:15, color:"#E63636", letterSpacing:"0.04em" }}>
+                  style={{ padding:"4px 10px", background:"transparent", border:"none", cursor:"pointer", fontFamily:"var(--font-vt323),monospace", fontSize:15, color:"#E63636", letterSpacing:"0.04em" }}>
                   ● ADMIN
                 </button>
               )}
               <button onClick={() => setPage("dashboard")}
-                style={{ padding:"4px 8px", background:"transparent", border:"none", cursor:"pointer", fontFamily:"'VT323',monospace", fontSize:14, opacity:0.6 }}>
+                style={{ padding:"4px 8px", background:"transparent", border:"none", cursor:"pointer", fontFamily:"var(--font-vt323),monospace", fontSize:14, opacity:0.6 }}>
                 DASH
               </button>
               <button onClick={() => setPage("profile")}
-                style={{ display:"flex", alignItems:"center", gap:6, padding:"4px 10px", background:"transparent", border:"2px solid #1F2937", cursor:"pointer", fontFamily:"'Inter',sans-serif", fontSize:13 }}>
-                <div style={{ width:22, height:22, background:"#1F2937", color:"#FDFBF7", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Londrina Solid',cursive", fontSize:13, flexShrink:0 }}>
+                style={{ display:"flex", alignItems:"center", gap:6, padding:"4px 10px", background:"transparent", border:"2px solid #1F2937", cursor:"pointer", fontFamily:"var(--font-space-grotesk),sans-serif", fontSize:13 }}>
+                <div style={{ width:22, height:22, background:"#1F2937", color:"#FDFBF7", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"var(--font-londrina),cursive", fontSize:13, flexShrink:0 }}>
                   {user.avatar || user.name?.charAt(0)}
                 </div>
                 <span>{user.name?.split(" ")[0]}</span>
@@ -1086,12 +1082,12 @@ const Footer = ({ setPage }) => (
       <div style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 48, marginBottom: 36 }}>
         <div>
           <div style={{ display:"flex", alignItems:"center", gap:9, cursor:"pointer", marginBottom:10 }} onClick={() => setPage("home")}>
-            <div style={{ width:30, height:30, background:"#E63636", border:"2px solid rgba(253,251,247,0.4)", borderRadius:5, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-              <span style={{ fontFamily:"'Londrina Solid',cursive", fontSize:18, color:"#FDFBF7", lineHeight:1 }}>∞</span>
+            <div style={{ width:32, height:32, background:"#111827", borderRadius:6, color:"#FFFFFF", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 1px 2px rgba(0,0,0,0.35)", flexShrink:0, padding:4 }}>
+              <img src="https://athenax.mypinx.store/Logo_Icon_White.png" alt="AthenaX Logo" style={{ width:"100%", height:"100%", objectFit:"contain" }} />
             </div>
-            <span style={{ fontFamily:"'Londrina Solid',cursive", fontSize:24, color:"#E63636", letterSpacing:2, lineHeight:1 }}>ATHENAX</span>
+            <span style={{ fontFamily:"var(--font-londrina), cursive", fontSize:30, color:"#FDFBF7", letterSpacing:0, lineHeight:1 }}>AthenaX</span>
           </div>
-          <div style={{ fontFamily:"'Inter',sans-serif", fontSize: 11, fontWeight:600, letterSpacing:"0.08em", opacity: 0.35, marginBottom: 14, textTransform:"uppercase" }}>Research OS v5.0</div>
+          <div style={{ fontFamily:"var(--font-space-grotesk),sans-serif", fontSize: 11, fontWeight:600, letterSpacing:"0.08em", opacity: 0.35, marginBottom: 14, textTransform:"uppercase" }}>Research OS v5.0</div>
           <p style={{ fontSize: 12, opacity: 0.5, lineHeight: 1.65 }}>The research and innovation engine of Web3.</p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 24 }}>
@@ -1138,7 +1134,7 @@ const HomePage = ({ setPage }) => {
               <div className="vt" style={{ fontSize: 16, color: "#E63636", letterSpacing: "0.1em", marginBottom: 18 }}>
                 ATHENAX RESEARCH OS v5.0 ▶ SYSTEM ONLINE <span className="blink">{tick ? "█" : " "}</span>
               </div>
-              <h1 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: "clamp(44px,6vw,80px)", lineHeight: 1.0, marginBottom: 24 }}>
+              <h1 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: "clamp(44px,6vw,80px)", lineHeight: 1.0, marginBottom: 24 }}>
                 The Research &amp; Innovation Engine of <span style={{ color: "#E63636" }}>Web3</span>
               </h1>
               <p style={{ fontSize: 17, lineHeight: 1.7, opacity: 0.7, maxWidth: 500, marginBottom: 14 }}>
@@ -1164,7 +1160,7 @@ const HomePage = ({ setPage }) => {
               ].map(([label, value, color], i, arr) => (
                 <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 0", borderBottom: i < arr.length - 1 ? "1px solid rgba(31,41,55,0.1)" : "none" }}>
                   <span className="vt" style={{ fontSize: 16, letterSpacing: "0.04em" }}>{label}</span>
-                  <span style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 26, color }}>{value}</span>
+                  <span style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 26, color }}>{value}</span>
                 </div>
               ))}
             </WindowCard>
@@ -1175,7 +1171,7 @@ const HomePage = ({ setPage }) => {
       {/* Cohort banner */}
       <div style={{ background: "#1F2937", color: "#FDFBF7", borderBottom: "2px solid #1F2937", padding: "14px 32px", display: "flex", alignItems: "center", justifyContent: "center", gap: 28, flexWrap: "wrap" }}>
         <span className="vt" style={{ fontSize: 14, opacity: 0.5 }}>NOW RUNNING</span>
-        <span style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 20, color: "#E63636", letterSpacing: 2 }}>ATHENAX × IF LABS RESEARCH COHORT 01</span>
+        <span style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 20, color: "#E63636", letterSpacing: 2 }}>ATHENAX × IF LABS RESEARCH COHORT 01</span>
         <span className="vt" style={{ fontSize: 14, opacity: 0.5 }}>PRIZE POOL: $500,000</span>
         <button className="btn btn-primary btn-sm" style={{ border: "2px solid rgba(255,255,255,0.4)" }} onClick={() => setPage("cohorts")}>VIEW COHORT</button>
       </div>
@@ -1193,11 +1189,11 @@ const HomePage = ({ setPage }) => {
               onClick={() => setPage(col.page)}
               style={{ padding: "32px 28px", borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.12)" : "none", cursor: "pointer" }}
             >
-              <div style={{ fontFamily: "'VT323',monospace", fontSize: 32, color: "#E63636", marginBottom: 10, letterSpacing: "0.04em" }}>{col.icon}</div>
+              <div style={{ fontFamily: "var(--font-vt323), monospace", fontSize: 32, color: "#E63636", marginBottom: 10, letterSpacing: "0.04em" }}>{col.icon}</div>
               <div className="vt" style={{ fontSize: 13, color: "#E63636", letterSpacing: "0.1em", marginBottom: 8 }}>{col.label}</div>
-              <h3 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 26, marginBottom: 10, color: "#FDFBF7" }}>{col.title}</h3>
+              <h3 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 26, marginBottom: 10, color: "#FDFBF7" }}>{col.title}</h3>
               <p style={{ fontSize: 13, lineHeight: 1.65, opacity: 0.6, marginBottom: 20 }}>{col.desc}</p>
-              <span style={{ fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: "0.05em", textTransform: "uppercase", color: "rgba(253,251,247,0.7)", border: "2px solid rgba(255,255,255,0.4)", padding: "5px 12px", borderRadius: 6, display: "inline-block" }}>{col.cta} →</span>
+              <span style={{ fontFamily: "var(--font-inter), sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: "0.05em", textTransform: "uppercase", color: "rgba(253,251,247,0.7)", border: "2px solid rgba(255,255,255,0.4)", padding: "5px 12px", borderRadius: 6, display: "inline-block" }}>{col.cta} →</span>
             </div>
           ))}
         </div>
@@ -1226,7 +1222,7 @@ const HowItWorksPage = ({ setPage }) => (
     <div style={{ background: "#1F2937", color: "#FDFBF7", borderBottom: "2px solid #1F2937", padding: "64px 32px 56px" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         <SectionLabel>PLATFORM MECHANICS</SectionLabel>
-        <h1 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: "clamp(44px,6vw,76px)", lineHeight: 1.0, marginBottom: 18, color: "#FDFBF7" }}>How AthenaX Works</h1>
+        <h1 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: "clamp(44px,6vw,76px)", lineHeight: 1.0, marginBottom: 18, color: "#FDFBF7" }}>How AthenaX Works</h1>
         <p style={{ fontSize: 17, lineHeight: 1.7, opacity: 0.65, maxWidth: 580, marginBottom: 36 }}>
           AthenaX is the coordination layer between academic research and Web3 innovation. Ideas enter as papers and exit as protocols, products, and companies.
         </p>
@@ -1257,10 +1253,10 @@ const HowItWorksPage = ({ setPage }) => (
             }}
           >
             <div className="vt" style={{ fontSize: 12, opacity: 0.5, color: "#FDFBF7", marginBottom: 4 }}>{step.label}</div>
-            <div style={{ fontFamily: "'VT323',monospace", fontSize: 28, color: "#FDFBF7", marginBottom: 8, letterSpacing: "0.04em" }}>{step.icon}</div>
-            <div style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 19, color: "#FDFBF7", lineHeight: 1.1, marginBottom: 10 }}>{step.title}</div>
+            <div style={{ fontFamily: "var(--font-vt323), monospace", fontSize: 28, color: "#FDFBF7", marginBottom: 8, letterSpacing: "0.04em" }}>{step.icon}</div>
+            <div style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 19, color: "#FDFBF7", lineHeight: 1.1, marginBottom: 10 }}>{step.title}</div>
             <p style={{ fontSize: 12, lineHeight: 1.6, color: "rgba(255,255,255,0.65)", marginBottom: 10 }}>{step.desc}</p>
-            <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>
+            <div style={{ fontFamily: "var(--font-inter), sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>
               Explore →
             </div>
           </div>
@@ -1275,7 +1271,7 @@ const HowItWorksPage = ({ setPage }) => (
           { who: "AthenaX Revenue", items: ["10–20% fee on sponsored programs", "Research Terminal subscriptions ($49–$2,500/mo)", "10% bounty marketplace take", "5–8% equity in incubated startups"] },
         ].map(col => (
           <WindowCard key={col.who} title={`VALUE_${col.who.toUpperCase().replace(/ /g, "_")}.md`}>
-            <h3 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 24, marginBottom: 14, color: "#E63636" }}>{col.who}</h3>
+            <h3 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 24, marginBottom: 14, color: "#E63636" }}>{col.who}</h3>
             {col.items.map((item, i) => (
               <div key={i} style={{ display: "flex", gap: 8, padding: "7px 0", borderBottom: "1px solid rgba(31,41,55,0.08)", alignItems: "flex-start" }}>
                 <span className="vt" style={{ color: "#E63636", fontSize: 16, flexShrink: 0 }}>▸</span>
@@ -1295,7 +1291,7 @@ const FundingPage = ({ setPage }) => (
     <div style={{ background: "#1F2937", color: "#FDFBF7", borderBottom: "2px solid #1F2937", padding: "64px 32px 56px" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         <SectionLabel>RESEARCH FUNDING ENGINE</SectionLabel>
-        <h1 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: "clamp(44px,6vw,76px)", lineHeight: 1.0, marginBottom: 18, color: "#FDFBF7" }}>Funding</h1>
+        <h1 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: "clamp(44px,6vw,76px)", lineHeight: 1.0, marginBottom: 18, color: "#FDFBF7" }}>Funding</h1>
         <p style={{ fontSize: 17, lineHeight: 1.7, opacity: 0.65, maxWidth: 580 }}>
           Web3 protocols sponsor open research programs. AthenaX sources labs, manages peer review, handles escrow, and publishes open-access papers.
         </p>
@@ -1323,11 +1319,11 @@ const FundingPage = ({ setPage }) => (
           </div>
         </TerminalPanel>
         <WindowCard title="MILESTONE_ESCROW.sys" staticHover>
-          <h3 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 24, marginBottom: 16, color: "#E63636" }}>Milestone-Based Release</h3>
+          <h3 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 24, marginBottom: 16, color: "#E63636" }}>Milestone-Based Release</h3>
           {[["Research Brief Approved", "20%"], ["First Draft Submitted", "30%"], ["Peer Review Passed", "30%"], ["Paper Published", "20%"]].map((m, i) => (
             <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid rgba(31,41,55,0.08)" }}>
               <span style={{ fontSize: 13 }}>{m[0]}</span>
-              <span style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 24, color: "#E63636" }}>{m[1]}</span>
+              <span style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 24, color: "#E63636" }}>{m[1]}</span>
             </div>
           ))}
         </WindowCard>
@@ -1345,7 +1341,7 @@ const BuildersPage = ({ setPage }) => (
     <div style={{ background: "#1F2937", color: "#FDFBF7", borderBottom: "2px solid #1F2937", padding: "64px 32px 56px" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         <SectionLabel>STARTUP PIPELINE</SectionLabel>
-        <h1 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: "clamp(44px,6vw,76px)", lineHeight: 1.0, marginBottom: 18, color: "#FDFBF7" }}>Builders</h1>
+        <h1 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: "clamp(44px,6vw,76px)", lineHeight: 1.0, marginBottom: 18, color: "#FDFBF7" }}>Builders</h1>
         <p style={{ fontSize: 17, lineHeight: 1.7, opacity: 0.65, maxWidth: 580, marginBottom: 36 }}>
           AthenaX turns research into companies. Every paper in the archive is a potential startup.
         </p>
@@ -1369,7 +1365,7 @@ const BuildersPage = ({ setPage }) => (
           <div className="term-yellow">{"}"}</div>
         </TerminalPanel>
         <WindowCard title="BUILDER_BENEFITS.md" staticHover>
-          <h3 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 24, marginBottom: 16, color: "#E63636" }}>What Builders Get</h3>
+          <h3 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 24, marginBottom: 16, color: "#E63636" }}>What Builders Get</h3>
           {[
             ["Validated research foundation", "Start from peer-reviewed IP"],
             ["Cohort funding", "$50K–$500K non-dilutive"],
@@ -1393,8 +1389,8 @@ const BuildersPage = ({ setPage }) => (
               <span className="tag-accent">{p.topic}</span>
               <span className="tag">{p.university}</span>
             </div>
-            <h3 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 20, lineHeight: 1.2, marginBottom: 10 }}>{p.title.slice(0, 60)}…</h3>
-            <div style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 28, color: "#E63636", marginBottom: 10 }}>$50K – $200K</div>
+            <h3 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 20, lineHeight: 1.2, marginBottom: 10 }}>{p.title.slice(0, 60)}…</h3>
+            <div style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 28, color: "#E63636", marginBottom: 10 }}>$50K – $200K</div>
             <button className="btn btn-primary" style={{ width: "100%", fontSize: 16 }} onClick={() => setPage("cohorts")}>APPLY TO BUILD</button>
           </WindowCard>
         ))}
@@ -1422,13 +1418,13 @@ const SponsorsPage = ({ setPage }) => (
             <span className="tag-accent">{s.category}</span>
           </div>
           <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "56px 1fr auto", gap: 20, alignItems: "center" }}>
-            <div style={{ width: 50, height: 50, background: "#1F2937", color: "#FDFBF7", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Londrina Solid',cursive", fontSize: 13, border: "2px solid #1F2937", textAlign: "center", lineHeight: 1.1 }}>{s.ticker}</div>
+            <div style={{ width: 50, height: 50, background: "#1F2937", color: "#FDFBF7", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-londrina), cursive", fontSize: 13, border: "2px solid #1F2937", textAlign: "center", lineHeight: 1.1 }}>{s.ticker}</div>
             <div>
-              <h3 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 24, marginBottom: 6 }}>{s.name}</h3>
+              <h3 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 24, marginBottom: 6 }}>{s.name}</h3>
               <p style={{ fontSize: 13, opacity: 0.65 }}>{s.why}</p>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 32, color: "#E63636", marginBottom: 4 }}>{s.amount}</div>
+              <div style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 32, color: "#E63636", marginBottom: 4 }}>{s.amount}</div>
               <div className="vt" style={{ fontSize: 14, opacity: 0.5 }}>{s.programs} PROGRAMS FUNDED</div>
             </div>
           </div>
@@ -1463,10 +1459,10 @@ const BusinessModelPage = ({ setPage }) => (
             <span className="tag" style={{ color: type === "Recurring" ? "#22C55E" : type === "Equity" ? "#F5A623" : "#FDFBF7", borderColor: type === "Recurring" ? "#22C55E" : type === "Equity" ? "#F5A623" : "rgba(253,251,247,0.4)", fontSize: 12 }}>{type.toUpperCase()}</span>
           </div>
           <div style={{ padding: "14px 20px", display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 16, alignItems: "center" }}>
-            <div style={{ fontFamily: "'VT323',monospace", fontSize: 28, color: "#E63636", minWidth: 28, letterSpacing: "0.04em" }}>{icon}</div>
+            <div style={{ fontFamily: "var(--font-vt323), monospace", fontSize: 28, color: "#E63636", minWidth: 28, letterSpacing: "0.04em" }}>{icon}</div>
             <div>
-              <h3 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 22, marginBottom: 4 }}>{name}</h3>
-              <div style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 18, color: "#E63636" }}>{take}</div>
+              <h3 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 22, marginBottom: 4 }}>{name}</h3>
+              <div style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 18, color: "#E63636" }}>{take}</div>
             </div>
             <div style={{ display: "flex", gap: 16, textAlign: "center" }}>
               {[["Y1", y1], ["Y2", y2], ["Y3", y3]].map(([yr, val]) => (
@@ -1499,8 +1495,8 @@ const NetworkPage = ({ setPage }) => (
         { title: "Web3 Sponsors", icon: "◆", desc: "Protocols fund research tracks aligned with protocol needs, gaining academic credibility.", items: ["Branded Research Tracks", "Researcher Recruiting", "Protocol Improvement", "Ecosystem Signal"] },
       ].map(p => (
         <WindowCard key={p.title} title={`${p.title.toUpperCase().replace(/ /g, "_")}_PILLAR.md`}>
-          <div style={{ fontFamily: "'VT323',monospace", fontSize: 30, color: "#E63636", marginBottom: 14, letterSpacing: "0.04em" }}>{p.icon}</div>
-          <h3 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 26, marginBottom: 10 }}>{p.title}</h3>
+          <div style={{ fontFamily: "var(--font-vt323), monospace", fontSize: 30, color: "#E63636", marginBottom: 14, letterSpacing: "0.04em" }}>{p.icon}</div>
+          <h3 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 26, marginBottom: 10 }}>{p.title}</h3>
           <p style={{ fontSize: 13, lineHeight: 1.65, opacity: 0.7, marginBottom: 18 }}>{p.desc}</p>
           <hr style={{ border: "none", borderTop: "1px solid rgba(31,41,55,0.15)", marginBottom: 14 }} />
           {p.items.map(b => <div key={b} className="vt" style={{ fontSize: 16, marginBottom: 5, opacity: 0.75 }}>▸ {b}</div>)}
@@ -1555,7 +1551,7 @@ const LabProfilePage = ({ lab, setPage }) => {
               <span className="tag">{lab.papers} PAPERS</span>
               {lab.tags.map(t => <span key={t} className="tag">{t}</span>)}
             </div>
-            <h1 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 48, marginBottom: 6 }}>{lab.name}</h1>
+            <h1 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 48, marginBottom: 6 }}>{lab.name}</h1>
             <div className="vt" style={{ fontSize: 18, color: "#E63636", marginBottom: 16 }}>{lab.focus}</div>
             <p style={{ fontSize: 14, lineHeight: 1.75, opacity: 0.75 }}>{lab.description}</p>
           </WindowCard>
@@ -1563,7 +1559,7 @@ const LabProfilePage = ({ lab, setPage }) => {
             <div className="grid-auto-sm">
               {lab.researchers.map((r, i) => (
                 <div key={i} style={{ border: "1px solid #1F2937", padding: 14 }}>
-                  <div style={{ width: 36, height: 36, background: "#1F2937", color: "#FDFBF7", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Londrina Solid',cursive", fontSize: 18, marginBottom: 10 }}>{r.charAt(0)}</div>
+                  <div style={{ width: 36, height: 36, background: "#1F2937", color: "#FDFBF7", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-londrina), cursive", fontSize: 18, marginBottom: 10 }}>{r.charAt(0)}</div>
                   <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 2 }}>{r}</div>
                   <div className="vt" style={{ fontSize: 13, opacity: 0.45 }}>RESEARCHER</div>
                 </div>
@@ -1584,7 +1580,7 @@ const LabProfilePage = ({ lab, setPage }) => {
             {[["PAPERS", lab.papers], ["RESEARCHERS", lab.researchers.length], ["PARTNERS", lab.partners.length], ["STATUS", lab.active ? "ACTIVE" : "INACTIVE"]].map(([k, v]) => (
               <div key={k} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 0", borderBottom: "1px solid rgba(31,41,55,0.1)" }}>
                 <span className="vt" style={{ fontSize: 15 }}>{k}</span>
-                <span style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 20, color: "#E63636" }}>{v}</span>
+                <span style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 20, color: "#E63636" }}>{v}</span>
               </div>
             ))}
           </WindowCard>
@@ -1618,7 +1614,7 @@ const UniversitiesPage = ({ setPage }) => (
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px,1fr))", gap: 10 }}>
         {["MIT", "Stanford", "Oxford", "Harvard", "ETH Zurich", "Imperial College", "Columbia", "NYU", "Caltech", "Cambridge", "Berkeley", "Yale"].map(u => (
           <div key={u} style={{ border: "1px solid #1F2937", padding: "10px 14px", textAlign: "center" }}>
-            <span style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 19 }}>{u}</span>
+            <span style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 19 }}>{u}</span>
           </div>
         ))}
       </div>
@@ -1637,7 +1633,7 @@ const CohortsPage = ({ setPage }) => {
     <div className="page-enter page-container">
       <div style={{ background: "#1F2937", color: "#FDFBF7", border: "2px solid #1F2937", boxShadow: "4px 4px 0px #E63636", padding: "32px 36px", marginBottom: 36 }}>
         <span className="vt" style={{ fontSize: 14, opacity: 0.45 }}>PROGRAM_001 · STATUS: ACTIVE · COHORT_START: Q1 2025</span>
-        <h1 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: "clamp(30px,4.5vw,52px)", lineHeight: 1.05, marginBottom: 14, marginTop: 8 }}>ATHENAX × IF LABS<br />RESEARCH COHORT 01</h1>
+        <h1 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: "clamp(30px,4.5vw,52px)", lineHeight: 1.05, marginBottom: 14, marginTop: 8 }}>ATHENAX × IF LABS<br />RESEARCH COHORT 01</h1>
         <p style={{ fontSize: 15, opacity: 0.65, maxWidth: 560, lineHeight: 1.65, marginBottom: 28 }}>A 6-month open research program connecting top university researchers with Web3 ecosystem sponsors.</p>
         <button className="btn btn-primary" style={{ border: "2px solid rgba(255,255,255,0.5)" }} onClick={() => setPage("apply-cohort")}>APPLY TO COHORT</button>
       </div>
@@ -1652,7 +1648,7 @@ const CohortsPage = ({ setPage }) => {
               {sel === topic && <span style={{ marginLeft: "auto", fontSize: 12 }}>● SELECTED</span>}
             </div>
             <div style={{ padding: 16 }}>
-              <div style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 20, color: sel === topic ? "#E63636" : "#1F2937" }}>{topic}</div>
+              <div style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 20, color: sel === topic ? "#E63636" : "#1F2937" }}>{topic}</div>
               <div className="vt" style={{ fontSize: 13, opacity: 0.5, marginTop: 4 }}>RESEARCH TRACK</div>
             </div>
           </div>
@@ -1660,7 +1656,7 @@ const CohortsPage = ({ setPage }) => {
       </div>
       {sel && (
         <WindowCard title={`TRACK_DETAIL — ${sel.toUpperCase()}`} style={{ marginBottom: 24, border: "2px solid #E63636" }}>
-          <h3 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 24, color: "#E63636", marginBottom: 10 }}>{sel}</h3>
+          <h3 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 24, color: "#E63636", marginBottom: 10 }}>{sel}</h3>
           <p style={{ fontSize: 13, lineHeight: 1.7, opacity: 0.72, marginBottom: 16 }}>
             Apply for the {sel} research track. You'll receive mentorship, funding access, and direct protocol connections.
           </p>
@@ -1728,7 +1724,7 @@ const PaperPage = ({ paperId, setPage }) => {
               <span className="tag">{paper.year}</span>
               <span className="tag-green">PUBLISHED</span>
             </div>
-            <h1 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: "clamp(28px,4vw,44px)", lineHeight: 1.1, marginBottom: 12 }}>{paper.title}</h1>
+            <h1 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: "clamp(28px,4vw,44px)", lineHeight: 1.1, marginBottom: 12 }}>{paper.title}</h1>
             <div className="vt" style={{ fontSize: 17, opacity: 0.6, marginBottom: 4 }}>AUTHORS: {paper.authors.join(" · ")}</div>
             <div className="vt" style={{ fontSize: 14, opacity: 0.4 }}>{paper.university} / {paper.lab}</div>
           </WindowCard>
@@ -1738,7 +1734,7 @@ const PaperPage = ({ paperId, setPage }) => {
           <WindowCard title="FULL_PAPER.content" style={{ marginBottom: 20 }}>
             {[["1. Introduction", "This research addresses a fundamental challenge in decentralized systems: balancing cryptographic security guarantees with practical computational efficiency. Our approach builds on prior work while introducing novel constructions that achieve significant performance improvements."], ["2. Methodology", "We employ a multi-phase evaluation framework combining formal verification with empirical benchmarking across a distributed testnet with 128 validator nodes across 4 geographic regions."], ["3. Results", "Our experiments demonstrate a 3.2× improvement in proof generation time and a 67% reduction in on-chain verification costs. Security analysis confirms equivalent cryptographic guarantees."], ["4. Discussion", "The results suggest practical utility for production deployments. Tradeoffs around prover setup time may be addressed through parallel proof generation in follow-on work."], ["5. Conclusion", "We present a novel approach achieving meaningful practical improvements while maintaining strong theoretical guarantees, opening several avenues for future research."]].map(([title, content]) => (
               <div key={title} style={{ marginBottom: 24 }}>
-                <h2 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 26, marginBottom: 10, paddingBottom: 8, borderBottom: "1px solid rgba(31,41,55,0.1)" }}>{title}</h2>
+                <h2 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 26, marginBottom: 10, paddingBottom: 8, borderBottom: "1px solid rgba(31,41,55,0.1)" }}>{title}</h2>
                 <p style={{ fontSize: 13, lineHeight: 1.8, opacity: 0.72 }}>{content}</p>
               </div>
             ))}
@@ -1773,7 +1769,7 @@ const PaperPage = ({ paperId, setPage }) => {
           </WindowCard>
           <WindowCard title="PEER_REVIEW.score" staticHover>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 64, color: "#E63636", lineHeight: 1 }}>{paper.reviewScore}</div>
+              <div style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 64, color: "#E63636", lineHeight: 1 }}>{paper.reviewScore}</div>
               <div className="vt" style={{ fontSize: 13, opacity: 0.5, marginBottom: 12 }}>/ 10.0 · PEER REVIEW SCORE</div>
               <div style={{ display: "flex", justifyContent: "center", gap: 4, flexWrap: "wrap" }}>
                 {Array.from({ length: 10 }).map((_, i) => (
@@ -1800,7 +1796,7 @@ const LeaderboardPage = ({ setPage }) => {
       </div>
       <div style={{ display: "flex", borderBottom: "2px solid #1F2937", marginBottom: 28 }}>
         {[["researchers", "RESEARCHERS"], ["universities", "UNIVERSITIES"], ["labs", "LABS"]].map(([id, label]) => (
-          <button key={id} onClick={() => setTab(id)} style={{ padding: "10px 24px", background: tab === id ? "#1F2937" : "transparent", color: tab === id ? "#FDFBF7" : "#1F2937", border: "none", borderTop: tab === id ? "3px solid #E63636" : "3px solid transparent", fontFamily: "'VT323',monospace", fontSize: 19, letterSpacing: "0.06em", cursor: "pointer" }}>{label}</button>
+          <button key={id} onClick={() => setTab(id)} style={{ padding: "10px 24px", background: tab === id ? "#1F2937" : "transparent", color: tab === id ? "#FDFBF7" : "#1F2937", border: "none", borderTop: tab === id ? "3px solid #E63636" : "3px solid transparent", fontFamily: "var(--font-vt323), monospace", fontSize: 19, letterSpacing: "0.06em", cursor: "pointer" }}>{label}</button>
         ))}
       </div>
       {tab === "researchers" && (
@@ -1811,17 +1807,17 @@ const LeaderboardPage = ({ setPage }) => {
               <tbody>
                 {SEED_LEADERBOARD.map(r => (
                   <tr key={r.rank}>
-                    <td style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 22, color: r.rank <= 3 ? "#E63636" : "#1F2937" }}>
-                      {r.rank === 1 ? <span style={{fontFamily:"'Inter',sans-serif",fontWeight:600,fontSize:13,letterSpacing:"0.04em",color:"#E63636"}}>◆ 01</span>
-                     : r.rank === 2 ? <span style={{fontFamily:"'Inter',sans-serif",fontWeight:600,fontSize:13,letterSpacing:"0.04em",color:"#1F2937"}}>◆ 02</span>
-                     : r.rank === 3 ? <span style={{fontFamily:"'Inter',sans-serif",fontWeight:600,fontSize:13,letterSpacing:"0.04em",color:"#1F2937"}}>◆ 03</span>
-                     : <span style={{fontFamily:"'VT323',monospace",fontSize:16,opacity:0.5}}>#{r.rank}</span>}
+                    <td style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 22, color: r.rank <= 3 ? "#E63636" : "#1F2937" }}>
+                      {r.rank === 1 ? <span style={{fontFamily:"var(--font-inter), sans-serif",fontWeight:600,fontSize:13,letterSpacing:"0.04em",color:"#E63636"}}>◆ 01</span>
+                     : r.rank === 2 ? <span style={{fontFamily:"var(--font-inter), sans-serif",fontWeight:600,fontSize:13,letterSpacing:"0.04em",color:"#1F2937"}}>◆ 02</span>
+                     : r.rank === 3 ? <span style={{fontFamily:"var(--font-inter), sans-serif",fontWeight:600,fontSize:13,letterSpacing:"0.04em",color:"#1F2937"}}>◆ 03</span>
+                     : <span style={{fontFamily:"var(--font-vt323), monospace",fontSize:16,opacity:0.5}}>#{r.rank}</span>}
                     </td>
                     <td><strong>{r.name}</strong><div className="vt" style={{ fontSize: 12, opacity: 0.45 }}>{r.university}</div></td>
                     <td><span className="vt" style={{ fontSize: 14 }}>{r.lab}</span></td>
-                    <td><span style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 20, color: "#E63636" }}>{r.citations}</span></td>
+                    <td><span style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 20, color: "#E63636" }}>{r.citations}</span></td>
                     <td>{r.downloads.toLocaleString()}</td>
-                    <td style={{ color: "var(--success-green)", fontFamily: "'VT323',monospace", fontSize: 16 }}>{r.votes.toLocaleString()}</td>
+                    <td style={{ color: "var(--success-green)", fontFamily: "var(--font-vt323), monospace", fontSize: 16 }}>{r.votes.toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1837,10 +1833,10 @@ const LeaderboardPage = ({ setPage }) => {
               <tbody>
                 {[...SEED_LABS].sort((a, b) => b.papers - a.papers).map((lab, i) => (
                   <tr key={lab.id} style={{ cursor: "pointer" }} onClick={() => { setSelectedLab?.(lab); setPage("lab-profile"); }}>
-                    <td style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 20, color: i < 3 ? "#E63636" : "#1F2937" }}>#{i + 1}</td>
+                    <td style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 20, color: i < 3 ? "#E63636" : "#1F2937" }}>#{i + 1}</td>
                     <td><strong>{lab.name}</strong></td>
                     <td style={{ fontSize: 12, opacity: 0.65 }}>{lab.focus}</td>
-                    <td><span style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 20, color: "#E63636" }}>{lab.papers}</span></td>
+                    <td><span style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 20, color: "#E63636" }}>{lab.papers}</span></td>
                     <td><span className="vt" style={{ fontSize: 14, color: lab.active ? "#22C55E" : "rgba(31,41,55,0.35)" }}>{lab.active ? "● ACTIVE" : "○ INACTIVE"}</span></td>
                   </tr>
                 ))}
@@ -1856,7 +1852,7 @@ const LeaderboardPage = ({ setPage }) => {
               <thead><tr><th>RANK</th><th>UNIVERSITY</th><th>PAPERS</th><th>CITATIONS</th></tr></thead>
               <tbody>
                 {[{ r: 1, n: "MIT", p: 34, c: 1240 }, { r: 2, n: "Stanford", p: 28, c: 980 }, { r: 3, n: "Oxford", p: 22, c: 876 }, { r: 4, n: "ETH Zurich", p: 19, c: 654 }, { r: 5, n: "Harvard", p: 15, c: 521 }].map(u => (
-                  <tr key={u.r}><td style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 20, color: u.r <= 3 ? "#E63636" : "#1F2937" }}>#{u.r}</td><td><strong style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 20 }}>{u.n}</strong></td><td>{u.p}</td><td><span style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 20, color: "#E63636" }}>{u.c}</span></td></tr>
+                  <tr key={u.r}><td style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 20, color: u.r <= 3 ? "#E63636" : "#1F2937" }}>#{u.r}</td><td><strong style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 20 }}>{u.n}</strong></td><td>{u.p}</td><td><span style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 20, color: "#E63636" }}>{u.c}</span></td></tr>
                 ))}
               </tbody>
             </table>
@@ -1881,7 +1877,7 @@ const DashboardPage = ({ setPage }) => {
         </div>
         <TerminalPanel title="CLOCK.sys" style={{ minWidth: 180 }}>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 40, color: "var(--success-green)" }}>{now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+            <div style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 40, color: "var(--success-green)" }}>{now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
             <div className="term-dim" style={{ fontSize: 14 }}>{now.toDateString().toUpperCase()}</div>
           </div>
         </TerminalPanel>
@@ -1910,10 +1906,10 @@ const DashboardPage = ({ setPage }) => {
                 <span className="tag-accent">{b.topic}</span>
                 <span className="tag">{b.sponsor}</span>
               </div>
-              <h3 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 19, lineHeight: 1.2, marginBottom: 10 }}>{b.title}</h3>
+              <h3 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 19, lineHeight: 1.2, marginBottom: 10 }}>{b.title}</h3>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <div style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 26, color: "#E63636" }}>{b.reward}</div>
+                  <div style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 26, color: "#E63636" }}>{b.reward}</div>
                   <div className="vt" style={{ fontSize: 13, opacity: 0.5 }}>{b.applicants} APPLICANTS · DL: {b.deadline}</div>
                 </div>
                 <button className="btn btn-primary btn-sm" onClick={() => setPage("bounties")}>APPLY</button>
@@ -1930,7 +1926,7 @@ const DashboardPage = ({ setPage }) => {
                 <span className="tag-accent" style={{ fontSize: 11 }}>{p.topic}</span>
                 <span className="tag" style={{ fontSize: 11 }}>{p.year}</span>
               </div>
-              <div style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 18, lineHeight: 1.2, marginBottom: 4 }}>{p.title.slice(0, 60)}…</div>
+              <div style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 18, lineHeight: 1.2, marginBottom: 4 }}>{p.title.slice(0, 60)}…</div>
               <div className="vt" style={{ fontSize: 14, opacity: 0.5 }}>{p.citations} cite · {p.downloads.toLocaleString()} dl</div>
             </div>
           ))}
@@ -1981,8 +1977,8 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
   }, [user]);
 
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
-  const iStyle = { width:"100%", padding:"9px 12px", fontFamily:"'Inter',sans-serif", background:"#FDFBF7", border:"2px solid #1F2937", outline:"none", fontSize:13, display:"block", marginTop:4 };
-  const lStyle = { fontFamily:"'VT323',monospace", fontSize:14, letterSpacing:"0.06em", opacity:0.7, display:"block" };
+  const iStyle = { width:"100%", padding:"9px 12px", fontFamily:"var(--font-inter), sans-serif", background:"#FDFBF7", border:"2px solid #1F2937", outline:"none", fontSize:13, display:"block", marginTop:4 };
+  const lStyle = { fontFamily:"var(--font-vt323), monospace", fontSize:14, letterSpacing:"0.06em", opacity:0.7, display:"block" };
 
   const validate = () => {
     if (!form.title.trim())    return "Title is required.";
@@ -2033,7 +2029,7 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
       <div style={{ display:"flex", borderBottom:"2px solid #1F2937", marginBottom:28 }}>
         {[["1","PAPER DETAILS"],["2","PREVIEW"]].map(([n,lbl]) => (
           <button key={n} onClick={() => { if(n==="2"&&!validate()) setStep(2); else if(n==="1") setStep(1); }}
-            style={{ padding:"10px 28px", background:step===+n?"#1F2937":"transparent", color:step===+n?"#FDFBF7":"#1F2937", border:"none", borderTop:step===+n?"3px solid #E63636":"3px solid transparent", borderRadius:0, fontFamily:"'Inter',sans-serif", fontWeight:600, fontSize:12, letterSpacing:"0.06em", textTransform:"uppercase", cursor:"pointer" }}>
+            style={{ padding:"10px 28px", background:step===+n?"#1F2937":"transparent", color:step===+n?"#FDFBF7":"#1F2937", border:"none", borderTop:step===+n?"3px solid #E63636":"3px solid transparent", borderRadius:0, fontFamily:"var(--font-inter), sans-serif", fontWeight:600, fontSize:12, letterSpacing:"0.06em", textTransform:"uppercase", cursor:"pointer" }}>
             STEP {n}: {lbl}
           </button>
         ))}
@@ -2094,7 +2090,7 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
             <TerminalPanel title="SUBMISSION_STATUS.sys">
               <div className="term-dim">STATUS:</div>
               <select value={form.status} onChange={set("status")}
-                style={{ background:"#1F2937", color:"#22C55E", border:"1px solid rgba(255,255,255,0.2)", fontFamily:"'VT323',monospace", fontSize:16, padding:"4px 8px", width:"100%", marginTop:4 }}>
+                style={{ background:"#1F2937", color:"#22C55E", border:"1px solid rgba(255,255,255,0.2)", fontFamily:"var(--font-vt323), monospace", fontSize:16, padding:"4px 8px", width:"100%", marginTop:4 }}>
                 <option value="draft">DRAFT</option>
                 <option value="submitted">SUBMIT FOR REVIEW</option>
               </select>
@@ -2136,13 +2132,13 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
                 <span className="tag">{new Date().getFullYear()}</span>
                 <span className="tag-yellow">◎ PENDING REVIEW</span>
               </div>
-              <h1 style={{ fontFamily:"'Londrina Solid',cursive", fontSize:"clamp(22px,3vw,36px)", lineHeight:1.1, marginBottom:10 }}>
+              <h1 style={{ fontFamily:"var(--font-londrina), cursive", fontSize:"clamp(22px,3vw,36px)", lineHeight:1.1, marginBottom:10 }}>
                 {form.title || <span style={{ opacity:0.3 }}>UNTITLED PAPER</span>}
               </h1>
               <div className="vt" style={{ fontSize:16, opacity:0.55, marginBottom:14 }}>
                 BY: {user.name}{form.coAuthors ? ` · ${form.coAuthors}` : ""}
               </div>
-              <h3 style={{ fontFamily:"'Londrina Solid',cursive", fontSize:22, marginBottom:8 }}>Abstract</h3>
+              <h3 style={{ fontFamily:"var(--font-londrina), cursive", fontSize:22, marginBottom:8 }}>Abstract</h3>
               <p style={{ fontSize:14, lineHeight:1.75, opacity:0.8 }}>{form.abstract || <span style={{ opacity:0.3 }}>No abstract provided.</span>}</p>
               {form.keywords && (
                 <div style={{ marginTop:16, display:"flex", gap:6, flexWrap:"wrap" }}>
@@ -2228,7 +2224,7 @@ const BountyMarketplacePage = ({ user, setPage, showToast }) => {
       {/* Filters */}
       <div style={{ display:"flex", gap:10, marginBottom:20, flexWrap:"wrap", alignItems:"center" }}>
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search bounties…"
-          style={{ padding:"8px 12px", fontFamily:"'Inter',sans-serif", background:"#FDFBF7", border:"2px solid #1F2937", outline:"none", fontSize:13, minWidth:220 }}/>
+          style={{ padding:"8px 12px", fontFamily:"var(--font-inter), sans-serif", background:"#FDFBF7", border:"2px solid #1F2937", outline:"none", fontSize:13, minWidth:220 }}/>
         <div style={{ display:"flex", gap:5, flexWrap:"wrap" }}>
           {topics.map(t => (
             <button key={t} onClick={() => setTopicFilter(t)} className="btn btn-sm"
@@ -2259,11 +2255,11 @@ const BountyMarketplacePage = ({ user, setPage, showToast }) => {
               </div>
               <div style={{ display:"grid", gridTemplateColumns:"1fr auto", gap:16, alignItems:"start" }}>
                 <div>
-                  <h3 style={{ fontFamily:"'Londrina Solid',cursive", fontSize:22, lineHeight:1.2, marginBottom:6 }}>{b.title}</h3>
+                  <h3 style={{ fontFamily:"var(--font-londrina), cursive", fontSize:22, lineHeight:1.2, marginBottom:6 }}>{b.title}</h3>
                   {b.description && <p style={{ fontSize:13, lineHeight:1.6, opacity:0.65 }}>{b.description.slice(0,180)}…</p>}
                 </div>
                 <div style={{ textAlign:"right", flexShrink:0 }}>
-                  <div style={{ fontFamily:"'Londrina Solid',cursive", fontSize:32, color:"#E63636", lineHeight:1 }}>{b.reward}</div>
+                  <div style={{ fontFamily:"var(--font-londrina), cursive", fontSize:32, color:"#E63636", lineHeight:1 }}>{b.reward}</div>
                   <div className="vt" style={{ fontSize:13, opacity:0.5, marginBottom:10 }}>{b.applicants} PROPOSALS</div>
                   <button className="btn btn-primary btn-sm" onClick={() => setSelected(b)}>VIEW + APPLY</button>
                 </div>
@@ -2278,16 +2274,16 @@ const BountyMarketplacePage = ({ user, setPage, showToast }) => {
         <div style={{ position:"fixed", inset:0, background:"rgba(31,41,55,0.75)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:20 }}
           onClick={e => e.target===e.currentTarget && setSelected(null)}>
           <div style={{ background:"#FDFBF7", border:"3px solid #1F2937", boxShadow:"8px 8px 0 #1F2937", maxWidth:600, width:"100%", maxHeight:"90vh", overflowY:"auto" }}>
-            <div style={{ background:"#1F2937", color:"#FDFBF7", padding:"7px 14px", display:"flex", alignItems:"center", justifyContent:"space-between", fontFamily:"'VT323',monospace", fontSize:15, letterSpacing:"0.06em" }}>
+            <div style={{ background:"#1F2937", color:"#FDFBF7", padding:"7px 14px", display:"flex", alignItems:"center", justifyContent:"space-between", fontFamily:"var(--font-vt323), monospace", fontSize:15, letterSpacing:"0.06em" }}>
               <div style={{ display:"flex", alignItems:"center", gap:10 }}><TrafficLights/><span>SUBMIT_PROPOSAL — {selected.id.toUpperCase()}</span></div>
-              <button onClick={() => setSelected(null)} style={{ background:"none", border:"none", color:"#FDFBF7", cursor:"pointer", fontFamily:"'Inter',sans-serif", fontWeight:600, fontSize:13 }}>✕ CLOSE</button>
+              <button onClick={() => setSelected(null)} style={{ background:"none", border:"none", color:"#FDFBF7", cursor:"pointer", fontFamily:"var(--font-inter), sans-serif", fontWeight:600, fontSize:13 }}>✕ CLOSE</button>
             </div>
             <div style={{ padding:24 }}>
               <div style={{ background:"#DBEAFE", border:"1.5px solid #1F2937", padding:14, marginBottom:20, borderRadius:6 }}>
                 <div style={{ display:"flex", gap:6, marginBottom:8 }}><span className="tag-accent">{selected.topic}</span><span className="tag">◆ {selected.sponsor}</span></div>
-                <div style={{ fontFamily:"'Londrina Solid',cursive", fontSize:22, marginBottom:4 }}>{selected.title}</div>
+                <div style={{ fontFamily:"var(--font-londrina), cursive", fontSize:22, marginBottom:4 }}>{selected.title}</div>
                 <div style={{ display:"flex", gap:16 }}>
-                  <span style={{ fontFamily:"'Londrina Solid',cursive", fontSize:24, color:"#E63636" }}>{selected.reward}</span>
+                  <span style={{ fontFamily:"var(--font-londrina), cursive", fontSize:24, color:"#E63636" }}>{selected.reward}</span>
                   <span className="vt" style={{ fontSize:14, opacity:0.5, alignSelf:"flex-end" }}>DL: {selected.deadline}</span>
                 </div>
                 {selected.requirements && <p style={{ fontSize:12, marginTop:8, opacity:0.6 }}><strong>Requirements:</strong> {selected.requirements}</p>}
@@ -2303,9 +2299,9 @@ const BountyMarketplacePage = ({ user, setPage, showToast }) => {
                     ["TECHNICAL APPROACH","approach","Outline your methodology and key milestones.",false],
                     ["TIMELINE","timeline","Estimated duration and delivery schedule.",false]].map(([lbl,key,ph,required]) => (
                     <div key={key} style={{ marginBottom:14 }}>
-                      <label style={{ fontFamily:"'VT323',monospace", fontSize:14, opacity:0.7, display:"block", marginBottom:4 }}>{lbl}</label>
+                      <label style={{ fontFamily:"var(--font-vt323), monospace", fontSize:14, opacity:0.7, display:"block", marginBottom:4 }}>{lbl}</label>
                       <textarea value={proposal[key]} onChange={e => setProposal(p => ({...p,[key]:e.target.value}))} placeholder={ph} rows={3}
-                        style={{ width:"100%", padding:"9px 12px", fontFamily:"'Inter',sans-serif", background:"#FDFBF7", border:"2px solid #1F2937", outline:"none", fontSize:13, resize:"vertical", display:"block" }}/>
+                        style={{ width:"100%", padding:"9px 12px", fontFamily:"var(--font-inter), sans-serif", background:"#FDFBF7", border:"2px solid #1F2937", outline:"none", fontSize:13, resize:"vertical", display:"block" }}/>
                     </div>
                   ))}
                   <button className="btn btn-primary" disabled={submitting} onClick={submitProposal} style={{ width:"100%", fontSize:19 }}>
@@ -2328,8 +2324,8 @@ const PostBountyPage = ({ user, setPage, showToast }) => {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ title:"", description:"", topic:"ZK Proofs", reward:"", deadline:"", requirements:"" });
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
-  const iStyle = { width:"100%", padding:"9px 12px", fontFamily:"'Inter',sans-serif", background:"#FDFBF7", border:"2px solid #1F2937", outline:"none", fontSize:13, display:"block", marginTop:4 };
-  const lStyle = { fontFamily:"'VT323',monospace", fontSize:14, letterSpacing:"0.06em", opacity:0.7, display:"block" };
+  const iStyle = { width:"100%", padding:"9px 12px", fontFamily:"var(--font-inter), sans-serif", background:"#FDFBF7", border:"2px solid #1F2937", outline:"none", fontSize:13, display:"block", marginTop:4 };
+  const lStyle = { fontFamily:"var(--font-vt323), monospace", fontSize:14, letterSpacing:"0.06em", opacity:0.7, display:"block" };
 
   if (!user || user.role !== "sponsor") return (
     <div className="page-enter page-container">
@@ -2411,7 +2407,7 @@ const PostBountyPage = ({ user, setPage, showToast }) => {
         <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
           <WindowCard title="SPONSOR_ID.sys" staticHover>
             <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
-              <div style={{ width:36, height:36, background:"#1F2937", color:"#FDFBF7", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Londrina Solid',cursive", fontSize:18, border:"2px solid #1F2937" }}>
+              <div style={{ width:36, height:36, background:"#1F2937", color:"#FDFBF7", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"var(--font-londrina), cursive", fontSize:18, border:"2px solid #1F2937" }}>
                 {user.avatar}
               </div>
               <div>
@@ -2451,8 +2447,8 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
     track:"AI Agents", summary:"", outcomes:"", background:"", commitment:"part-time",
   });
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
-  const iStyle = { width:"100%", padding:"9px 12px", fontFamily:"'Inter',sans-serif", background:"#FDFBF7", border:"2px solid #1F2937", outline:"none", fontSize:13, display:"block", marginTop:4 };
-  const lStyle = { fontFamily:"'VT323',monospace", fontSize:14, letterSpacing:"0.06em", opacity:0.7, display:"block" };
+  const iStyle = { width:"100%", padding:"9px 12px", fontFamily:"var(--font-inter), sans-serif", background:"#FDFBF7", border:"2px solid #1F2937", outline:"none", fontSize:13, display:"block", marginTop:4 };
+  const lStyle = { fontFamily:"var(--font-vt323), monospace", fontSize:14, letterSpacing:"0.06em", opacity:0.7, display:"block" };
 
   const TRACKS = ["AI Agents","DAO Governance","Crypto Economics","Tokenomics","DeFi Systems","Digital Nations"];
 
@@ -2471,8 +2467,8 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
     <div className="page-enter page-container">
       <WindowCard title="APPLICATION_RECEIVED.sys" staticHover>
         <div style={{ textAlign:"center", padding:"32px 0" }}>
-          <div style={{ fontFamily:"'Londrina Solid',cursive", fontSize:48, color:"#22C55E", marginBottom:8 }}>◉</div>
-          <h2 style={{ fontFamily:"'Londrina Solid',cursive", fontSize:32, marginBottom:10 }}>Application Submitted</h2>
+          <div style={{ fontFamily:"var(--font-londrina), cursive", fontSize:48, color:"#22C55E", marginBottom:8 }}>◉</div>
+          <h2 style={{ fontFamily:"var(--font-londrina), cursive", fontSize:32, marginBottom:10 }}>Application Submitted</h2>
           <p style={{ fontSize:13, opacity:0.65, marginBottom:8 }}>Track: <strong>{form.track}</strong></p>
           <p style={{ fontSize:13, opacity:0.55, marginBottom:24, maxWidth:400, margin:"0 auto 24px" }}>
             Your application has been received. The AthenaX team will review it within 5–10 business days.
@@ -2508,7 +2504,7 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
       {/* Cohort header */}
       <div style={{ background:"#1F2937", color:"#FDFBF7", border:"3px solid #1F2937", boxShadow:"4px 4px 0 #E63636", padding:"24px 28px", marginBottom:28 }}>
         <div className="vt" style={{ fontSize:13, opacity:0.45, marginBottom:6 }}>APPLICATION FORM · COHORT_01 · STATUS: OPEN</div>
-        <h1 style={{ fontFamily:"'Londrina Solid',cursive", fontSize:"clamp(24px,4vw,40px)", lineHeight:1.1 }}>ATHENAX × IF LABS COHORT 01</h1>
+        <h1 style={{ fontFamily:"var(--font-londrina), cursive", fontSize:"clamp(24px,4vw,40px)", lineHeight:1.1 }}>ATHENAX × IF LABS COHORT 01</h1>
         <div className="vt" style={{ fontSize:15, opacity:0.5, marginTop:6 }}>PRIZE POOL: $500,000 · DURATION: 6 MONTHS</div>
       </div>
 
@@ -2521,7 +2517,7 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
                 <div key={t} onClick={() => setForm(f => ({...f,track:t}))}
                   style={{ cursor:"pointer", border:form.track===t?"2px solid #E63636":"2px solid rgba(31,41,55,0.2)", padding:"10px 14px", background:form.track===t?"rgba(230,54,54,0.06)":"transparent", borderRadius:6, display:"flex", alignItems:"center", gap:8 }}>
                   <div style={{ width:11, height:11, borderRadius:"50%", border:form.track===t?"4px solid #E63636":"2px solid #1F2937", flexShrink:0 }}/>
-                  <span style={{ fontFamily:"'VT323',monospace", fontSize:16, color:form.track===t?"#E63636":"#1F2937" }}>{t}</span>
+                  <span style={{ fontFamily:"var(--font-vt323), monospace", fontSize:16, color:form.track===t?"#E63636":"#1F2937" }}>{t}</span>
                 </div>
               ))}
             </div>
@@ -2563,7 +2559,7 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
           {user.role==="researcher" && (
             <WindowCard title="APPLICANT_PROFILE.sys" staticHover>
               <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
-                <div style={{ width:36, height:36, background:"#1F2937", color:"#FDFBF7", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Londrina Solid',cursive", fontSize:18, border:"2px solid #1F2937" }}>{user.avatar}</div>
+                <div style={{ width:36, height:36, background:"#1F2937", color:"#FDFBF7", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"var(--font-londrina), cursive", fontSize:18, border:"2px solid #1F2937" }}>{user.avatar}</div>
                 <div>
                   <div style={{ fontWeight:600, fontSize:13 }}>{user.name}</div>
                   <div className="vt" style={{ fontSize:13, opacity:0.4 }}>{user.university||"INDEPENDENT"}</div>
@@ -2577,7 +2573,7 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
             {[["Research quality","40%"],["Feasibility","25%"],["Impact potential","20%"],["Researcher background","15%"]].map(([c,w]) => (
               <div key={c} style={{ display:"flex", justifyContent:"space-between", paddingBottom:7, marginBottom:7, borderBottom:"1px solid rgba(31,41,55,0.07)" }}>
                 <span style={{ fontSize:12 }}>{c}</span>
-                <span style={{ fontFamily:"'Londrina Solid',cursive", fontSize:16, color:"#E63636" }}>{w}</span>
+                <span style={{ fontFamily:"var(--font-londrina), cursive", fontSize:16, color:"#E63636" }}>{w}</span>
               </div>
             ))}
           </WindowCard>
@@ -2660,7 +2656,7 @@ const AdminPanelPage = ({ user, setPage, showToast }) => {
       <div style={{ display:"flex", borderBottom:"2px solid #1F2937", marginBottom:20 }}>
         {TABS.map(([id,label]) => (
           <button key={id} onClick={() => setTab(id)}
-            style={{ padding:"9px 20px", background:tab===id?"#1F2937":"transparent", color:tab===id?"#FDFBF7":"#1F2937", border:"none", borderTop:tab===id?"3px solid #E63636":"3px solid transparent", borderRadius:0, fontFamily:"'VT323',monospace", fontSize:16, letterSpacing:"0.06em", cursor:"pointer" }}>
+            style={{ padding:"9px 20px", background:tab===id?"#1F2937":"transparent", color:tab===id?"#FDFBF7":"#1F2937", border:"none", borderTop:tab===id?"3px solid #E63636":"3px solid transparent", borderRadius:0, fontFamily:"var(--font-vt323), monospace", fontSize:16, letterSpacing:"0.06em", cursor:"pointer" }}>
             {label}
           </button>
         ))}
@@ -2744,7 +2740,7 @@ const AdminPanelPage = ({ user, setPage, showToast }) => {
                   <tr key={u.id}>
                     <td>
                       <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                        <div style={{ width:24, height:24, background:"#1F2937", color:"#FDFBF7", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Londrina Solid',cursive", fontSize:12, border:"1px solid #1F2937", flexShrink:0 }}>{u.avatar||"?"}</div>
+                        <div style={{ width:24, height:24, background:"#1F2937", color:"#FDFBF7", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"var(--font-londrina), cursive", fontSize:12, border:"1px solid #1F2937", flexShrink:0 }}>{u.avatar||"?"}</div>
                         <span style={{ fontWeight:600, fontSize:13 }}>{u.name}</span>
                       </div>
                     </td>
@@ -2771,7 +2767,7 @@ const AdminPanelPage = ({ user, setPage, showToast }) => {
                     <td style={{ fontWeight:600, fontSize:12, maxWidth:200 }}>{b.title.slice(0,50)}{b.title.length>50?"…":""}</td>
                     <td style={{ fontSize:13 }}>◆ {b.sponsor}</td>
                     <td><span className="tag-accent" style={{ fontSize:11 }}>{b.topic}</span></td>
-                    <td style={{ fontFamily:"'Londrina Solid',cursive", fontSize:18, color:"#E63636" }}>{b.reward}</td>
+                    <td style={{ fontFamily:"var(--font-londrina), cursive", fontSize:18, color:"#E63636" }}>{b.reward}</td>
                     <td className="vt" style={{ fontSize:14 }}>{proposals.filter(p=>p.bountyId===b.id).length || b.applicants || 0}</td>
                     <td><span className={b.status==="open"?"tag-green":"tag"} style={{ fontSize:11 }}>{(b.status||"open").toUpperCase()}</span></td>
                   </tr>
@@ -2908,7 +2904,7 @@ const ResearchTerminalPage = ({ user, setPage }) => {
               <input ref={inputRef} value={query} onChange={e => setQuery(e.target.value)}
                 onKeyDown={e => e.key==="Enter" && runQuery(query)}
                 placeholder="search papers, authors, topics… or try /top /trending /stats"
-                style={{ flex:1, background:"transparent", border:"none", outline:"none", fontFamily:"'VT323',monospace", fontSize:17, color:"#FDFBF7", caretColor:"#22C55E" }}/>
+                style={{ flex:1, background:"transparent", border:"none", outline:"none", fontFamily:"var(--font-vt323), monospace", fontSize:17, color:"#FDFBF7", caretColor:"#22C55E" }}/>
               <button onClick={() => runQuery(query)} className="btn btn-sm" style={{ background:"#E63636", color:"#FDFBF7", border:"none", fontSize:15, padding:"4px 12px", flexShrink:0 }}>RUN</button>
             </div>
           </TerminalPanel>
@@ -3022,7 +3018,7 @@ const TalentMarketplacePage = ({ user, setPage, showToast }) => {
       <div style={{ display:"flex", borderBottom:"2px solid #1F2937", marginBottom:24 }}>
         {SECTIONS.map(([id,lbl])=>(
           <button key={id} onClick={()=>setActiveSection(id)}
-            style={{ padding:"9px 22px", background:activeSection===id?"#1F2937":"transparent", color:activeSection===id?"#FDFBF7":"#1F2937", border:"none", borderTop:activeSection===id?"3px solid #E63636":"3px solid transparent", fontFamily:"'VT323',monospace", fontSize:17, letterSpacing:"0.06em", cursor:"pointer" }}>
+            style={{ padding:"9px 22px", background:activeSection===id?"#1F2937":"transparent", color:activeSection===id?"#FDFBF7":"#1F2937", border:"none", borderTop:activeSection===id?"3px solid #E63636":"3px solid transparent", fontFamily:"var(--font-vt323), monospace", fontSize:17, letterSpacing:"0.06em", cursor:"pointer" }}>
             {lbl}
           </button>
         ))}
@@ -3035,11 +3031,11 @@ const TalentMarketplacePage = ({ user, setPage, showToast }) => {
             {TALENT_RESEARCHERS.map(r=>(
               <WindowCard key={r.id} title={`RES_${r.id.toUpperCase()}.profile`}>
                 <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:12 }}>
-                  <div style={{ width:44, height:44, background:"#1F2937", color:"#FDFBF7", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Londrina Solid',cursive", fontSize:22, border:"2px solid #1F2937", flexShrink:0 }}>
+                  <div style={{ width:44, height:44, background:"#1F2937", color:"#FDFBF7", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"var(--font-londrina), cursive", fontSize:22, border:"2px solid #1F2937", flexShrink:0 }}>
                     {r.name.charAt(0)}
                   </div>
                   <div>
-                    <div style={{ fontFamily:"'Londrina Solid',cursive", fontSize:20, lineHeight:1.1 }}>{r.name}</div>
+                    <div style={{ fontFamily:"var(--font-londrina), cursive", fontSize:20, lineHeight:1.1 }}>{r.name}</div>
                     <div className="vt" style={{ fontSize:13, opacity:0.5 }}>{r.university} · {r.lab}</div>
                   </div>
                 </div>
@@ -3050,7 +3046,7 @@ const TalentMarketplacePage = ({ user, setPage, showToast }) => {
                   </div>
                 </div>
                 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                  <span style={{ fontFamily:"'Londrina Solid',cursive", fontSize:22, color:"#E63636" }}>ARS {r.ars}</span>
+                  <span style={{ fontFamily:"var(--font-londrina), cursive", fontSize:22, color:"#E63636" }}>ARS {r.ars}</span>
                   <span className={r.available?"tag-green":"tag"} style={{ fontSize:11 }}>{r.available?"◉ AVAILABLE":"○ ENGAGED"}</span>
                 </div>
                 {r.available && (
@@ -3082,11 +3078,11 @@ const TalentMarketplacePage = ({ user, setPage, showToast }) => {
                       <span className="tag">◆ {role.org}</span>
                       <span className="tag-yellow">{role.type}</span>
                     </div>
-                    <h3 style={{ fontFamily:"'Londrina Solid',cursive", fontSize:22, marginBottom:6 }}>{role.role}</h3>
+                    <h3 style={{ fontFamily:"var(--font-londrina), cursive", fontSize:22, marginBottom:6 }}>{role.role}</h3>
                     <div className="vt" style={{ fontSize:14, opacity:0.55 }}>REQ: {role.req}</div>
                   </div>
                   <div style={{ textAlign:"right", flexShrink:0 }}>
-                    <div style={{ fontFamily:"'Londrina Solid',cursive", fontSize:20, color:"#E63636", lineHeight:1.2 }}>{role.comp}</div>
+                    <div style={{ fontFamily:"var(--font-londrina), cursive", fontSize:20, color:"#E63636", lineHeight:1.2 }}>{role.comp}</div>
                     <button className="btn btn-primary btn-sm" style={{ marginTop:10, fontSize:15 }}
                       onClick={()=>setApplying({id:role.id, title:role.role, org:role.org, type:"role"})}>
                       APPLY
@@ -3105,12 +3101,12 @@ const TalentMarketplacePage = ({ user, setPage, showToast }) => {
           {FELLOWSHIPS.map(f=>(
             <WindowCard key={f.id} title={`FELLOWSHIP_${f.id.toUpperCase()}.sys`}>
               <div className="vt" style={{ fontSize:13, color:"#E63636", marginBottom:6 }}>◆ {f.org}</div>
-              <h3 style={{ fontFamily:"'Londrina Solid',cursive", fontSize:22, lineHeight:1.2, marginBottom:10 }}>{f.name}</h3>
+              <h3 style={{ fontFamily:"var(--font-londrina), cursive", fontSize:22, lineHeight:1.2, marginBottom:10 }}>{f.name}</h3>
               <div style={{ display:"flex", flexDirection:"column", gap:6, marginBottom:14 }}>
                 {[["STIPEND",f.stipend],["DURATION",f.duration],["TOPIC",f.topic],["SLOTS",f.slots+" open"]].map(([k,v])=>(
                   <div key={k} style={{ display:"flex", justifyContent:"space-between", paddingBottom:5, borderBottom:"1px solid rgba(31,41,55,0.08)" }}>
                     <span className="vt" style={{ fontSize:13, opacity:0.5 }}>{k}</span>
-                    <span style={{ fontFamily:"'Londrina Solid',cursive", fontSize:17, color:"#E63636" }}>{v}</span>
+                    <span style={{ fontFamily:"var(--font-londrina), cursive", fontSize:17, color:"#E63636" }}>{v}</span>
                   </div>
                 ))}
               </div>
@@ -3128,9 +3124,9 @@ const TalentMarketplacePage = ({ user, setPage, showToast }) => {
         <div style={{ position:"fixed", inset:0, background:"rgba(31,41,55,0.75)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:20 }}
           onClick={e=>e.target===e.currentTarget&&setApplying(null)}>
           <div style={{ background:"#FDFBF7", border:"3px solid #1F2937", boxShadow:"8px 8px 0 #1F2937", maxWidth:500, width:"100%" }}>
-            <div style={{ background:"#1F2937", color:"#FDFBF7", padding:"7px 14px", display:"flex", alignItems:"center", justifyContent:"space-between", fontFamily:"'VT323',monospace", fontSize:15 }}>
+            <div style={{ background:"#1F2937", color:"#FDFBF7", padding:"7px 14px", display:"flex", alignItems:"center", justifyContent:"space-between", fontFamily:"var(--font-vt323), monospace", fontSize:15 }}>
               <div style={{ display:"flex", alignItems:"center", gap:10 }}><TrafficLights/><span>APPLY — {applying.title.toUpperCase().slice(0,30)}</span></div>
-              <button onClick={()=>setApplying(null)} style={{ background:"none", border:"none", color:"#FDFBF7", cursor:"pointer", fontFamily:"'Inter',sans-serif", fontWeight:600, fontSize:14 }}>✕</button>
+              <button onClick={()=>setApplying(null)} style={{ background:"none", border:"none", color:"#FDFBF7", cursor:"pointer", fontFamily:"var(--font-inter), sans-serif", fontWeight:600, fontSize:14 }}>✕</button>
             </div>
             <div style={{ padding:24 }}>
               {!user ? (
@@ -3140,13 +3136,13 @@ const TalentMarketplacePage = ({ user, setPage, showToast }) => {
                 </div>
               ) : (
                 <>
-                  <div style={{ background:"var(--accent-blue)", border:"2px solid #1F2937", padding:12, marginBottom:16, fontFamily:"'VT323',monospace", fontSize:14, borderRadius:6 }}>
+                  <div style={{ background:"var(--accent-blue)", border:"2px solid #1F2937", padding:12, marginBottom:16, fontFamily:"var(--font-vt323), monospace", fontSize:14, borderRadius:6 }}>
                     {applying.org && <div style={{ opacity:0.5, marginBottom:2 }}>◆ {applying.org}</div>}
                     <div style={{ fontSize:17 }}>{applying.title}</div>
                   </div>
-                  <label style={{ fontFamily:"'VT323',monospace", fontSize:14, opacity:0.7, display:"block", marginBottom:4 }}>COVER NOTE *</label>
+                  <label style={{ fontFamily:"var(--font-vt323), monospace", fontSize:14, opacity:0.7, display:"block", marginBottom:4 }}>COVER NOTE *</label>
                   <textarea value={appNote} onChange={e=>setAppNote(e.target.value)} rows={4} placeholder="Brief introduction and why you're a strong fit…"
-                    style={{ width:"100%", padding:"9px 12px", fontFamily:"'Inter',sans-serif", background:"#FDFBF7", border:"2px solid #1F2937", outline:"none", fontSize:13, resize:"vertical", display:"block", marginBottom:16 }}/>
+                    style={{ width:"100%", padding:"9px 12px", fontFamily:"var(--font-inter), sans-serif", background:"#FDFBF7", border:"2px solid #1F2937", outline:"none", fontSize:13, resize:"vertical", display:"block", marginBottom:16 }}/>
                   <button className="btn btn-primary" style={{ width:"100%", fontSize:19 }} onClick={submitApp}>SUBMIT APPLICATION</button>
                 </>
               )}
@@ -3214,12 +3210,12 @@ const ResearchReportsPage = ({ setPage }) => {
                   <div style={{ display:"flex", gap:6, marginBottom:8 }}>
                     <span className="tag-accent" style={{ fontSize:11 }}>{r.type}</span>
                   </div>
-                  <h3 style={{ fontFamily:"'Londrina Solid',cursive", fontSize:22, lineHeight:1.2, marginBottom:8 }}>{r.title}</h3>
+                  <h3 style={{ fontFamily:"var(--font-londrina), cursive", fontSize:22, lineHeight:1.2, marginBottom:8 }}>{r.title}</h3>
                   <div className="vt" style={{ fontSize:14, opacity:0.5, marginBottom:8 }}>BY: {r.authors}</div>
                   <p style={{ fontSize:13, lineHeight:1.65, opacity:0.7 }}>{r.abstract}</p>
                 </div>
                 <div style={{ flexShrink:0, textAlign:"right" }}>
-                  <div style={{ fontFamily:"'Londrina Solid',cursive", fontSize:20, color:"#E63636", marginBottom:4 }}>{r.downloads.toLocaleString()}</div>
+                  <div style={{ fontFamily:"var(--font-londrina), cursive", fontSize:20, color:"#E63636", marginBottom:4 }}>{r.downloads.toLocaleString()}</div>
                   <div className="vt" style={{ fontSize:12, opacity:0.4, marginBottom:14 }}>DOWNLOADS</div>
                   <button className="btn btn-primary btn-sm" style={{ fontSize:15, display:"block", width:"100%", marginBottom:6 }}>▤ READ PDF</button>
                   <button className="btn btn-secondary btn-sm" style={{ fontSize:14, display:"block", width:"100%" }}>↓ DOWNLOAD</button>
@@ -3270,7 +3266,7 @@ const AthenaXLivePage = ({ user, setPage, showToast }) => {
       <div style={{ background:"#1F2937", color:"#FDFBF7", border:"3px solid #1F2937", boxShadow:"4px 4px 0 #E63636", padding:"20px 28px", marginBottom:28, display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, flexWrap:"wrap" }}>
         <div>
           <div className="vt" style={{ fontSize:13, color:"#E63636", marginBottom:4 }}>● NEXT LIVE · {LIVE_UPCOMING[0].date} · {LIVE_UPCOMING[0].time}</div>
-          <div style={{ fontFamily:"'Londrina Solid',cursive", fontSize:"clamp(18px,3vw,28px)", lineHeight:1.2 }}>{LIVE_UPCOMING[0].title}</div>
+          <div style={{ fontFamily:"var(--font-londrina), cursive", fontSize:"clamp(18px,3vw,28px)", lineHeight:1.2 }}>{LIVE_UPCOMING[0].title}</div>
           <div className="vt" style={{ fontSize:14, opacity:0.5, marginTop:4 }}>HOST: {LIVE_UPCOMING[0].host} · {LIVE_UPCOMING[0].attendees} REGISTERED</div>
         </div>
         <button className="btn btn-primary" style={{ fontSize:18, flexShrink:0 }} onClick={()=>register(LIVE_UPCOMING[0])}>REGISTER ◎</button>
@@ -3280,7 +3276,7 @@ const AthenaXLivePage = ({ user, setPage, showToast }) => {
       <div style={{ display:"flex", borderBottom:"2px solid #1F2937", marginBottom:24 }}>
         {[["upcoming","▸ UPCOMING"],["recorded","▤ RECORDED"]].map(([id,lbl])=>(
           <button key={id} onClick={()=>setTab(id)}
-            style={{ padding:"9px 24px", background:tab===id?"#1F2937":"transparent", color:tab===id?"#FDFBF7":"#1F2937", border:"none", borderTop:tab===id?"3px solid #E63636":"3px solid transparent", borderRadius:0, fontFamily:"'Inter',sans-serif", fontWeight:600, fontSize:12, letterSpacing:"0.06em", textTransform:"uppercase", cursor:"pointer" }}>
+            style={{ padding:"9px 24px", background:tab===id?"#1F2937":"transparent", color:tab===id?"#FDFBF7":"#1F2937", border:"none", borderTop:tab===id?"3px solid #E63636":"3px solid transparent", borderRadius:0, fontFamily:"var(--font-inter), sans-serif", fontWeight:600, fontSize:12, letterSpacing:"0.06em", textTransform:"uppercase", cursor:"pointer" }}>
             {lbl}
           </button>
         ))}
@@ -3298,7 +3294,7 @@ const AthenaXLivePage = ({ user, setPage, showToast }) => {
                 <div style={{ display:"grid", gridTemplateColumns:"1fr auto", gap:16, alignItems:"center" }}>
                   <div>
                     <div style={{ display:"flex", gap:6, marginBottom:8 }}><span className="tag-accent">{ev.topic}</span></div>
-                    <h3 style={{ fontFamily:"'Londrina Solid',cursive", fontSize:22, lineHeight:1.2, marginBottom:4 }}>{ev.title}</h3>
+                    <h3 style={{ fontFamily:"var(--font-londrina), cursive", fontSize:22, lineHeight:1.2, marginBottom:4 }}>{ev.title}</h3>
                     <div className="vt" style={{ fontSize:14, opacity:0.5 }}>HOST: {ev.host} · {ev.attendees} REGISTERED</div>
                   </div>
                   <button className="btn btn-primary btn-sm" style={{ fontSize:15, flexShrink:0 }} onClick={()=>register(ev)}>REGISTER</button>
@@ -3318,10 +3314,10 @@ const AthenaXLivePage = ({ user, setPage, showToast }) => {
                 <span className="vt" style={{ fontSize:32, color:"rgba(230,54,54,0.6)" }}>▸</span>
               </div>
               <div style={{ display:"flex", gap:5, marginBottom:8 }}><span className="tag-accent" style={{ fontSize:11 }}>{v.topic}</span></div>
-              <h3 style={{ fontFamily:"'Londrina Solid',cursive", fontSize:18, lineHeight:1.2, marginBottom:6 }}>{v.title}</h3>
+              <h3 style={{ fontFamily:"var(--font-londrina), cursive", fontSize:18, lineHeight:1.2, marginBottom:6 }}>{v.title}</h3>
               <div className="vt" style={{ fontSize:13, opacity:0.45, marginBottom:10 }}>{v.host} · {v.date} · {v.duration}</div>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                <span style={{ fontFamily:"'Londrina Solid',cursive", fontSize:18, color:"#E63636" }}>{v.views.toLocaleString()} views</span>
+                <span style={{ fontFamily:"var(--font-londrina), cursive", fontSize:18, color:"#E63636" }}>{v.views.toLocaleString()} views</span>
                 <button className="btn btn-primary btn-sm" style={{ fontSize:15 }}>▸ WATCH</button>
               </div>
             </WindowCard>
@@ -3386,14 +3382,14 @@ const RoundtablesPage = ({ setPage }) => {
               <div style={{ display:"grid", gridTemplateColumns:"1fr auto", gap:20, alignItems:"start" }}>
                 <div>
                   <div style={{ display:"flex", gap:6, marginBottom:8 }}><span className="tag-accent">{rt.topic}</span><span className="tag">{rt.duration}</span></div>
-                  <h3 style={{ fontFamily:"'Londrina Solid',cursive", fontSize:22, lineHeight:1.2, marginBottom:8 }}>{rt.title}</h3>
+                  <h3 style={{ fontFamily:"var(--font-londrina), cursive", fontSize:22, lineHeight:1.2, marginBottom:8 }}>{rt.title}</h3>
                   <p style={{ fontSize:13, lineHeight:1.65, opacity:0.65, marginBottom:10 }}>{rt.summary}</p>
                   <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
                     {rt.participants.map(p=><span key={p} className="tag" style={{ fontSize:11 }}>▣ {p}</span>)}
                   </div>
                 </div>
                 <div style={{ flexShrink:0, textAlign:"right" }}>
-                  <div style={{ fontFamily:"'Londrina Solid',cursive", fontSize:22, color:"#E63636" }}>{rt.views.toLocaleString()}</div>
+                  <div style={{ fontFamily:"var(--font-londrina), cursive", fontSize:22, color:"#E63636" }}>{rt.views.toLocaleString()}</div>
                   <div className="vt" style={{ fontSize:12, opacity:0.4, marginBottom:14 }}>VIEWS</div>
                   <button className="btn btn-primary btn-sm" style={{ fontSize:15, display:"block", width:"100%", marginBottom:6 }}>▸ WATCH</button>
                   <button className="btn btn-ghost btn-sm" style={{ fontSize:13, display:"block", width:"100%" }}>TRANSCRIPT</button>
@@ -3453,7 +3449,7 @@ const ResearchDigestPage = ({ user, showToast }) => {
       {!subbed ? (
         <div style={{ background:"#1F2937", color:"#FDFBF7", border:"3px solid #1F2937", boxShadow:"6px 6px 0 #E63636", padding:"32px 36px", marginBottom:36 }}>
           <div className="vt" style={{ fontSize:13, color:"#E63636", marginBottom:8, letterSpacing:"0.08em" }}>▤ WEEKLY · EVERY MONDAY 07:00 UTC</div>
-          <h2 style={{ fontFamily:"'Londrina Solid',cursive", fontSize:"clamp(24px,4vw,40px)", marginBottom:8, lineHeight:1.1 }}>Never Miss Important Web3 Research</h2>
+          <h2 style={{ fontFamily:"var(--font-londrina), cursive", fontSize:"clamp(24px,4vw,40px)", marginBottom:8, lineHeight:1.1 }}>Never Miss Important Web3 Research</h2>
           <p style={{ fontSize:14, opacity:0.6, marginBottom:24, maxWidth:560 }}>Each week: the 5 most important papers, rising researchers to watch, trending topics, and open bounties.</p>
 
           {/* Tier selector */}
@@ -3462,22 +3458,22 @@ const ResearchDigestPage = ({ user, showToast }) => {
               <div key={t.id} onClick={()=>setTier(t.id)}
                 style={{ cursor:"pointer", border:`2px solid ${tier===t.id?"#E63636":"rgba(255,255,255,0.15)"}`, padding:"12px 14px", background:tier===t.id?"rgba(230,54,54,0.12)":"rgba(255,255,255,0.04)", transition:"all 0.1s" }}>
                 <div className="vt" style={{ fontSize:13, color:tier===t.id?"#E63636":"rgba(255,255,255,0.5)", marginBottom:3 }}>{t.name}</div>
-                <div style={{ fontFamily:"'Londrina Solid',cursive", fontSize:22, color:"#FDFBF7" }}>{t.price}</div>
+                <div style={{ fontFamily:"var(--font-londrina), cursive", fontSize:22, color:"#FDFBF7" }}>{t.price}</div>
               </div>
             ))}
           </div>
 
           <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
             <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="your@email.com" onKeyDown={e=>e.key==="Enter"&&subscribe()}
-              style={{ flex:1, minWidth:220, padding:"11px 14px", fontFamily:"'Inter',sans-serif", background:"rgba(255,255,255,0.07)", border:"2px solid rgba(255,255,255,0.2)", outline:"none", fontSize:14, color:"#FDFBF7" }}/>
+              style={{ flex:1, minWidth:220, padding:"11px 14px", fontFamily:"var(--font-inter), sans-serif", background:"rgba(255,255,255,0.07)", border:"2px solid rgba(255,255,255,0.2)", outline:"none", fontSize:14, color:"#FDFBF7" }}/>
             <button className="btn btn-primary" style={{ fontSize:19, flexShrink:0, padding:"11px 28px" }} onClick={subscribe}>SUBSCRIBE →</button>
           </div>
         </div>
       ) : (
         <div style={{ background:"rgba(39,201,63,0.06)", border:"2px solid #22C55E", padding:"20px 28px", marginBottom:36, display:"flex", alignItems:"center", gap:14 }}>
-          <span style={{ fontFamily:"'Londrina Solid',cursive", fontSize:40, color:"#22C55E" }}>◉</span>
+          <span style={{ fontFamily:"var(--font-londrina), cursive", fontSize:40, color:"#22C55E" }}>◉</span>
           <div>
-            <div style={{ fontFamily:"'Londrina Solid',cursive", fontSize:24, marginBottom:3 }}>Subscribed — first issue lands Monday</div>
+            <div style={{ fontFamily:"var(--font-londrina), cursive", fontSize:24, marginBottom:3 }}>Subscribed — first issue lands Monday</div>
             <div className="vt" style={{ fontSize:14, opacity:0.55 }}>TIER: {tier.toUpperCase()} · {email}</div>
           </div>
         </div>
@@ -3486,13 +3482,13 @@ const ResearchDigestPage = ({ user, showToast }) => {
       <div style={{ display:"grid", gridTemplateColumns:"1fr 300px", gap:24 }}>
         {/* Past issues */}
         <div>
-          <div style={{ fontFamily:"'VT323',monospace", fontSize:14, letterSpacing:"0.08em", opacity:0.45, marginBottom:14 }}>RECENT ISSUES</div>
+          <div style={{ fontFamily:"var(--font-vt323), monospace", fontSize:14, letterSpacing:"0.08em", opacity:0.45, marginBottom:14 }}>RECENT ISSUES</div>
           <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
             {DIGEST_ISSUES.map(d=>(
               <WindowCard key={d.id} title={`DIGEST_${d.issue} — ${d.date}`} staticHover>
                 <div style={{ display:"grid", gridTemplateColumns:"1fr auto", gap:12, alignItems:"center" }}>
                   <div>
-                    <h3 style={{ fontFamily:"'Londrina Solid',cursive", fontSize:20, lineHeight:1.2, marginBottom:5 }}>{d.title}</h3>
+                    <h3 style={{ fontFamily:"var(--font-londrina), cursive", fontSize:20, lineHeight:1.2, marginBottom:5 }}>{d.title}</h3>
                     <div className="vt" style={{ fontSize:13, opacity:0.45 }}>FEATURED: {d.featured.slice(0,50)}…</div>
                     <div className="vt" style={{ fontSize:13, opacity:0.35, marginTop:3 }}>{d.papers} PAPERS · {d.downloads.toLocaleString()} READERS</div>
                   </div>
@@ -3525,7 +3521,7 @@ const ResearchDigestPage = ({ user, showToast }) => {
               <div key={t.id} style={{ marginBottom:14, paddingBottom:14, borderBottom:"1px solid rgba(31,41,55,0.08)" }}>
                 <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
                   <span className="vt" style={{ fontSize:16 }}>{t.name}</span>
-                  <span style={{ fontFamily:"'Londrina Solid',cursive", fontSize:18, color:"#E63636" }}>{t.price}</span>
+                  <span style={{ fontFamily:"var(--font-londrina), cursive", fontSize:18, color:"#E63636" }}>{t.price}</span>
                 </div>
                 {t.features.map(f=><div key={f} style={{ fontSize:12, opacity:0.6, marginBottom:2 }}>▸ {f}</div>)}
               </div>
@@ -3775,7 +3771,7 @@ const ResearchGraphPage = ({ setPage }) => {
       ctx.stroke();
 
       // Label
-      ctx.font = `${isSel||isHL ? "bold " : ""}10px 'Inter', sans-serif`;
+      ctx.font = `${isSel||isHL ? "bold " : ""}10px var(--font-inter), sans-serif`;
       ctx.fillStyle = dim ? "rgba(31,41,55,0.2)" : (n.type==="paper"||n.type==="topic" ? "#1F2937" : "#1F2937");
       ctx.textAlign = "center";
       ctx.fillText(n.label.slice(0,16), n.x, n.y + cfg.radius + 12);
@@ -3950,7 +3946,7 @@ const ResearchGraphPage = ({ setPage }) => {
         <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
           <div style={{ width:18, height:18, borderRadius:"50%", background:cfg.color, border:`2px solid ${cfg.stroke}`, flexShrink:0 }}/>
           <span className="vt" style={{ fontSize:14, color:"#E63636" }}>{typeLabel}</span>
-          <span style={{ fontFamily:"'Londrina Solid',cursive", fontSize:22, lineHeight:1 }}>{selected.label}</span>
+          <span style={{ fontFamily:"var(--font-londrina), cursive", fontSize:22, lineHeight:1 }}>{selected.label}</span>
         </div>
         {selected.type==="paper" && <>
           <div style={{ fontSize:12, fontWeight:600, marginBottom:4, lineHeight:1.4 }}>{m.title}</div>
@@ -3965,7 +3961,7 @@ const ResearchGraphPage = ({ setPage }) => {
           <div className="vt" style={{ fontSize:13, opacity:0.5, marginBottom:6 }}>{m.university} · {m.lab}</div>
           <div style={{ display:"flex", gap:6, marginBottom:8 }}>
             <span className="tag" style={{ fontSize:11 }}>{m.citations} CITE</span>
-            <span style={{ fontFamily:"'Londrina Solid',cursive", fontSize:16, color:"#E63636" }}>ARS {calcARS(m)}</span>
+            <span style={{ fontFamily:"var(--font-londrina), cursive", fontSize:16, color:"#E63636" }}>ARS {calcARS(m)}</span>
           </div>
         </>}
         {selected.type==="lab" && <>
@@ -3975,7 +3971,7 @@ const ResearchGraphPage = ({ setPage }) => {
         {selected.type==="topic" && <div style={{ fontSize:12, opacity:0.55 }}>Research topic cluster</div>}
         {selected.type==="protocol" && <>
           <div className="vt" style={{ fontSize:13, opacity:0.5, marginBottom:4 }}>{m.category}</div>
-          <div style={{ fontFamily:"'Londrina Solid',cursive", fontSize:20, color:"#22C55E" }}>{m.amount}</div>
+          <div style={{ fontFamily:"var(--font-londrina), cursive", fontSize:20, color:"#22C55E" }}>{m.amount}</div>
         </>}
         {selected.type==="university" && <div style={{ fontSize:12, opacity:0.55 }}>Academic institution</div>}
         {connCount > 0 && <div className="vt" style={{ fontSize:13, opacity:0.45, marginTop:8 }}>◈ {connCount} connected nodes</div>}
@@ -4009,7 +4005,7 @@ const ResearchGraphPage = ({ setPage }) => {
                 onDoubleClick={onDblClick}
               />
               {/* Zoom hint */}
-              <div style={{ position:"absolute", bottom:8, right:10, fontFamily:"'VT323',monospace", fontSize:12, color:"rgba(255,255,255,0.2)" }}>
+              <div style={{ position:"absolute", bottom:8, right:10, fontFamily:"var(--font-vt323), monospace", fontSize:12, color:"rgba(255,255,255,0.2)" }}>
                 SCROLL TO ZOOM · DRAG TO PAN · DBL-CLICK TO NAVIGATE
               </div>
               {!graphReady && (
@@ -4025,8 +4021,8 @@ const ResearchGraphPage = ({ setPage }) => {
               <input value={cmd} onChange={e=>setCmd(e.target.value)}
                 onKeyDown={e=>e.key==="Enter"&&runCmd(cmd)}
                 placeholder="/top   /trending   /topic ZK Proofs   /researcher Tanaka   /reset"
-                style={{ flex:1, background:"transparent", border:"none", outline:"none", fontFamily:"'VT323',monospace", fontSize:16, color:"#FDFBF7", caretColor:"#22C55E" }}/>
-              <button onClick={()=>runCmd(cmd)} style={{ background:"#E63636", border:"none", color:"#FDFBF7", fontFamily:"'VT323',monospace", fontSize:15, padding:"3px 12px", cursor:"pointer", flexShrink:0 }}>RUN</button>
+                style={{ flex:1, background:"transparent", border:"none", outline:"none", fontFamily:"var(--font-vt323), monospace", fontSize:16, color:"#FDFBF7", caretColor:"#22C55E" }}/>
+              <button onClick={()=>runCmd(cmd)} style={{ background:"#E63636", border:"none", color:"#FDFBF7", fontFamily:"var(--font-vt323), monospace", fontSize:15, padding:"3px 12px", cursor:"pointer", flexShrink:0 }}>RUN</button>
             </div>
             {/* Command log */}
             <div style={{ marginTop:8, maxHeight:72, overflowY:"auto", fontSize:12 }}>
@@ -4079,7 +4075,7 @@ const ResearchGraphPage = ({ setPage }) => {
             {[["Researchers",SEED_RESEARCHERS.length],["Papers",SEED_PAPERS.length],["Labs",SEED_LABS.length],["Topics",[...new Set(SEED_PAPERS.map(p=>p.topic))].length],["Protocols",SEED_SPONSORS.length]].map(([k,v])=>(
               <div key={k} style={{ display:"flex", justifyContent:"space-between", padding:"5px 0", borderBottom:"1px solid rgba(31,41,55,0.07)" }}>
                 <span className="vt" style={{ fontSize:14, opacity:0.5 }}>{k}</span>
-                <span style={{ fontFamily:"'Londrina Solid',cursive", fontSize:18, color:"#E63636" }}>{v}</span>
+                <span style={{ fontFamily:"var(--font-londrina), cursive", fontSize:18, color:"#E63636" }}>{v}</span>
               </div>
             ))}
           </WindowCard>
@@ -4096,7 +4092,7 @@ const PlaceholderPage = ({ title, description, setPage }) => (
     <WindowCard title={`${title.toUpperCase().replace(/ /g, "_")}.sys`} staticHover>
       <div style={{ textAlign: "center", padding: "32px 0" }}>
         <div className="vt" style={{ fontSize: 20, color: "#F5A623", marginBottom: 12 }}>◎ PENDING IMPLEMENTATION</div>
-        <h2 style={{ fontFamily: "'Londrina Solid',cursive", fontSize: 32, marginBottom: 12 }}>{title}</h2>
+        <h2 style={{ fontFamily: "var(--font-londrina), cursive", fontSize: 32, marginBottom: 12 }}>{title}</h2>
         <p style={{ fontSize: 13, opacity: 0.65, marginBottom: 24 }}>{description}</p>
         <button className="btn btn-ghost" onClick={() => setPage("home")}>← BACK TO HOME</button>
       </div>

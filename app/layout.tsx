@@ -3,30 +3,30 @@ import { Inter, Londrina_Solid, Space_Grotesk, VT323 } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
-   subsets: ["latin"],
-   variable: "--font-inter",
-   display: "swap",
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
 const londrinaSolid = Londrina_Solid({
-   weight: ["300", "400", "900"],
-   subsets: ["latin"],
-   variable: "--font-londrina",
-   display: "swap",
+  weight: ["300", "400", "900"],
+  subsets: ["latin"],
+  variable: "--font-londrina",
+  display: "swap",
 });
 
 const spaceGrotesk = Space_Grotesk({
-   weight: ["300", "400", "500", "600"],
-   subsets: ["latin"],
-   variable: "--font-space-grotesk",
-   display: "swap",
+  weight: ["300", "400", "500", "600"],
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  display: "swap",
 });
 
 const vt323 = VT323({
-   weight: ["400"],
-   subsets: ["latin"],
-   variable: "--font-vt323",
-   display: "swap",
+  weight: ["400"],
+  subsets: ["latin"],
+  variable: "--font-vt323",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -41,10 +41,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-         <body
-            className={`${spaceGrotesk.variable} ${londrinaSolid.variable} ${vt323.variable} ${inter.variable} antialiased`}
-                        style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
-         >
+      <body
+        className={`${spaceGrotesk.variable} ${londrinaSolid.variable} ${vt323.variable} ${inter.variable} antialiased`}
+        style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+      >
         {children}
       </body>
     </html>

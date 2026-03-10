@@ -2,6 +2,20 @@
 
 import { useState, useEffect, useRef } from "react";
 import React from "react";
+import {
+  DocsSidebar,
+  DocsShell,
+  DocSection,
+  DocStep,
+  DocDef,
+  DocsHomePage,
+  DocsResearchersPage,
+  DocsProtocolsPage,
+  DocsBuilderPage,
+  DocsStandardsPage,
+  DocsGovernancePage,
+  DocsMediaPage,
+} from "./Docs";
 
 // ═══════════════════════════════════════════════════════════
 // ATHENAX v5 — SINGLE-FILE REACT APPLICATION
@@ -357,7 +371,7 @@ const TrafficLights = () => (
   </div>
 );
 
-const WindowCard = ({
+export const WindowCard = ({
   title,
   children,
   className = "",
@@ -366,68 +380,39 @@ const WindowCard = ({
   headerRight = null,
   staticHover = false,
 }: WindowCardProps) => (
-  <div
-    className={`window-card ${staticHover ? "window-card--static" : ""} ${className}`}
-    style={style}
-  >
+  <div className={`window-card ${staticHover ? "window-card--static" : ""} ${className}`} style={style}>
     <div className="window-header">
       <TrafficLights />
-      <span
-        style={{
-          flex: 1,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {title}
-      </span>
-      {headerRight && (
-        <span style={{ fontSize: 13, opacity: 0.7, flexShrink: 0 }}>
-          {headerRight}
-        </span>
-      )}
+      <span className="flex-1 truncate">{title}</span>
+      {headerRight && <span className="text-[13px] opacity-70 flex-shrink-0">{headerRight}</span>}
     </div>
     <div className={bodyClass}>{children}</div>
   </div>
 );
 
-const TerminalPanel = ({
-  title,
-  children,
-  style = {},
-  headerRight = null,
-}: TerminalPanelProps) => (
+export const TerminalPanel = ({ title, children, style = {}, headerRight = null }: TerminalPanelProps) => (
   <div className="terminal-panel" style={style}>
     <div className="window-header">
       <TrafficLights />
-      <span style={{ flex: 1 }}>{title}</span>
-      {headerRight && (
-        <span style={{ fontSize: 13, opacity: 0.6 }}>{headerRight}</span>
-      )}
+      <span className="flex-1">{title}</span>
+      {headerRight && <span className="text-[13px] opacity-60">{headerRight}</span>}
     </div>
     <div className="terminal-body">{children}</div>
   </div>
 );
 
-const SectionLabel = ({ children }: SectionLabelProps) => (
-  <span className="section-badge">{children}</span>
-);
+export const SectionLabel = ({ children }: SectionLabelProps) => <span className="section-badge">{children}</span>;
 
 const StatCard = ({ label, value, sub = "" }: StatCardProps) => (
-  <WindowCard title={label} staticHover style={{ flex: "1 1 140px" }}>
-    <div style={{ textAlign: "center", padding: "6px 0" }}>
+  <WindowCard title={label} staticHover className="flex-[1_1_140px]">
+    <div className="text-center py-[6px]">
       <div className="stat-number">{value}</div>
       {sub && <div className="stat-label">{sub}</div>}
     </div>
   </WindowCard>
 );
 
-const Spinner = () => (
-  <span className="spin" style={{ fontSize: 18 }}>
-    ◌
-  </span>
-);
+const Spinner = () => <span className="spin text-[18px]">◌</span>;
 
 // ── Toast notification ──────────────────────────────────────
 const Toast = ({ msg, onClose }: ToastProps) => {
@@ -436,28 +421,13 @@ const Toast = ({ msg, onClose }: ToastProps) => {
     return () => clearTimeout(t);
   }, [onClose]);
   const icon = msg.type === "success" ? "✓" : msg.type === "error" ? "✗" : "!";
-  const iconColor =
-    msg.type === "success"
-      ? "#22C55E"
-      : msg.type === "error"
-        ? "#E63636"
-        : "#F5A623";
+  const iconColor = msg.type === "success" ? "#22C55E" : msg.type === "error" ? "#E63636" : "#F5A623";
   return (
     <div className={`toast toast--${msg.type}`}>
-      <span
-        className="vt"
-        style={{ fontSize: 20, color: iconColor, flexShrink: 0 }}
-      >
+      <span className="vt text-[20px] flex-shrink-0" style={{ color: iconColor }}>
         {icon}
       </span>
-      <span
-        style={{
-          fontFamily: "var(--font-inter), sans-serif",
-          fontWeight: 500,
-          fontSize: 13,
-          letterSpacing: "0.01em",
-        }}
-      >
+      <span className="font-medium text-[13px] tracking-[0.01em]" style={{ fontFamily: "var(--font-inter), sans-serif" }}>
         {msg.text}
       </span>
     </div>
@@ -466,94 +436,49 @@ const Toast = ({ msg, onClose }: ToastProps) => {
 
 // ── Modal wrapper ───────────────────────────────────────────
 const Modal = ({ title, onClose, children }: ModalProps) => (
-  <div
-    className="modal-overlay"
-    onClick={(e) => e.target === e.currentTarget && onClose()}
-  >
+  <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
     <div className="modal-box">
-      <div
-        className="window-header"
-        style={{ justifyContent: "space-between" }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div className="window-header justify-between">
+        <div className="flex items-center gap-[10px]">
           <TrafficLights />
           <span>{title}</span>
         </div>
         <button
           onClick={onClose}
-          style={{
-            background: "none",
-            border: "none",
-            color: "#FDFBF7",
-            cursor: "pointer",
-            fontFamily: "var(--font-vt323), monospace",
-            fontSize: 20,
-          }}
+          className="bg-transparent border-none text-[#FDFBF7] cursor-pointer text-[20px]"
+          style={{ fontFamily: "var(--font-vt323), monospace" }}
         >
           ✕ CLOSE
         </button>
       </div>
-      <div style={{ padding: 24 }}>{children}</div>
+      <div className="p-6">{children}</div>
     </div>
   </div>
 );
 
 // ── Shared card components ──────────────────────────────────
 const ResearchCard = ({ paper, onClick }: ResearchCardProps) => (
-  <div className="window-card" style={{ cursor: "pointer" }} onClick={onClick}>
-    <div className="window-header" style={{ justifyContent: "space-between" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+  <div className="window-card cursor-pointer" onClick={onClick}>
+    <div className="window-header justify-between">
+      <div className="flex items-center gap-[10px]">
         <TrafficLights />
-        <span style={{ fontSize: 13 }}>
+        <span className="text-[13px]">
           PAPER_{paper.id} · {paper.year}
         </span>
       </div>
-      {paper.reviewScore > 0 && (
-        <span
-          className="vt"
-          style={{ color: "var(--success-green)", fontSize: 14 }}
-        >
-          ★ {paper.reviewScore}
-        </span>
-      )}
+      {paper.reviewScore > 0 && <span className="vt text-[14px] text-[var(--success-green)]">★ {paper.reviewScore}</span>}
     </div>
     <div className="window-body">
-      <div
-        style={{ display: "flex", gap: 7, marginBottom: 10, flexWrap: "wrap" }}
-      >
+      <div className="flex gap-[7px] mb-[10px] flex-wrap">
         <span className="tag-accent">{paper.topic}</span>
         <span className="tag">{paper.university}</span>
         <span className="tag">{paper.lab}</span>
       </div>
-      <h3
-        style={{
-          fontFamily: "var(--font-londrina), cursive",
-          fontSize: 22,
-          lineHeight: 1.2,
-          marginBottom: 8,
-        }}
-      >
+      <h3 className="text-[22px] leading-[1.2] mb-2" style={{ fontFamily: "var(--font-londrina), cursive" }}>
         {paper.title}
       </h3>
-      <p
-        style={{
-          fontSize: 13,
-          lineHeight: 1.6,
-          opacity: 0.65,
-          marginBottom: 14,
-        }}
-      >
-        {paper.abstract.slice(0, 140)}…
-      </p>
-      <div
-        style={{
-          fontFamily: "var(--font-vt323), monospace",
-          fontSize: 15,
-          opacity: 0.7,
-          display: "flex",
-          gap: 16,
-        }}
-      >
+      <p className="text-[13px] leading-[1.6] opacity-65 mb-[14px]">{paper.abstract.slice(0, 140)}…</p>
+      <div className="font-mono text-[15px] opacity-70 flex gap-4" style={{ fontFamily: "var(--font-vt323), monospace" }}>
         <span>✦ {paper.citations} CITE</span>
         <span>↓ {paper.downloads.toLocaleString()} DL</span>
         <span>▲ {paper.votes} VOTES</span>
@@ -563,78 +488,32 @@ const ResearchCard = ({ paper, onClick }: ResearchCardProps) => (
 );
 
 const LabCard = ({ lab, onClick }: LabCardProps) => (
-  <div className="window-card" style={{ cursor: "pointer" }} onClick={onClick}>
+  <div className="window-card cursor-pointer" onClick={onClick}>
     <div className="window-header">
       <TrafficLights />
-      <span style={{ fontSize: 13 }}>LAB_PROFILE.sys</span>
-      <span
-        style={{
-          marginLeft: "auto",
-          fontSize: 12,
-          color: lab.active ? "#22C55E" : "rgba(255,255,255,0.35)",
-        }}
-      >
+      <span className="text-[13px]">LAB_PROFILE.sys</span>
+      <span className={`ml-auto text-[12px] ${lab.active ? "text-[#22C55E]" : "text-[rgba(255,255,255,0.35)]"}`}>
         {lab.active ? "● ACTIVE" : "○ INACTIVE"}
       </span>
     </div>
     <div className="window-body">
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          marginBottom: 14,
-        }}
-      >
+      <div className="flex items-start justify-between mb-[14px]">
         <div
-          style={{
-            width: 48,
-            height: 48,
-            background: "#1F2937",
-            color: "#FDFBF7",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontFamily: "var(--font-londrina), cursive",
-            fontSize: 22,
-            border: "2px solid #1F2937",
-            flexShrink: 0,
-          }}
+          className="w-12 h-12 bg-[#1F2937] text-[#FDFBF7] flex items-center justify-center text-[22px] border-2 border-[#1F2937] flex-shrink-0"
+          style={{ fontFamily: "var(--font-londrina), cursive" }}
         >
           {lab.name.charAt(0)}
         </div>
-        <span className="tag-accent" style={{ fontSize: 12 }}>
-          {lab.papers} PAPERS
-        </span>
+        <span className="tag-accent text-[12px]">{lab.papers} PAPERS</span>
       </div>
-      <h3
-        style={{
-          fontFamily: "var(--font-londrina), cursive",
-          fontSize: 24,
-          marginBottom: 6,
-        }}
-      >
+      <h3 className="text-[24px] mb-[6px]" style={{ fontFamily: "var(--font-londrina), cursive" }}>
         {lab.name}
       </h3>
-      <p
-        style={{
-          fontSize: 13,
-          opacity: 0.65,
-          marginBottom: 12,
-          lineHeight: 1.5,
-        }}
-      >
-        {lab.focus}
-      </p>
-      <div
-        className="vt"
-        style={{ fontSize: 13, opacity: 0.5, marginBottom: 10 }}
-      >
-        PARTNERS: {lab.partners.join(" · ")}
-      </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+      <p className="text-[13px] opacity-65 mb-[12px] leading-[1.5]">{lab.focus}</p>
+      <div className="vt text-[13px] opacity-50 mb-[10px]">PARTNERS: {lab.partners.join(" · ")}</div>
+      <div className="flex flex-wrap gap-1">
         {lab.tags.map((t) => (
-          <span key={t} className="tag" style={{ fontSize: 11 }}>
+          <span key={t} className="tag text-[11px]">
             {t}
           </span>
         ))}
@@ -692,8 +571,7 @@ const SEED_LABS = [
     partners: ["Oxford", "Cambridge"],
     papers: 112,
     tags: ["Governance", "DAOs", "Digital Nations"],
-    description:
-      "The OII examines the social, economic, and political implications of internet technologies and decentralized governance systems.",
+    description: "The OII examines the social, economic, and political implications of internet technologies and decentralized governance systems.",
     researchers: ["Prof. Vili Lehdonvirta", "Dr. Markus Ante", "Clara Jensen"],
     active: false,
   },
@@ -716,8 +594,7 @@ const SEED_LABS = [
     partners: ["Columbia", "Imperial College"],
     papers: 41,
     tags: ["EVM", "Dev Tools", "Layer 2"],
-    description:
-      "Consensys R&D combines protocol engineering with applied research across the Ethereum ecosystem.",
+    description: "Consensys R&D combines protocol engineering with applied research across the Ethereum ecosystem.",
     researchers: ["Dr. Péter Szilágyi", "Danno Ferrin", "Antoine Toulme"],
     active: true,
   },
@@ -794,8 +671,7 @@ const SEED_PAPERS = [
   },
   {
     id: "005",
-    title:
-      "Crypto Economic Security: Game Theoretic Models for Validator Incentives",
+    title: "Crypto Economic Security: Game Theoretic Models for Validator Incentives",
     authorIds: ["user_005"],
     authors: ["Dankrad Feist", "Justin Drake"],
     university: "ETH Zurich",
@@ -836,7 +712,7 @@ const SEED_SPONSORS = [
     amount: "$2.4M",
     ticker: "ETH",
     programs: 12,
-    why: "Funding open cryptography and consensus research to advance the Ethereum protocol.",
+    why: "Funding open cryptography and consensus research to advance public goods infrastructure.",
   },
   {
     name: "Arbitrum",
@@ -997,8 +873,7 @@ const dbWrite = (k: string, v: any) => {
     localStorage.setItem(k, JSON.stringify(v));
   } catch {}
 };
-const dbUid = (p: string = "id") =>
-  `${p}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+const dbUid = (p: string = "id") => `${p}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 const dbNow = () => new Date().toISOString();
 
 const SEED_USERS = [
@@ -1196,15 +1071,10 @@ const authSvc = {
   getSession: () => {
     const s = dbRead(DB_KEYS.SESSION, null);
     if (!s?.userId) return null;
-    return (
-      (dbRead(DB_KEYS.USERS) as User[]).find((u: User) => u.id === s.userId) ||
-      null
-    );
+    return (dbRead(DB_KEYS.USERS) as User[]).find((u: User) => u.id === s.userId) || null;
   },
   login: (email: string, password: string) => {
-    const user = (dbRead(DB_KEYS.USERS) as User[]).find(
-      (u: User) => u.email === email && u.password === password,
-    );
+    const user = (dbRead(DB_KEYS.USERS) as User[]).find((u: User) => u.email === email && u.password === password);
     if (!user) return { error: "Invalid email or password." };
     dbWrite(DB_KEYS.SESSION, { userId: user.id, loginAt: dbNow() });
     return { user };
@@ -1212,8 +1082,7 @@ const authSvc = {
   logout: () => localStorage.removeItem(DB_KEYS.SESSION),
   register: (data: RegisterData) => {
     const users = dbRead(DB_KEYS.USERS) as User[];
-    if (users.find((u: User) => u.email === data.email))
-      return { error: "An account with this email already exists." };
+    if (users.find((u: User) => u.email === data.email)) return { error: "An account with this email already exists." };
     const user = {
       id: dbUid("user"),
       ...data,
@@ -1246,9 +1115,7 @@ const authSvc = {
     return { user };
   },
   updateProfile: (userId, updates) => {
-    const users = dbRead(DB_KEYS.USERS).map((u) =>
-      u.id === userId ? { ...u, ...updates, updatedAt: dbNow() } : u,
-    );
+    const users = dbRead(DB_KEYS.USERS).map((u) => (u.id === userId ? { ...u, ...updates, updatedAt: dbNow() } : u));
     dbWrite(DB_KEYS.USERS, users);
     const updated = users.find((u) => u.id === userId);
     if (updated?.role === "researcher") {
@@ -1263,12 +1130,9 @@ const authSvc = {
     }
     return updated;
   },
-  getResearcher: (userId) =>
-    dbRead(DB_KEYS.RESEARCHERS).find((r) => r.userId === userId) || null,
-  getPapersByUser: (userId) =>
-    SEED_PAPERS.filter((p) => (p.authorIds || []).includes(userId)),
-  getApplications: (userId) =>
-    dbRead(DB_KEYS.APPLICATIONS).filter((a) => a.userId === userId),
+  getResearcher: (userId) => dbRead(DB_KEYS.RESEARCHERS).find((r) => r.userId === userId) || null,
+  getPapersByUser: (userId) => SEED_PAPERS.filter((p) => (p.authorIds || []).includes(userId)),
+  getApplications: (userId) => dbRead(DB_KEYS.APPLICATIONS).filter((a) => a.userId === userId),
   DEMO_ACCOUNTS: [
     {
       label: "Researcher — Dr. Yuki Tanaka",
@@ -1320,81 +1184,32 @@ const LoginModal = ({ onClose, onSuccess, showToast }) => {
 
   return (
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(31,41,55,0.75)",
-        zIndex: 200,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 20,
-      }}
+      className="fixed inset-0 bg-[#1F2937]/75 z-[200] flex items-center justify-center p-5"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div
-        style={{
-          background: "#FDFBF7",
-          border: "3px solid #1F2937",
-          boxShadow: "8px 8px 0 #1F2937",
-          border: "3px solid #1F2937",
-          borderRadius: 10,
-          maxWidth: 460,
-          width: "100%",
-          maxHeight: "90vh",
-          overflowY: "auto",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            background: "#1F2937",
-            color: "#FDFBF7",
-            padding: "7px 14px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            fontFamily: "var(--font-vt323), monospace",
-            fontSize: 15,
-            letterSpacing: "0.06em",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div className="bg-[#FDFBF7] border-3 border-[#1F2937] shadow-[8px_8px_0_#1F2937] rounded-[10px] max-w-[460px] w-full max-h-[90vh] overflow-y-auto overflow-hidden">
+        <div className="bg-[#1F2937] text-[#FDFBF7] p-[7px_14px] flex items-center justify-between font-mono text-[15px] tracking-[0.06em]">
+          <div className="flex items-center gap-[10px]">
             <TrafficLights />
             <span>ATHENAX_LOGIN.sys</span>
           </div>
           <button
             onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#FDFBF7",
-              cursor: "pointer",
-              fontFamily: "var(--font-inter), sans-serif",
-              fontWeight: 600,
-              fontSize: 13,
-            }}
+            className="bg-none border-none text-[#FDFBF7] cursor-pointer font-semibold text-[13px]"
+            style={{ fontFamily: "var(--font-inter), sans-serif" }}
           >
             ✕ CLOSE
           </button>
         </div>
-        <div style={{ padding: 28 }}>
+        <div className="p-7">
           {[
             ["EMAIL", "email", email, setEmail, "researcher@university.edu"],
             ["PASSWORD", "password", pw, setPw, "••••••••"],
           ].map(([label, type, val, setter, ph]) => (
-            <div key={label} style={{ marginBottom: 16 }}>
+            <div key={label} className="mb-4">
               <label
-                style={{
-                  fontFamily: "var(--font-inter), sans-serif",
-                  fontWeight: 600,
-                  fontSize: 11,
-                  letterSpacing: "0.07em",
-                  textTransform: "uppercase",
-                  display: "block",
-                  marginBottom: 6,
-                  color: "#1F2937",
-                }}
+                className="font-semibold text-[11px] tracking-[0.07em] uppercase block mb-[6px] text-[#1F2937]"
+                style={{ fontFamily: "var(--font-inter), sans-serif" }}
               >
                 {label}
               </label>
@@ -1404,32 +1219,15 @@ const LoginModal = ({ onClose, onSuccess, showToast }) => {
                 onChange={(e) => setter(e.target.value)}
                 placeholder={ph}
                 onKeyDown={(e) => e.key === "Enter" && submit()}
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  fontFamily: "var(--font-inter), sans-serif",
-                  background: "#FDFBF7",
-                  border: "2px solid #1F2937",
-                  outline: "none",
-                  fontSize: 13,
-                  display: "block",
-                }}
+                className="w-full p-[10px_12px] bg-[#FDFBF7] border-2 border-[#1F2937] outline-none text-[13px] block"
+                style={{ fontFamily: "var(--font-inter), sans-serif" }}
               />
             </div>
           ))}
           {error && (
             <div
-              style={{
-                fontFamily: "var(--font-inter), sans-serif",
-                fontWeight: 600,
-                color: "#E63636",
-                fontSize: 12,
-                marginBottom: 14,
-                padding: "8px 10px",
-                border: "1.5px solid #E63636",
-                borderRadius: 6,
-                background: "rgba(230,54,54,0.06)",
-              }}
+              className="font-semibold text-[#E63636] text-[12px] mb-[14px] p-[8px_10px] border-[1.5px] border-[#E63636] rounded-[6px] bg-[rgba(230,54,54,0.06)]"
+              style={{ fontFamily: "var(--font-inter), sans-serif" }}
             >
               ✗ {error}
             </div>
@@ -1437,31 +1235,12 @@ const LoginModal = ({ onClose, onSuccess, showToast }) => {
           <button
             onClick={submit}
             disabled={loading}
-            style={{
-              width: "100%",
-              padding: "11px 0",
-              fontFamily: "var(--font-inter), sans-serif",
-              fontWeight: 700,
-              fontSize: 14,
-              letterSpacing: "0.06em",
-              background: "#E63636",
-              color: "#FDFBF7",
-              border: "3px solid #1F2937",
-              boxShadow: "6px 6px 0 #1F2937",
-              borderRadius: 6,
-              cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.6 : 1,
-              textTransform: "uppercase",
-            }}
+            className={`w-full p-[11px_0] font-bold text-[14px] tracking-[0.06em] bg-[#E63636] text-[#FDFBF7] border-3 border-[#1F2937] shadow-[6px_6px_0_#1F2937] rounded-[6px] uppercase ${loading ? "cursor-not-allowed opacity-60" : "cursor-pointer opacity-100"}`}
+            style={{ fontFamily: "var(--font-inter), sans-serif" }}
           >
             {loading ? "SIGNING IN…" : "SIGN IN"}
           </button>
-          <div
-            style={{
-              borderTop: "1px solid rgba(31,41,55,0.15)",
-              margin: "22px 0 14px",
-            }}
-          />
+          <div className="border-t border-[rgba(31,41,55,0.15)] m-[22px_0_14px]" />
           <div
             style={{
               fontFamily: "var(--font-vt323), monospace",
@@ -1490,12 +1269,8 @@ const LoginModal = ({ onClose, onSuccess, showToast }) => {
                 alignItems: "center",
                 marginBottom: 5,
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "rgba(31,41,55,0.04)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "transparent")
-              }
+              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(31,41,55,0.04)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
               <span style={{ fontSize: 12 }}>{acc.label}</span>
               <span
@@ -1519,11 +1294,9 @@ const LoginModal = ({ onClose, onSuccess, showToast }) => {
 // PART 3 — REGISTER MODAL
 // ═══════════════════════════════════════════════════════════
 const ROLE_DESCS = {
-  researcher:
-    "Publish research, earn ARS reputation, apply to cohorts, claim bounties.",
+  researcher: "Publish research, earn ARS reputation, apply to cohorts, claim bounties.",
   sponsor: "Fund research programs, post bounties, access researcher talent.",
-  builder:
-    "Build startups from validated research through the builder pipeline.",
+  builder: "Build startups from validated research through the builder pipeline.",
 };
 
 const RegisterModal = ({ onClose, onSuccess, showToast }) => {
@@ -1553,13 +1326,7 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
     marginTop: 5,
     display: "block",
   };
-  const lStyle = {
-    fontFamily: "var(--font-vt323), monospace",
-    fontSize: 14,
-    letterSpacing: "0.06em",
-    opacity: 0.7,
-    display: "block",
-  };
+  const lStyle = "font-mono text-[14px] tracking-[0.06em] opacity-70 block";
 
   const step1ok = () => {
     if (!form.name.trim()) return "Full name required.";
@@ -1605,118 +1372,46 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
 
   return (
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(31,41,55,0.75)",
-        zIndex: 200,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 20,
-      }}
+      className="fixed inset-0 bg-[#1F2937]/75 z-[200] flex items-center justify-center p-5"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div
-        style={{
-          background: "#FDFBF7",
-          border: "3px solid #1F2937",
-          boxShadow: "8px 8px 0 #1F2937",
-          border: "3px solid #1F2937",
-          borderRadius: 10,
-          maxWidth: 500,
-          width: "100%",
-          maxHeight: "90vh",
-          overflowY: "auto",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            background: "#1F2937",
-            color: "#FDFBF7",
-            padding: "7px 14px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            fontFamily: "var(--font-vt323), monospace",
-            fontSize: 15,
-            letterSpacing: "0.06em",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div className="bg-[#FDFBF7] border-3 border-[#1F2937] shadow-[8px_8px_0_#1F2937] rounded-[10px] max-w-[500px] w-full max-h-[90vh] overflow-y-auto overflow-hidden">
+        <div className="bg-[#1F2937] text-[#FDFBF7] p-[7px_14px] flex items-center justify-between font-mono text-[15px] tracking-[0.06em]">
+          <div className="flex items-center gap-[10px]">
             <TrafficLights />
             <span>CREATE_ACCOUNT.sys — STEP {step}/2</span>
           </div>
           <button
             onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#FDFBF7",
-              cursor: "pointer",
-              fontFamily: "var(--font-inter), sans-serif",
-              fontWeight: 600,
-              fontSize: 13,
-            }}
+            className="bg-none border-none text-[#FDFBF7] cursor-pointer font-semibold text-[13px]"
+            style={{ fontFamily: "var(--font-inter), sans-serif" }}
           >
             ✕ CLOSE
           </button>
         </div>
         {/* step tabs */}
-        <div
-          style={{
-            display: "flex",
-            borderBottom: "1px solid rgba(31,41,55,0.15)",
-          }}
-        >
+        <div className="flex border-b border-[#1F2937]/15">
           {[
             ["1", "CREDENTIALS"],
             ["2", "PROFILE"],
           ].map(([n, lbl]) => (
-            <div
-              key={n}
-              style={{
-                flex: 1,
-                padding: "9px 16px",
-                borderBottom:
-                  step === +n ? "3px solid #E63636" : "3px solid transparent",
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: "var(--font-vt323), monospace",
-                  fontSize: 15,
-                  color: step === +n ? "#E63636" : "rgba(31,41,55,0.35)",
-                  letterSpacing: "0.06em",
-                }}
-              >
+            <div key={n} className={`flex-1 p-[9px_16px] border-b-3 ${step === +n ? "border-[#E63636]" : "border-transparent"}`}>
+              <span className="font-mono text-[15px] tracking-[0.06em]" style={{ color: step === +n ? "#E63636" : "rgba(31,41,55,0.35)" }}>
                 STEP {n}: {lbl}
               </span>
             </div>
           ))}
         </div>
-        <div style={{ padding: 28 }}>
+        <div className="p-7">
           {step === 1 && (
             <>
-              <div style={{ marginBottom: 14 }}>
-                <label style={lStyle}>FULL NAME</label>
-                <input
-                  value={form.name}
-                  onChange={set("name")}
-                  placeholder="Dr. Jane Smith"
-                  style={iStyle}
-                />
+              <div className="mb-[14px]">
+                <label className={lStyle}>FULL NAME</label>
+                <input value={form.name} onChange={set("name")} placeholder="Dr. Jane Smith" style={iStyle} />
               </div>
               <div style={{ marginBottom: 14 }}>
-                <label style={lStyle}>EMAIL</label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={set("email")}
-                  placeholder="jane@university.edu"
-                  style={iStyle}
-                />
+                <label className={lStyle}>EMAIL</label>
+                <input type="email" value={form.email} onChange={set("email")} placeholder="jane@university.edu" style={iStyle} />
               </div>
               <div
                 style={{
@@ -1728,27 +1423,15 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
               >
                 <div>
                   <label style={lStyle}>PASSWORD</label>
-                  <input
-                    type="password"
-                    value={form.password}
-                    onChange={set("password")}
-                    placeholder="min 6 chars"
-                    style={iStyle}
-                  />
+                  <input type="password" value={form.password} onChange={set("password")} placeholder="min 6 chars" style={iStyle} />
                 </div>
                 <div>
                   <label style={lStyle}>CONFIRM</label>
-                  <input
-                    type="password"
-                    value={form.confirm}
-                    onChange={set("confirm")}
-                    placeholder="repeat"
-                    style={iStyle}
-                  />
+                  <input type="password" value={form.confirm} onChange={set("confirm")} placeholder="repeat" style={iStyle} />
                 </div>
               </div>
               <div style={{ marginBottom: 4 }}>
-                <label style={lStyle}>I AM A…</label>
+                <label className={lStyle}>I AM A…</label>
               </div>
               {["researcher", "sponsor", "builder"].map((role) => (
                 <div
@@ -1756,16 +1439,10 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
                   onClick={() => setForm((f) => ({ ...f, role }))}
                   style={{
                     cursor: "pointer",
-                    border:
-                      form.role === role
-                        ? "2px solid #E63636"
-                        : "2px solid rgba(31,41,55,0.2)",
+                    border: form.role === role ? "2px solid #E63636" : "2px solid rgba(31,41,55,0.2)",
                     padding: "10px 14px",
                     marginBottom: 6,
-                    background:
-                      form.role === role
-                        ? "rgba(230,54,54,0.06)"
-                        : "transparent",
+                    background: form.role === role ? "rgba(230,54,54,0.06)" : "transparent",
                     borderRadius: 6,
                     display: "flex",
                     alignItems: "center",
@@ -1777,10 +1454,7 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
                       width: 13,
                       height: 13,
                       borderRadius: "50%",
-                      border:
-                        form.role === role
-                          ? "4px solid #E63636"
-                          : "2px solid #1F2937",
+                      border: form.role === role ? "4px solid #E63636" : "2px solid #1F2937",
                       flexShrink: 0,
                     }}
                   />
@@ -1795,11 +1469,7 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
                     >
                       {role}
                     </div>
-                    <div
-                      style={{ fontSize: 12, opacity: 0.55, lineHeight: 1.4 }}
-                    >
-                      {ROLE_DESCS[role]}
-                    </div>
+                    <div style={{ fontSize: 12, opacity: 0.55, lineHeight: 1.4 }}>{ROLE_DESCS[role]}</div>
                   </div>
                 </div>
               ))}
@@ -1821,38 +1491,23 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
               {form.role === "researcher" && (
                 <>
                   <div style={{ marginBottom: 14 }}>
-                    <label style={lStyle}>UNIVERSITY / INSTITUTION</label>
-                    <input
-                      value={form.university}
-                      onChange={set("university")}
-                      placeholder="MIT, Stanford, Oxford…"
-                      style={iStyle}
-                    />
+                    <label className={lStyle}>UNIVERSITY / INSTITUTION</label>
+                    <input value={form.university} onChange={set("university")} placeholder="MIT, Stanford, Oxford…" style={iStyle} />
                   </div>
                   <div style={{ marginBottom: 14 }}>
-                    <label style={lStyle}>LAB (optional)</label>
-                    <input
-                      value={form.lab}
-                      onChange={set("lab")}
-                      placeholder="IF Labs, MIT DCI…"
-                      style={iStyle}
-                    />
+                    <label className={lStyle}>LAB (optional)</label>
+                    <input value={form.lab} onChange={set("lab")} placeholder="IF Labs, MIT DCI…" style={iStyle} />
                   </div>
                 </>
               )}
               {form.role === "sponsor" && (
-                <div style={{ marginBottom: 14 }}>
-                  <label style={lStyle}>ORGANIZATION</label>
-                  <input
-                    value={form.organization}
-                    onChange={set("organization")}
-                    placeholder="Protocol / Foundation / DAO"
-                    style={iStyle}
-                  />
+                <div className="mb-[14px]">
+                  <label className={lStyle}>ORGANIZATION</label>
+                  <input value={form.organization} onChange={set("organization")} placeholder="Protocol / Foundation / DAO" style={iStyle} />
                 </div>
               )}
               <div style={{ marginBottom: 14 }}>
-                <label style={lStyle}>BIO (optional)</label>
+                <label className={lStyle}>BIO (optional)</label>
                 <textarea
                   value={form.bio}
                   onChange={set("bio")}
@@ -1937,25 +1592,10 @@ const ArsBreakdown = ({ r }) => {
   const comps = [
     ["Citations", r.citations || 0, r.citations || 0, 0.3],
     ["Peer Reviews", r.peerReviews || 0, r.peerReviews || 0, 0.25],
-    [
-      "Downloads (÷1000)",
-      r.downloads || 0,
-      Math.min((r.downloads || 0) / 1000, 20),
-      0.15,
-    ],
+    ["Downloads (÷1000)", r.downloads || 0, Math.min((r.downloads || 0) / 1000, 20), 0.15],
     ["Votes (÷100)", r.votes || 0, Math.min((r.votes || 0) / 100, 20), 0.15],
-    [
-      "Sponsor Endorsements",
-      r.sponsorEndorsements || 0,
-      r.sponsorEndorsements || 0,
-      0.1,
-    ],
-    [
-      "Bounty Completions",
-      r.bountyCompletions || 0,
-      r.bountyCompletions || 0,
-      0.05,
-    ],
+    ["Sponsor Endorsements", r.sponsorEndorsements || 0, r.sponsorEndorsements || 0, 0.1],
+    ["Bounty Completions", r.bountyCompletions || 0, r.bountyCompletions || 0, 0.05],
   ];
   const ars = calcARS(r);
   return (
@@ -2050,18 +1690,12 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState(null);
 
-  const researcher =
-    user?.role === "researcher" ? authSvc.getResearcher(user.id) : null;
+  const researcher = user?.role === "researcher" ? authSvc.getResearcher(user.id) : null;
   const papers = user ? authSvc.getPapersByUser(user.id) : [];
   const applications = user ? authSvc.getApplications(user.id) : [];
   const bounties =
     user?.role === "sponsor"
-      ? SEED_BOUNTIES.filter(
-          (b) =>
-            b.sponsorId === user.id ||
-            b.sponsor === user.organization ||
-            b.sponsor === user.name,
-        )
+      ? SEED_BOUNTIES.filter((b) => b.sponsorId === user.id || b.sponsor === user.organization || b.sponsor === user.name)
       : [];
   const ars = researcher ? calcARS(researcher) : 0;
 
@@ -2120,10 +1754,7 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
             >
               ○ NOT SIGNED IN
             </div>
-            <button
-              className="btn btn-primary"
-              onClick={() => setPage("login")}
-            >
+            <button className="btn btn-primary" onClick={() => setPage("login")}>
               SIGN IN
             </button>
           </div>
@@ -2132,10 +1763,7 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
     );
 
   return (
-    <div
-      style={{ maxWidth: 1200, margin: "0 auto", padding: "56px 32px" }}
-      className="page-enter"
-    >
+    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "56px 32px" }} className="page-enter">
       <div
         style={{
           display: "grid",
@@ -2169,13 +1797,7 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
                 <div style={{ textAlign: "left" }}>
                   <div style={{ marginBottom: 10 }}>
                     <label style={lStyle}>NAME</label>
-                    <input
-                      value={editForm.name}
-                      onChange={(e) =>
-                        setEditForm((f) => ({ ...f, name: e.target.value }))
-                      }
-                      style={iStyle}
-                    />
+                    <input value={editForm.name} onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))} style={iStyle} />
                   </div>
                   {user.role === "researcher" && (
                     <>
@@ -2194,13 +1816,7 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
                       </div>
                       <div style={{ marginBottom: 10 }}>
                         <label style={lStyle}>LAB</label>
-                        <input
-                          value={editForm.lab}
-                          onChange={(e) =>
-                            setEditForm((f) => ({ ...f, lab: e.target.value }))
-                          }
-                          style={iStyle}
-                        />
+                        <input value={editForm.lab} onChange={(e) => setEditForm((f) => ({ ...f, lab: e.target.value }))} style={iStyle} />
                       </div>
                     </>
                   )}
@@ -2223,23 +1839,15 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
                     <label style={lStyle}>BIO</label>
                     <textarea
                       value={editForm.bio}
-                      onChange={(e) =>
-                        setEditForm((f) => ({ ...f, bio: e.target.value }))
-                      }
+                      onChange={(e) => setEditForm((f) => ({ ...f, bio: e.target.value }))}
                       style={{ ...iStyle, minHeight: 64, resize: "vertical" }}
                     />
                   </div>
                   <div style={{ display: "flex", gap: 8 }}>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={saveEdit}
-                    >
+                    <button className="btn btn-primary btn-sm" onClick={saveEdit}>
                       SAVE
                     </button>
-                    <button
-                      className="btn btn-ghost btn-sm"
-                      onClick={cancelEdit}
-                    >
+                    <button className="btn btn-ghost btn-sm" onClick={cancelEdit}>
                       CANCEL
                     </button>
                   </div>
@@ -2255,9 +1863,7 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
                   >
                     {user.name}
                   </div>
-                  <div style={{ fontSize: 12, opacity: 0.45, marginBottom: 8 }}>
-                    {user.email}
-                  </div>
+                  <div style={{ fontSize: 12, opacity: 0.45, marginBottom: 8 }}>{user.email}</div>
                   {(researcher?.university || user.university) && (
                     <div
                       style={{
@@ -2317,28 +1923,13 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
                     }}
                   >
                     <span
-                      className={
-                        user.role === "researcher"
-                          ? "tag-green"
-                          : user.role === "sponsor"
-                            ? "tag-yellow"
-                            : "tag-accent"
-                      }
+                      className={user.role === "researcher" ? "tag-green" : user.role === "sponsor" ? "tag-yellow" : "tag-accent"}
                       style={{ fontSize: 12 }}
                     >
                       {user.role.toUpperCase()}
                     </span>
                     {researcher && (
-                      <span
-                        className={
-                          ars >= 8
-                            ? "tag-green"
-                            : ars >= 5
-                              ? "tag-yellow"
-                              : "tag-accent"
-                        }
-                        style={{ fontSize: 12 }}
-                      >
+                      <span className={ars >= 8 ? "tag-green" : ars >= 5 ? "tag-yellow" : "tag-accent"} style={{ fontSize: 12 }}>
                         ARS {ars.toFixed(1)}
                       </span>
                     )}
@@ -2381,11 +1972,7 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
                 >
                   APPLY TO COHORT
                 </button>
-                <button
-                  className="btn btn-ghost btn-sm"
-                  style={{ width: "100%", fontSize: 16 }}
-                  onClick={() => setPage("bounties")}
-                >
+                <button className="btn btn-ghost btn-sm" style={{ width: "100%", fontSize: 16 }} onClick={() => setPage("bounties")}>
                   VIEW BOUNTIES
                 </button>
               </>
@@ -2399,11 +1986,7 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
                 >
                   + POST BOUNTY
                 </button>
-                <button
-                  className="btn btn-ghost btn-sm"
-                  style={{ width: "100%", fontSize: 16 }}
-                  onClick={() => setPage("sponsors")}
-                >
+                <button className="btn btn-ghost btn-sm" style={{ width: "100%", fontSize: 16 }} onClick={() => setPage("sponsors")}>
                   SPONSOR OVERVIEW
                 </button>
               </>
@@ -2417,21 +2000,13 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
                 >
                   VIEW COHORTS
                 </button>
-                <button
-                  className="btn btn-ghost btn-sm"
-                  style={{ width: "100%", fontSize: 16 }}
-                  onClick={() => setPage("archive")}
-                >
+                <button className="btn btn-ghost btn-sm" style={{ width: "100%", fontSize: 16 }} onClick={() => setPage("archive")}>
                   BROWSE RESEARCH
                 </button>
               </>
             )}
             {user.role === "admin" && (
-              <button
-                className="btn btn-dark btn-sm"
-                style={{ width: "100%", fontSize: 16 }}
-                onClick={() => setPage("admin")}
-              >
+              <button className="btn btn-dark btn-sm" style={{ width: "100%", fontSize: 16 }} onClick={() => setPage("admin")}>
                 ADMIN PANEL →
               </button>
             )}
@@ -2458,10 +2033,7 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
                 >
                   Published Research
                 </h3>
-                <button
-                  className="btn btn-primary btn-sm"
-                  onClick={() => setPage("submit-paper")}
-                >
+                <button className="btn btn-primary btn-sm" onClick={() => setPage("submit-paper")}>
                   + SUBMIT
                 </button>
               </div>
@@ -2551,10 +2123,7 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
                 >
                   Posted Bounties
                 </h3>
-                <button
-                  className="btn btn-primary btn-sm"
-                  onClick={() => setPage("post-bounty")}
-                >
+                <button className="btn btn-primary btn-sm" onClick={() => setPage("post-bounty")}>
                   + NEW
                 </button>
               </div>
@@ -2586,9 +2155,7 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
                         marginBottom: 4,
                       }}
                     >
-                      <span style={{ fontWeight: 600, fontSize: 13 }}>
-                        {b.title}
-                      </span>
+                      <span style={{ fontWeight: 600, fontSize: 13 }}>{b.title}</span>
                       <span
                         style={{
                           fontFamily: "var(--font-londrina), cursive",
@@ -2603,14 +2170,10 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
                       style={{
                         fontFamily: "var(--font-vt323), monospace",
                         fontSize: 13,
-                        color:
-                          b.status === "open"
-                            ? "#22C55E"
-                            : "rgba(31,41,55,0.4)",
+                        color: b.status === "open" ? "#22C55E" : "rgba(31,41,55,0.4)",
                       }}
                     >
-                      {b.applicants} PROPOSALS ·{" "}
-                      {(b.status || "open").toUpperCase()}
+                      {b.applicants} PROPOSALS · {(b.status || "open").toUpperCase()}
                     </span>
                   </div>
                 ))
@@ -2618,9 +2181,7 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
             </WindowCard>
           )}
 
-          <WindowCard
-            title={`COHORT_APPLICATIONS.log (${applications.length})`}
-          >
+          <WindowCard title={`COHORT_APPLICATIONS.log (${applications.length})`}>
             <h3
               style={{
                 fontFamily: "var(--font-londrina), cursive",
@@ -2641,10 +2202,7 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
                 }}
               >
                 NO APPLICATIONS YET —{" "}
-                <span
-                  style={{ color: "#E63636", cursor: "pointer" }}
-                  onClick={() => setPage("cohorts")}
-                >
+                <span style={{ color: "#E63636", cursor: "pointer" }} onClick={() => setPage("cohorts")}>
                   APPLY TO A COHORT
                 </span>
               </div>
@@ -2661,11 +2219,7 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
                   }}
                 >
                   <div>
-                    <div
-                      style={{ fontWeight: 600, fontSize: 13, marginBottom: 2 }}
-                    >
-                      Cohort: {a.cohortId}
-                    </div>
+                    <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 2 }}>Cohort: {a.cohortId}</div>
                     <div
                       style={{
                         fontFamily: "var(--font-vt323), monospace",
@@ -2678,13 +2232,7 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
                     </div>
                   </div>
                   <span
-                    className={
-                      a.status === "accepted"
-                        ? "tag-green"
-                        : a.status === "rejected"
-                          ? "tag-accent"
-                          : "tag-yellow"
-                    }
+                    className={a.status === "accepted" ? "tag-green" : a.status === "rejected" ? "tag-accent" : "tag-yellow"}
                     style={{ fontSize: 11 }}
                   >
                     {(a.status || "pending").toUpperCase()}
@@ -2714,13 +2262,9 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }) => {
                   lineHeight: 1.6,
                 }}
               >
-                Full access to the AthenaX admin panel. Moderate papers, manage
-                applications, review users.
+                Full access to the AthenaX admin panel. Moderate papers, manage applications, review users.
               </p>
-              <button
-                className="btn btn-dark btn-sm"
-                onClick={() => setPage("admin")}
-              >
+              <button className="btn btn-dark btn-sm" onClick={() => setPage("admin")}>
                 OPEN ADMIN PANEL →
               </button>
             </WindowCard>
@@ -2821,6 +2365,19 @@ const TOP_NAV = [
   },
   { id: "builders", label: "Builders", dropdown: null },
   {
+    id: "docs",
+    label: "Docs",
+    dropdown: [
+      { id: "docs", label: "Overview", desc: "What is AthenaX?" },
+      { id: "docs-researchers", label: "For Researchers", desc: "Profiles, papers, ARS" },
+      { id: "docs-protocols", label: "For Protocols", desc: "Sponsor research" },
+      { id: "docs-builders", label: "For Builders", desc: "Build from research" },
+      { id: "docs-standards", label: "Research Standards", desc: "Guidelines & integrity" },
+      { id: "docs-governance", label: "Governance", desc: "Council & DAO" },
+      { id: "docs-media", label: "Media & Reports", desc: "Events, reports, digest" },
+    ],
+  },
+  {
     id: "terminal",
     label: "Terminal ▤",
     dropdown: [
@@ -2840,34 +2397,10 @@ const TOP_NAV = [
 
 // Which top-level section is "active" for a given page
 const getActiveSection = (page) => {
-  const researchPages = [
-    "home",
-    "archive",
-    "reports",
-    "roundtables",
-    "digest",
-    "how-it-works",
-    "paper_",
-    "leaderboard",
-  ];
-  const networkPages = [
-    "network",
-    "labs",
-    "lab-profile",
-    "universities",
-    "sponsors",
-    "talent",
-  ];
-  const fundingPages = [
-    "funding",
-    "bounties",
-    "post-bounty",
-    "cohorts",
-    "apply-cohort",
-    "business-model",
-  ];
-  if (researchPages.some((p) => page === p || page.startsWith(p)))
-    return "home";
+  const researchPages = ["home", "archive", "reports", "roundtables", "digest", "how-it-works", "paper_", "leaderboard"];
+  const networkPages = ["network", "labs", "lab-profile", "universities", "sponsors", "talent"];
+  const fundingPages = ["funding", "bounties", "post-bounty", "cohorts", "apply-cohort", "business-model"];
+  if (researchPages.some((p) => page === p || page.startsWith(p))) return "home";
   if (networkPages.includes(page)) return "network";
   if (fundingPages.includes(page)) return "funding";
   if (page === "builders") return "builders";
@@ -2891,8 +2424,7 @@ const Navbar = ({ current, setPage, user, onAuthClick }) => {
     fontSize: 13,
     whiteSpace: "nowrap",
     flexShrink: 0,
-    borderBottom:
-      activeSection === id ? "3px solid #E63636" : "3px solid transparent",
+    borderBottom: activeSection === id ? "3px solid #E63636" : "3px solid transparent",
     position: "relative",
     letterSpacing: "0.01em",
   });
@@ -3053,18 +2585,10 @@ const Navbar = ({ current, setPage, user, onAuthClick }) => {
                       style={{
                         padding: "10px 14px",
                         cursor: "pointer",
-                        borderBottom:
-                          i < item.dropdown.length - 1
-                            ? "1px solid rgba(31,41,55,0.08)"
-                            : "none",
+                        borderBottom: i < item.dropdown.length - 1 ? "1px solid rgba(31,41,55,0.08)" : "none",
                       }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.background =
-                          "rgba(230,54,54,0.06)")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.background = "transparent")
-                      }
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(230,54,54,0.06)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                     >
                       <div
                         style={{
@@ -3074,11 +2598,7 @@ const Navbar = ({ current, setPage, user, onAuthClick }) => {
                           color: current === sub.id ? "#E63636" : "#1F2937",
                         }}
                       >
-                        {current === sub.id && (
-                          <span style={{ color: "#E63636", marginRight: 5 }}>
-                            ▸
-                          </span>
-                        )}
+                        {current === sub.id && <span style={{ color: "#E63636", marginRight: 5 }}>▸</span>}
                         {sub.label}
                       </div>
                       <div
@@ -3174,25 +2694,16 @@ const Navbar = ({ current, setPage, user, onAuthClick }) => {
                 </div>
                 <span>{user.name?.split(" ")[0]}</span>
               </button>
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={() => onAuthClick?.("logout")}
-              >
+              <button className="btn btn-ghost btn-sm" onClick={() => onAuthClick?.("logout")}>
                 OUT
               </button>
             </>
           ) : (
             <>
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={() => onAuthClick?.("login")}
-              >
+              <button className="btn btn-ghost btn-sm" onClick={() => onAuthClick?.("login")}>
                 SIGN IN
               </button>
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => onAuthClick?.("register")}
-              >
+              <button className="btn btn-primary btn-sm" onClick={() => onAuthClick?.("register")}>
                 JOIN
               </button>
             </>
@@ -3290,9 +2801,7 @@ const Footer = ({ setPage }) => (
           >
             Research OS v5.0
           </div>
-          <p style={{ fontSize: 12, opacity: 0.5, lineHeight: 1.65 }}>
-            The research and innovation engine of Web3.
-          </p>
+          <p style={{ fontSize: 12, opacity: 0.5, lineHeight: 1.65 }}>The research and innovation engine of Web3.</p>
         </div>
         <div
           style={{
@@ -3426,8 +2935,7 @@ const HomePage = ({ setPage }) => {
           style={{
             position: "absolute",
             inset: 0,
-            backgroundImage:
-              "radial-gradient(circle, rgba(31,41,55,0.12) 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(circle, rgba(31,41,55,0.12) 1px, transparent 1px)",
             backgroundSize: "24px 24px",
             opacity: 0.4,
             pointerEvents: "none",
@@ -3459,8 +2967,7 @@ const HomePage = ({ setPage }) => {
                   marginBottom: 18,
                 }}
               >
-                ATHENAX RESEARCH OS v5.0 ▶ SYSTEM ONLINE{" "}
-                <span className="blink">{tick ? "█" : " "}</span>
+                ATHENAX RESEARCH OS v5.0 ▶ SYSTEM ONLINE <span className="blink">{tick ? "█" : " "}</span>
               </div>
               <h1
                 style={{
@@ -3470,8 +2977,7 @@ const HomePage = ({ setPage }) => {
                   marginBottom: 24,
                 }}
               >
-                The Research &amp; Innovation Engine of{" "}
-                <span style={{ color: "#E63636" }}>Web3</span>
+                The Research and Innovation Engine of <span style={{ color: "#E63636" }}>onchain</span>
               </h1>
               <p
                 style={{
@@ -3482,9 +2988,7 @@ const HomePage = ({ setPage }) => {
                   marginBottom: 14,
                 }}
               >
-                AthenaX connects universities, research labs, and Web3 protocols
-                to produce credentialed open research — then turns validated
-                ideas into funded startups.
+                AthenaX connects universities, research labs, and protocol ecosystems to produce credentialed open research, then turns validated ideas into funded startups.
               </p>
               <div
                 className="vt"
@@ -3495,35 +2999,21 @@ const HomePage = ({ setPage }) => {
                   letterSpacing: "0.03em",
                 }}
               >
-                Researchers get paid. Protocols get credibility. Ideas become
-                companies.
+                Researchers get paid. Protocols get credibility. Ideas become companies.
               </div>
               <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-                <button
-                  className="btn btn-primary btn-lg"
-                  onClick={() => setPage("how-it-works")}
-                >
+                <button className="btn btn-primary btn-lg" onClick={() => setPage("how-it-works")}>
                   How It Works
                 </button>
-                <button
-                  className="btn btn-secondary btn-lg"
-                  onClick={() => setPage("archive")}
-                >
+                <button className="btn btn-secondary btn-lg" onClick={() => setPage("archive")}>
                   Research Archive
                 </button>
-                <button
-                  className="btn btn-dark btn-lg"
-                  onClick={() => setPage("register")}
-                >
+                <button className="btn btn-dark btn-lg" onClick={() => setPage("register")}>
                   Join the Network →
                 </button>
               </div>
             </div>
-            <WindowCard
-              title="NETWORK_STATUS.sys"
-              headerRight="● LIVE"
-              staticHover
-            >
+            <WindowCard title="NETWORK_STATUS.sys" headerRight="● LIVE" staticHover>
               {[
                 ["ACTIVE COHORTS", "3", "#22C55E"],
                 ["PARTNER LABS", "12", "#F5A623"],
@@ -3539,16 +3029,10 @@ const HomePage = ({ setPage }) => {
                     justifyContent: "space-between",
                     alignItems: "center",
                     padding: "11px 0",
-                    borderBottom:
-                      i < arr.length - 1
-                        ? "1px solid rgba(31,41,55,0.1)"
-                        : "none",
+                    borderBottom: i < arr.length - 1 ? "1px solid rgba(31,41,55,0.1)" : "none",
                   }}
                 >
-                  <span
-                    className="vt"
-                    style={{ fontSize: 16, letterSpacing: "0.04em" }}
-                  >
+                  <span className="vt" style={{ fontSize: 16, letterSpacing: "0.04em" }}>
                     {label}
                   </span>
                   <span
@@ -3597,11 +3081,7 @@ const HomePage = ({ setPage }) => {
         <span className="vt" style={{ fontSize: 14, opacity: 0.5 }}>
           PRIZE POOL: $500,000
         </span>
-        <button
-          className="btn btn-primary btn-sm"
-          style={{ border: "2px solid rgba(255,255,255,0.4)" }}
-          onClick={() => setPage("cohorts")}
-        >
+        <button className="btn btn-primary btn-sm" style={{ border: "2px solid rgba(255,255,255,0.4)" }} onClick={() => setPage("cohorts")}>
           VIEW COHORT
         </button>
       </div>
@@ -3627,7 +3107,7 @@ const HomePage = ({ setPage }) => {
               label: "FOR RESEARCHERS",
               icon: "▣",
               title: "Get paid to do research",
-              desc: "Funded cohort positions. AthenaX Reputation Scores. Direct access to Web3 protocols.",
+              desc: "Funded cohort positions. AthenaX Reputation Scores. Direct access to protocol ecosystems.",
               cta: "Join as Researcher",
               page: "register",
             },
@@ -3642,7 +3122,7 @@ const HomePage = ({ setPage }) => {
             {
               label: "FOR BUILDERS",
               icon: "◎",
-              title: "Build the next Web3 startup",
+              title: "Build the next protocol startup",
               desc: "Take validated research through the builder pipeline into funded startups.",
               cta: "Join as Builder",
               page: "builders",
@@ -3721,18 +3201,12 @@ const HomePage = ({ setPage }) => {
       </div>
 
       {/* Recent papers */}
-      <section
-        style={{ maxWidth: 1200, margin: "0 auto", padding: "56px 32px" }}
-      >
+      <section style={{ maxWidth: 1200, margin: "0 auto", padding: "56px 32px" }}>
         <SectionLabel>RECENT RESEARCH</SectionLabel>
         <div style={{ height: 16 }} />
         <div className="grid-auto">
           {SEED_PAPERS.slice(0, 3).map((p) => (
-            <ResearchCard
-              key={p.id}
-              paper={p}
-              onClick={() => setPage("paper_" + p.id)}
-            />
+            <ResearchCard key={p.id} paper={p} onClick={() => setPage("paper_" + p.id)} />
           ))}
         </div>
         <div style={{ textAlign: "center", marginTop: 28 }}>
@@ -3778,21 +3252,14 @@ const HowItWorksPage = ({ setPage }) => (
             marginBottom: 36,
           }}
         >
-          AthenaX is the coordination layer between academic research and Web3
-          innovation. Ideas enter as papers and exit as protocols, products, and
+          AthenaX is the coordination layer between academic research and Web3 innovation. Ideas enter as papers and exit as protocols, products, and
           companies.
         </p>
         <div style={{ display: "flex", gap: 12 }}>
-          <button
-            className="btn btn-primary"
-            onClick={() => setPage("funding")}
-          >
+          <button className="btn btn-primary" onClick={() => setPage("funding")}>
             Funding Model
           </button>
-          <button
-            className="btn btn-outline-white"
-            onClick={() => setPage("builders")}
-          >
+          <button className="btn btn-outline-white" onClick={() => setPage("builders")}>
             Builder Pipeline
           </button>
         </div>
@@ -3956,10 +3423,7 @@ const HowItWorksPage = ({ setPage }) => (
             ],
           },
         ].map((col) => (
-          <WindowCard
-            key={col.who}
-            title={`VALUE_${col.who.toUpperCase().replace(/ /g, "_")}.md`}
-          >
+          <WindowCard key={col.who} title={`VALUE_${col.who.toUpperCase().replace(/ /g, "_")}.md`}>
             <h3
               style={{
                 fontFamily: "var(--font-londrina), cursive",
@@ -3981,10 +3445,7 @@ const HowItWorksPage = ({ setPage }) => (
                   alignItems: "flex-start",
                 }}
               >
-                <span
-                  className="vt"
-                  style={{ color: "#E63636", fontSize: 16, flexShrink: 0 }}
-                >
+                <span className="vt" style={{ color: "#E63636", fontSize: 16, flexShrink: 0 }}>
                   ▸
                 </span>
                 <span style={{ fontSize: 13, lineHeight: 1.5 }}>{item}</span>
@@ -4029,15 +3490,12 @@ const FundingPage = ({ setPage }) => (
             maxWidth: 580,
           }}
         >
-          Web3 protocols sponsor open research programs. AthenaX sources labs,
-          manages peer review, handles escrow, and publishes open-access papers.
+          Protocol ecosystems sponsor open research programs. AthenaX sources labs, manages peer review, handles escrow, and publishes open-access papers.
         </p>
       </div>
     </div>
     <div className="page-container">
-      <div
-        style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 48 }}
-      >
+      <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 48 }}>
         <StatCard label="TOTAL FUNDED" value="$2.5M" sub="ALL PROGRAMS" />
         <StatCard label="ACTIVE PROGRAMS" value="8" sub="RUNNING NOW" />
         <StatCard label="AVG PROGRAM" value="$180K" sub="PROGRAM SIZE" />
@@ -4119,10 +3577,7 @@ const FundingPage = ({ setPage }) => (
         </WindowCard>
       </div>
       <div style={{ textAlign: "center" }}>
-        <button
-          className="btn btn-primary btn-lg"
-          onClick={() => setPage("sponsors")}
-        >
+        <button className="btn btn-primary btn-lg" onClick={() => setPage("sponsors")}>
           Become a Research Sponsor →
         </button>
       </div>
@@ -4163,20 +3618,13 @@ const BuildersPage = ({ setPage }) => (
             marginBottom: 36,
           }}
         >
-          AthenaX turns research into companies. Every paper in the archive is a
-          potential startup.
+          AthenaX turns research into companies. Every paper in the archive is a potential startup.
         </p>
         <div style={{ display: "flex", gap: 12 }}>
-          <button
-            className="btn btn-primary"
-            onClick={() => setPage("cohorts")}
-          >
+          <button className="btn btn-primary" onClick={() => setPage("cohorts")}>
             View Active Cohorts
           </button>
-          <button
-            className="btn btn-outline-white"
-            onClick={() => setPage("how-it-works")}
-          >
+          <button className="btn btn-outline-white" onClick={() => setPage("how-it-works")}>
             How It Works
           </button>
         </div>
@@ -4195,8 +3643,7 @@ const BuildersPage = ({ setPage }) => (
               "instrument": <span className="term-green">"SAFE"</span>,
             </div>
             <div>
-              "cohort_funding":{" "}
-              <span className="term-yellow">"$50K–$500K"</span>,
+              "cohort_funding": <span className="term-yellow">"$50K–$500K"</span>,
             </div>
             <div>
               "duration": <span className="term-yellow">"6 months"</span>
@@ -4230,9 +3677,7 @@ const BuildersPage = ({ setPage }) => (
                 borderBottom: i < 4 ? "1px solid rgba(31,41,55,0.08)" : "none",
               }}
             >
-              <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 2 }}>
-                {t}
-              </div>
+              <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 2 }}>{t}</div>
               <div style={{ fontSize: 12, opacity: 0.6 }}>{s}</div>
             </div>
           ))}
@@ -4267,11 +3712,7 @@ const BuildersPage = ({ setPage }) => (
             >
               $50K – $200K
             </div>
-            <button
-              className="btn btn-primary"
-              style={{ width: "100%", fontSize: 16 }}
-              onClick={() => setPage("cohorts")}
-            >
+            <button className="btn btn-primary" style={{ width: "100%", fontSize: 16 }} onClick={() => setPage("cohorts")}>
               APPLY TO BUILD
             </button>
           </WindowCard>
@@ -4287,9 +3728,7 @@ const SponsorsPage = ({ setPage }) => (
     <div style={{ marginBottom: 48 }}>
       <SectionLabel>WEB3 ECOSYSTEM</SectionLabel>
       <h1 className="section-title">Sponsors</h1>
-      <p className="section-subtitle">
-        Web3 protocols fund open research that advances the entire ecosystem.
-      </p>
+      <p className="section-subtitle">Protocol ecosystems fund open research that advances the broader public goods infrastructure.</p>
     </div>
     <div
       style={{
@@ -4301,15 +3740,10 @@ const SponsorsPage = ({ setPage }) => (
     >
       {SEED_SPONSORS.map((s) => (
         <div key={s.name} className="window-card window-card--static">
-          <div
-            className="window-header"
-            style={{ justifyContent: "space-between" }}
-          >
+          <div className="window-header" style={{ justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <TrafficLights />
-              <span style={{ fontSize: 13 }}>
-                {s.name.toUpperCase().replace(/ /g, "_")}.sponsor
-              </span>
+              <span style={{ fontSize: 13 }}>{s.name.toUpperCase().replace(/ /g, "_")}.sponsor</span>
             </div>
             <span className="tag-accent">{s.category}</span>
           </div>
@@ -4372,10 +3806,7 @@ const SponsorsPage = ({ setPage }) => (
       ))}
     </div>
     <div style={{ textAlign: "center" }}>
-      <button
-        className="btn btn-primary btn-lg"
-        onClick={() => setPage("funding")}
-      >
+      <button className="btn btn-primary btn-lg" onClick={() => setPage("funding")}>
         SPONSOR RESEARCH →
       </button>
     </div>
@@ -4388,9 +3819,7 @@ const BusinessModelPage = ({ setPage }) => (
     <div style={{ marginBottom: 48 }}>
       <SectionLabel>BUSINESS MODEL</SectionLabel>
       <h1 className="section-title">How AthenaX Makes Money</h1>
-      <p className="section-subtitle">
-        Five revenue streams across the research-to-startup pipeline.
-      </p>
+      <p className="section-subtitle">Five revenue streams across the research-to-startup pipeline.</p>
     </div>
     <div
       style={{
@@ -4401,53 +3830,14 @@ const BusinessModelPage = ({ setPage }) => (
       }}
     >
       {[
-        [
-          "01",
-          "Sponsored Research Programs",
-          "▣",
-          "Transaction",
-          "10–20%",
-          "$150K",
-          "$900K",
-          "$3.0M",
-        ],
-        [
-          "02",
-          "Research Terminal Subscriptions",
-          "▤",
-          "Recurring",
-          "$49–$2,500/mo",
-          "$400K",
-          "$2.2M",
-          "$7.5M",
-        ],
-        [
-          "03",
-          "Bounty Marketplace",
-          "◎",
-          "Transaction",
-          "10% fee",
-          "$100K",
-          "$700K",
-          "$3.0M",
-        ],
-        [
-          "04",
-          "Talent Marketplace",
-          "◈",
-          "Transaction",
-          "15–20%",
-          "$540K",
-          "$2.5M",
-          "$5.0M",
-        ],
+        ["01", "Sponsored Research Programs", "▣", "Transaction", "10–20%", "$150K", "$900K", "$3.0M"],
+        ["02", "Research Terminal Subscriptions", "▤", "Recurring", "$49–$2,500/mo", "$400K", "$2.2M", "$7.5M"],
+        ["03", "Bounty Marketplace", "◎", "Transaction", "10% fee", "$100K", "$700K", "$3.0M"],
+        ["04", "Talent Marketplace", "◈", "Transaction", "15–20%", "$540K", "$2.5M", "$5.0M"],
         ["05", "Startup Equity", "◆", "Equity", "5–8% SAFE", "—", "—", "$50M+"],
       ].map(([id, name, icon, type, take, y1, y2, y3]) => (
         <div key={id} className="window-card window-card--static">
-          <div
-            className="window-header"
-            style={{ justifyContent: "space-between" }}
-          >
+          <div className="window-header" style={{ justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <TrafficLights />
               <span>REVENUE_STREAM_{id}.sys</span>
@@ -4455,18 +3845,8 @@ const BusinessModelPage = ({ setPage }) => (
             <span
               className="tag"
               style={{
-                color:
-                  type === "Recurring"
-                    ? "#22C55E"
-                    : type === "Equity"
-                      ? "#F5A623"
-                      : "#FDFBF7",
-                borderColor:
-                  type === "Recurring"
-                    ? "#22C55E"
-                    : type === "Equity"
-                      ? "#F5A623"
-                      : "rgba(253,251,247,0.4)",
+                color: type === "Recurring" ? "#22C55E" : type === "Equity" ? "#F5A623" : "#FDFBF7",
+                borderColor: type === "Recurring" ? "#22C55E" : type === "Equity" ? "#F5A623" : "rgba(253,251,247,0.4)",
                 fontSize: 12,
               }}
             >
@@ -4547,16 +3927,10 @@ const BusinessModelPage = ({ setPage }) => (
         justifyContent: "center",
       }}
     >
-      <button
-        className="btn btn-primary btn-lg"
-        onClick={() => setPage("funding")}
-      >
+      <button className="btn btn-primary btn-lg" onClick={() => setPage("funding")}>
         FUNDING MODEL
       </button>
-      <button
-        className="btn btn-secondary btn-lg"
-        onClick={() => setPage("sponsors")}
-      >
+      <button className="btn btn-secondary btn-lg" onClick={() => setPage("sponsors")}>
         SPONSORS
       </button>
     </div>
@@ -4570,8 +3944,7 @@ const NetworkPage = ({ setPage }) => (
       <SectionLabel>ECOSYSTEM</SectionLabel>
       <h1 className="section-title">Research Network</h1>
       <p className="section-subtitle">
-        AthenaX is the coordination layer connecting academic institutions,
-        independent labs, and Web3 organizations.
+        AthenaX is the coordination layer connecting academic institutions, independent labs, and Web3 organizations.
       </p>
     </div>
     <div className="grid-3">
@@ -4580,40 +3953,22 @@ const NetworkPage = ({ setPage }) => (
           title: "Universities",
           icon: "▣",
           desc: "Academic institutions partner with AthenaX for grants, mentorship, and industry access.",
-          items: [
-            "Co-branded Programs",
-            "Student Fellowships",
-            "Research Grants",
-            "Industry Mentorship",
-          ],
+          items: ["Co-branded Programs", "Student Fellowships", "Research Grants", "Industry Mentorship"],
         },
         {
           title: "Research Labs",
           icon: "◉",
-          desc: "Labs run cohorts, publish papers, and build the cumulative body of Web3 knowledge.",
-          items: [
-            "Cohort Leadership",
-            "Sponsor Connections",
-            "Archive Publication",
-            "Prize Pool Access",
-          ],
+          desc: "Labs run cohorts, publish papers, and build the cumulative body of open research knowledge.",
+          items: ["Cohort Leadership", "Sponsor Connections", "Archive Publication", "Prize Pool Access"],
         },
         {
           title: "Web3 Sponsors",
           icon: "◆",
-          desc: "Protocols fund research tracks aligned with protocol needs, gaining academic credibility.",
-          items: [
-            "Branded Research Tracks",
-            "Researcher Recruiting",
-            "Protocol Improvement",
-            "Ecosystem Signal",
-          ],
+          desc: "Protocols fund research tracks aligned with their development needs, gaining academic credibility and public goods legitimacy.",
+          items: ["Branded Research Tracks", "Researcher Recruiting", "Protocol Improvement", "Ecosystem Signal"],
         },
       ].map((p) => (
-        <WindowCard
-          key={p.title}
-          title={`${p.title.toUpperCase().replace(/ /g, "_")}_PILLAR.md`}
-        >
+        <WindowCard key={p.title} title={`${p.title.toUpperCase().replace(/ /g, "_")}_PILLAR.md`}>
           <div
             style={{
               fontFamily: "var(--font-vt323), monospace",
@@ -4652,11 +4007,7 @@ const NetworkPage = ({ setPage }) => (
             }}
           />
           {p.items.map((b) => (
-            <div
-              key={b}
-              className="vt"
-              style={{ fontSize: 16, marginBottom: 5, opacity: 0.75 }}
-            >
+            <div key={b} className="vt" style={{ fontSize: 16, marginBottom: 5, opacity: 0.75 }}>
               ▸ {b}
             </div>
           ))}
@@ -4672,22 +4023,14 @@ const LabsPage = ({ setPage, setSelectedLab }) => (
     <div style={{ marginBottom: 36 }}>
       <SectionLabel>DIRECTORY</SectionLabel>
       <h1 className="section-title">Labs Directory</h1>
-      <p className="section-subtitle">
-        Research laboratories in the AthenaX network.
-      </p>
+      <p className="section-subtitle">Research laboratories in the AthenaX network.</p>
     </div>
     <TerminalPanel title="LAB_INDEX.sys" style={{ marginBottom: 32 }}>
       <div className="term-green">$ ls -la /athenax/labs/</div>
       <div>
         total <span className="term-red">{SEED_LABS.length}</span> labs ·{" "}
-        <span className="term-yellow">
-          {SEED_LABS.filter((l) => l.active).length}
-        </span>{" "}
-        active ·{" "}
-        <span className="term-green">
-          {SEED_LABS.reduce((a, b) => a + b.papers, 0)}
-        </span>{" "}
-        papers published
+        <span className="term-yellow">{SEED_LABS.filter((l) => l.active).length}</span> active ·{" "}
+        <span className="term-green">{SEED_LABS.reduce((a, b) => a + b.papers, 0)}</span> papers published
       </div>
       <div className="term-dim">
         &gt; click any card to open lab profile <span className="blink">█</span>
@@ -4715,10 +4058,7 @@ const LabProfilePage = ({ lab, setPage }) => {
       <div className="page-enter page-container">
         <WindowCard title="LAB_NOT_FOUND.sys" staticHover>
           <div style={{ textAlign: "center", padding: "32px 0" }}>
-            <div
-              className="vt"
-              style={{ fontSize: 20, color: "#E63636", marginBottom: 12 }}
-            >
+            <div className="vt" style={{ fontSize: 20, color: "#E63636", marginBottom: 12 }}>
               ○ NO LAB SELECTED
             </div>
             <button className="btn btn-primary" onClick={() => setPage("labs")}>
@@ -4731,21 +4071,12 @@ const LabProfilePage = ({ lab, setPage }) => {
   const labPapers = SEED_PAPERS.filter((p) => p.lab === lab.name);
   return (
     <div className="page-enter page-container">
-      <button
-        className="btn btn-ghost btn-sm"
-        style={{ marginBottom: 20 }}
-        onClick={() => setPage("labs")}
-      >
+      <button className="btn btn-ghost btn-sm" style={{ marginBottom: 20 }} onClick={() => setPage("labs")}>
         ← BACK TO LABS
       </button>
-      <div
-        style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 24 }}
-      >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 24 }}>
         <div>
-          <WindowCard
-            title={`LAB_PROFILE — ${lab.name.toUpperCase()}`}
-            style={{ marginBottom: 20 }}
-          >
+          <WindowCard title={`LAB_PROFILE — ${lab.name.toUpperCase()}`} style={{ marginBottom: 20 }}>
             <div
               style={{
                 display: "flex",
@@ -4754,9 +4085,7 @@ const LabProfilePage = ({ lab, setPage }) => {
                 flexWrap: "wrap",
               }}
             >
-              <span className={lab.active ? "tag-green" : "tag"}>
-                {lab.active ? "● ACTIVE" : "○ INACTIVE"}
-              </span>
+              <span className={lab.active ? "tag-green" : "tag"}>{lab.active ? "● ACTIVE" : "○ INACTIVE"}</span>
               <span className="tag">{lab.papers} PAPERS</span>
               {lab.tags.map((t) => (
                 <span key={t} className="tag">
@@ -4773,23 +4102,15 @@ const LabProfilePage = ({ lab, setPage }) => {
             >
               {lab.name}
             </h1>
-            <div
-              className="vt"
-              style={{ fontSize: 18, color: "#E63636", marginBottom: 16 }}
-            >
+            <div className="vt" style={{ fontSize: 18, color: "#E63636", marginBottom: 16 }}>
               {lab.focus}
             </div>
-            <p style={{ fontSize: 14, lineHeight: 1.75, opacity: 0.75 }}>
-              {lab.description}
-            </p>
+            <p style={{ fontSize: 14, lineHeight: 1.75, opacity: 0.75 }}>{lab.description}</p>
           </WindowCard>
           <WindowCard title="RESEARCHERS.roster" style={{ marginBottom: 20 }}>
             <div className="grid-auto-sm">
               {lab.researchers.map((r, i) => (
-                <div
-                  key={i}
-                  style={{ border: "1px solid #1F2937", padding: 14 }}
-                >
+                <div key={i} style={{ border: "1px solid #1F2937", padding: 14 }}>
                   <div
                     style={{
                       width: 36,
@@ -4806,11 +4127,7 @@ const LabProfilePage = ({ lab, setPage }) => {
                   >
                     {r.charAt(0)}
                   </div>
-                  <div
-                    style={{ fontWeight: 600, fontSize: 13, marginBottom: 2 }}
-                  >
-                    {r}
-                  </div>
+                  <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 2 }}>{r}</div>
                   <div className="vt" style={{ fontSize: 13, opacity: 0.45 }}>
                     RESEARCHER
                   </div>
@@ -4822,13 +4139,7 @@ const LabProfilePage = ({ lab, setPage }) => {
           <div style={{ height: 14 }} />
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {labPapers.length > 0 ? (
-              labPapers.map((p) => (
-                <ResearchCard
-                  key={p.id}
-                  paper={p}
-                  onClick={() => setPage("paper_" + p.id)}
-                />
-              ))
+              labPapers.map((p) => <ResearchCard key={p.id} paper={p} onClick={() => setPage("paper_" + p.id)} />)
             ) : (
               <div
                 style={{
@@ -4913,15 +4224,9 @@ const LabProfilePage = ({ lab, setPage }) => {
                 >
                   ● COHORT 01 ACTIVE
                 </div>
-                <div style={{ fontSize: 12, lineHeight: 1.5 }}>
-                  ATHENAX × IF Labs Research Cohort 01
-                </div>
+                <div style={{ fontSize: 12, lineHeight: 1.5 }}>ATHENAX × IF Labs Research Cohort 01</div>
               </div>
-              <button
-                className="btn btn-primary"
-                style={{ width: "100%", fontSize: 16 }}
-                onClick={() => setPage("cohorts")}
-              >
+              <button className="btn btn-primary" style={{ width: "100%", fontSize: 16 }} onClick={() => setPage("cohorts")}>
                 VIEW COHORT
               </button>
             </WindowCard>
@@ -4938,16 +4243,9 @@ const UniversitiesPage = ({ setPage }) => (
     <div style={{ marginBottom: 48 }}>
       <SectionLabel>ACADEMIC PARTNERSHIPS</SectionLabel>
       <h1 className="section-title">Universities</h1>
-      <p className="section-subtitle">
-        AthenaX partners with leading academic institutions to bridge rigorous
-        research with Web3 ecosystem needs.
-      </p>
+      <p className="section-subtitle">AthenaX partners with leading academic institutions to bridge rigorous research with the needs of protocol ecosystems and public goods infrastructure.</p>
     </div>
-    <WindowCard
-      title="PARTNER_UNIVERSITIES.list"
-      staticHover
-      style={{ marginBottom: 32 }}
-    >
+    <WindowCard title="PARTNER_UNIVERSITIES.list" staticHover style={{ marginBottom: 32 }}>
       <div
         style={{
           display: "grid",
@@ -4990,23 +4288,14 @@ const UniversitiesPage = ({ setPage }) => (
       </div>
     </WindowCard>
     <div style={{ textAlign: "center" }}>
-      <button className="btn btn-primary btn-lg">
-        APPLY AS UNIVERSITY PARTNER
-      </button>
+      <button className="btn btn-primary btn-lg">APPLY AS UNIVERSITY PARTNER</button>
     </div>
   </div>
 );
 
 // ── COHORTS (static shell — logic added in Part 6) ────────────
 const CohortsPage = ({ setPage }) => {
-  const topics = [
-    "AI Agents",
-    "DAO Governance",
-    "Crypto Economics",
-    "Tokenomics",
-    "DeFi Systems",
-    "Digital Nations",
-  ];
+  const topics = ["AI Agents", "DAO Governance", "Crypto Economics", "Tokenomics", "DeFi Systems", "Digital Nations"];
   const [sel, setSel] = useState(null);
   return (
     <div className="page-enter page-container">
@@ -5045,14 +4334,9 @@ const CohortsPage = ({ setPage }) => {
             marginBottom: 28,
           }}
         >
-          A 6-month open research program connecting top university researchers
-          with Web3 ecosystem sponsors.
+          A 6-month open research program connecting top university researchers with Web3 ecosystem sponsors.
         </p>
-        <button
-          className="btn btn-primary"
-          style={{ border: "2px solid rgba(255,255,255,0.5)" }}
-          onClick={() => setPage("apply-cohort")}
-        >
+        <button className="btn btn-primary" style={{ border: "2px solid rgba(255,255,255,0.5)" }} onClick={() => setPage("apply-cohort")}>
           APPLY TO COHORT
         </button>
       </div>
@@ -5067,24 +4351,14 @@ const CohortsPage = ({ setPage }) => {
               cursor: "pointer",
               background: sel === topic ? "#1F2937" : "#FDFBF7",
               border: sel === topic ? "2px solid #E63636" : "2px solid #1F2937",
-              boxShadow:
-                sel === topic ? "4px 4px 0 #E63636" : "4px 4px 0 #1F2937",
+              boxShadow: sel === topic ? "4px 4px 0 #E63636" : "4px 4px 0 #1F2937",
             }}
             onClick={() => setSel(sel === topic ? null : topic)}
           >
-            <div
-              className="window-header"
-              style={{ background: sel === topic ? "#E63636" : "#1F2937" }}
-            >
+            <div className="window-header" style={{ background: sel === topic ? "#E63636" : "#1F2937" }}>
               <TrafficLights />
-              <span style={{ fontSize: 12 }}>
-                TRACK_{String(idx + 1).padStart(2, "0")}
-              </span>
-              {sel === topic && (
-                <span style={{ marginLeft: "auto", fontSize: 12 }}>
-                  ● SELECTED
-                </span>
-              )}
+              <span style={{ fontSize: 12 }}>TRACK_{String(idx + 1).padStart(2, "0")}</span>
+              {sel === topic && <span style={{ marginLeft: "auto", fontSize: 12 }}>● SELECTED</span>}
             </div>
             <div style={{ padding: 16 }}>
               <div
@@ -5096,10 +4370,7 @@ const CohortsPage = ({ setPage }) => {
               >
                 {topic}
               </div>
-              <div
-                className="vt"
-                style={{ fontSize: 13, opacity: 0.5, marginTop: 4 }}
-              >
+              <div className="vt" style={{ fontSize: 13, opacity: 0.5, marginTop: 4 }}>
                 RESEARCH TRACK
               </div>
             </div>
@@ -5107,10 +4378,7 @@ const CohortsPage = ({ setPage }) => {
         ))}
       </div>
       {sel && (
-        <WindowCard
-          title={`TRACK_DETAIL — ${sel.toUpperCase()}`}
-          style={{ marginBottom: 24, border: "2px solid #E63636" }}
-        >
+        <WindowCard title={`TRACK_DETAIL — ${sel.toUpperCase()}`} style={{ marginBottom: 24, border: "2px solid #E63636" }}>
           <h3
             style={{
               fontFamily: "var(--font-londrina), cursive",
@@ -5129,13 +4397,9 @@ const CohortsPage = ({ setPage }) => {
               marginBottom: 16,
             }}
           >
-            Apply for the {sel} research track. You'll receive mentorship,
-            funding access, and direct protocol connections.
+            Apply for the {sel} research track. You'll receive mentorship, funding access, and direct protocol connections.
           </p>
-          <button
-            className="btn btn-primary"
-            onClick={() => setPage("apply-cohort")}
-          >
+          <button className="btn btn-primary" onClick={() => setPage("apply-cohort")}>
             APPLY FOR THIS TRACK →
           </button>
         </WindowCard>
@@ -5147,42 +4411,26 @@ const CohortsPage = ({ setPage }) => {
 // ── ARCHIVE (static shell — logic added in Part 4) ────────────
 const ArchivePage = ({ setPage }) => {
   const [filter, setFilter] = useState("ALL");
-  const topics = [
-    "ALL",
-    ...Array.from(new Set(SEED_PAPERS.map((p) => p.topic))),
-  ];
-  const filtered =
-    filter === "ALL"
-      ? SEED_PAPERS
-      : SEED_PAPERS.filter((p) => p.topic === filter);
+  const topics = ["ALL", ...Array.from(new Set(SEED_PAPERS.map((p) => p.topic)))];
+  const filtered = filter === "ALL" ? SEED_PAPERS : SEED_PAPERS.filter((p) => p.topic === filter);
   return (
     <div className="page-enter page-container">
       <div style={{ marginBottom: 36 }}>
         <SectionLabel>OPEN ACCESS ARCHIVE</SectionLabel>
         <h1 className="section-title">Research Archive</h1>
-        <p className="section-subtitle">
-          All published research — peer-reviewed, open access, always free.
-        </p>
+        <p className="section-subtitle">All published research — peer-reviewed, open access, always free.</p>
       </div>
       <TerminalPanel title="ARCHIVE_QUERY.sys" style={{ marginBottom: 24 }}>
-        <div className="term-green">
-          $ query --database=athenax --sort=citations_desc --status=published
-        </div>
+        <div className="term-green">$ query --database=athenax --sort=citations_desc --status=published</div>
         <div>
-          Found <span className="term-red">{filtered.length}</span> papers ·
-          Citations:{" "}
-          <span className="term-yellow">
-            {filtered.reduce((a, b) => a + b.citations, 0)}
-          </span>
+          Found <span className="term-red">{filtered.length}</span> papers · Citations:{" "}
+          <span className="term-yellow">{filtered.reduce((a, b) => a + b.citations, 0)}</span>
         </div>
         <div className="term-dim">
-          Filter: <span style={{ color: "#FDFBF7" }}>{filter}</span>{" "}
-          <span className="blink">█</span>
+          Filter: <span style={{ color: "#FDFBF7" }}>{filter}</span> <span className="blink">█</span>
         </div>
       </TerminalPanel>
-      <div
-        style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 28 }}
-      >
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 28 }}>
         {topics.map((t) => (
           <button
             key={t}
@@ -5200,11 +4448,7 @@ const ArchivePage = ({ setPage }) => {
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {filtered.map((paper) => (
-          <ResearchCard
-            key={paper.id}
-            paper={paper}
-            onClick={() => setPage("paper_" + paper.id)}
-          />
+          <ResearchCard key={paper.id} paper={paper} onClick={() => setPage("paper_" + paper.id)} />
         ))}
       </div>
     </div>
@@ -5220,16 +4464,10 @@ const PaperPage = ({ paperId, setPage }) => {
       <div className="page-enter page-container">
         <WindowCard title="PAPER_NOT_FOUND.sys" staticHover>
           <div style={{ textAlign: "center", padding: "32px 0" }}>
-            <div
-              className="vt"
-              style={{ fontSize: 20, color: "#E63636", marginBottom: 12 }}
-            >
+            <div className="vt" style={{ fontSize: 20, color: "#E63636", marginBottom: 12 }}>
               ○ PAPER NOT FOUND
             </div>
-            <button
-              className="btn btn-primary"
-              onClick={() => setPage("archive")}
-            >
+            <button className="btn btn-primary" onClick={() => setPage("archive")}>
               ← BACK TO ARCHIVE
             </button>
           </div>
@@ -5238,21 +4476,12 @@ const PaperPage = ({ paperId, setPage }) => {
     );
   return (
     <div className="page-enter page-container">
-      <button
-        className="btn btn-ghost btn-sm"
-        style={{ marginBottom: 20 }}
-        onClick={() => setPage("archive")}
-      >
+      <button className="btn btn-ghost btn-sm" style={{ marginBottom: 20 }} onClick={() => setPage("archive")}>
         ← BACK TO ARCHIVE
       </button>
-      <div
-        style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 24 }}
-      >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 24 }}>
         <div>
-          <WindowCard
-            title={`PAPER_${paper.id}.pdf`}
-            style={{ marginBottom: 20 }}
-          >
+          <WindowCard title={`PAPER_${paper.id}.pdf`} style={{ marginBottom: 20 }}>
             <div
               style={{
                 display: "flex",
@@ -5276,10 +4505,7 @@ const PaperPage = ({ paperId, setPage }) => {
             >
               {paper.title}
             </h1>
-            <div
-              className="vt"
-              style={{ fontSize: 17, opacity: 0.6, marginBottom: 4 }}
-            >
+            <div className="vt" style={{ fontSize: 17, opacity: 0.6, marginBottom: 4 }}>
               AUTHORS: {paper.authors.join(" · ")}
             </div>
             <div className="vt" style={{ fontSize: 14, opacity: 0.4 }}>
@@ -5287,9 +4513,7 @@ const PaperPage = ({ paperId, setPage }) => {
             </div>
           </WindowCard>
           <WindowCard title="ABSTRACT.txt" style={{ marginBottom: 20 }}>
-            <p style={{ fontSize: 14, lineHeight: 1.8, opacity: 0.82 }}>
-              {paper.abstract}
-            </p>
+            <p style={{ fontSize: 14, lineHeight: 1.8, opacity: 0.82 }}>{paper.abstract}</p>
           </WindowCard>
           <WindowCard title="FULL_PAPER.content" style={{ marginBottom: 20 }}>
             {[
@@ -5326,9 +4550,7 @@ const PaperPage = ({ paperId, setPage }) => {
                 >
                   {title}
                 </h2>
-                <p style={{ fontSize: 13, lineHeight: 1.8, opacity: 0.72 }}>
-                  {content}
-                </p>
+                <p style={{ fontSize: 13, lineHeight: 1.8, opacity: 0.72 }}>{content}</p>
               </div>
             ))}
           </WindowCard>
@@ -5360,19 +4582,14 @@ const PaperPage = ({ paperId, setPage }) => {
                     marginBottom: 6,
                   }}
                 >
-                  <span
-                    className="vt"
-                    style={{ fontSize: 16, color: "#E63636" }}
-                  >
+                  <span className="vt" style={{ fontSize: 16, color: "#E63636" }}>
                     {c.user}
                   </span>
                   <span className="vt" style={{ fontSize: 14, opacity: 0.5 }}>
                     ▲ {c.votes}
                   </span>
                 </div>
-                <p style={{ fontSize: 13, lineHeight: 1.6, opacity: 0.75 }}>
-                  {c.text}
-                </p>
+                <p style={{ fontSize: 13, lineHeight: 1.6, opacity: 0.75 }}>{c.text}</p>
               </div>
             ))}
             <textarea
@@ -5389,10 +4606,7 @@ const PaperPage = ({ paperId, setPage }) => {
                 display: "block",
               }}
             />
-            <button
-              className="btn btn-primary"
-              style={{ marginTop: 10, fontSize: 16 }}
-            >
+            <button className="btn btn-primary" style={{ marginTop: 10, fontSize: 16 }}>
               POST COMMENT
             </button>
           </WindowCard>
@@ -5405,9 +4619,7 @@ const PaperPage = ({ paperId, setPage }) => {
             </div>
             <div style={{ marginBottom: 6 }}>
               <span className="term-dim">DOWNLOADS: </span>
-              <span className="term-green">
-                {paper.downloads.toLocaleString()}
-              </span>
+              <span className="term-green">{paper.downloads.toLocaleString()}</span>
             </div>
             <div style={{ marginBottom: 6 }}>
               <span className="term-dim">PEER SCORE: </span>
@@ -5420,22 +4632,13 @@ const PaperPage = ({ paperId, setPage }) => {
           </TerminalPanel>
           <WindowCard title="DOWNLOADS.sys">
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <button
-                className="btn btn-primary"
-                style={{ width: "100%", fontSize: 16 }}
-              >
+              <button className="btn btn-primary" style={{ width: "100%", fontSize: 16 }}>
                 ↓ DOWNLOAD PDF
               </button>
-              <button
-                className="btn btn-secondary"
-                style={{ width: "100%", fontSize: 16 }}
-              >
+              <button className="btn btn-secondary" style={{ width: "100%", fontSize: 16 }}>
                 ⌥ GITHUB REPO
               </button>
-              <button
-                className="btn btn-secondary"
-                style={{ width: "100%", fontSize: 16 }}
-              >
+              <button className="btn btn-secondary" style={{ width: "100%", fontSize: 16 }}>
                 ✦ CITE PAPER
               </button>
             </div>
@@ -5452,10 +4655,7 @@ const PaperPage = ({ paperId, setPage }) => {
               >
                 {paper.reviewScore}
               </div>
-              <div
-                className="vt"
-                style={{ fontSize: 13, opacity: 0.5, marginBottom: 12 }}
-              >
+              <div className="vt" style={{ fontSize: 13, opacity: 0.5, marginBottom: 12 }}>
                 / 10.0 · PEER REVIEW SCORE
               </div>
               <div
@@ -5472,10 +4672,7 @@ const PaperPage = ({ paperId, setPage }) => {
                     style={{
                       width: 16,
                       height: 16,
-                      background:
-                        i < Math.round(paper.reviewScore)
-                          ? "#E63636"
-                          : "rgba(31,41,55,0.1)",
+                      background: i < Math.round(paper.reviewScore) ? "#E63636" : "rgba(31,41,55,0.1)",
                       border: "1px solid rgba(31,41,55,0.2)",
                     }}
                   />
@@ -5497,9 +4694,7 @@ const LeaderboardPage = ({ setPage }) => {
       <div style={{ marginBottom: 36 }}>
         <SectionLabel>RANKINGS</SectionLabel>
         <h1 className="section-title">Leaderboard</h1>
-        <p className="section-subtitle">
-          Ranked by citations, peer reviews, downloads, and community votes.
-        </p>
+        <p className="section-subtitle">Ranked by citations, peer reviews, downloads, and community votes.</p>
       </div>
       <div
         style={{
@@ -5521,8 +4716,7 @@ const LeaderboardPage = ({ setPage }) => {
               background: tab === id ? "#1F2937" : "transparent",
               color: tab === id ? "#FDFBF7" : "#1F2937",
               border: "none",
-              borderTop:
-                tab === id ? "3px solid #E63636" : "3px solid transparent",
+              borderTop: tab === id ? "3px solid #E63636" : "3px solid transparent",
               fontFamily: "var(--font-vt323), monospace",
               fontSize: 19,
               letterSpacing: "0.06em",
@@ -5607,10 +4801,7 @@ const LeaderboardPage = ({ setPage }) => {
                     </td>
                     <td>
                       <strong>{r.name}</strong>
-                      <div
-                        className="vt"
-                        style={{ fontSize: 12, opacity: 0.45 }}
-                      >
+                      <div className="vt" style={{ fontSize: 12, opacity: 0.45 }}>
                         {r.university}
                       </div>
                     </td>
@@ -5684,9 +4875,7 @@ const LeaderboardPage = ({ setPage }) => {
                       <td>
                         <strong>{lab.name}</strong>
                       </td>
-                      <td style={{ fontSize: 12, opacity: 0.65 }}>
-                        {lab.focus}
-                      </td>
+                      <td style={{ fontSize: 12, opacity: 0.65 }}>{lab.focus}</td>
                       <td>
                         <span
                           style={{
@@ -5703,9 +4892,7 @@ const LeaderboardPage = ({ setPage }) => {
                           className="vt"
                           style={{
                             fontSize: 14,
-                            color: lab.active
-                              ? "#22C55E"
-                              : "rgba(31,41,55,0.35)",
+                            color: lab.active ? "#22C55E" : "rgba(31,41,55,0.35)",
                           }}
                         >
                           {lab.active ? "● ACTIVE" : "○ INACTIVE"}
@@ -5803,10 +4990,7 @@ const DashboardPage = ({ setPage }) => {
         <div>
           <SectionLabel>RESEARCH COMMAND CENTER</SectionLabel>
           <h1 className="section-title">Dashboard</h1>
-          <div
-            className="vt"
-            style={{ fontSize: 15, opacity: 0.45, marginTop: 4 }}
-          >
+          <div className="vt" style={{ fontSize: 15, opacity: 0.45, marginTop: 4 }}>
             SESSION: public_view · {now.toLocaleDateString()}
           </div>
         </div>
@@ -5832,16 +5016,10 @@ const DashboardPage = ({ setPage }) => {
       </div>
       <SectionLabel>ECOSYSTEM HEALTH</SectionLabel>
       <div style={{ height: 14 }} />
-      <div
-        style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 40 }}
-      >
+      <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 40 }}>
         <StatCard label="RESEARCH PAPERS" value="530" sub="OPEN ACCESS" />
         <StatCard label="UNIVERSITIES" value="18" sub="IN NETWORK" />
-        <StatCard
-          label="FUNDING DISTRIBUTED"
-          value="$2.5M"
-          sub="TO RESEARCHERS"
-        />
+        <StatCard label="FUNDING DISTRIBUTED" value="$2.5M" sub="TO RESEARCHERS" />
         <StatCard label="ACTIVE BOUNTIES" value="14" sub="OPEN CHALLENGES" />
         <StatCard label="TOP LABS" value="12" sub="ACTIVE THIS QUARTER" />
         <StatCard label="RESEARCHERS" value="340+" sub="REGISTERED" />
@@ -5851,18 +5029,12 @@ const DashboardPage = ({ setPage }) => {
       <div className="grid-2" style={{ marginBottom: 32 }}>
         {SEED_BOUNTIES.map((b) => (
           <div key={b.id} className="window-card">
-            <div
-              className="window-header"
-              style={{ justifyContent: "space-between" }}
-            >
+            <div className="window-header" style={{ justifyContent: "space-between" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <TrafficLights />
                 <span style={{ fontSize: 13 }}>BOUNTY_{b.id}</span>
               </div>
-              <span
-                className="vt"
-                style={{ fontSize: 13, color: "var(--success-green)" }}
-              >
+              <span className="vt" style={{ fontSize: 13, color: "var(--success-green)" }}>
                 ● OPEN
               </span>
             </div>
@@ -5902,10 +5074,7 @@ const DashboardPage = ({ setPage }) => {
                     {b.applicants} APPLICANTS · DL: {b.deadline}
                   </div>
                 </div>
-                <button
-                  className="btn btn-primary btn-sm"
-                  onClick={() => setPage("bounties")}
-                >
+                <button className="btn btn-primary btn-sm" onClick={() => setPage("bounties")}>
                   APPLY
                 </button>
               </div>
@@ -5981,10 +5150,7 @@ const PageError = ({ message = "This page encountered an error.", onBack }) => (
   <div className="page-enter page-container">
     <WindowCard title="PAGE_ERROR.sys" staticHover>
       <div style={{ textAlign: "center", padding: "32px 0" }}>
-        <div
-          className="vt"
-          style={{ fontSize: 22, color: "#E63636", marginBottom: 12 }}
-        >
+        <div className="vt" style={{ fontSize: 22, color: "#E63636", marginBottom: 12 }}>
           ● RENDER_ERROR
         </div>
         <p
@@ -6099,12 +5265,7 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
       };
       dbWrite("ax_submitted_papers", [...papers, paper]);
       setSaving(false);
-      showToast(
-        statusOverride === "submitted"
-          ? "Paper submitted for review."
-          : "Draft saved.",
-        "success",
-      );
+      showToast(statusOverride === "submitted" ? "Paper submitted for review." : "Draft saved.", "success");
       setPage("profile");
     }, 400);
   };
@@ -6114,16 +5275,10 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
       <div className="page-enter page-container">
         <WindowCard title="AUTH_REQUIRED.sys" staticHover>
           <div style={{ textAlign: "center", padding: "32px 0" }}>
-            <div
-              className="vt"
-              style={{ fontSize: 18, color: "#E63636", marginBottom: 12 }}
-            >
+            <div className="vt" style={{ fontSize: 18, color: "#E63636", marginBottom: 12 }}>
               ▣ SIGN IN REQUIRED
             </div>
-            <button
-              className="btn btn-primary"
-              onClick={() => setPage("login")}
-            >
+            <button className="btn btn-primary" onClick={() => setPage("login")}>
               SIGN IN TO SUBMIT
             </button>
           </div>
@@ -6133,11 +5288,7 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
 
   return (
     <div className="page-enter page-container">
-      <button
-        className="btn btn-ghost btn-sm"
-        style={{ marginBottom: 20 }}
-        onClick={() => setPage("profile")}
-      >
+      <button className="btn btn-ghost btn-sm" style={{ marginBottom: 20 }} onClick={() => setPage("profile")}>
         ← BACK
       </button>
 
@@ -6164,8 +5315,7 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
               background: step === +n ? "#1F2937" : "transparent",
               color: step === +n ? "#FDFBF7" : "#1F2937",
               border: "none",
-              borderTop:
-                step === +n ? "3px solid #E63636" : "3px solid transparent",
+              borderTop: step === +n ? "3px solid #E63636" : "3px solid transparent",
               borderRadius: 0,
               fontFamily: "var(--font-inter), sans-serif",
               fontWeight: 600,
@@ -6181,19 +5331,12 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
       </div>
 
       {step === 1 && (
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 24 }}
-        >
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 24 }}>
           <div>
             <WindowCard title="PAPER_DETAILS.form" style={{ marginBottom: 16 }}>
               <div className="form-field">
                 <label style={lStyle}>PAPER TITLE *</label>
-                <input
-                  value={form.title}
-                  onChange={set("title")}
-                  placeholder="Full title of your research paper"
-                  style={iStyle}
-                />
+                <input value={form.title} onChange={set("title")} placeholder="Full title of your research paper" style={iStyle} />
               </div>
               <div className="form-field">
                 <label style={lStyle}>ABSTRACT *</label>
@@ -6214,11 +5357,7 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
               >
                 <div className="form-field">
                   <label style={lStyle}>RESEARCH TOPIC *</label>
-                  <select
-                    value={form.topic}
-                    onChange={set("topic")}
-                    style={{ ...iStyle, cursor: "pointer" }}
-                  >
+                  <select value={form.topic} onChange={set("topic")} style={{ ...iStyle, cursor: "pointer" }}>
                     {TOPICS.map((t) => (
                       <option key={t} value={t}>
                         {t}
@@ -6228,12 +5367,7 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
                 </div>
                 <div className="form-field">
                   <label style={lStyle}>KEYWORDS</label>
-                  <input
-                    value={form.keywords}
-                    onChange={set("keywords")}
-                    placeholder="comma separated"
-                    style={iStyle}
-                  />
+                  <input value={form.keywords} onChange={set("keywords")} placeholder="comma separated" style={iStyle} />
                 </div>
               </div>
               <div
@@ -6245,39 +5379,20 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
               >
                 <div className="form-field">
                   <label style={lStyle}>UNIVERSITY / INSTITUTION *</label>
-                  <input
-                    value={form.university}
-                    onChange={set("university")}
-                    placeholder="MIT, Stanford, Oxford…"
-                    style={iStyle}
-                  />
+                  <input value={form.university} onChange={set("university")} placeholder="MIT, Stanford, Oxford…" style={iStyle} />
                 </div>
                 <div className="form-field">
                   <label style={lStyle}>LAB</label>
-                  <input
-                    value={form.lab}
-                    onChange={set("lab")}
-                    placeholder="Research lab or group"
-                    style={iStyle}
-                  />
+                  <input value={form.lab} onChange={set("lab")} placeholder="Research lab or group" style={iStyle} />
                 </div>
               </div>
               <div className="form-field">
                 <label style={lStyle}>CO-AUTHORS (optional)</label>
-                <input
-                  value={form.coAuthors}
-                  onChange={set("coAuthors")}
-                  placeholder="Dr. Jane Smith, Prof. John Doe…"
-                  style={iStyle}
-                />
+                <input value={form.coAuthors} onChange={set("coAuthors")} placeholder="Dr. Jane Smith, Prof. John Doe…" style={iStyle} />
               </div>
             </WindowCard>
 
-            <WindowCard
-              title="FILE_UPLOAD.sys"
-              staticHover
-              style={{ marginBottom: 16 }}
-            >
+            <WindowCard title="FILE_UPLOAD.sys" staticHover style={{ marginBottom: 16 }}>
               <div
                 style={{
                   border: "2px dashed rgba(31,41,55,0.25)",
@@ -6285,20 +5400,12 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
                   textAlign: "center",
                 }}
               >
-                <div
-                  className="vt"
-                  style={{ fontSize: 22, color: "#E63636", marginBottom: 8 }}
-                >
+                <div className="vt" style={{ fontSize: 22, color: "#E63636", marginBottom: 8 }}>
                   ▤ PAPER FILE
                 </div>
-                <p style={{ fontSize: 13, opacity: 0.55, marginBottom: 12 }}>
-                  PDF upload — drag and drop or click to select
-                </p>
+                <p style={{ fontSize: 13, opacity: 0.55, marginBottom: 12 }}>PDF upload — drag and drop or click to select</p>
                 <button className="btn btn-ghost btn-sm">SELECT FILE</button>
-                <div
-                  className="vt"
-                  style={{ fontSize: 12, opacity: 0.3, marginTop: 10 }}
-                >
+                <div className="vt" style={{ fontSize: 12, opacity: 0.3, marginTop: 10 }}>
                   MAX 50MB · PDF FORMAT · FILE UPLOAD ACTIVE IN v5.1
                 </div>
               </div>
@@ -6326,17 +5433,11 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
                 <option value="submitted">SUBMIT FOR REVIEW</option>
               </select>
               <div style={{ marginTop: 12, fontSize: 13, opacity: 0.5 }}>
-                {form.status === "draft"
-                  ? "Save locally. Submit when ready."
-                  : "Will enter peer review queue."}
+                {form.status === "draft" ? "Save locally. Submit when ready." : "Will enter peer review queue."}
               </div>
             </TerminalPanel>
 
-            <WindowCard
-              title="SUBMISSION_GUIDE.md"
-              staticHover
-              bodyClass="window-body--sm"
-            >
+            <WindowCard title="SUBMISSION_GUIDE.md" staticHover bodyClass="window-body--sm">
               {[
                 ["Title", "Clear, descriptive, searchable"],
                 ["Abstract", "150–300 words. Method + findings."],
@@ -6352,10 +5453,7 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
                     borderBottom: "1px solid rgba(31,41,55,0.07)",
                   }}
                 >
-                  <div
-                    className="vt"
-                    style={{ fontSize: 14, color: "#E63636" }}
-                  >
+                  <div className="vt" style={{ fontSize: 14, color: "#E63636" }}>
                     ▸ {f}
                   </div>
                   <div style={{ fontSize: 12, opacity: 0.55 }}>{g}</div>
@@ -6378,20 +5476,10 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
               >
                 PREVIEW →
               </button>
-              <button
-                className="btn btn-primary"
-                disabled={saving}
-                onClick={() => save("submitted")}
-                style={{ fontSize: 18 }}
-              >
+              <button className="btn btn-primary" disabled={saving} onClick={() => save("submitted")} style={{ fontSize: 18 }}>
                 {saving ? "SUBMITTING…" : "SUBMIT FOR REVIEW"}
               </button>
-              <button
-                className="btn btn-secondary"
-                disabled={saving}
-                onClick={() => save("draft")}
-                style={{ fontSize: 16 }}
-              >
+              <button className="btn btn-secondary" disabled={saving} onClick={() => save("draft")} style={{ fontSize: 16 }}>
                 SAVE AS DRAFT
               </button>
             </div>
@@ -6400,9 +5488,7 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
       )}
 
       {step === 2 && (
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 24 }}
-        >
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 24 }}>
           <div>
             <WindowCard title="PAPER_PREVIEW.pdf" style={{ marginBottom: 16 }}>
               <div
@@ -6427,14 +5513,9 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
                   marginBottom: 10,
                 }}
               >
-                {form.title || (
-                  <span style={{ opacity: 0.3 }}>UNTITLED PAPER</span>
-                )}
+                {form.title || <span style={{ opacity: 0.3 }}>UNTITLED PAPER</span>}
               </h1>
-              <div
-                className="vt"
-                style={{ fontSize: 16, opacity: 0.55, marginBottom: 14 }}
-              >
+              <div className="vt" style={{ fontSize: 16, opacity: 0.55, marginBottom: 14 }}>
                 BY: {user.name}
                 {form.coAuthors ? ` · ${form.coAuthors}` : ""}
               </div>
@@ -6448,9 +5529,7 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
                 Abstract
               </h3>
               <p style={{ fontSize: 14, lineHeight: 1.75, opacity: 0.8 }}>
-                {form.abstract || (
-                  <span style={{ opacity: 0.3 }}>No abstract provided.</span>
-                )}
+                {form.abstract || <span style={{ opacity: 0.3 }}>No abstract provided.</span>}
               </p>
               {form.keywords && (
                 <div
@@ -6488,21 +5567,14 @@ const SubmitPaperPage = ({ user, setPage, showToast }) => {
                   }}
                 >
                   <span style={{ fontSize: 13 }}>{item}</span>
-                  <span className={ok ? "term-green" : "term-red"}>
-                    {ok ? "✓" : "✗"}
-                  </span>
+                  <span className={ok ? "term-green" : "term-red"}>{ok ? "✓" : "✗"}</span>
                 </div>
               ))}
             </TerminalPanel>
             <button className="btn btn-ghost btn-sm" onClick={() => setStep(1)}>
               ← EDIT
             </button>
-            <button
-              className="btn btn-primary"
-              disabled={saving}
-              onClick={() => save("submitted")}
-              style={{ fontSize: 18 }}
-            >
+            <button className="btn btn-primary" disabled={saving} onClick={() => save("submitted")} style={{ fontSize: 18 }}>
               {saving ? "SUBMITTING…" : "CONFIRM SUBMIT"}
             </button>
           </div>
@@ -6527,17 +5599,11 @@ const BountyMarketplacePage = ({ user, setPage, showToast }) => {
   const [submitting, setSubmitting] = useState(false);
 
   const allBounties = [...SEED_BOUNTIES, ...dbRead("ax_bounties", [])];
-  const topics = [
-    "ALL",
-    ...Array.from(new Set(allBounties.map((b) => b.topic))),
-  ];
+  const topics = ["ALL", ...Array.from(new Set(allBounties.map((b) => b.topic)))];
   const filtered = allBounties.filter((b) => {
     const matchTopic = topicFilter === "ALL" || b.topic === topicFilter;
     const q = search.toLowerCase();
-    const matchSearch =
-      !q ||
-      b.title.toLowerCase().includes(q) ||
-      (b.sponsor || "").toLowerCase().includes(q);
+    const matchSearch = !q || b.title.toLowerCase().includes(q) || (b.sponsor || "").toLowerCase().includes(q);
     return matchTopic && matchSearch;
   });
 
@@ -6577,10 +5643,7 @@ const BountyMarketplacePage = ({ user, setPage, showToast }) => {
       <div style={{ marginBottom: 32 }}>
         <SectionLabel>RESEARCH BOUNTIES</SectionLabel>
         <h1 className="section-title">Bounty Marketplace</h1>
-        <p className="section-subtitle">
-          Open research challenges posted by Web3 protocols. Submit a proposal
-          to claim the reward.
-        </p>
+        <p className="section-subtitle">Open research challenges posted by Web3 protocols. Submit a proposal to claim the reward.</p>
       </div>
 
       {/* Stats bar */}
@@ -6593,13 +5656,7 @@ const BountyMarketplacePage = ({ user, setPage, showToast }) => {
           <span>
             <span className="term-dim">TOTAL POOL: </span>
             <span className="term-yellow">
-              $
-              {allBounties
-                .reduce(
-                  (s, b) => s + (+String(b.reward).replace(/[$,K]/g, "") || 0),
-                  0,
-                )
-                .toLocaleString()}
+              ${allBounties.reduce((s, b) => s + (+String(b.reward).replace(/[$,K]/g, "") || 0), 0).toLocaleString()}
             </span>
           </span>
           <span>
@@ -6607,11 +5664,7 @@ const BountyMarketplacePage = ({ user, setPage, showToast }) => {
             <span className="term-green">{topics.length - 1}</span>
           </span>
           {user?.role === "sponsor" && (
-            <button
-              className="btn btn-primary btn-sm"
-              style={{ marginLeft: "auto", fontSize: 16 }}
-              onClick={() => setPage("post-bounty")}
-            >
+            <button className="btn btn-primary btn-sm" style={{ marginLeft: "auto", fontSize: 16 }} onClick={() => setPage("post-bounty")}>
               + POST BOUNTY
             </button>
           )}
@@ -6677,15 +5730,10 @@ const BountyMarketplacePage = ({ user, setPage, showToast }) => {
         )}
         {filtered.map((b) => (
           <div key={b.id} className="window-card">
-            <div
-              className="window-header"
-              style={{ justifyContent: "space-between" }}
-            >
+            <div className="window-header" style={{ justifyContent: "space-between" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <TrafficLights />
-                <span style={{ fontSize: 13 }}>
-                  BOUNTY_{b.id.toUpperCase()}
-                </span>
+                <span style={{ fontSize: 13 }}>BOUNTY_{b.id.toUpperCase()}</span>
               </div>
               <span className="vt" style={{ fontSize: 13, color: "#22C55E" }}>
                 ● OPEN · DL: {b.deadline}
@@ -6722,11 +5770,7 @@ const BountyMarketplacePage = ({ user, setPage, showToast }) => {
                   >
                     {b.title}
                   </h3>
-                  {b.description && (
-                    <p style={{ fontSize: 13, lineHeight: 1.6, opacity: 0.65 }}>
-                      {b.description.slice(0, 180)}…
-                    </p>
-                  )}
+                  {b.description && <p style={{ fontSize: 13, lineHeight: 1.6, opacity: 0.65 }}>{b.description.slice(0, 180)}…</p>}
                 </div>
                 <div style={{ textAlign: "right", flexShrink: 0 }}>
                   <div
@@ -6739,16 +5783,10 @@ const BountyMarketplacePage = ({ user, setPage, showToast }) => {
                   >
                     {b.reward}
                   </div>
-                  <div
-                    className="vt"
-                    style={{ fontSize: 13, opacity: 0.5, marginBottom: 10 }}
-                  >
+                  <div className="vt" style={{ fontSize: 13, opacity: 0.5, marginBottom: 10 }}>
                     {b.applicants} PROPOSALS
                   </div>
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() => setSelected(b)}
-                  >
+                  <button className="btn btn-primary btn-sm" onClick={() => setSelected(b)}>
                     VIEW + APPLY
                   </button>
                 </div>
@@ -6868,10 +5906,7 @@ const BountyMarketplacePage = ({ user, setPage, showToast }) => {
               </div>
               {!user ? (
                 <div style={{ textAlign: "center", padding: "20px 0" }}>
-                  <div
-                    className="vt"
-                    style={{ fontSize: 17, opacity: 0.5, marginBottom: 14 }}
-                  >
+                  <div className="vt" style={{ fontSize: 17, opacity: 0.5, marginBottom: 14 }}>
                     SIGN IN TO SUBMIT A PROPOSAL
                   </div>
                   <button
@@ -6887,24 +5922,9 @@ const BountyMarketplacePage = ({ user, setPage, showToast }) => {
               ) : (
                 <>
                   {[
-                    [
-                      "PROPOSAL SUMMARY *",
-                      "summary",
-                      "Describe your research approach and qualifications in 2–3 sentences.",
-                      true,
-                    ],
-                    [
-                      "TECHNICAL APPROACH",
-                      "approach",
-                      "Outline your methodology and key milestones.",
-                      false,
-                    ],
-                    [
-                      "TIMELINE",
-                      "timeline",
-                      "Estimated duration and delivery schedule.",
-                      false,
-                    ],
+                    ["PROPOSAL SUMMARY *", "summary", "Describe your research approach and qualifications in 2–3 sentences.", true],
+                    ["TECHNICAL APPROACH", "approach", "Outline your methodology and key milestones.", false],
+                    ["TIMELINE", "timeline", "Estimated duration and delivery schedule.", false],
                   ].map(([lbl, key, ph, required]) => (
                     <div key={key} style={{ marginBottom: 14 }}>
                       <label
@@ -6920,9 +5940,7 @@ const BountyMarketplacePage = ({ user, setPage, showToast }) => {
                       </label>
                       <textarea
                         value={proposal[key]}
-                        onChange={(e) =>
-                          setProposal((p) => ({ ...p, [key]: e.target.value }))
-                        }
+                        onChange={(e) => setProposal((p) => ({ ...p, [key]: e.target.value }))}
                         placeholder={ph}
                         rows={3}
                         style={{
@@ -6939,12 +5957,7 @@ const BountyMarketplacePage = ({ user, setPage, showToast }) => {
                       />
                     </div>
                   ))}
-                  <button
-                    className="btn btn-primary"
-                    disabled={submitting}
-                    onClick={submitProposal}
-                    style={{ width: "100%", fontSize: 19 }}
-                  >
+                  <button className="btn btn-primary" disabled={submitting} onClick={submitProposal} style={{ width: "100%", fontSize: 19 }}>
                     {submitting ? "SUBMITTING…" : "SUBMIT PROPOSAL"}
                   </button>
                 </>
@@ -6995,19 +6008,11 @@ const PostBountyPage = ({ user, setPage, showToast }) => {
       <div className="page-enter page-container">
         <WindowCard title="ACCESS_DENIED.sys" staticHover>
           <div style={{ textAlign: "center", padding: "32px 0" }}>
-            <div
-              className="vt"
-              style={{ fontSize: 18, color: "#E63636", marginBottom: 12 }}
-            >
+            <div className="vt" style={{ fontSize: 18, color: "#E63636", marginBottom: 12 }}>
               ◆ SPONSOR ACCOUNT REQUIRED
             </div>
-            <p style={{ fontSize: 13, opacity: 0.65, marginBottom: 20 }}>
-              Only sponsor accounts can post research bounties.
-            </p>
-            <button
-              className="btn btn-primary"
-              onClick={() => setPage("register")}
-            >
+            <p style={{ fontSize: 13, opacity: 0.65, marginBottom: 20 }}>Only sponsor accounts can post research bounties.</p>
+            <button className="btn btn-primary" onClick={() => setPage("register")}>
               REGISTER AS SPONSOR
             </button>
           </div>
@@ -7055,33 +6060,20 @@ const PostBountyPage = ({ user, setPage, showToast }) => {
 
   return (
     <div className="page-enter page-container">
-      <button
-        className="btn btn-ghost btn-sm"
-        style={{ marginBottom: 20 }}
-        onClick={() => setPage("bounties")}
-      >
+      <button className="btn btn-ghost btn-sm" style={{ marginBottom: 20 }} onClick={() => setPage("bounties")}>
         ← BACK TO MARKETPLACE
       </button>
       <div style={{ marginBottom: 28 }}>
         <SectionLabel>SPONSOR INTERFACE</SectionLabel>
         <h1 className="section-title">Post a Research Bounty</h1>
-        <p className="section-subtitle">
-          Define a research challenge. The best proposal wins the reward.
-        </p>
+        <p className="section-subtitle">Define a research challenge. The best proposal wins the reward.</p>
       </div>
-      <div
-        style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 24 }}
-      >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 24 }}>
         <div>
           <WindowCard title="BOUNTY_DETAILS.form" style={{ marginBottom: 16 }}>
             <div className="form-field">
               <label style={lStyle}>BOUNTY TITLE *</label>
-              <input
-                value={form.title}
-                onChange={set("title")}
-                placeholder="Clear, specific research challenge title"
-                style={iStyle}
-              />
+              <input value={form.title} onChange={set("title")} placeholder="Clear, specific research challenge title" style={iStyle} />
             </div>
             <div className="form-field">
               <label style={lStyle}>DESCRIPTION *</label>
@@ -7112,11 +6104,7 @@ const PostBountyPage = ({ user, setPage, showToast }) => {
             >
               <div className="form-field">
                 <label style={lStyle}>RESEARCH TOPIC *</label>
-                <select
-                  value={form.topic}
-                  onChange={set("topic")}
-                  style={{ ...iStyle, cursor: "pointer" }}
-                >
+                <select value={form.topic} onChange={set("topic")} style={{ ...iStyle, cursor: "pointer" }}>
                   {TOPICS.map((t) => (
                     <option key={t} value={t}>
                       {t}
@@ -7126,21 +6114,11 @@ const PostBountyPage = ({ user, setPage, showToast }) => {
               </div>
               <div className="form-field">
                 <label style={lStyle}>REWARD AMOUNT *</label>
-                <input
-                  value={form.reward}
-                  onChange={set("reward")}
-                  placeholder="$25,000"
-                  style={iStyle}
-                />
+                <input value={form.reward} onChange={set("reward")} placeholder="$25,000" style={iStyle} />
               </div>
               <div className="form-field">
                 <label style={lStyle}>DEADLINE *</label>
-                <input
-                  type="date"
-                  value={form.deadline}
-                  onChange={set("deadline")}
-                  style={iStyle}
-                />
+                <input type="date" value={form.deadline} onChange={set("deadline")} style={iStyle} />
               </div>
             </div>
           </WindowCard>
@@ -7173,9 +6151,7 @@ const PostBountyPage = ({ user, setPage, showToast }) => {
                 {user.avatar}
               </div>
               <div>
-                <div style={{ fontWeight: 600, fontSize: 13 }}>
-                  {user.organization || user.name}
-                </div>
+                <div style={{ fontWeight: 600, fontSize: 13 }}>{user.organization || user.name}</div>
                 <div className="vt" style={{ fontSize: 13, opacity: 0.45 }}>
                   VERIFIED SPONSOR
                 </div>
@@ -7186,11 +6162,7 @@ const PostBountyPage = ({ user, setPage, showToast }) => {
             </span>
           </WindowCard>
 
-          <WindowCard
-            title="POSTING_GUIDE.md"
-            staticHover
-            bodyClass="window-body--sm"
-          >
+          <WindowCard title="POSTING_GUIDE.md" staticHover bodyClass="window-body--sm">
             {[
               ["Be specific", "Clear deliverables = better proposals"],
               ["Set fair reward", "Match scope to compensation"],
@@ -7213,19 +6185,10 @@ const PostBountyPage = ({ user, setPage, showToast }) => {
             ))}
           </WindowCard>
 
-          <button
-            className="btn btn-primary"
-            disabled={saving}
-            onClick={submit}
-            style={{ fontSize: 19, width: "100%" }}
-          >
+          <button className="btn btn-primary" disabled={saving} onClick={submit} style={{ fontSize: 19, width: "100%" }}>
             {saving ? "POSTING…" : "POST BOUNTY"}
           </button>
-          <button
-            className="btn btn-ghost"
-            onClick={() => setPage("bounties")}
-            style={{ fontSize: 16, width: "100%" }}
-          >
+          <button className="btn btn-ghost" onClick={() => setPage("bounties")} style={{ fontSize: 16, width: "100%" }}>
             CANCEL
           </button>
         </div>
@@ -7267,30 +6230,17 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
     display: "block",
   };
 
-  const TRACKS = [
-    "AI Agents",
-    "DAO Governance",
-    "Crypto Economics",
-    "Tokenomics",
-    "DeFi Systems",
-    "Digital Nations",
-  ];
+  const TRACKS = ["AI Agents", "DAO Governance", "Crypto Economics", "Tokenomics", "DeFi Systems", "Digital Nations"];
 
   if (!user)
     return (
       <div className="page-enter page-container">
         <WindowCard title="AUTH_REQUIRED.sys" staticHover>
           <div style={{ textAlign: "center", padding: "32px 0" }}>
-            <div
-              className="vt"
-              style={{ fontSize: 18, color: "#E63636", marginBottom: 12 }}
-            >
+            <div className="vt" style={{ fontSize: 18, color: "#E63636", marginBottom: 12 }}>
               ▣ SIGN IN REQUIRED
             </div>
-            <button
-              className="btn btn-primary"
-              onClick={() => setPage("login")}
-            >
+            <button className="btn btn-primary" onClick={() => setPage("login")}>
               SIGN IN TO APPLY
             </button>
           </div>
@@ -7334,20 +6284,13 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
                 margin: "0 auto 24px",
               }}
             >
-              Your application has been received. The AthenaX team will review
-              it within 5–10 business days.
+              Your application has been received. The AthenaX team will review it within 5–10 business days.
             </p>
             <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-              <button
-                className="btn btn-primary"
-                onClick={() => setPage("profile")}
-              >
+              <button className="btn btn-primary" onClick={() => setPage("profile")}>
                 VIEW PROFILE
               </button>
-              <button
-                className="btn btn-ghost"
-                onClick={() => setPage("cohorts")}
-              >
+              <button className="btn btn-ghost" onClick={() => setPage("cohorts")}>
                 BACK TO COHORTS
               </button>
             </div>
@@ -7387,11 +6330,7 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
 
   return (
     <div className="page-enter page-container">
-      <button
-        className="btn btn-ghost btn-sm"
-        style={{ marginBottom: 20 }}
-        onClick={() => setPage("cohorts")}
-      >
+      <button className="btn btn-ghost btn-sm" style={{ marginBottom: 20 }} onClick={() => setPage("cohorts")}>
         ← BACK TO COHORTS
       </button>
 
@@ -7406,10 +6345,7 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
           marginBottom: 28,
         }}
       >
-        <div
-          className="vt"
-          style={{ fontSize: 13, opacity: 0.45, marginBottom: 6 }}
-        >
+        <div className="vt" style={{ fontSize: 13, opacity: 0.45, marginBottom: 6 }}>
           APPLICATION FORM · COHORT_01 · STATUS: OPEN
         </div>
         <h1
@@ -7421,22 +6357,14 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
         >
           ATHENAX × IF LABS COHORT 01
         </h1>
-        <div
-          className="vt"
-          style={{ fontSize: 15, opacity: 0.5, marginTop: 6 }}
-        >
+        <div className="vt" style={{ fontSize: 15, opacity: 0.5, marginTop: 6 }}>
           PRIZE POOL: $500,000 · DURATION: 6 MONTHS
         </div>
       </div>
 
-      <div
-        style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 24 }}
-      >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 24 }}>
         <div>
-          <WindowCard
-            title="RESEARCH_TRACK.select"
-            style={{ marginBottom: 16 }}
-          >
+          <WindowCard title="RESEARCH_TRACK.select" style={{ marginBottom: 16 }}>
             <label style={lStyle}>SELECT RESEARCH TRACK *</label>
             <div
               style={{
@@ -7452,13 +6380,9 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
                   onClick={() => setForm((f) => ({ ...f, track: t }))}
                   style={{
                     cursor: "pointer",
-                    border:
-                      form.track === t
-                        ? "2px solid #E63636"
-                        : "2px solid rgba(31,41,55,0.2)",
+                    border: form.track === t ? "2px solid #E63636" : "2px solid rgba(31,41,55,0.2)",
                     padding: "10px 14px",
-                    background:
-                      form.track === t ? "rgba(230,54,54,0.06)" : "transparent",
+                    background: form.track === t ? "rgba(230,54,54,0.06)" : "transparent",
                     borderRadius: 6,
                     display: "flex",
                     alignItems: "center",
@@ -7470,10 +6394,7 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
                       width: 11,
                       height: 11,
                       borderRadius: "50%",
-                      border:
-                        form.track === t
-                          ? "4px solid #E63636"
-                          : "2px solid #1F2937",
+                      border: form.track === t ? "4px solid #E63636" : "2px solid #1F2937",
                       flexShrink: 0,
                     }}
                   />
@@ -7491,14 +6412,10 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
             </div>
           </WindowCard>
 
-          <WindowCard
-            title="PROPOSAL_DETAILS.form"
-            style={{ marginBottom: 16 }}
-          >
+          <WindowCard title="PROPOSAL_DETAILS.form" style={{ marginBottom: 16 }}>
             <div className="form-field">
               <label style={lStyle}>
-                PROPOSAL SUMMARY *{" "}
-                <span style={{ opacity: 0.4 }}>(150–300 words)</span>
+                PROPOSAL SUMMARY * <span style={{ opacity: 0.4 }}>(150–300 words)</span>
               </label>
               <textarea
                 value={form.summary}
@@ -7507,10 +6424,7 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
                 rows={5}
                 style={{ ...iStyle, resize: "vertical", minHeight: 110 }}
               />
-              <div
-                className="vt"
-                style={{ fontSize: 12, opacity: 0.35, marginTop: 4 }}
-              >
+              <div className="vt" style={{ fontSize: 12, opacity: 0.35, marginTop: 4 }}>
                 {form.summary.split(/\s+/).filter(Boolean).length} WORDS
               </div>
             </div>
@@ -7536,11 +6450,7 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
             </div>
             <div className="form-field">
               <label style={lStyle}>COMMITMENT LEVEL</label>
-              <select
-                value={form.commitment}
-                onChange={set("commitment")}
-                style={{ ...iStyle, cursor: "pointer" }}
-              >
+              <select value={form.commitment} onChange={set("commitment")} style={{ ...iStyle, cursor: "pointer" }}>
                 <option value="full-time">Full-time (40h/week)</option>
                 <option value="part-time">Part-time (20h/week)</option>
                 <option value="research-only">Research-only (flexible)</option>
@@ -7548,12 +6458,7 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
             </div>
           </WindowCard>
 
-          <button
-            className="btn btn-primary"
-            disabled={submitting}
-            onClick={submit}
-            style={{ width: "100%", fontSize: 21 }}
-          >
+          <button className="btn btn-primary" disabled={submitting} onClick={submit} style={{ width: "100%", fontSize: 21 }}>
             {submitting ? "SUBMITTING…" : "SUBMIT APPLICATION"}
           </button>
         </div>
@@ -7586,9 +6491,7 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
                   {user.avatar}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: 13 }}>
-                    {user.name}
-                  </div>
+                  <div style={{ fontWeight: 600, fontSize: 13 }}>{user.name}</div>
                   <div className="vt" style={{ fontSize: 13, opacity: 0.4 }}>
                     {user.university || "INDEPENDENT"}
                   </div>
@@ -7599,15 +6502,8 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
               </span>
             </WindowCard>
           )}
-          <WindowCard
-            title="SELECTION_CRITERIA.md"
-            staticHover
-            bodyClass="window-body--sm"
-          >
-            <div
-              className="vt"
-              style={{ fontSize: 13, color: "#E63636", marginBottom: 10 }}
-            >
+          <WindowCard title="SELECTION_CRITERIA.md" staticHover bodyClass="window-body--sm">
+            <div className="vt" style={{ fontSize: 13, color: "#E63636", marginBottom: 10 }}>
               REVIEWED ON:
             </div>
             {[
@@ -7639,18 +6535,8 @@ const CohortApplicationPage = ({ user, setPage, showToast }) => {
               </div>
             ))}
           </WindowCard>
-          <WindowCard
-            title="COHORT_BENEFITS.md"
-            staticHover
-            bodyClass="window-body--sm"
-          >
-            {[
-              "$5K–$50K stipend",
-              "Lab mentor access",
-              "Protocol introductions",
-              "ARS reputation boost",
-              "Open publication support",
-            ].map((b) => (
+          <WindowCard title="COHORT_BENEFITS.md" staticHover bodyClass="window-body--sm">
+            {["$5K–$50K stipend", "Lab mentor access", "Protocol introductions", "ARS reputation boost", "Open publication support"].map((b) => (
               <div
                 key={b}
                 className="vt"
@@ -7682,15 +6568,10 @@ const AdminPanelPage = ({ user, setPage, showToast }) => {
       <div className="page-enter page-container">
         <WindowCard title="ACCESS_DENIED.sys" staticHover>
           <div style={{ textAlign: "center", padding: "32px 0" }}>
-            <div
-              className="vt"
-              style={{ fontSize: 18, color: "#E63636", marginBottom: 12 }}
-            >
+            <div className="vt" style={{ fontSize: 18, color: "#E63636", marginBottom: 12 }}>
               ◼ ADMIN ACCESS REQUIRED
             </div>
-            <p style={{ fontSize: 13, opacity: 0.65, marginBottom: 20 }}>
-              This panel is restricted to AthenaX administrators.
-            </p>
+            <p style={{ fontSize: 13, opacity: 0.65, marginBottom: 20 }}>This panel is restricted to AthenaX administrators.</p>
             <button className="btn btn-ghost" onClick={() => setPage("home")}>
               ← HOME
             </button>
@@ -7700,31 +6581,22 @@ const AdminPanelPage = ({ user, setPage, showToast }) => {
     );
 
   // Live data
-  const submittedPapers = dbRead("ax_submitted_papers", []).filter(
-    (p) => p.status === "submitted",
-  );
+  const submittedPapers = dbRead("ax_submitted_papers", []).filter((p) => p.status === "submitted");
   const applications = dbRead(DB_KEYS.APPLICATIONS, []);
   const allUsers = dbRead(DB_KEYS.USERS, []);
   const allBounties = [...SEED_BOUNTIES, ...dbRead("ax_bounties", [])];
   const proposals = dbRead("ax_proposals", []);
 
   const updatePaper = (id, status) => {
-    const papers = dbRead("ax_submitted_papers", []).map((p) =>
-      p.id === id ? { ...p, status, reviewedAt: dbNow() } : p,
-    );
+    const papers = dbRead("ax_submitted_papers", []).map((p) => (p.id === id ? { ...p, status, reviewedAt: dbNow() } : p));
     dbWrite("ax_submitted_papers", papers);
     showToast(`Paper ${status}.`, status === "published" ? "success" : "info");
   };
 
   const updateApp = (id, status) => {
-    const apps = dbRead(DB_KEYS.APPLICATIONS, []).map((a) =>
-      a.id === id ? { ...a, status, reviewedAt: dbNow() } : a,
-    );
+    const apps = dbRead(DB_KEYS.APPLICATIONS, []).map((a) => (a.id === id ? { ...a, status, reviewedAt: dbNow() } : a));
     dbWrite(DB_KEYS.APPLICATIONS, apps);
-    showToast(
-      `Application ${status}.`,
-      status === "accepted" ? "success" : "info",
-    );
+    showToast(`Application ${status}.`, status === "accepted" ? "success" : "info");
   };
 
   const statusTag = (s) => {
@@ -7775,30 +6647,14 @@ const AdminPanelPage = ({ user, setPage, showToast }) => {
       </div>
 
       {/* Stats */}
-      <div
-        style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 24 }}
-      >
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 24 }}>
         {[
           ["PENDING PAPERS", submittedPapers.length, "#E63636"],
-          [
-            "APPLICATIONS",
-            applications.filter((a) => a.status === "pending").length,
-            "#F5A623",
-          ],
+          ["APPLICATIONS", applications.filter((a) => a.status === "pending").length, "#F5A623"],
           ["TOTAL USERS", allUsers.length, "#1F2937"],
-          [
-            "OPEN BOUNTIES",
-            allBounties.filter((b) => b.status === "open").length,
-            "#22C55E",
-          ],
+          ["OPEN BOUNTIES", allBounties.filter((b) => b.status === "open").length, "#22C55E"],
         ].map(([label, val, color]) => (
-          <StatCard
-            key={label}
-            label={label}
-            value={String(val)}
-            sub=""
-            style={{ minWidth: 140 }}
-          />
+          <StatCard key={label} label={label} value={String(val)} sub="" style={{ minWidth: 140 }} />
         ))}
       </div>
 
@@ -7819,8 +6675,7 @@ const AdminPanelPage = ({ user, setPage, showToast }) => {
               background: tab === id ? "#1F2937" : "transparent",
               color: tab === id ? "#FDFBF7" : "#1F2937",
               border: "none",
-              borderTop:
-                tab === id ? "3px solid #E63636" : "3px solid transparent",
+              borderTop: tab === id ? "3px solid #E63636" : "3px solid transparent",
               borderRadius: 0,
               fontFamily: "var(--font-vt323), monospace",
               fontSize: 16,
@@ -7946,9 +6801,7 @@ const AdminPanelPage = ({ user, setPage, showToast }) => {
                 <tbody>
                   {applications.map((a) => (
                     <tr key={a.id}>
-                      <td style={{ fontWeight: 600, fontSize: 13 }}>
-                        {a.userName || a.userId}
-                      </td>
+                      <td style={{ fontWeight: 600, fontSize: 13 }}>{a.userName || a.userId}</td>
                       <td className="vt" style={{ fontSize: 13 }}>
                         {a.cohortId}
                       </td>
@@ -7989,10 +6842,7 @@ const AdminPanelPage = ({ user, setPage, showToast }) => {
                           </div>
                         )}
                         {a.status !== "pending" && (
-                          <span
-                            className="vt"
-                            style={{ fontSize: 13, opacity: 0.4 }}
-                          >
+                          <span className="vt" style={{ fontSize: 13, opacity: 0.4 }}>
                             REVIEWED
                           </span>
                         )}
@@ -8047,21 +6897,13 @@ const AdminPanelPage = ({ user, setPage, showToast }) => {
                         >
                           {u.avatar || "?"}
                         </div>
-                        <span style={{ fontWeight: 600, fontSize: 13 }}>
-                          {u.name}
-                        </span>
+                        <span style={{ fontWeight: 600, fontSize: 13 }}>{u.name}</span>
                       </div>
                     </td>
                     <td style={{ fontSize: 12, opacity: 0.65 }}>{u.email}</td>
                     <td>
                       <span
-                        className={
-                          u.role === "admin"
-                            ? "tag-accent"
-                            : u.role === "researcher"
-                              ? "tag-green"
-                              : "tag-yellow"
-                        }
+                        className={u.role === "admin" ? "tag-accent" : u.role === "researcher" ? "tag-green" : "tag-yellow"}
                         style={{ fontSize: 11 }}
                       >
                         {u.role?.toUpperCase()}
@@ -8096,9 +6938,7 @@ const AdminPanelPage = ({ user, setPage, showToast }) => {
               <tbody>
                 {allBounties.map((b) => (
                   <tr key={b.id}>
-                    <td
-                      style={{ fontWeight: 600, fontSize: 12, maxWidth: 200 }}
-                    >
+                    <td style={{ fontWeight: 600, fontSize: 12, maxWidth: 200 }}>
                       {b.title.slice(0, 50)}
                       {b.title.length > 50 ? "…" : ""}
                     </td>
@@ -8118,15 +6958,10 @@ const AdminPanelPage = ({ user, setPage, showToast }) => {
                       {b.reward}
                     </td>
                     <td className="vt" style={{ fontSize: 14 }}>
-                      {proposals.filter((p) => p.bountyId === b.id).length ||
-                        b.applicants ||
-                        0}
+                      {proposals.filter((p) => p.bountyId === b.id).length || b.applicants || 0}
                     </td>
                     <td>
-                      <span
-                        className={b.status === "open" ? "tag-green" : "tag"}
-                        style={{ fontSize: 11 }}
-                      >
+                      <span className={b.status === "open" ? "tag-green" : "tag"} style={{ fontSize: 11 }}>
                         {(b.status || "open").toUpperCase()}
                       </span>
                     </td>
@@ -8157,12 +6992,7 @@ const ResearchTerminalPage = ({ user, setPage }) => {
   const [topicFocus, setTopicFocus] = useState(null);
   const inputRef = useRef(null);
 
-  const allPapers = [
-    ...SEED_PAPERS,
-    ...dbRead("ax_submitted_papers", []).filter(
-      (p) => p.status === "published",
-    ),
-  ];
+  const allPapers = [...SEED_PAPERS, ...dbRead("ax_submitted_papers", []).filter((p) => p.status === "published")];
 
   const topicCounts = allPapers.reduce((acc, p) => {
     acc[p.topic] = (acc[p.topic] || 0) + 1;
@@ -8207,9 +7037,7 @@ const ResearchTerminalPage = ({ user, setPage }) => {
         {
           type: "stat",
           label: "Total downloads",
-          val: allPapers
-            .reduce((s, p) => s + (p.downloads || 0), 0)
-            .toLocaleString(),
+          val: allPapers.reduce((s, p) => s + (p.downloads || 0), 0).toLocaleString(),
         },
         {
           type: "stat",
@@ -8235,13 +7063,8 @@ const ResearchTerminalPage = ({ user, setPage }) => {
     }
 
     if (cmd === "/top") {
-      const top = [...allPapers]
-        .sort((a, b) => (b.citations || 0) - (a.citations || 0))
-        .slice(0, 5);
-      addHistory([
-        { type: "output", text: "TOP PAPERS BY CITATIONS:" },
-        ...top.map((p, i) => ({ type: "paper", rank: i + 1, paper: p })),
-      ]);
+      const top = [...allPapers].sort((a, b) => (b.citations || 0) - (a.citations || 0)).slice(0, 5);
+      addHistory([{ type: "output", text: "TOP PAPERS BY CITATIONS:" }, ...top.map((p, i) => ({ type: "paper", rank: i + 1, paper: p }))]);
       setResults(top);
       return;
     }
@@ -8253,7 +7076,7 @@ const ResearchTerminalPage = ({ user, setPage }) => {
         p.title.toLowerCase().includes(q2) ||
         (p.abstract || "").toLowerCase().includes(q2) ||
         (p.topic || "").toLowerCase().includes(q2) ||
-        (p.authors || []).join(" ").toLowerCase().includes(q2),
+        (p.authors || []).join(" ").toLowerCase().includes(q2)
     );
     addHistory([
       {
@@ -8261,9 +7084,7 @@ const ResearchTerminalPage = ({ user, setPage }) => {
         text: `QUERY: "${q}" — Found ${found.length} result${found.length !== 1 ? "s" : ""}`,
       },
       ...found.map((p, i) => ({ type: "paper", rank: i + 1, paper: p })),
-      ...(found.length === 0
-        ? [{ type: "dim", text: "No matching papers. Try /top or /trending." }]
-        : []),
+      ...(found.length === 0 ? [{ type: "dim", text: "No matching papers. Try /top or /trending." }] : []),
     ]);
     setResults(found.length > 0 ? found : null);
   };
@@ -8273,20 +7094,13 @@ const ResearchTerminalPage = ({ user, setPage }) => {
       <div style={{ marginBottom: 24 }}>
         <SectionLabel>RESEARCH INTELLIGENCE</SectionLabel>
         <h1 className="section-title">Research Terminal</h1>
-        <p className="section-subtitle">
-          Search the archive. Analyse citations. Surface trends.
-        </p>
+        <p className="section-subtitle">Search the archive. Analyse citations. Surface trends.</p>
       </div>
 
-      <div
-        style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 20 }}
-      >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 20 }}>
         {/* Main terminal */}
         <div>
-          <TerminalPanel
-            title="ATHENAX_TERMINAL.sys"
-            headerRight="v5.0 · READY"
-          >
+          <TerminalPanel title="ATHENAX_TERMINAL.sys" headerRight="v5.0 · READY">
             {/* Output history */}
             <div
               style={{
@@ -8342,10 +7156,7 @@ const ResearchTerminalPage = ({ user, setPage }) => {
                 if (line.type === "rank")
                   return (
                     <div key={i}>
-                      <span
-                        className="term-red"
-                        style={{ minWidth: 28, display: "inline-block" }}
-                      >
+                      <span className="term-red" style={{ minWidth: 28, display: "inline-block" }}>
                         #{line.rank}
                       </span>
                       <span className="term-green">{line.label} </span>
@@ -8363,29 +7174,17 @@ const ResearchTerminalPage = ({ user, setPage }) => {
                         marginTop: 2,
                         cursor: "pointer",
                       }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.background =
-                          "rgba(255,255,255,0.04)")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.background = "transparent")
-                      }
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                     >
-                      <span
-                        className="term-red"
-                        style={{ minWidth: 28, display: "inline-block" }}
-                      >
+                      <span className="term-red" style={{ minWidth: 28, display: "inline-block" }}>
                         #{line.rank}
                       </span>
                       <span style={{ color: "#FDFBF7" }}>
                         {line.paper.title.slice(0, 70)}
                         {line.paper.title.length > 70 ? "…" : ""}
                       </span>
-                      <span
-                        style={{ opacity: 0.4, marginLeft: 12, fontSize: 13 }}
-                      >
-                        {line.paper.citations || 0} cite
-                      </span>
+                      <span style={{ opacity: 0.4, marginLeft: 12, fontSize: 13 }}>{line.paper.citations || 0} cite</span>
                     </div>
                   );
                 return null;
@@ -8400,10 +7199,7 @@ const ResearchTerminalPage = ({ user, setPage }) => {
                 paddingTop: 10,
               }}
             >
-              <span
-                className="term-green"
-                style={{ flexShrink: 0, marginRight: 8 }}
-              >
+              <span className="term-green" style={{ flexShrink: 0, marginRight: 8 }}>
                 $
               </span>
               <input
@@ -8441,9 +7237,7 @@ const ResearchTerminalPage = ({ user, setPage }) => {
           </TerminalPanel>
 
           {/* Quick commands */}
-          <div
-            style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap" }}
-          >
+          <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap" }}>
             {[
               ["/top", "Top Papers"],
               ["/trending", "Trending Topics"],
@@ -8451,12 +7245,7 @@ const ResearchTerminalPage = ({ user, setPage }) => {
               ["ZK Proofs", "Search ZK"],
               ["DAO", "Search DAO"],
             ].map(([cmd, label]) => (
-              <button
-                key={cmd}
-                onClick={() => runQuery(cmd)}
-                className="btn btn-ghost btn-sm"
-                style={{ fontSize: 14 }}
-              >
+              <button key={cmd} onClick={() => runQuery(cmd)} className="btn btn-ghost btn-sm" style={{ fontSize: 14 }}>
                 {label}
               </button>
             ))}
@@ -8469,11 +7258,7 @@ const ResearchTerminalPage = ({ user, setPage }) => {
             {trending.map(([topic, count], i) => {
               const max = trending[0]?.[1] || 1;
               return (
-                <div
-                  key={topic}
-                  style={{ marginBottom: 10, cursor: "pointer" }}
-                  onClick={() => runQuery(topic)}
-                >
+                <div key={topic} style={{ marginBottom: 10, cursor: "pointer" }} onClick={() => runQuery(topic)}>
                   <div
                     style={{
                       display: "flex",
@@ -8481,21 +7266,13 @@ const ResearchTerminalPage = ({ user, setPage }) => {
                       marginBottom: 3,
                     }}
                   >
-                    <span style={{ fontSize: 12, fontWeight: 500 }}>
-                      {topic}
-                    </span>
-                    <span
-                      className="vt"
-                      style={{ fontSize: 13, color: "#E63636" }}
-                    >
+                    <span style={{ fontSize: 12, fontWeight: 500 }}>{topic}</span>
+                    <span className="vt" style={{ fontSize: 13, color: "#E63636" }}>
                       {count}
                     </span>
                   </div>
                   <div className="progress-track">
-                    <div
-                      className="progress-fill"
-                      style={{ width: `${(count / max) * 100}%` }}
-                    />
+                    <div className="progress-fill" style={{ width: `${(count / max) * 100}%` }} />
                   </div>
                 </div>
               );
@@ -8524,10 +7301,7 @@ const ResearchTerminalPage = ({ user, setPage }) => {
                       alignItems: "flex-start",
                     }}
                   >
-                    <span
-                      className="vt"
-                      style={{ fontSize: 16, color: "#E63636", flexShrink: 0 }}
-                    >
+                    <span className="vt" style={{ fontSize: 16, color: "#E63636", flexShrink: 0 }}>
                       #{i + 1}
                     </span>
                     <div>
@@ -8541,10 +7315,7 @@ const ResearchTerminalPage = ({ user, setPage }) => {
                       >
                         {p.title.slice(0, 50)}…
                       </div>
-                      <span
-                        className="vt"
-                        style={{ fontSize: 13, opacity: 0.5 }}
-                      >
+                      <span className="vt" style={{ fontSize: 13, opacity: 0.5 }}>
                         {p.citations} CITE · {p.year}
                       </span>
                     </div>
@@ -8755,29 +7526,16 @@ const TalentMarketplacePage = ({ user, setPage, showToast }) => {
       <div style={{ marginBottom: 32 }}>
         <SectionLabel>TALENT INFRASTRUCTURE</SectionLabel>
         <h1 className="section-title">Talent Marketplace</h1>
-        <p className="section-subtitle">
-          Connect credentialed researchers with protocols, startups, and
-          fellowship programs.
-        </p>
+        <p className="section-subtitle">Connect credentialed researchers with protocols, startups, and fellowship programs.</p>
       </div>
 
       <TerminalPanel title="MARKET_STATUS.sys" style={{ marginBottom: 24 }}>
         <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
           {[
-            [
-              "RESEARCHERS",
-              TALENT_RESEARCHERS.filter((r) => r.available).length +
-                " AVAILABLE",
-            ],
+            ["RESEARCHERS", TALENT_RESEARCHERS.filter((r) => r.available).length + " AVAILABLE"],
             ["OPEN ROLES", PROTOCOL_ROLES.length + " LISTINGS"],
             ["FELLOWSHIPS", FELLOWSHIPS.length + " PROGRAMS"],
-            [
-              "AVG ARS",
-              (
-                TALENT_RESEARCHERS.reduce((s, r) => s + r.ars, 0) /
-                TALENT_RESEARCHERS.length
-              ).toFixed(1),
-            ],
+            ["AVG ARS", (TALENT_RESEARCHERS.reduce((s, r) => s + r.ars, 0) / TALENT_RESEARCHERS.length).toFixed(1)],
           ].map(([k, v]) => (
             <span key={k}>
               <span className="term-dim">{k}: </span>
@@ -8804,10 +7562,7 @@ const TalentMarketplacePage = ({ user, setPage, showToast }) => {
               background: activeSection === id ? "#1F2937" : "transparent",
               color: activeSection === id ? "#FDFBF7" : "#1F2937",
               border: "none",
-              borderTop:
-                activeSection === id
-                  ? "3px solid #E63636"
-                  : "3px solid transparent",
+              borderTop: activeSection === id ? "3px solid #E63636" : "3px solid transparent",
               fontFamily: "var(--font-vt323), monospace",
               fontSize: 17,
               letterSpacing: "0.06em",
@@ -8830,10 +7585,7 @@ const TalentMarketplacePage = ({ user, setPage, showToast }) => {
             }}
           >
             {TALENT_RESEARCHERS.map((r) => (
-              <WindowCard
-                key={r.id}
-                title={`RES_${r.id.toUpperCase()}.profile`}
-              >
+              <WindowCard key={r.id} title={`RES_${r.id.toUpperCase()}.profile`}>
                 <div
                   style={{
                     display: "flex",
@@ -8875,11 +7627,7 @@ const TalentMarketplacePage = ({ user, setPage, showToast }) => {
                   </div>
                 </div>
                 <div style={{ marginBottom: 10 }}>
-                  <div
-                    style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}
-                  >
-                    {r.role}
-                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{r.role}</div>
                   <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                     {r.tags.map((t) => (
                       <span key={t} className="tag" style={{ fontSize: 11 }}>
@@ -8904,10 +7652,7 @@ const TalentMarketplacePage = ({ user, setPage, showToast }) => {
                   >
                     ARS {r.ars}
                   </span>
-                  <span
-                    className={r.available ? "tag-green" : "tag"}
-                    style={{ fontSize: 11 }}
-                  >
+                  <span className={r.available ? "tag-green" : "tag"} style={{ fontSize: 11 }}>
                     {r.available ? "◉ AVAILABLE" : "○ ENGAGED"}
                   </span>
                 </div>
@@ -8937,10 +7682,7 @@ const TalentMarketplacePage = ({ user, setPage, showToast }) => {
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {PROTOCOL_ROLES.map((role) => (
             <div key={role.id} className="window-card">
-              <div
-                className="window-header"
-                style={{ justifyContent: "space-between" }}
-              >
+              <div className="window-header" style={{ justifyContent: "space-between" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <TrafficLights />
                   <span className="vt" style={{ fontSize: 13 }}>
@@ -9022,14 +7764,8 @@ const TalentMarketplacePage = ({ user, setPage, showToast }) => {
           }}
         >
           {FELLOWSHIPS.map((f) => (
-            <WindowCard
-              key={f.id}
-              title={`FELLOWSHIP_${f.id.toUpperCase()}.sys`}
-            >
-              <div
-                className="vt"
-                style={{ fontSize: 13, color: "#E63636", marginBottom: 6 }}
-              >
+            <WindowCard key={f.id} title={`FELLOWSHIP_${f.id.toUpperCase()}.sys`}>
+              <div className="vt" style={{ fontSize: 13, color: "#E63636", marginBottom: 6 }}>
                 ◆ {f.org}
               </div>
               <h3
@@ -9157,10 +7893,7 @@ const TalentMarketplacePage = ({ user, setPage, showToast }) => {
             <div style={{ padding: 24 }}>
               {!user ? (
                 <div style={{ textAlign: "center", padding: "16px 0" }}>
-                  <div
-                    className="vt"
-                    style={{ fontSize: 16, opacity: 0.5, marginBottom: 14 }}
-                  >
+                  <div className="vt" style={{ fontSize: 16, opacity: 0.5, marginBottom: 14 }}>
                     SIGN IN TO APPLY
                   </div>
                   <button
@@ -9186,11 +7919,7 @@ const TalentMarketplacePage = ({ user, setPage, showToast }) => {
                       borderRadius: 6,
                     }}
                   >
-                    {applying.org && (
-                      <div style={{ opacity: 0.5, marginBottom: 2 }}>
-                        ◆ {applying.org}
-                      </div>
-                    )}
+                    {applying.org && <div style={{ opacity: 0.5, marginBottom: 2 }}>◆ {applying.org}</div>}
                     <div style={{ fontSize: 17 }}>{applying.title}</div>
                   </div>
                   <label
@@ -9222,11 +7951,7 @@ const TalentMarketplacePage = ({ user, setPage, showToast }) => {
                       marginBottom: 16,
                     }}
                   />
-                  <button
-                    className="btn btn-primary"
-                    style={{ width: "100%", fontSize: 19 }}
-                    onClick={submitApp}
-                  >
+                  <button className="btn btn-primary" style={{ width: "100%", fontSize: 19 }} onClick={submitApp}>
                     SUBMIT APPLICATION
                   </button>
                 </>
@@ -9251,14 +7976,12 @@ const REPORTS = [
     date: "2024-Q4",
     pages: 48,
     downloads: 3240,
-    abstract:
-      "The foundational whitepaper outlining AthenaX's architecture, incentive design, ARS scoring, and long-term research network vision.",
+    abstract: "The foundational whitepaper outlining AthenaX's architecture, incentive design, ARS scoring, and long-term research network vision.",
   },
   {
     id: "rp2",
     type: "ECOSYSTEM REPORT",
-    title:
-      "State of Web3 Research 2024: Funding, Output, and Protocol Adoption",
+    title: "State of Web3 Research 2024: Funding, Output, and Protocol Adoption",
     authors: "AthenaX Research Team",
     date: "2024-Q4",
     pages: 92,
@@ -9269,8 +7992,7 @@ const REPORTS = [
   {
     id: "rp3",
     type: "WHITEPAPER",
-    title:
-      "ARS: A Reputation Scoring System for Decentralised Academic Research",
+    title: "ARS: A Reputation Scoring System for Decentralised Academic Research",
     authors: "Dr. Yuki Tanaka, AthenaX",
     date: "2024-Q3",
     pages: 32,
@@ -9292,8 +8014,7 @@ const REPORTS = [
   {
     id: "rp5",
     type: "QUARTERLY BRIEF",
-    title:
-      "Q3 2024 Research Digest: Layer 2 Scaling and Cross-chain Interoperability",
+    title: "Q3 2024 Research Digest: Layer 2 Scaling and Cross-chain Interoperability",
     authors: "AthenaX Research Team",
     date: "2024-Q3",
     pages: 22,
@@ -9304,52 +8025,35 @@ const REPORTS = [
   {
     id: "rp6",
     type: "ECOSYSTEM REPORT",
-    title:
-      "Talent Report 2024: Where Web3 Researchers Are, and Where Protocols Need Them",
+    title: "Talent Report 2024: Where Web3 Researchers Are, and Where Protocols Need Them",
     authors: "AthenaX Talent Team",
     date: "2024-Q4",
     pages: 36,
     downloads: 2870,
-    abstract:
-      "Mapping of researcher supply and protocol demand across Web3's key research areas, with salary benchmarks and fellowship impact data.",
+    abstract: "Mapping of researcher supply and protocol demand across Web3's key research areas, with salary benchmarks and fellowship impact data.",
   },
 ];
 
 const ResearchReportsPage = ({ setPage }) => {
   const [typeFilter, setTypeFilter] = useState("ALL");
   const types = ["ALL", ...Array.from(new Set(REPORTS.map((r) => r.type)))];
-  const filtered =
-    typeFilter === "ALL"
-      ? REPORTS
-      : REPORTS.filter((r) => r.type === typeFilter);
+  const filtered = typeFilter === "ALL" ? REPORTS : REPORTS.filter((r) => r.type === typeFilter);
 
   return (
     <div className="page-enter page-container">
       <div style={{ marginBottom: 32 }}>
         <SectionLabel>OFFICIAL PUBLICATIONS</SectionLabel>
         <h1 className="section-title">AthenaX Research Reports</h1>
-        <p className="section-subtitle">
-          Whitepapers, ecosystem analyses, and quarterly research digests from
-          the AthenaX team.
-        </p>
+        <p className="section-subtitle">Whitepapers, ecosystem analyses, and quarterly research digests from the AthenaX team.</p>
       </div>
 
       <TerminalPanel title="ARCHIVE_INDEX.sys" style={{ marginBottom: 24 }}>
         <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
           {[
             ["DOCUMENTS", REPORTS.length],
-            [
-              "TOTAL DOWNLOADS",
-              REPORTS.reduce((s, r) => s + r.downloads, 0).toLocaleString(),
-            ],
-            [
-              "WHITEPAPERS",
-              REPORTS.filter((r) => r.type === "WHITEPAPER").length,
-            ],
-            [
-              "QUARTERLY BRIEFS",
-              REPORTS.filter((r) => r.type === "QUARTERLY BRIEF").length,
-            ],
+            ["TOTAL DOWNLOADS", REPORTS.reduce((s, r) => s + r.downloads, 0).toLocaleString()],
+            ["WHITEPAPERS", REPORTS.filter((r) => r.type === "WHITEPAPER").length],
+            ["QUARTERLY BRIEFS", REPORTS.filter((r) => r.type === "QUARTERLY BRIEF").length],
           ].map(([k, v]) => (
             <span key={k}>
               <span className="term-dim">{k}: </span>
@@ -9360,9 +8064,7 @@ const ResearchReportsPage = ({ setPage }) => {
       </TerminalPanel>
 
       {/* Type filter */}
-      <div
-        style={{ display: "flex", gap: 6, marginBottom: 24, flexWrap: "wrap" }}
-      >
+      <div style={{ display: "flex", gap: 6, marginBottom: 24, flexWrap: "wrap" }}>
         {types.map((t) => (
           <button
             key={t}
@@ -9382,10 +8084,7 @@ const ResearchReportsPage = ({ setPage }) => {
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {filtered.map((r) => (
           <div key={r.id} className="window-card">
-            <div
-              className="window-header"
-              style={{ justifyContent: "space-between" }}
-            >
+            <div className="window-header" style={{ justifyContent: "space-between" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <TrafficLights />
                 <span className="vt" style={{ fontSize: 13 }}>
@@ -9421,15 +8120,10 @@ const ResearchReportsPage = ({ setPage }) => {
                   >
                     {r.title}
                   </h3>
-                  <div
-                    className="vt"
-                    style={{ fontSize: 14, opacity: 0.5, marginBottom: 8 }}
-                  >
+                  <div className="vt" style={{ fontSize: 14, opacity: 0.5, marginBottom: 8 }}>
                     BY: {r.authors}
                   </div>
-                  <p style={{ fontSize: 13, lineHeight: 1.65, opacity: 0.7 }}>
-                    {r.abstract}
-                  </p>
+                  <p style={{ fontSize: 13, lineHeight: 1.65, opacity: 0.7 }}>{r.abstract}</p>
                 </div>
                 <div style={{ flexShrink: 0, textAlign: "right" }}>
                   <div
@@ -9442,10 +8136,7 @@ const ResearchReportsPage = ({ setPage }) => {
                   >
                     {r.downloads.toLocaleString()}
                   </div>
-                  <div
-                    className="vt"
-                    style={{ fontSize: 12, opacity: 0.4, marginBottom: 14 }}
-                  >
+                  <div className="vt" style={{ fontSize: 12, opacity: 0.4, marginBottom: 14 }}>
                     DOWNLOADS
                   </div>
                   <button
@@ -9459,10 +8150,7 @@ const ResearchReportsPage = ({ setPage }) => {
                   >
                     ▤ READ PDF
                   </button>
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    style={{ fontSize: 14, display: "block", width: "100%" }}
-                  >
+                  <button className="btn btn-secondary btn-sm" style={{ fontSize: 14, display: "block", width: "100%" }}>
                     ↓ DOWNLOAD
                   </button>
                 </div>
@@ -9584,10 +8272,7 @@ const AthenaXLivePage = ({ user, setPage, showToast }) => {
       <div style={{ marginBottom: 32 }}>
         <SectionLabel>LIVE RESEARCH MEDIA</SectionLabel>
         <h1 className="section-title">AthenaX Live</h1>
-        <p className="section-subtitle">
-          Live research streams, recorded talks, and protocol design sessions
-          from the AthenaX network.
-        </p>
+        <p className="section-subtitle">Live research streams, recorded talks, and protocol design sessions from the AthenaX network.</p>
       </div>
 
       {/* Next event banner */}
@@ -9607,10 +8292,7 @@ const AthenaXLivePage = ({ user, setPage, showToast }) => {
         }}
       >
         <div>
-          <div
-            className="vt"
-            style={{ fontSize: 13, color: "#E63636", marginBottom: 4 }}
-          >
+          <div className="vt" style={{ fontSize: 13, color: "#E63636", marginBottom: 4 }}>
             ● NEXT LIVE · {LIVE_UPCOMING[0].date} · {LIVE_UPCOMING[0].time}
           </div>
           <div
@@ -9622,19 +8304,11 @@ const AthenaXLivePage = ({ user, setPage, showToast }) => {
           >
             {LIVE_UPCOMING[0].title}
           </div>
-          <div
-            className="vt"
-            style={{ fontSize: 14, opacity: 0.5, marginTop: 4 }}
-          >
-            HOST: {LIVE_UPCOMING[0].host} · {LIVE_UPCOMING[0].attendees}{" "}
-            REGISTERED
+          <div className="vt" style={{ fontSize: 14, opacity: 0.5, marginTop: 4 }}>
+            HOST: {LIVE_UPCOMING[0].host} · {LIVE_UPCOMING[0].attendees} REGISTERED
           </div>
         </div>
-        <button
-          className="btn btn-primary"
-          style={{ fontSize: 18, flexShrink: 0 }}
-          onClick={() => register(LIVE_UPCOMING[0])}
-        >
+        <button className="btn btn-primary" style={{ fontSize: 18, flexShrink: 0 }} onClick={() => register(LIVE_UPCOMING[0])}>
           REGISTER ◎
         </button>
       </div>
@@ -9659,8 +8333,7 @@ const AthenaXLivePage = ({ user, setPage, showToast }) => {
               background: tab === id ? "#1F2937" : "transparent",
               color: tab === id ? "#FDFBF7" : "#1F2937",
               border: "none",
-              borderTop:
-                tab === id ? "3px solid #E63636" : "3px solid transparent",
+              borderTop: tab === id ? "3px solid #E63636" : "3px solid transparent",
               borderRadius: 0,
               fontFamily: "var(--font-inter), sans-serif",
               fontWeight: 600,
@@ -9679,10 +8352,7 @@ const AthenaXLivePage = ({ user, setPage, showToast }) => {
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {LIVE_UPCOMING.map((ev) => (
             <div key={ev.id} className="window-card">
-              <div
-                className="window-header"
-                style={{ justifyContent: "space-between" }}
-              >
+              <div className="window-header" style={{ justifyContent: "space-between" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <TrafficLights />
                   <span className="vt" style={{ fontSize: 13 }}>
@@ -9720,11 +8390,7 @@ const AthenaXLivePage = ({ user, setPage, showToast }) => {
                       HOST: {ev.host} · {ev.attendees} REGISTERED
                     </div>
                   </div>
-                  <button
-                    className="btn btn-primary btn-sm"
-                    style={{ fontSize: 15, flexShrink: 0 }}
-                    onClick={() => register(ev)}
-                  >
+                  <button className="btn btn-primary btn-sm" style={{ fontSize: 15, flexShrink: 0 }} onClick={() => register(ev)}>
                     REGISTER
                   </button>
                 </div>
@@ -9756,10 +8422,7 @@ const AthenaXLivePage = ({ user, setPage, showToast }) => {
                   border: "1px solid rgba(255,255,255,0.08)",
                 }}
               >
-                <span
-                  className="vt"
-                  style={{ fontSize: 32, color: "rgba(230,54,54,0.6)" }}
-                >
+                <span className="vt" style={{ fontSize: 32, color: "rgba(230,54,54,0.6)" }}>
                   ▸
                 </span>
               </div>
@@ -9778,10 +8441,7 @@ const AthenaXLivePage = ({ user, setPage, showToast }) => {
               >
                 {v.title}
               </h3>
-              <div
-                className="vt"
-                style={{ fontSize: 13, opacity: 0.45, marginBottom: 10 }}
-              >
+              <div className="vt" style={{ fontSize: 13, opacity: 0.45, marginBottom: 10 }}>
                 {v.host} · {v.date} · {v.duration}
               </div>
               <div
@@ -9800,10 +8460,7 @@ const AthenaXLivePage = ({ user, setPage, showToast }) => {
                 >
                   {v.views.toLocaleString()} views
                 </span>
-                <button
-                  className="btn btn-primary btn-sm"
-                  style={{ fontSize: 15 }}
-                >
+                <button className="btn btn-primary btn-sm" style={{ fontSize: 15 }}>
                   ▸ WATCH
                 </button>
               </div>
@@ -9822,18 +8479,13 @@ const ROUNDTABLES = [
   {
     id: "rt1",
     title: "Is DAO Governance Fundamentally Broken?",
-    participants: [
-      "Prof. Vili Lehdonvirta",
-      "Dr. Clara Jensen",
-      "Kain Warwick",
-    ],
+    participants: ["Prof. Vili Lehdonvirta", "Dr. Clara Jensen", "Kain Warwick"],
     date: "2024-12-15",
     duration: "94 min",
     views: 6210,
     topic: "DAO Governance",
     format: "DEBATE",
-    summary:
-      "A structured academic debate examining whether token-weighted voting is structurally incompatible with effective governance at scale.",
+    summary: "A structured academic debate examining whether token-weighted voting is structurally incompatible with effective governance at scale.",
   },
   {
     id: "rt2",
@@ -9844,17 +8496,12 @@ const ROUNDTABLES = [
     views: 5480,
     topic: "ZK Proofs",
     format: "ROUNDTABLE",
-    summary:
-      "Leading ZK researchers debate the gap between academic proof systems and what actually ships in production rollups today.",
+    summary: "Leading ZK researchers debate the gap between academic proof systems and what actually ships in production rollups today.",
   },
   {
     id: "rt3",
     title: "Protocol Incentive Design: Where Game Theory Breaks Down",
-    participants: [
-      "Dr. Felix Chen",
-      "Dr. James McCarthy",
-      "Prof. Tim Roughgarden",
-    ],
+    participants: ["Dr. Felix Chen", "Dr. James McCarthy", "Prof. Tim Roughgarden"],
     date: "2024-11-08",
     duration: "88 min",
     views: 4190,
@@ -9866,18 +8513,13 @@ const ROUNDTABLES = [
   {
     id: "rt4",
     title: "Digital Nations and the Future of Sovereignty",
-    participants: [
-      "Prof. Vili Lehdonvirta",
-      "Balaji Srinivasan",
-      "Dr. Markus Ante",
-    ],
+    participants: ["Prof. Vili Lehdonvirta", "Balaji Srinivasan", "Dr. Markus Ante"],
     date: "2024-10-25",
     duration: "106 min",
     views: 8320,
     topic: "Digital Nations",
     format: "DEBATE",
-    summary:
-      "High-stakes debate on whether network states represent genuine political innovation or techno-libertarian fantasy.",
+    summary: "High-stakes debate on whether network states represent genuine political innovation or techno-libertarian fantasy.",
   },
   {
     id: "rt5",
@@ -9888,8 +8530,7 @@ const ROUNDTABLES = [
     views: 3870,
     topic: "AI Agents",
     format: "ROUNDTABLE",
-    summary:
-      "Examining the dual-use nature of autonomous AI agents operating on-chain, from MEV bots to protocol governance participants.",
+    summary: "Examining the dual-use nature of autonomous AI agents operating on-chain, from MEV bots to protocol governance participants.",
   },
   {
     id: "rt6",
@@ -9907,14 +8548,8 @@ const ROUNDTABLES = [
 
 const RoundtablesPage = ({ setPage }) => {
   const [topicFilter, setTopicFilter] = useState("ALL");
-  const topics = [
-    "ALL",
-    ...Array.from(new Set(ROUNDTABLES.map((r) => r.topic))),
-  ];
-  const filtered =
-    topicFilter === "ALL"
-      ? ROUNDTABLES
-      : ROUNDTABLES.filter((r) => r.topic === topicFilter);
+  const topics = ["ALL", ...Array.from(new Set(ROUNDTABLES.map((r) => r.topic)))];
+  const filtered = topicFilter === "ALL" ? ROUNDTABLES : ROUNDTABLES.filter((r) => r.topic === topicFilter);
   const formatColor = {
     DEBATE: "#E63636",
     ROUNDTABLE: "#F5A623",
@@ -9926,23 +8561,14 @@ const RoundtablesPage = ({ setPage }) => {
       <div style={{ marginBottom: 32 }}>
         <SectionLabel>ACADEMIC DISCOURSE</SectionLabel>
         <h1 className="section-title">Roundtable Discussions</h1>
-        <p className="section-subtitle">
-          Recorded debates, panels, and protocol design discussions from leading
-          Web3 researchers.
-        </p>
+        <p className="section-subtitle">Recorded debates, panels, and protocol design discussions from leading researchers in onchain and decentralized systems.</p>
       </div>
 
-      <TerminalPanel
-        title="DISCUSSION_ARCHIVE.sys"
-        style={{ marginBottom: 24 }}
-      >
+      <TerminalPanel title="DISCUSSION_ARCHIVE.sys" style={{ marginBottom: 24 }}>
         <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
           {[
             ["SESSIONS", ROUNDTABLES.length],
-            [
-              "TOTAL VIEWS",
-              ROUNDTABLES.reduce((s, r) => s + r.views, 0).toLocaleString(),
-            ],
+            ["TOTAL VIEWS", ROUNDTABLES.reduce((s, r) => s + r.views, 0).toLocaleString()],
             ["FORMATS", "3 (DEBATE·PANEL·ROUNDTABLE)"],
             ["TOPICS", topics.length - 1],
           ].map(([k, v]) => (
@@ -9954,9 +8580,7 @@ const RoundtablesPage = ({ setPage }) => {
         </div>
       </TerminalPanel>
 
-      <div
-        style={{ display: "flex", gap: 6, marginBottom: 24, flexWrap: "wrap" }}
-      >
+      <div style={{ display: "flex", gap: 6, marginBottom: 24, flexWrap: "wrap" }}>
         {topics.map((t) => (
           <button
             key={t}
@@ -9976,10 +8600,7 @@ const RoundtablesPage = ({ setPage }) => {
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {filtered.map((rt) => (
           <div key={rt.id} className="window-card">
-            <div
-              className="window-header"
-              style={{ justifyContent: "space-between" }}
-            >
+            <div className="window-header" style={{ justifyContent: "space-between" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <TrafficLights />
                 <span className="vt" style={{ fontSize: 13 }}>
@@ -10048,10 +8669,7 @@ const RoundtablesPage = ({ setPage }) => {
                   >
                     {rt.views.toLocaleString()}
                   </div>
-                  <div
-                    className="vt"
-                    style={{ fontSize: 12, opacity: 0.4, marginBottom: 14 }}
-                  >
+                  <div className="vt" style={{ fontSize: 12, opacity: 0.4, marginBottom: 14 }}>
                     VIEWS
                   </div>
                   <button
@@ -10065,10 +8683,7 @@ const RoundtablesPage = ({ setPage }) => {
                   >
                     ▸ WATCH
                   </button>
-                  <button
-                    className="btn btn-ghost btn-sm"
-                    style={{ fontSize: 13, display: "block", width: "100%" }}
-                  >
+                  <button className="btn btn-ghost btn-sm" style={{ fontSize: 13, display: "block", width: "100%" }}>
                     TRANSCRIPT
                   </button>
                 </div>
@@ -10138,12 +8753,7 @@ const TIERS = [
     price: "$0/mo",
     color: "rgba(31,41,55,0.06)",
     border: "rgba(31,41,55,0.2)",
-    features: [
-      "Weekly digest email",
-      "Top 3 papers",
-      "Topic filter",
-      "Archive access (last 4 weeks)",
-    ],
+    features: ["Weekly digest email", "Top 3 papers", "Topic filter", "Archive access (last 4 weeks)"],
   },
   {
     id: "pro",
@@ -10151,13 +8761,7 @@ const TIERS = [
     price: "$29/mo",
     color: "rgba(230,54,54,0.05)",
     border: "#E63636",
-    features: [
-      "Everything in Free",
-      "Full paper archive",
-      "Citation alerts",
-      "Early access to AthenaX reports",
-      "Researcher leaderboard digest",
-    ],
+    features: ["Everything in Free", "Full paper archive", "Citation alerts", "Early access to AthenaX reports", "Researcher leaderboard digest"],
   },
   {
     id: "proto",
@@ -10165,13 +8769,7 @@ const TIERS = [
     price: "$199/mo",
     color: "#DBEAFE",
     border: "#1F2937",
-    features: [
-      "Everything in Researcher",
-      "Custom topic monitoring",
-      "Bounty match alerts",
-      "Sponsor digest",
-      "API access to digest data",
-    ],
+    features: ["Everything in Researcher", "Custom topic monitoring", "Bounty match alerts", "Sponsor digest", "API access to digest data"],
   },
 ];
 
@@ -10192,28 +8790,19 @@ const ResearchDigestPage = ({ user, showToast }) => {
       showToast("Already subscribed.", "info");
       return;
     }
-    dbWrite("ax_digest_subs", [
-      ...subs,
-      { id: dbUid("sub"), email, tier, topics, createdAt: dbNow() },
-    ]);
+    dbWrite("ax_digest_subs", [...subs, { id: dbUid("sub"), email, tier, topics, createdAt: dbNow() }]);
     setSubbed(true);
     showToast("Subscribed to the Research Digest!", "success");
   };
 
-  const toggleTopic = (t) =>
-    setTopics((prev) =>
-      prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t],
-    );
+  const toggleTopic = (t) => setTopics((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
 
   return (
     <div className="page-enter page-container">
       <div style={{ marginBottom: 32 }}>
         <SectionLabel>WEEKLY INTELLIGENCE</SectionLabel>
         <h1 className="section-title">Research Digest</h1>
-        <p className="section-subtitle">
-          The definitive weekly briefing on Web3 academic research — curated,
-          cited, and delivered.
-        </p>
+        <p className="section-subtitle">The definitive weekly briefing on open research across protocol ecosystems — curated, cited, and delivered.</p>
       </div>
 
       {/* Hero subscribe box */}
@@ -10257,8 +8846,7 @@ const ResearchDigestPage = ({ user, showToast }) => {
               maxWidth: 560,
             }}
           >
-            Each week: the 5 most important papers, rising researchers to watch,
-            trending topics, and open bounties.
+            Each week: the 5 most important papers, rising researchers to watch, trending topics, and open bounties.
           </p>
 
           {/* Tier selector */}
@@ -10278,10 +8866,7 @@ const ResearchDigestPage = ({ user, showToast }) => {
                   cursor: "pointer",
                   border: `2px solid ${tier === t.id ? "#E63636" : "rgba(255,255,255,0.15)"}`,
                   padding: "12px 14px",
-                  background:
-                    tier === t.id
-                      ? "rgba(230,54,54,0.12)"
-                      : "rgba(255,255,255,0.04)",
+                  background: tier === t.id ? "rgba(230,54,54,0.12)" : "rgba(255,255,255,0.04)",
                   transition: "all 0.1s",
                 }}
               >
@@ -10326,11 +8911,7 @@ const ResearchDigestPage = ({ user, showToast }) => {
                 color: "#FDFBF7",
               }}
             />
-            <button
-              className="btn btn-primary"
-              style={{ fontSize: 19, flexShrink: 0, padding: "11px 28px" }}
-              onClick={subscribe}
-            >
+            <button className="btn btn-primary" style={{ fontSize: 19, flexShrink: 0, padding: "11px 28px" }} onClick={subscribe}>
               SUBSCRIBE →
             </button>
           </div>
@@ -10373,9 +8954,7 @@ const ResearchDigestPage = ({ user, showToast }) => {
         </div>
       )}
 
-      <div
-        style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 24 }}
-      >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 24 }}>
         {/* Past issues */}
         <div>
           <div
@@ -10391,11 +8970,7 @@ const ResearchDigestPage = ({ user, showToast }) => {
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {DIGEST_ISSUES.map((d) => (
-              <WindowCard
-                key={d.id}
-                title={`DIGEST_${d.issue} — ${d.date}`}
-                staticHover
-              >
+              <WindowCard key={d.id} title={`DIGEST_${d.issue} — ${d.date}`} staticHover>
                 <div
                   style={{
                     display: "grid",
@@ -10418,17 +8993,11 @@ const ResearchDigestPage = ({ user, showToast }) => {
                     <div className="vt" style={{ fontSize: 13, opacity: 0.45 }}>
                       FEATURED: {d.featured.slice(0, 50)}…
                     </div>
-                    <div
-                      className="vt"
-                      style={{ fontSize: 13, opacity: 0.35, marginTop: 3 }}
-                    >
+                    <div className="vt" style={{ fontSize: 13, opacity: 0.35, marginTop: 3 }}>
                       {d.papers} PAPERS · {d.downloads.toLocaleString()} READERS
                     </div>
                   </div>
-                  <button
-                    className="btn btn-ghost btn-sm"
-                    style={{ fontSize: 14, flexShrink: 0 }}
-                  >
+                  <button className="btn btn-ghost btn-sm" style={{ fontSize: 14, flexShrink: 0 }}>
                     READ →
                   </button>
                 </div>
@@ -10441,10 +9010,7 @@ const ResearchDigestPage = ({ user, showToast }) => {
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {/* Topic selector */}
           <WindowCard title="TOPIC_PREFERENCES.sys">
-            <div
-              className="vt"
-              style={{ fontSize: 13, opacity: 0.5, marginBottom: 10 }}
-            >
+            <div className="vt" style={{ fontSize: 13, opacity: 0.5, marginBottom: 10 }}>
               SELECT YOUR RESEARCH INTERESTS:
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -10454,13 +9020,9 @@ const ResearchDigestPage = ({ user, showToast }) => {
                   onClick={() => toggleTopic(t)}
                   style={{
                     cursor: "pointer",
-                    border: topics.includes(t)
-                      ? "2px solid #E63636"
-                      : "1.5px solid rgba(31,41,55,0.2)",
+                    border: topics.includes(t) ? "2px solid #E63636" : "1.5px solid rgba(31,41,55,0.2)",
                     padding: "7px 12px",
-                    background: topics.includes(t)
-                      ? "rgba(230,54,54,0.06)"
-                      : "transparent",
+                    background: topics.includes(t) ? "rgba(230,54,54,0.06)" : "transparent",
                     borderRadius: 6,
                     display: "flex",
                     justifyContent: "space-between",
@@ -10469,10 +9031,7 @@ const ResearchDigestPage = ({ user, showToast }) => {
                 >
                   <span style={{ fontSize: 13 }}>{t}</span>
                   {topics.includes(t) && (
-                    <span
-                      className="vt"
-                      style={{ fontSize: 14, color: "#E63636" }}
-                    >
+                    <span className="vt" style={{ fontSize: 14, color: "#E63636" }}>
                       ✓
                     </span>
                   )}
@@ -10513,10 +9072,7 @@ const ResearchDigestPage = ({ user, showToast }) => {
                   </span>
                 </div>
                 {t.features.map((f) => (
-                  <div
-                    key={f}
-                    style={{ fontSize: 12, opacity: 0.6, marginBottom: 2 }}
-                  >
+                  <div key={f} style={{ fontSize: 12, opacity: 0.6, marginBottom: 2 }}>
                     ▸ {f}
                   </div>
                 ))}
@@ -10543,32 +9099,20 @@ const buildGraphData = () => {
 
   // Unique topics
   const topics = [...new Set(SEED_PAPERS.map((p) => p.topic))];
-  topics.forEach((t) =>
-    push({ id: `topic_${t}`, type: "topic", label: t, meta: {} }),
-  );
+  topics.forEach((t) => push({ id: `topic_${t}`, type: "topic", label: t, meta: {} }));
 
   // Universities
-  const unis = [
-    ...new Set([
-      ...SEED_PAPERS.map((p) => p.university),
-      ...SEED_RESEARCHERS.map((r) => r.university),
-    ]),
-  ];
-  unis.forEach((u) =>
-    push({ id: `uni_${u}`, type: "university", label: u, meta: {} }),
-  );
+  const unis = [...new Set([...SEED_PAPERS.map((p) => p.university), ...SEED_RESEARCHERS.map((r) => r.university)])];
+  unis.forEach((u) => push({ id: `uni_${u}`, type: "university", label: u, meta: {} }));
 
   // Labs
   SEED_LABS.forEach((l) => {
     push({ id: l.id, type: "lab", label: l.name, meta: l });
     // lab → university
-    l.partners.forEach((u) =>
-      edges.push({ source: l.id, target: `uni_${u}`, rel: "affiliated" }),
-    );
+    l.partners.forEach((u) => edges.push({ source: l.id, target: `uni_${u}`, rel: "affiliated" }));
     // lab → topic
     l.tags.forEach((t) => {
-      if (topics.includes(t))
-        edges.push({ source: l.id, target: `topic_${t}`, rel: "researches" });
+      if (topics.includes(t)) edges.push({ source: l.id, target: `topic_${t}`, rel: "researches" });
     });
   });
 
@@ -10587,10 +9131,7 @@ const buildGraphData = () => {
       meta: r,
     });
     // researcher → lab
-    const lab = SEED_LABS.find(
-      (l) =>
-        l.name === r.lab || l.name.includes(r.lab) || r.lab.includes(l.name),
-    );
+    const lab = SEED_LABS.find((l) => l.name === r.lab || l.name.includes(r.lab) || r.lab.includes(l.name));
     if (lab) edges.push({ source: r.id, target: lab.id, rel: "works_at" });
     // researcher → university
     edges.push({
@@ -10623,8 +9164,7 @@ const buildGraphData = () => {
     const bounty = SEED_BOUNTIES.find((b) => b.topic === p.topic);
     if (bounty) {
       const sid = `sponsor_${bounty.sponsor}`;
-      if (nodes.find((n) => n.id === sid))
-        edges.push({ source: pid, target: sid, rel: "funded_by" });
+      if (nodes.find((n) => n.id === sid)) edges.push({ source: pid, target: sid, rel: "funded_by" });
     }
   });
 
@@ -10743,10 +9283,7 @@ const ResearchGraphPage = ({ setPage }) => {
   const [selected, setSelected] = useState(null);
   const [highlight, setHighlight] = useState(null); // set of node ids
   const [cmd, setCmd] = useState("");
-  const [cmdLog, setCmdLog] = useState([
-    "RESEARCH_GRAPH v5.0 — READY",
-    "Commands: /top /trending /topic [name] /researcher [name] /reset",
-  ]);
+  const [cmdLog, setCmdLog] = useState(["RESEARCH_GRAPH v5.0 — READY", "Commands: /top /trending /topic [name] /researcher [name] /reset"]);
   const [graphReady, setGraphReady] = useState(false);
 
   // Build once
@@ -10815,11 +9352,7 @@ const ResearchGraphPage = ({ setPage }) => {
       ctx.beginPath();
       ctx.moveTo(a.x, a.y);
       ctx.lineTo(b.x, b.y);
-      ctx.strokeStyle = isHit
-        ? "rgba(230,54,54,0.7)"
-        : highlight
-          ? "rgba(31,41,55,0.05)"
-          : cfg.color;
+      ctx.strokeStyle = isHit ? "rgba(230,54,54,0.7)" : highlight ? "rgba(31,41,55,0.05)" : cfg.color;
       ctx.lineWidth = isHit ? 2 : 1;
       if (cfg.dash) ctx.setLineDash([3, 5]);
       else ctx.setLineDash([]);
@@ -10852,11 +9385,7 @@ const ResearchGraphPage = ({ setPage }) => {
 
       // Label
       ctx.font = `${isSel || isHL ? "bold " : ""}10px var(--font-inter), sans-serif`;
-      ctx.fillStyle = dim
-        ? "rgba(31,41,55,0.2)"
-        : n.type === "paper" || n.type === "topic"
-          ? "#1F2937"
-          : "#1F2937";
+      ctx.fillStyle = dim ? "rgba(31,41,55,0.2)" : n.type === "paper" || n.type === "topic" ? "#1F2937" : "#1F2937";
       ctx.textAlign = "center";
       ctx.fillText(n.label.slice(0, 16), n.x, n.y + cfg.radius + 12);
     });
@@ -10941,10 +9470,7 @@ const ResearchGraphPage = ({ setPage }) => {
       const cx = e.clientX - rect.left,
         cy = e.clientY - rect.top;
       // If barely moved → click
-      if (
-        Math.abs(cx - s.drag.startX) < 3 &&
-        Math.abs(cy - s.drag.startY) < 3
-      ) {
+      if (Math.abs(cx - s.drag.startX) < 3 && Math.abs(cy - s.drag.startY) < 3) {
         const hit = s.drag.node;
         setSelected(hit);
         setHighlight(getConnected(hit.id));
@@ -11002,18 +9528,11 @@ const ResearchGraphPage = ({ setPage }) => {
       return;
     }
     if (c === "/top") {
-      const top = [...SEED_PAPERS]
-        .sort((a, b) => (b.citations || 0) - (a.citations || 0))
-        .slice(0, 3);
+      const top = [...SEED_PAPERS].sort((a, b) => (b.citations || 0) - (a.citations || 0)).slice(0, 3);
       const ids = new Set(top.map((p) => `paper_${p.id}`));
       setHighlight(ids);
       setSelected(null);
-      log([
-        "$ /top",
-        ...top.map(
-          (p, i) => `  #${i + 1} ${p.title.slice(0, 50)} (${p.citations} cite)`,
-        ),
-      ]);
+      log(["$ /top", ...top.map((p, i) => `  #${i + 1} ${p.title.slice(0, 50)} (${p.citations} cite)`)]);
       return;
     }
     if (c === "/trending") {
@@ -11028,9 +9547,7 @@ const ResearchGraphPage = ({ setPage }) => {
     }
     if (c.startsWith("/topic ")) {
       const q = c.slice(7).trim().toLowerCase();
-      const matches = nodes.filter(
-        (n) => n.type === "topic" && n.label.toLowerCase().includes(q),
-      );
+      const matches = nodes.filter((n) => n.type === "topic" && n.label.toLowerCase().includes(q));
       if (!matches.length) {
         log([`$ ${c}`, "  → No matching topic."]);
         return;
@@ -11047,10 +9564,7 @@ const ResearchGraphPage = ({ setPage }) => {
     }
     if (c.startsWith("/researcher ")) {
       const q = c.slice(12).trim().toLowerCase();
-      const matches = nodes.filter(
-        (n) =>
-          n.type === "researcher" && n.meta?.name?.toLowerCase().includes(q),
-      );
+      const matches = nodes.filter((n) => n.type === "researcher" && n.meta?.name?.toLowerCase().includes(q));
       if (!matches.length) {
         log([`$ ${c}`, "  → No matching researcher."]);
         return;
@@ -11062,16 +9576,10 @@ const ResearchGraphPage = ({ setPage }) => {
       });
       setHighlight(ids);
       setSelected(matches[0]);
-      log([
-        `$ ${c}`,
-        `  → ${matches[0].meta.name}: ${ids.size} connected nodes`,
-      ]);
+      log([`$ ${c}`, `  → ${matches[0].meta.name}: ${ids.size} connected nodes`]);
       return;
     }
-    log([
-      `$ ${c}`,
-      "  → Unknown command. Try /top /trending /topic [t] /researcher [r] /reset",
-    ]);
+    log([`$ ${c}`, "  → Unknown command. Try /top /trending /topic [t] /researcher [r] /reset"]);
   };
 
   // Selected node detail
@@ -11139,10 +9647,7 @@ const ResearchGraphPage = ({ setPage }) => {
             >
               {m.title}
             </div>
-            <div
-              className="vt"
-              style={{ fontSize: 13, opacity: 0.5, marginBottom: 6 }}
-            >
+            <div className="vt" style={{ fontSize: 13, opacity: 0.5, marginBottom: 6 }}>
               BY: {(m.authors || []).join(", ")} · {m.year}
             </div>
             <div
@@ -11160,21 +9665,14 @@ const ResearchGraphPage = ({ setPage }) => {
                 {m.citations} CITE
               </span>
             </div>
-            <button
-              className="btn btn-primary btn-sm"
-              style={{ fontSize: 14 }}
-              onClick={() => setPage(`paper_${m.id}`)}
-            >
+            <button className="btn btn-primary btn-sm" style={{ fontSize: 14 }} onClick={() => setPage(`paper_${m.id}`)}>
               OPEN PAPER →
             </button>
           </>
         )}
         {selected.type === "researcher" && (
           <>
-            <div
-              className="vt"
-              style={{ fontSize: 13, opacity: 0.5, marginBottom: 6 }}
-            >
+            <div className="vt" style={{ fontSize: 13, opacity: 0.5, marginBottom: 6 }}>
               {m.university} · {m.lab}
             </div>
             <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
@@ -11195,9 +9693,7 @@ const ResearchGraphPage = ({ setPage }) => {
         )}
         {selected.type === "lab" && (
           <>
-            <div style={{ fontSize: 12, opacity: 0.65, marginBottom: 6 }}>
-              {m.focus}
-            </div>
+            <div style={{ fontSize: 12, opacity: 0.65, marginBottom: 6 }}>{m.focus}</div>
             <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
               {(m.tags || []).map((t) => (
                 <span key={t} className="tag" style={{ fontSize: 11 }}>
@@ -11207,17 +9703,10 @@ const ResearchGraphPage = ({ setPage }) => {
             </div>
           </>
         )}
-        {selected.type === "topic" && (
-          <div style={{ fontSize: 12, opacity: 0.55 }}>
-            Research topic cluster
-          </div>
-        )}
+        {selected.type === "topic" && <div style={{ fontSize: 12, opacity: 0.55 }}>Research topic cluster</div>}
         {selected.type === "protocol" && (
           <>
-            <div
-              className="vt"
-              style={{ fontSize: 13, opacity: 0.5, marginBottom: 4 }}
-            >
+            <div className="vt" style={{ fontSize: 13, opacity: 0.5, marginBottom: 4 }}>
               {m.category}
             </div>
             <div
@@ -11231,23 +9720,13 @@ const ResearchGraphPage = ({ setPage }) => {
             </div>
           </>
         )}
-        {selected.type === "university" && (
-          <div style={{ fontSize: 12, opacity: 0.55 }}>
-            Academic institution
-          </div>
-        )}
+        {selected.type === "university" && <div style={{ fontSize: 12, opacity: 0.55 }}>Academic institution</div>}
         {connCount > 0 && (
-          <div
-            className="vt"
-            style={{ fontSize: 13, opacity: 0.45, marginTop: 8 }}
-          >
+          <div className="vt" style={{ fontSize: 13, opacity: 0.45, marginTop: 8 }}>
             ◈ {connCount} connected nodes
           </div>
         )}
-        <div
-          className="vt"
-          style={{ fontSize: 12, opacity: 0.3, marginTop: 6 }}
-        >
+        <div className="vt" style={{ fontSize: 12, opacity: 0.3, marginTop: 6 }}>
           DBL-CLICK TO NAVIGATE
         </div>
       </div>
@@ -11259,10 +9738,7 @@ const ResearchGraphPage = ({ setPage }) => {
       <div style={{ marginBottom: 24 }}>
         <SectionLabel>KNOWLEDGE INFRASTRUCTURE</SectionLabel>
         <h1 className="section-title">Research Graph</h1>
-        <p className="section-subtitle">
-          Force-directed map of researchers, papers, labs, protocols, and topics
-          across the AthenaX network.
-        </p>
+        <p className="section-subtitle">Force-directed map of researchers, papers, labs, protocols, and topics across the AthenaX network.</p>
       </div>
 
       <div
@@ -11328,10 +9804,7 @@ const ResearchGraphPage = ({ setPage }) => {
                     justifyContent: "center",
                   }}
                 >
-                  <span
-                    className="vt"
-                    style={{ fontSize: 18, color: "rgba(230,54,54,0.6)" }}
-                  >
+                  <span className="vt" style={{ fontSize: 18, color: "rgba(230,54,54,0.6)" }}>
                     ◎ COMPUTING LAYOUT…
                   </span>
                 </div>
@@ -11347,10 +9820,7 @@ const ResearchGraphPage = ({ setPage }) => {
                 paddingTop: 8,
               }}
             >
-              <span
-                className="term-green"
-                style={{ flexShrink: 0, marginRight: 8 }}
-              >
+              <span className="term-green" style={{ flexShrink: 0, marginRight: 8 }}>
                 $
               </span>
               <input
@@ -11398,11 +9868,7 @@ const ResearchGraphPage = ({ setPage }) => {
                 <div
                   key={i}
                   style={{
-                    color: l.startsWith("$")
-                      ? "#22C55E"
-                      : l.startsWith("  →")
-                        ? "#F5A623"
-                        : "rgba(255,255,255,0.35)",
+                    color: l.startsWith("$") ? "#22C55E" : l.startsWith("  →") ? "#F5A623" : "rgba(255,255,255,0.35)",
                     marginBottom: 1,
                   }}
                 >
@@ -11422,12 +9888,7 @@ const ResearchGraphPage = ({ setPage }) => {
               ["/researcher Feist", "Dankrad Feist"],
               ["/reset", "Reset"],
             ].map(([c, lbl]) => (
-              <button
-                key={c}
-                onClick={() => runCmd(c)}
-                className="btn btn-ghost btn-sm"
-                style={{ fontSize: 13 }}
-              >
+              <button key={c} onClick={() => runCmd(c)} className="btn btn-ghost btn-sm" style={{ fontSize: 13 }}>
                 {lbl}
               </button>
             ))}
@@ -11438,10 +9899,7 @@ const ResearchGraphPage = ({ setPage }) => {
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {/* Legend */}
           <WindowCard title="GRAPH_LEGEND.md" staticHover>
-            <div
-              className="vt"
-              style={{ fontSize: 13, opacity: 0.45, marginBottom: 10 }}
-            >
+            <div className="vt" style={{ fontSize: 13, opacity: 0.45, marginBottom: 10 }}>
               NODE TYPES:
             </div>
             {Object.entries(NODE_CONFIG).map(([type, cfg]) => (
@@ -11464,9 +9922,7 @@ const ResearchGraphPage = ({ setPage }) => {
                     flexShrink: 0,
                   }}
                 />
-                <span style={{ fontSize: 12, textTransform: "capitalize" }}>
-                  {type}
-                </span>
+                <span style={{ fontSize: 12, textTransform: "capitalize" }}>{type}</span>
               </div>
             ))}
             <div
@@ -11476,10 +9932,7 @@ const ResearchGraphPage = ({ setPage }) => {
                 paddingTop: 10,
               }}
             >
-              <div
-                className="vt"
-                style={{ fontSize: 13, opacity: 0.45, marginBottom: 8 }}
-              >
+              <div className="vt" style={{ fontSize: 13, opacity: 0.45, marginBottom: 8 }}>
                 EDGE TYPES:
               </div>
               {[
@@ -11507,9 +9960,7 @@ const ResearchGraphPage = ({ setPage }) => {
                         height: 2,
                         background: ec.color,
                         flexShrink: 0,
-                        borderTop: ec.dash
-                          ? "1px dashed rgba(31,41,55,0.4)"
-                          : "none",
+                        borderTop: ec.dash ? "1px dashed rgba(31,41,55,0.4)" : "none",
                       }}
                     />
                     <span style={{ fontSize: 11, opacity: 0.65 }}>{desc}</span>
@@ -11564,15 +10015,9 @@ const ResearchGraphPage = ({ setPage }) => {
 // ── PLACEHOLDER (for pages added in later parts) ──────────────
 const PlaceholderPage = ({ title, description, setPage }) => (
   <div className="page-enter page-container">
-    <WindowCard
-      title={`${title.toUpperCase().replace(/ /g, "_")}.sys`}
-      staticHover
-    >
+    <WindowCard title={`${title.toUpperCase().replace(/ /g, "_")}.sys`} staticHover>
       <div style={{ textAlign: "center", padding: "32px 0" }}>
-        <div
-          className="vt"
-          style={{ fontSize: 20, color: "#F5A623", marginBottom: 12 }}
-        >
+        <div className="vt" style={{ fontSize: 20, color: "#F5A623", marginBottom: 12 }}>
           ◎ PENDING IMPLEMENTATION
         </div>
         <h2
@@ -11584,9 +10029,7 @@ const PlaceholderPage = ({ title, description, setPage }) => (
         >
           {title}
         </h2>
-        <p style={{ fontSize: 13, opacity: 0.65, marginBottom: 24 }}>
-          {description}
-        </p>
+        <p style={{ fontSize: 13, opacity: 0.65, marginBottom: 24 }}>{description}</p>
         <button className="btn btn-ghost" onClick={() => setPage("home")}>
           ← BACK TO HOME
         </button>
@@ -11643,8 +10086,7 @@ export default function App() {
 
   const renderPage = () => {
     try {
-      if (page.startsWith("paper_"))
-        return <PaperPage paperId={page.slice(6)} setPage={navigate} />;
+      if (page.startsWith("paper_")) return <PaperPage paperId={page.slice(6)} setPage={navigate} />;
       switch (page) {
         case "home":
           return <HomePage setPage={navigate} />;
@@ -11655,9 +10097,7 @@ export default function App() {
         case "builders":
           return <BuildersPage setPage={navigate} />;
         case "labs":
-          return (
-            <LabsPage setPage={navigate} setSelectedLab={setSelectedLab} />
-          );
+          return <LabsPage setPage={navigate} setSelectedLab={setSelectedLab} />;
         case "archive":
           return <ArchivePage setPage={navigate} />;
         case "dashboard":
@@ -11677,76 +10117,41 @@ export default function App() {
         case "business-model":
           return <BusinessModelPage setPage={navigate} />;
         case "profile":
-          return (
-            <ProfilePage
-              user={user}
-              setPage={navigate}
-              showToast={showToast}
-              onUserUpdate={setUser}
-            />
-          );
+          return <ProfilePage user={user} setPage={navigate} showToast={showToast} onUserUpdate={setUser} />;
         case "talent":
-          return (
-            <TalentMarketplacePage
-              user={user}
-              setPage={navigate}
-              showToast={showToast}
-            />
-          );
+          return <TalentMarketplacePage user={user} setPage={navigate} showToast={showToast} />;
         case "reports":
           return <ResearchReportsPage setPage={navigate} />;
         case "live":
-          return (
-            <AthenaXLivePage
-              user={user}
-              setPage={navigate}
-              showToast={showToast}
-            />
-          );
+          return <AthenaXLivePage user={user} setPage={navigate} showToast={showToast} />;
         case "roundtables":
           return <RoundtablesPage setPage={navigate} />;
         case "digest":
           return <ResearchDigestPage user={user} showToast={showToast} />;
         case "submit-paper":
-          return (
-            <SubmitPaperPage
-              user={user}
-              setPage={navigate}
-              showToast={showToast}
-            />
-          );
+          return <SubmitPaperPage user={user} setPage={navigate} showToast={showToast} />;
         case "bounties":
-          return (
-            <BountyMarketplacePage
-              user={user}
-              setPage={navigate}
-              showToast={showToast}
-            />
-          );
+          return <BountyMarketplacePage user={user} setPage={navigate} showToast={showToast} />;
         case "post-bounty":
-          return (
-            <PostBountyPage
-              user={user}
-              setPage={navigate}
-              showToast={showToast}
-            />
-          );
+          return <PostBountyPage user={user} setPage={navigate} showToast={showToast} />;
         case "apply-cohort":
-          return (
-            <CohortApplicationPage
-              user={user}
-              setPage={navigate}
-              showToast={showToast}
-            />
-          );
+          return <CohortApplicationPage user={user} setPage={navigate} showToast={showToast} />;
         case "admin":
-          return (
-            <AdminPanelPage
-              user={user}
-              setPage={navigate}
-              showToast={showToast}
-            />
-          );
+          return <AdminPanelPage user={user} setPage={navigate} showToast={showToast} />;
+        case "docs":
+          return <DocsHomePage setPage={navigate} />;
+        case "docs-researchers":
+          return <DocsResearchersPage setPage={navigate} />;
+        case "docs-protocols":
+          return <DocsProtocolsPage setPage={navigate} />;
+        case "docs-builders":
+          return <DocsBuilderPage setPage={navigate} />;
+        case "docs-standards":
+          return <DocsStandardsPage setPage={navigate} />;
+        case "docs-governance":
+          return <DocsGovernancePage setPage={navigate} />;
+        case "docs-media":
+          return <DocsMediaPage setPage={navigate} />;
         case "terminal":
           return <ResearchTerminalPage user={user} setPage={navigate} />;
         case "research-graph":
@@ -11756,18 +10161,14 @@ export default function App() {
       }
     } catch (err) {
       console.error("AthenaX render error:", err);
-      return (
-        <PageError message="Rendering error." onBack={() => setPage("home")} />
-      );
+      return <PageError message="Rendering error." onBack={() => setPage("home")} />;
     }
   };
 
   return (
     <>
       <GlobalStyles />
-      <div
-        style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
-      >
+      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
         <Navbar
           current={page}
           setPage={navigate}
@@ -11793,20 +10194,8 @@ export default function App() {
       </div>
 
       {/* Auth modals */}
-      {showLogin && (
-        <LoginModal
-          onClose={() => setShowLogin(false)}
-          onSuccess={setUser}
-          showToast={showToast}
-        />
-      )}
-      {showRegister && (
-        <RegisterModal
-          onClose={() => setShowRegister(false)}
-          onSuccess={setUser}
-          showToast={showToast}
-        />
-      )}
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} onSuccess={setUser} showToast={showToast} />}
+      {showRegister && <RegisterModal onClose={() => setShowRegister(false)} onSuccess={setUser} showToast={showToast} />}
 
       {/* Toast stack */}
       <div
@@ -11821,11 +10210,7 @@ export default function App() {
         }}
       >
         {toasts.map((t) => (
-          <Toast
-            key={t.id}
-            msg={t}
-            onClose={() => setToasts((ts) => ts.filter((x) => x.id !== t.id))}
-          />
+          <Toast key={t.id} msg={t} onClose={() => setToasts((ts) => ts.filter((x) => x.id !== t.id))} />
         ))}
       </div>
     </>

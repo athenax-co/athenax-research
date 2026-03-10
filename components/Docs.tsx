@@ -42,8 +42,7 @@ const DocsSidebar = ({ current, setPage }: { current: string; setPage: (id: stri
         })}
       </div>
       <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid rgba(31,41,55,0.15)" }}>
-        <div className="vt" style={{ fontSize: 12, opacity: 0.4, letterSpacing: "0.06em" }}>ATHENAX</div>
-        <div className="vt" style={{ fontSize: 12, opacity: 0.4, letterSpacing: "0.06em" }}>DOCS BUILD</div>
+        <div className="vt" style={{ fontSize: 12, opacity: 0.4, letterSpacing: "0.06em" }}>ATHENAX DOCS BUILD</div>
       </div>
     </TerminalPanel>
   </div>

@@ -1184,33 +1184,60 @@ const LoginModal = ({ onClose, onSuccess, showToast }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-[#1F2937]/75 z-[200] flex items-center justify-center p-5"
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(31,41,55,0.75)",
+        zIndex: 200,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 20,
+      }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-[#FDFBF7] border-3 border-[#1F2937] shadow-[8px_8px_0_#1F2937] rounded-[10px] max-w-[460px] w-full max-h-[90vh] overflow-y-auto overflow-hidden">
-        <div className="bg-[#1F2937] text-[#FDFBF7] p-[7px_14px] flex items-center justify-between font-mono text-[15px] tracking-[0.06em]">
-          <div className="flex items-center gap-[10px]">
+      <div
+        style={{
+          background: "#FDFBF7",
+          border: "2px solid #1F2937",
+          boxShadow: "8px 8px 0 #1F2937",
+          maxWidth: 460,
+          width: "100%",
+          maxHeight: "90vh",
+          overflowY: "auto",
+        }}
+      >
+        <div
+          style={{
+            background: "#1F2937",
+            color: "#FDFBF7",
+            padding: "7px 14px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            fontFamily: "'VT323',monospace",
+            fontSize: 15,
+            letterSpacing: "0.06em",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <TrafficLights />
             <span>ATHENAX_LOGIN.sys</span>
           </div>
           <button
             onClick={onClose}
-            className="bg-none border-none text-[#FDFBF7] cursor-pointer font-semibold text-[13px]"
-            style={{ fontFamily: "var(--font-inter), sans-serif" }}
+            style={{ background: "none", border: "none", color: "#FDFBF7", cursor: "pointer", fontFamily: "'VT323',monospace", fontSize: 18 }}
           >
             ✕ CLOSE
           </button>
         </div>
-        <div className="p-7">
+        <div style={{ padding: 28 }}>
           {[
             ["EMAIL", "email", email, setEmail, "researcher@university.edu"],
             ["PASSWORD", "password", pw, setPw, "••••••••"],
           ].map(([label, type, val, setter, ph]) => (
-            <div key={label} className="mb-4">
-              <label
-                className="font-semibold text-[11px] tracking-[0.07em] uppercase block mb-[6px] text-[#1F2937]"
-                style={{ fontFamily: "var(--font-inter), sans-serif" }}
-              >
+            <div key={label} style={{ marginBottom: 16 }}>
+              <label style={{ fontFamily: "'VT323',monospace", fontSize: 15, letterSpacing: "0.06em", display: "block", marginBottom: 6 }}>
                 {label}
               </label>
               <input
@@ -1219,15 +1246,29 @@ const LoginModal = ({ onClose, onSuccess, showToast }) => {
                 onChange={(e) => setter(e.target.value)}
                 placeholder={ph}
                 onKeyDown={(e) => e.key === "Enter" && submit()}
-                className="w-full p-[10px_12px] bg-[#FDFBF7] border-2 border-[#1F2937] outline-none text-[13px] block"
-                style={{ fontFamily: "var(--font-inter), sans-serif" }}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  fontFamily: "'Space Grotesk',sans-serif",
+                  background: "#FDFBF7",
+                  border: "2px solid #1F2937",
+                  outline: "none",
+                  fontSize: 13,
+                  display: "block",
+                }}
               />
             </div>
           ))}
           {error && (
             <div
-              className="font-semibold text-[#E63636] text-[12px] mb-[14px] p-[8px_10px] border-[1.5px] border-[#E63636] rounded-[6px] bg-[rgba(230,54,54,0.06)]"
-              style={{ fontFamily: "var(--font-inter), sans-serif" }}
+              style={{
+                fontFamily: "'VT323',monospace",
+                color: "#E63636",
+                fontSize: 16,
+                marginBottom: 14,
+                padding: "8px 10px",
+                border: "1px solid #E63636",
+              }}
             >
               ✗ {error}
             </div>
@@ -1235,21 +1276,25 @@ const LoginModal = ({ onClose, onSuccess, showToast }) => {
           <button
             onClick={submit}
             disabled={loading}
-            className={`w-full p-[11px_0] font-bold text-[14px] tracking-[0.06em] bg-[#E63636] text-[#FDFBF7] border-3 border-[#1F2937] shadow-[6px_6px_0_#1F2937] rounded-[6px] uppercase ${loading ? "cursor-not-allowed opacity-60" : "cursor-pointer opacity-100"}`}
-            style={{ fontFamily: "var(--font-inter), sans-serif" }}
+            style={{
+              width: "100%",
+              padding: "11px 0",
+              fontFamily: "'VT323',monospace",
+              fontSize: 21,
+              letterSpacing: "0.08em",
+              background: "#E63636",
+              color: "#FDFBF7",
+              border: "2px solid #1F2937",
+              boxShadow: "4px 4px 0 #1F2937",
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.6 : 1,
+              textTransform: "uppercase",
+            }}
           >
             {loading ? "SIGNING IN…" : "SIGN IN"}
           </button>
-          <div className="border-t border-[rgba(31,41,55,0.15)] m-[22px_0_14px]" />
-          <div
-            style={{
-              fontFamily: "var(--font-vt323), monospace",
-              fontSize: 13,
-              opacity: 0.5,
-              marginBottom: 10,
-              letterSpacing: "0.04em",
-            }}
-          >
+          <div style={{ borderTop: "1px solid rgba(31,41,55,0.15)", margin: "22px 0 14px" }} />
+          <div style={{ fontFamily: "'VT323',monospace", fontSize: 13, opacity: 0.5, marginBottom: 10, letterSpacing: "0.04em" }}>
             DEMO ACCOUNTS — CLICK TO PREFILL:
           </div>
           {authSvc.DEMO_ACCOUNTS.map((acc) => (
@@ -1273,15 +1318,7 @@ const LoginModal = ({ onClose, onSuccess, showToast }) => {
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
               <span style={{ fontSize: 12 }}>{acc.label}</span>
-              <span
-                style={{
-                  fontFamily: "var(--font-vt323), monospace",
-                  color: "#E63636",
-                  fontSize: 16,
-                }}
-              >
-                USE →
-              </span>
+              <span style={{ fontFamily: "'VT323',monospace", color: "#E63636", fontSize: 16 }}>USE →</span>
             </div>
           ))}
         </div>
@@ -1318,7 +1355,7 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
   const iStyle = {
     width: "100%",
     padding: "10px 12px",
-    fontFamily: "var(--font-inter), sans-serif",
+    fontFamily: "'Space Grotesk',sans-serif",
     background: "#FDFBF7",
     border: "2px solid #1F2937",
     outline: "none",
@@ -1326,7 +1363,7 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
     marginTop: 5,
     display: "block",
   };
-  const lStyle = "font-mono text-[14px] tracking-[0.06em] opacity-70 block";
+  const lStyle = { fontFamily: "'VT323',monospace", fontSize: 14, letterSpacing: "0.06em", opacity: 0.7, display: "block" };
 
   const step1ok = () => {
     if (!form.name.trim()) return "Full name required.";
@@ -1372,55 +1409,85 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-[#1F2937]/75 z-[200] flex items-center justify-center p-5"
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(31,41,55,0.75)",
+        zIndex: 200,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 20,
+      }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-[#FDFBF7] border-3 border-[#1F2937] shadow-[8px_8px_0_#1F2937] rounded-[10px] max-w-[500px] w-full max-h-[90vh] overflow-y-auto overflow-hidden">
-        <div className="bg-[#1F2937] text-[#FDFBF7] p-[7px_14px] flex items-center justify-between font-mono text-[15px] tracking-[0.06em]">
-          <div className="flex items-center gap-[10px]">
+      <div
+        style={{
+          background: "#FDFBF7",
+          border: "2px solid #1F2937",
+          boxShadow: "8px 8px 0 #1F2937",
+          maxWidth: 500,
+          width: "100%",
+          maxHeight: "90vh",
+          overflowY: "auto",
+        }}
+      >
+        <div
+          style={{
+            background: "#1F2937",
+            color: "#FDFBF7",
+            padding: "7px 14px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            fontFamily: "'VT323',monospace",
+            fontSize: 15,
+            letterSpacing: "0.06em",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <TrafficLights />
             <span>CREATE_ACCOUNT.sys — STEP {step}/2</span>
           </div>
           <button
             onClick={onClose}
-            className="bg-none border-none text-[#FDFBF7] cursor-pointer font-semibold text-[13px]"
-            style={{ fontFamily: "var(--font-inter), sans-serif" }}
+            style={{ background: "none", border: "none", color: "#FDFBF7", cursor: "pointer", fontFamily: "'VT323',monospace", fontSize: 18 }}
           >
             ✕ CLOSE
           </button>
         </div>
         {/* step tabs */}
-        <div className="flex border-b border-[#1F2937]/15">
+        <div style={{ display: "flex", borderBottom: "1px solid rgba(31,41,55,0.15)" }}>
           {[
             ["1", "CREDENTIALS"],
             ["2", "PROFILE"],
           ].map(([n, lbl]) => (
-            <div key={n} className={`flex-1 p-[9px_16px] border-b-3 ${step === +n ? "border-[#E63636]" : "border-transparent"}`}>
-              <span className="font-mono text-[15px] tracking-[0.06em]" style={{ color: step === +n ? "#E63636" : "rgba(31,41,55,0.35)" }}>
+            <div key={n} style={{ flex: 1, padding: "9px 16px", borderBottom: step === +n ? "3px solid #E63636" : "3px solid transparent" }}>
+              <span
+                style={{
+                  fontFamily: "'VT323',monospace",
+                  fontSize: 15,
+                  color: step === +n ? "#E63636" : "rgba(31,41,55,0.35)",
+                  letterSpacing: "0.06em",
+                }}
+              >
                 STEP {n}: {lbl}
               </span>
             </div>
           ))}
         </div>
-        <div className="p-7">
+        <div style={{ padding: 28 }}>
           {step === 1 && (
             <>
-              <div className="mb-[14px]">
-                <label className={lStyle}>FULL NAME</label>
+              <div style={{ marginBottom: 14 }}>
+                <label style={lStyle}>FULL NAME</label>
                 <input value={form.name} onChange={set("name")} placeholder="Dr. Jane Smith" style={iStyle} />
               </div>
               <div style={{ marginBottom: 14 }}>
-                <label className={lStyle}>EMAIL</label>
+                <label style={lStyle}>EMAIL</label>
                 <input type="email" value={form.email} onChange={set("email")} placeholder="jane@university.edu" style={iStyle} />
               </div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 12,
-                  marginBottom: 14,
-                }}
-              >
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
                 <div>
                   <label style={lStyle}>PASSWORD</label>
                   <input type="password" value={form.password} onChange={set("password")} placeholder="min 6 chars" style={iStyle} />
@@ -1431,7 +1498,7 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
                 </div>
               </div>
               <div style={{ marginBottom: 4 }}>
-                <label className={lStyle}>I AM A…</label>
+                <label style={lStyle}>I AM A…</label>
               </div>
               {["researcher", "sponsor", "builder"].map((role) => (
                 <div
@@ -1443,7 +1510,6 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
                     padding: "10px 14px",
                     marginBottom: 6,
                     background: form.role === role ? "rgba(230,54,54,0.06)" : "transparent",
-                    borderRadius: 6,
                     display: "flex",
                     alignItems: "center",
                     gap: 12,
@@ -1461,7 +1527,7 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
                   <div>
                     <div
                       style={{
-                        fontFamily: "var(--font-vt323), monospace",
+                        fontFamily: "'VT323',monospace",
                         fontSize: 17,
                         textTransform: "uppercase",
                         color: form.role === role ? "#E63636" : "#1F2937",
@@ -1477,37 +1543,29 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
           )}
           {step === 2 && (
             <>
-              <div
-                style={{
-                  fontFamily: "var(--font-vt323), monospace",
-                  fontSize: 15,
-                  color: "#E63636",
-                  marginBottom: 16,
-                  letterSpacing: "0.06em",
-                }}
-              >
+              <div style={{ fontFamily: "'VT323',monospace", fontSize: 15, color: "#E63636", marginBottom: 16, letterSpacing: "0.06em" }}>
                 ROLE: {form.role.toUpperCase()} · Complete your profile
               </div>
               {form.role === "researcher" && (
                 <>
                   <div style={{ marginBottom: 14 }}>
-                    <label className={lStyle}>UNIVERSITY / INSTITUTION</label>
+                    <label style={lStyle}>UNIVERSITY / INSTITUTION</label>
                     <input value={form.university} onChange={set("university")} placeholder="MIT, Stanford, Oxford…" style={iStyle} />
                   </div>
                   <div style={{ marginBottom: 14 }}>
-                    <label className={lStyle}>LAB (optional)</label>
+                    <label style={lStyle}>LAB (optional)</label>
                     <input value={form.lab} onChange={set("lab")} placeholder="IF Labs, MIT DCI…" style={iStyle} />
                   </div>
                 </>
               )}
               {form.role === "sponsor" && (
-                <div className="mb-[14px]">
-                  <label className={lStyle}>ORGANIZATION</label>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={lStyle}>ORGANIZATION</label>
                   <input value={form.organization} onChange={set("organization")} placeholder="Protocol / Foundation / DAO" style={iStyle} />
                 </div>
               )}
               <div style={{ marginBottom: 14 }}>
-                <label className={lStyle}>BIO (optional)</label>
+                <label style={lStyle}>BIO (optional)</label>
                 <textarea
                   value={form.bio}
                   onChange={set("bio")}
@@ -1520,15 +1578,12 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
           {error && (
             <div
               style={{
-                fontFamily: "var(--font-inter), sans-serif",
-                fontWeight: 600,
+                fontFamily: "'VT323',monospace",
                 color: "#E63636",
-                fontSize: 12,
+                fontSize: 16,
                 marginBottom: 14,
                 padding: "8px 10px",
-                border: "1.5px solid #E63636",
-                borderRadius: 6,
-                background: "rgba(230,54,54,0.06)",
+                border: "1px solid #E63636",
               }}
             >
               ✗ {error}
@@ -1543,9 +1598,8 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
                 }}
                 style={{
                   padding: "11px 18px",
-                  fontFamily: "var(--font-inter), sans-serif",
-                  fontWeight: 600,
-                  fontSize: 13,
+                  fontFamily: "'VT323',monospace",
+                  fontSize: 18,
                   background: "transparent",
                   color: "#1F2937",
                   border: "2px solid #1F2937",
@@ -1562,15 +1616,13 @@ const RegisterModal = ({ onClose, onSuccess, showToast }) => {
               style={{
                 flex: 1,
                 padding: "11px 0",
-                fontFamily: "var(--font-inter), sans-serif",
-                fontWeight: 700,
-                fontSize: 14,
-                letterSpacing: "0.06em",
+                fontFamily: "'VT323',monospace",
+                fontSize: 21,
+                letterSpacing: "0.08em",
                 background: "#E63636",
                 color: "#FDFBF7",
-                border: "3px solid #1F2937",
-                boxShadow: "6px 6px 0 #1F2937",
-                borderRadius: 6,
+                border: "2px solid #1F2937",
+                boxShadow: "4px 4px 0 #1F2937",
                 cursor: loading ? "not-allowed" : "pointer",
                 opacity: loading ? 0.6 : 1,
                 textTransform: "uppercase",
@@ -2788,20 +2840,7 @@ const Footer = ({ setPage }) => (
               AthenaX
             </span>
           </div>
-          <div
-            style={{
-              fontFamily: "var(--font-space-grotesk),sans-serif",
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: "0.08em",
-              opacity: 0.35,
-              marginBottom: 14,
-              textTransform: "uppercase",
-            }}
-          >
-            Research OS v5.0
-          </div>
-          <p style={{ fontSize: 12, opacity: 0.5, lineHeight: 1.65 }}>The research and innovation engine of Web3.</p>
+          <p style={{ fontSize: 12, opacity: 0.5, lineHeight: 1.65 }}>Incubating open research for the onchain world.</p>
         </div>
         <div
           style={{
@@ -2902,8 +2941,19 @@ const Footer = ({ setPage }) => (
         <div className="vt" style={{ fontSize: 13, opacity: 0.3 }}>
           © 2025 ATHENAX RESEARCH NETWORK · ALL RESEARCH OPEN ACCESS
         </div>
-        <div className="vt" style={{ fontSize: 13, opacity: 0.3 }}>
-          BUILT ON OPEN SCIENCE · POWERED BY WEB3
+        {/* <div className="vt" style={{ fontSize: 13, opacity: 0.3 }} className={"flex"}>
+          <span>BUILT ON OPEN SCIENCE · POWERED BY{" "}</span>
+          <a href="https://nouns.wtf" target="_blank" style={{ color: "#E63636" }} rel="noreferrer">
+            <img src="https://athenax.mypinx.store/Noggles.png" alt="Nouns" style={{ verticalAlign: "middle", marginLeft: 8 }} />
+          </a>
+        </div> */}
+        <div className="flex gap-2 items-center">
+          <p className="vt" style={{ fontSize: 13, opacity: 0.3 }}>
+            BUILT ON OPEN SCIENCE · POWERED BY{" "}
+          </p>
+          <a href="https://nouns.wtf" target="_blank" style={{ color: "#E63636" }} rel="noreferrer">
+            <img src="https://athenax.mypinx.store/Noggles.png" alt="Nouns" className="h-3" />
+          </a>
         </div>
       </div>
     </div>
@@ -2967,7 +3017,7 @@ const HomePage = ({ setPage }) => {
                   marginBottom: 18,
                 }}
               >
-                ATHENAX RESEARCH OS v5.0 ▶ SYSTEM ONLINE <span className="blink">{tick ? "█" : " "}</span>
+                ATHENAX ▶ SYSTEM ONLINE <span className="blink">{tick ? "█" : " "}</span>
               </div>
               <h1
                 style={{
@@ -2977,7 +3027,7 @@ const HomePage = ({ setPage }) => {
                   marginBottom: 24,
                 }}
               >
-                The Research and Innovation Engine of <span style={{ color: "#E63636" }}>onchain</span>
+                Incubating Open Research for the <span style={{ color: "#E63636" }}>Onchain</span> World
               </h1>
               <p
                 style={{
@@ -2988,7 +3038,8 @@ const HomePage = ({ setPage }) => {
                   marginBottom: 14,
                 }}
               >
-                AthenaX connects universities, research labs, and protocol ecosystems to produce credentialed open research, then turns validated ideas into funded startups.
+                AthenaX connects universities, research labs, and protocol ecosystems to produce credentialed open research, then turns validated
+                ideas into funded startups.
               </p>
               <div
                 className="vt"
@@ -3490,7 +3541,8 @@ const FundingPage = ({ setPage }) => (
             maxWidth: 580,
           }}
         >
-          Protocol ecosystems sponsor open research programs. AthenaX sources labs, manages peer review, handles escrow, and publishes open-access papers.
+          Protocol ecosystems sponsor open research programs. AthenaX sources labs, manages peer review, handles escrow, and publishes open-access
+          papers.
         </p>
       </div>
     </div>
@@ -4243,7 +4295,10 @@ const UniversitiesPage = ({ setPage }) => (
     <div style={{ marginBottom: 48 }}>
       <SectionLabel>ACADEMIC PARTNERSHIPS</SectionLabel>
       <h1 className="section-title">Universities</h1>
-      <p className="section-subtitle">AthenaX partners with leading academic institutions to bridge rigorous research with the needs of protocol ecosystems and public goods infrastructure.</p>
+      <p className="section-subtitle">
+        AthenaX partners with leading academic institutions to bridge rigorous research with the needs of protocol ecosystems and public goods
+        infrastructure.
+      </p>
     </div>
     <WindowCard title="PARTNER_UNIVERSITIES.list" staticHover style={{ marginBottom: 32 }}>
       <div
@@ -8561,7 +8616,9 @@ const RoundtablesPage = ({ setPage }) => {
       <div style={{ marginBottom: 32 }}>
         <SectionLabel>ACADEMIC DISCOURSE</SectionLabel>
         <h1 className="section-title">Roundtable Discussions</h1>
-        <p className="section-subtitle">Recorded debates, panels, and protocol design discussions from leading researchers in onchain and decentralized systems.</p>
+        <p className="section-subtitle">
+          Recorded debates, panels, and protocol design discussions from leading researchers in onchain and decentralized systems.
+        </p>
       </div>
 
       <TerminalPanel title="DISCUSSION_ARCHIVE.sys" style={{ marginBottom: 24 }}>
@@ -8802,7 +8859,9 @@ const ResearchDigestPage = ({ user, showToast }) => {
       <div style={{ marginBottom: 32 }}>
         <SectionLabel>WEEKLY INTELLIGENCE</SectionLabel>
         <h1 className="section-title">Research Digest</h1>
-        <p className="section-subtitle">The definitive weekly briefing on open research across protocol ecosystems — curated, cited, and delivered.</p>
+        <p className="section-subtitle">
+          The definitive weekly briefing on open research across protocol ecosystems — curated, cited, and delivered.
+        </p>
       </div>
 
       {/* Hero subscribe box */}

@@ -2939,7 +2939,7 @@ const Footer = ({ setPage }) => (
         }}
       >
         <div className="vt" style={{ fontSize: 13, opacity: 0.3 }}>
-          © 2025 ATHENAX RESEARCH NETWORK · ALL RESEARCH OPEN ACCESS
+          © 2025 ATHENAX · ALL RESEARCH OPEN ACCESS
         </div>
         {/* <div className="vt" style={{ fontSize: 13, opacity: 0.3 }} className={"flex"}>
           <span>BUILT ON OPEN SCIENCE · POWERED BY{" "}</span>

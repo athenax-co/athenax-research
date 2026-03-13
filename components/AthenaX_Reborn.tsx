@@ -1,5 +1,192 @@
+// @ts-nocheck
+
 // AthenaX_Reborn — v3 — Terminal page + icon refresh + business model update
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import LexicalRenderer from "./LexicalRenderer";
+
+const API_BASE_URL = "https://admin.athenax.co/api";
+const CONTENT_DEFAULT_PARAMS = {
+  limit: "1000",
+  "where[_status][equals]": "published",
+};
+
+const buildContentUrl = (path, extraParams = {}) => {
+  const params = new URLSearchParams({
+    ...CONTENT_DEFAULT_PARAMS,
+    ...extraParams,
+  });
+
+  return `${API_BASE_URL}${path}?${params.toString()}`;
+};
+
+const fetchFromAPI = async (url) => {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Failed to fetch from ${url}`);
+    const data = await res.json();
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.docs)) return data.docs;
+    if (Array.isArray(data?.data)) return data.data;
+    console.error("Unexpected API response structure:", data);
+    return [];
+  } catch (error) {
+    console.error(`Error fetching from ${url}:`, error);
+    return [];
+  }
+};
+
+const getArticles = () =>
+  fetchFromAPI(
+    buildContentUrl("/articles", {
+      "select[title]": "true",
+      "select[slug]": "true",
+      "select[publishedAt]": "true",
+    })
+  );
+
+const getResearch = () =>
+  fetchFromAPI(
+    buildContentUrl("/research", {
+      "select[title]": "true",
+      "select[slug]": "true",
+      "select[tag]": "true",
+      "select[publishedAt]": "true",
+    })
+  );
+
+const getArticleBySlug = async (slug) => {
+  const items = await fetchFromAPI(
+    buildContentUrl("/articles", {
+      "where[slug][equals]": slug,
+    })
+  );
+  return items[0] ?? null;
+};
+
+const getResearchBySlug = async (slug) => {
+  const items = await fetchFromAPI(
+    buildContentUrl("/research", {
+      "where[slug][equals]": slug,
+    })
+  );
+  return items[0] ?? null;
+};
+
+const sortByPublishedAtDesc = (items = []) =>
+  [...items].sort(
+    (a, b) =>
+      new Date(b?.publishedAt || 0).getTime() -
+      new Date(a?.publishedAt || 0).getTime()
+  );
+
+const formatContentDate = (value) => {
+  if (!value) return "Date unavailable";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const normalizeTag = (tag) => (tag || "").trim().toLowerCase();
+
+const extractContentText = (value) => {
+  if (!value) return [];
+  if (typeof value === "string") {
+    return value
+      .split(/\n{2,}/)
+      .map((chunk) => chunk.trim())
+      .filter(Boolean);
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap(extractContentText);
+  }
+  if (typeof value === "object") {
+    if (typeof value.text === "string") return [value.text.trim()].filter(Boolean);
+    return Object.values(value).flatMap(extractContentText);
+  }
+  return [];
+};
+
+const isLexicalContent = (value) =>
+  Boolean(
+    value &&
+    typeof value === "object" &&
+    value.root &&
+    typeof value.root === "object"
+  );
+
+const useArchiveContent = () => {
+  const [articles, setArticles] = useState([]);
+  const [research, setResearch] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+
+    const load = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const [articleItems, researchItems] = await Promise.all([
+          getArticles(),
+          getResearch(),
+        ]);
+        if (!mounted) return;
+        setArticles(sortByPublishedAtDesc(articleItems));
+        setResearch(sortByPublishedAtDesc(researchItems));
+      } catch (err) {
+        if (!mounted) return;
+        console.error("Failed to load archive content:", err);
+        setError("Could not load archive content right now.");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  return { articles, research, loading, error };
+};
+
+const useContentItem = (kind, slug, initialItem = null) => {
+  const [item, setItem] = useState(initialItem);
+  const [loading, setLoading] = useState(!initialItem);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!slug) return;
+    let mounted = true;
+
+    const load = async () => {
+      setLoading(true);
+      setError("");
+      const nextItem =
+        kind === "research"
+          ? await getResearchBySlug(slug)
+          : await getArticleBySlug(slug);
+      if (!mounted) return;
+      setItem(nextItem);
+      setLoading(false);
+      if (!nextItem) setError("Not found.");
+    };
+
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [kind, slug]);
+
+  return { item, loading, error };
+};
 
 // ═══════════════════════════════════════════════════════════
 // SEED DATA
@@ -421,6 +608,12 @@ const GlobalStyles = () => (
     /* ── Footer ── */
     .footer { background: #F2EFE9; border-top: 2px solid #1C1C27; padding: 56px 40px 28px; margin-top: 100px; }
     .footer-inner { max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap; }
+    .footer-subscribe-inner { display: flex; align-items: center; justify-content: space-between; gap: 32px; width: 100%; }
+    .footer-subscribe-copy { flex: 1 1 420px; min-width: 0; max-width: 560px; }
+    .footer-subscribe-form { display: flex; align-items: center; gap: 8px; flex: 1 1 520px; min-width: 0; justify-content: flex-end; }
+    .footer-subscribe-input { flex: 1 1 320px; min-width: 0; }
+    .footer-subscribe-button { flex: 0 0 auto; }
+    .footer-subscribe-done { flex: 0 0 auto; }
     .footer-brand { font-size: 26px; font-weight: 700; color: #1C1C27; margin-bottom: 8px; }
     .footer-tagline { font-size: 14px; color: #1C1C27; line-height: 1.6; }
     .footer-col-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #1C1C27; margin-bottom: 14px; }
@@ -481,6 +674,15 @@ const GlobalStyles = () => (
     .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
     @media(max-width:900px) { .grid-3 { grid-template-columns: 1fr 1fr; } .grid-4 { grid-template-columns: 1fr 1fr; } }
     @media(max-width:640px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+    @media(max-width:900px) {
+      .footer-subscribe-inner { flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 20px; }
+      .footer-subscribe-copy { flex: 1 1 auto; max-width: none; }
+      .footer-subscribe-form { width: 100%; flex: 1 1 auto; flex-direction: column; align-items: stretch; justify-content: flex-start; }
+      .footer-subscribe-input { width: 100%; flex: 1 1 auto; }
+      .footer-subscribe-button { width: 100%; }
+      .footer-subscribe-button .btn { width: 100%; justify-content: center; }
+      .footer-subscribe-done { width: 100%; }
+    }
 
     /* ── Leaderboard ── */
     .lb-row { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid #D8D4CC; }
@@ -705,14 +907,64 @@ const FUNDING_ICONS = {
 // SHARED COMPONENTS
 // ═══════════════════════════════════════════════════════════
 
+const AthenaXMark = ({ size=28 }) => (
+  <svg width={size} height={size} viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect width="28" height="28" rx="6" fill="#1C1C27"/>
+    <path d="M7 14C7 10.134 10.134 7 14 7C17.866 7 21 10.134 21 14C21 17.866 17.866 21 14 21C10.134 21 7 17.866 7 14Z" stroke="#F2EFE9" strokeWidth="2"/>
+    <path d="M10 14C10 12.343 11.343 11 13 11H15C16.657 11 18 12.343 18 14C18 15.657 16.657 17 15 17H13C11.343 17 10 15.657 10 14Z" fill="#F5D94E"/>
+  </svg>
+);
+
+const BrandBlock = ({ compact=false }) => (
+  <div style={{display:"flex",alignItems:compact ? "center" : "flex-start",gap:compact ? 12 : 14}}>
+    <div>
+      <h4
+        className={compact ? "text-xl mb-0" : "text-2xl mb-2"}
+      >
+        AthenaX
+      </h4>
+      {!compact && (
+        <p className="text-sm max-w-xs" style={{color:"#6B6B7A",lineHeight:1.65,margin:0}}>
+          Powered by{" "}
+          <Link href="https://nouns.wtf" target="_blank" rel="noopener noreferrer">
+            <img
+              src="https://athenax.mypinx.store/Noggles.png"
+              alt="Noggles Logo"
+              width={100}
+              height={70}
+              className="inline-block mb-1 ml-1 h-4 w-auto"
+            />
+          </Link>
+          <br />
+          Building public goods on Ethereum.
+        </p>
+      )}
+    </div>
+  </div>
+);
+
 const Logo = ({ onClick }) => (
-  <button className="nav-logo" onClick={onClick}>
-    <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="28" height="28" rx="6" fill="#1C1C27"/>
-      <path d="M7 14C7 10.134 10.134 7 14 7C17.866 7 21 10.134 21 14C21 17.866 17.866 21 14 21C10.134 21 7 17.866 7 14Z" stroke="#F2EFE9" strokeWidth="2"/>
-      <path d="M10 14C10 12.343 11.343 11 13 11H15C16.657 11 18 12.343 18 14C18 15.657 16.657 17 15 17H13C11.343 17 10 15.657 10 14Z" fill="#F5D94E"/>
-    </svg>
-    AthenaX
+  <button className="nav-logo" onClick={onClick} aria-label="Go to AthenaX home">
+    <div className="size-8 bg-gray-900 rounded text-white flex items-center justify-center text-lg shadow-sm p-1">
+      <img
+        src="https://athenax.mypinx.store/Logo_Icon_White.png"
+        alt="AthenaX Logo"
+        width={200}
+        height={100}
+        className="size-7 object-contain"
+      />
+    </div>
+    <span
+      style={{
+        fontFamily: "var(--font-londrina), cursive",
+        fontSize: 32,
+        lineHeight: 1,
+        letterSpacing: "-0.02em",
+        color: "#1C1C27",
+      }}
+    >
+      AthenaX
+    </span>
   </button>
 );
 
@@ -922,7 +1174,7 @@ const NAV_ITEMS = [
   {id:"archive",   label:"Research"},
   {id:"network",   label:"Network"},
   {id:"funding",   label:"Funding"},
-  {id:"terminal",  label:"Terminal"},
+  // {id:"terminal",  label:"Terminal"},
   {id:"docs",      label:"Docs"},
 ];
 
@@ -1004,19 +1256,23 @@ const FooterSubscribe = () => {
   };
   return (
     <div style={{borderBottom:"1px solid #D8D4CC",paddingBottom:40,marginBottom:40}}>
-      <div className="page-wrap" style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:32,flexWrap:"wrap"}}>
-        <div>
+      <div className="page-wrap footer-subscribe-inner">
+        <div className="footer-subscribe-copy">
           <div style={{fontWeight:700,fontSize:17,marginBottom:4}}>Weekly Research Digest</div>
-          <div style={{fontSize:14,color:"#6B6B7A"}}>Top papers, bounties, and cohort news — every Monday.</div>
+          <div style={{fontSize:14,color:"#6B6B7A",lineHeight:1.7}}>Top papers, bounties, and cohort news — every Monday.</div>
         </div>
         {done ? (
-          <div style={{fontFamily:"'Space Mono',monospace",fontSize:12,color:"#15803D",letterSpacing:"0.05em"}}>✓ YOU'RE IN</div>
+          <div className="footer-subscribe-done" style={{fontFamily:"'Space Mono',monospace",fontSize:12,color:"#15803D",letterSpacing:"0.05em"}}>✓ YOU'RE IN</div>
         ) : (
-          <div style={{display:"flex",gap:8,flexShrink:0}}>
-            <input className="inp" style={{width:240,padding:"9px 14px",fontSize:14}} value={email}
+          <div className="footer-subscribe-form">
+            <div className="footer-subscribe-input">
+              <input className="inp" style={{padding:"9px 14px",fontSize:14,marginTop:0}} value={email}
               onChange={e=>setEmail(e.target.value)} placeholder="your@email.com"
               onKeyDown={e=>e.key==="Enter"&&submit()}/>
-            <button className="btn btn-primary btn-sm" onClick={submit}>Subscribe →</button>
+            </div>
+            <div className="footer-subscribe-button">
+              <button className="btn btn-primary btn-sm" onClick={submit}>Subscribe →</button>
+            </div>
           </div>
         )}
       </div>
@@ -1029,10 +1285,7 @@ const Footer = ({ setPage }) => (
     <div style={{paddingTop:48}}>
       <FooterSubscribe/>    </div>
     <div className="footer-inner">
-      <div>
-        <div className="footer-brand">AthenaX</div>
-        <div className="footer-tagline">The Research & Innovation Engine<br/>of Web3.</div>
-      </div>
+      <BrandBlock />
       <div style={{display:"flex",gap:56,flexWrap:"wrap"}}>
         <div>
           <div className="footer-col-label">Research</div>
@@ -1066,7 +1319,7 @@ const Footer = ({ setPage }) => (
 // ═══════════════════════════════════════════════════════════
 // HOME PAGE
 // ═══════════════════════════════════════════════════════════
-const HomePage = ({ setPage }) => {
+const HomePage = ({ setPage, latestArticles, articlesLoading, articlesError }) => {
   const [tick,setTick] = useState(true);
   useEffect(()=>{ const id=setInterval(()=>setTick(t=>!t),800); return ()=>clearInterval(id); },[]);
 
@@ -1201,16 +1454,20 @@ const HomePage = ({ setPage }) => {
             <button className="link-arrow" onClick={()=>setPage("archive")}>View Full Archive →</button>
           </div>
           <hr className="divider"/>
-          {[...SEED_MEDIA].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5).map(item=>(
-            <div key={item.id} className="archive-row" onClick={()=>setPage(`media:${item.id}`)}>
-              <MediaIcon type={item.type}/>
-              <div style={{flex:1}}>
-                <div className="archive-title">{item.title}</div>
-                <div className="archive-meta">{item.date} &nbsp;//&nbsp; {item.type}</div>
-              </div>
-              <span style={{color:"#6B6B7A",fontSize:18}}>→</span>
-            </div>
-          ))}
+          {latestArticles.length > 0 ? latestArticles.map((item) => (
+            <ContentRow
+              key={item.slug}
+              item={item}
+              kind="article"
+              onClick={()=>setPage(`article:${item.slug}`)}
+            />
+          )) : (
+            <ContentListState
+              loading={articlesLoading}
+              error={articlesError}
+              emptyText="No published articles available yet."
+            />
+          )}
         </div>
       </div>
       <Footer setPage={setPage}/>
@@ -1292,6 +1549,54 @@ const MediaIcon = ({ type }) => {
   );
 };
 
+const ContentIcon = ({ kind }) => (
+  <div className="archive-icon" style={{background:kind === "research" ? "#EAF0F6" : "#F9F5DC"}}>
+    {kind === "research" ? <IconLabsSmall/> : (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="3" y="1" width="10" height="14" rx="1" stroke="#1C1C27" strokeWidth="1.5"/>
+        <line x1="5" y1="5" x2="11" y2="5" stroke="#1C1C27" strokeWidth="1.2"/>
+        <line x1="5" y1="8" x2="11" y2="8" stroke="#1C1C27" strokeWidth="1.2"/>
+        <line x1="5" y1="11" x2="9" y2="11" stroke="#1C1C27" strokeWidth="1.2"/>
+      </svg>
+    )}
+  </div>
+);
+
+const ContentRow = ({ item, kind, onClick }) => (
+  <div className="archive-row" onClick={onClick}>
+    <ContentIcon kind={kind}/>
+    <div style={{flex:1,minWidth:0}}>
+      <div className="archive-title">{item.title}</div>
+      <div className="archive-meta">
+        {formatContentDate(item.publishedAt)}
+        {kind === "research" && item.tag ? `  //  ${item.tag}` : ""}
+      </div>
+    </div>
+    <span style={{color:"#6B6B7A",fontSize:18}}>→</span>
+  </div>
+);
+
+const ContentListState = ({ loading, error, emptyText }) => {
+  if (loading) {
+    return (
+      <div style={{padding:"18px 0",fontSize:14,color:"#6B6B7A"}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,fontSize:14,color:"#6B6B7A"}}>
+          <span className="spinner"/>
+          Loading latest content...
+        </div>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <p style={{fontSize:14,color:"#E8323C",margin:"18px 0 0"}}>{error}</p>
+    );
+  }
+  return (
+    <p style={{fontSize:14,color:"#6B6B7A",margin:"18px 0 0"}}>{emptyText}</p>
+  );
+};
+
 // ═══════════════════════════════════════════════════════════
 // MEDIA DETAIL PAGE
 // ═══════════════════════════════════════════════════════════
@@ -1332,104 +1637,140 @@ const MediaPage = ({ mediaId, setPage }) => {
   );
 };
 
-// ═══════════════════════════════════════════════════════════
-// ARCHIVE PAGE — papers + typed media, exactly like real site
-// ═══════════════════════════════════════════════════════════
-const ArchivePage = ({ setPage }) => {
-  const [tab, setTab] = useState("media"); // "media" | "papers" | "leaderboard"
+const ContentDetailPage = ({ kind, slug, setPage, initialItem }) => {
+  const { item, loading, error } = useContentItem(kind, slug, initialItem);
+  const contentBlocks = extractContentText(item?.content);
 
-  // All media entries sorted newest first
-  const allMedia = [...SEED_MEDIA].sort((a,b) => b.date.localeCompare(a.date));
+  return (
+    <div>
+      <div className="page-wrap section section-stack-md">
+        <button className="link-arrow" onClick={()=>setPage("archive")} style={{marginBottom:0}}>← Back to Research</button>
+        {loading && !item ? (
+          <ContentListState loading={true} error="" emptyText="" />
+        ) : error || !item ? (
+          <ContentListState loading={false} error={error || "Not found."} emptyText="Not found." />
+        ) : (
+          <>
+            <div className="section-heading-tight">
+              <div className="path-badge">/root/{kind}/{item.slug}</div>
+              <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+                <span className="topic-pill" style={kind === "research" ? {background:"#EAF0F6"} : {}}>
+                  {kind === "research" ? "Research" : "Article"}
+                </span>
+                {kind === "research" && item.tag && <span className="ftag">{item.tag}</span>}
+                <span style={{fontSize:13,color:"#6B6B7A",fontFamily:"'Space Mono',monospace"}}>
+                  {formatContentDate(item.publishedAt)}
+                </span>
+              </div>
+              <h1 style={{fontSize:42,marginBottom:0}}>{item.title}</h1>
+            </div>
+            <WindowCard label={`${kind.toUpperCase()}_CONTENT`}>
+              {isLexicalContent(item?.content) ? (
+                <LexicalRenderer content={item.content} />
+              ) : contentBlocks.length > 0 ? contentBlocks.map((block, index) => (
+                <p key={index} style={{fontSize:16,lineHeight:1.8,color:"#1C1C27",marginBottom:index === contentBlocks.length - 1 ? 0 : 18}}>
+                  {block}
+                </p>
+              )) : (
+                <pre style={{whiteSpace:"pre-wrap",wordBreak:"break-word",fontFamily:"'Space Mono',monospace",fontSize:12,color:"#6B6B7A",margin:0}}>
+                  {JSON.stringify(item.content, null, 2)}
+                </pre>
+              )}
+            </WindowCard>
+          </>
+        )}
+      </div>
+      <Footer setPage={setPage}/>
+    </div>
+  );
+};
 
-  const [paperFilter, setPaperFilter] = useState("ALL");
-  const paperTopics = ["ALL", ...Array.from(new Set(SEED_PAPERS.map(p => p.topic)))];
-  const filteredPapers = paperFilter === "ALL" ? SEED_PAPERS : SEED_PAPERS.filter(p => p.topic === paperFilter);
+// ═══════════════════════════════════════════════════════════
+// ARCHIVE PAGE
+// ═══════════════════════════════════════════════════════════
+const ArchivePage = ({ setPage, articles, research, loading, error }) => {
+  const [tab, setTab] = useState("articles");
+  const [researchFilter, setResearchFilter] = useState("all");
+  const filteredResearch = researchFilter === "all"
+    ? research
+    : research.filter((item) => normalizeTag(item.tag) === researchFilter);
 
   return (
     <div>
       <div className="page-wrap section">
         <div className="path-badge">/root/archive</div>
         <h1 style={{fontSize:48,marginBottom:8}}>The Archive</h1>
-        <p style={{fontSize:17,color:"#6B6B7A",marginBottom:0}}>Artifacts, learnings, and broadcasts.</p>
+        <p style={{fontSize:17,color:"#6B6B7A"}}>Artifacts, learnings, and broadcasts.</p>
         <hr className="divider"/>
 
-        {/* Tabs */}
-        <div style={{display:"flex",gap:8,marginBottom:32}}>
-          {[["media","Artifacts & Broadcasts"],["papers","Research Papers"],["leaderboard","ARS Leaderboard"]].map(([id,label])=>(
-            <button key={id}
+        <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:32}}>
+          {[
+            ["articles", "Articles"],
+            ["research", "Research"],
+          ].map(([id, label]) => (
+            <button
+              key={id}
               className={tab===id ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}
               style={tab===id ? {background:"#F5D94E"} : {}}
-              onClick={()=>setTab(id)}>{label}</button>
+              onClick={() => setTab(id)}
+            >
+              {label}
+            </button>
           ))}
         </div>
 
-        {/* MEDIA TAB — matches real AthenaX archive layout exactly */}
-        {tab === "media" && (
+        {tab === "articles" && (
           <div>
-            {allMedia.map(item => (
-              <div key={item.id} className="archive-row" onClick={()=>setPage(`media:${item.id}`)}>
-                <MediaIcon type={item.type}/>
-                <div style={{flex:1}}>
-                  <div className="archive-title">{item.title}</div>
-                  <div className="archive-meta">{item.date} &nbsp;//&nbsp; {item.type}</div>
-                </div>
-                <span style={{color:"#6B6B7A",fontSize:18}}>→</span>
-              </div>
-            ))}
+            {articles.length > 0 ? articles.map((item) => (
+              <ContentRow
+                key={item.slug}
+                item={item}
+                kind="article"
+                onClick={() => setPage(`article:${item.slug}`)}
+              />
+            )) : (
+              <ContentListState
+                loading={loading}
+                error={error}
+                emptyText="No published articles available yet."
+              />
+            )}
           </div>
         )}
 
-        {/* PAPERS TAB */}
-        {tab === "papers" && (
+        {tab === "research" && (
           <div>
             <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:24}}>
-              {paperTopics.map(t=>(
-                <button key={t}
-                  className={paperFilter===t ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}
-                  style={paperFilter===t ? {background:"#F5D94E"} : {}}
-                  onClick={()=>setPaperFilter(t)}>{t}</button>
+              {[
+                ["all", "All"],
+                ["governance", "Governance"],
+                ["treasury", "Treasury"],
+              ].map(([id, label]) => (
+                <button
+                  key={id}
+                  className={researchFilter===id ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}
+                  style={researchFilter===id ? {background:"#F5D94E"} : {}}
+                  onClick={()=>setResearchFilter(id)}
+                >
+                  {label}
+                </button>
               ))}
             </div>
-            {filteredPapers.map(p=>(
-              <div key={p.id} className="archive-row" onClick={()=>setPage(`paper:${p.id}`)}>
-                <MediaIcon type="Essay"/>
-                <div style={{flex:1}}>
-                  <div className="archive-title">{p.title}</div>
-                  <div className="archive-meta">{p.year} &nbsp;//&nbsp; {p.topic} &nbsp;//&nbsp; {p.authors[0]}</div>
-                </div>
-                <div style={{display:"flex",gap:16,alignItems:"center",flexShrink:0}}>
-                  <div style={{textAlign:"right"}}>
-                    <div style={{fontFamily:"'Space Mono',monospace",fontSize:13,fontWeight:700,color:"#E8323C"}}>{p.reviewScore}</div>
-                    <div style={{fontSize:11,color:"#6B6B7A"}}>score</div>
-                  </div>
-                  <div style={{textAlign:"right"}}>
-                    <div style={{fontFamily:"'Space Mono',monospace",fontSize:13,fontWeight:700}}>{p.citations}</div>
-                    <div style={{fontSize:11,color:"#6B6B7A"}}>cites</div>
-                  </div>
-                </div>
-              </div>
-            ))}
+            {filteredResearch.length > 0 ? filteredResearch.map((item) => (
+              <ContentRow
+                key={item.slug}
+                item={item}
+                kind="research"
+                onClick={() => setPage(`research:${item.slug}`)}
+              />
+            )) : (
+              <ContentListState
+                loading={loading}
+                error={error}
+                emptyText={researchFilter === "all" ? "No published research available yet." : `No ${researchFilter} research available right now.`}
+              />
+            )}
           </div>
-        )}
-
-        {/* LEADERBOARD TAB */}
-        {tab === "leaderboard" && (
-          <WindowCard label="LEADERBOARD.SYS">
-            {SEED_LEADERBOARD.map(r=>{
-              const ars = calcARS({citations:r.citations,downloads:r.downloads,votes:r.votes,peerReviews:8,sponsorEndorsements:2,bountyCompletions:1});
-              return (
-                <div key={r.rank} className="lb-row">
-                  <div className={`lb-rank${r.rank===1?" gold":""}`}>#{r.rank}</div>
-                  <div className="lb-avatar">{r.name.charAt(0)}</div>
-                  <div>
-                    <div className="lb-name">{r.name}</div>
-                    <div className="lb-meta">{r.university} — {r.lab}</div>
-                  </div>
-                  <div className="lb-ars">{ars}</div>
-                </div>
-              );
-            })}
-          </WindowCard>
         )}
       </div>
       <Footer setPage={setPage}/>
@@ -3566,6 +3907,8 @@ export default function App() {
   const [toasts,setToasts]           = useState([]);
   const [showLogin,setShowLogin]     = useState(false);
   const [showRegister,setShowRegister] = useState(false);
+  const { articles, research, loading: archiveLoading, error: archiveError } = useArchiveContent();
+  const latestArticles = articles.slice(0, 5);
 
   useEffect(()=>{ initDB(); const session=authSvc.getSession(); if(session)setUser(session); },[]);
 
@@ -3591,6 +3934,16 @@ export default function App() {
   };
 
   const renderPage = () => {
+    if(page.startsWith("article:")) {
+      const slug = page.replace("article:","");
+      const initialItem = articles.find((item) => item.slug === slug) || null;
+      return <ContentDetailPage kind="article" slug={slug} initialItem={initialItem} setPage={navigate}/>;
+    }
+    if(page.startsWith("research:")) {
+      const slug = page.replace("research:","");
+      const initialItem = research.find((item) => item.slug === slug) || null;
+      return <ContentDetailPage kind="research" slug={slug} initialItem={initialItem} setPage={navigate}/>;
+    }
     if(page.startsWith("paper:")) {
       const paperId = page.replace("paper:","");
       return <PaperPage paperId={paperId} setPage={navigate} user={user} showToast={showToast}/>;
@@ -3604,11 +3957,11 @@ export default function App() {
       return <TerminalPage setPage={navigate} user={user} showToast={showToast} initialQuery={`topic: ${topic}`}/>;
     }
     switch(page){
-      case "home":              return <HomePage setPage={navigate}/>;
+      case "home":              return <HomePage setPage={navigate} latestArticles={latestArticles} articlesLoading={archiveLoading} articlesError={archiveError}/>;
       case "how-it-works":     return <HowItWorksPage setPage={navigate}/>;
       case "about":            return <AboutPage setPage={navigate}/>;
-      case "archive":          return <ArchivePage setPage={navigate}/>;
-      case "leaderboard":      return <ArchivePage setPage={navigate}/>;
+      case "archive":          return <ArchivePage setPage={navigate} articles={articles} research={research} loading={archiveLoading} error={archiveError}/>;
+      case "leaderboard":      return <ArchivePage setPage={navigate} articles={articles} research={research} loading={archiveLoading} error={archiveError}/>;
       case "submit-paper":     return <SubmitPaperPage setPage={navigate} user={user} showToast={showToast}/>;
       case "network":          return <NetworkPage setPage={navigate}/>;
       case "labs":             return <LabsPage setPage={navigate} setSelectedLab={setSelectedLab}/>;

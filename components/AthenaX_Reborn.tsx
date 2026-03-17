@@ -4,6 +4,29 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import LexicalRenderer from "./LexicalRenderer";
+import LaunchPage, {LaunchDetailPage} from "./page/launch";
+import Navbar from "./Navbar";
+import TrafficLights from "./ui/TrafficLights";
+import WindowCard from "./ui/WindowCard";
+import {
+  IconLabs,
+  IconUniversities,
+  IconSponsors,
+  IconTalent,
+  IconResearchers,
+  IconProtocols,
+  IconBuilders,
+  IconSponsoredPrograms,
+  IconBounties,
+  IconCohortFees,
+  IconTerminal,
+  IconTalentPlacement,
+  IconStartupEquity,
+  IconLabsSmall,
+  IconTalentSmall,
+  IconPaperSmall,
+  IconBriefcaseSmall,
+} from "./Icons";
 
 const API_BASE_URL = "https://admin.athenax.co/api";
 const CONTENT_DEFAULT_PARAMS = {
@@ -719,180 +742,6 @@ const GlobalStyles = () => (
   `}</style>
 );
 
-// ═══════════════════════════════════════════════════════════
-// ICON REGISTRY — /components/icons.jsx
-// All product icons as pure SVG. Consistent 24×24 viewBox,
-// 2px stroke, round joins/caps — matches Lucide visual language.
-// Container sizing/colors stay in .icon-tile CSS (unchanged).
-// ═══════════════════════════════════════════════════════════
-
-// Research Labs — flask / beaker silhouette
-const IconLabs = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9 3h6"/>
-    <path d="M9 3v6l-4 9a1 1 0 0 0 .9 1.45h12.2A1 1 0 0 0 21 18l-4-9V3"/>
-    <line x1="6.5" y1="14" x2="17.5" y2="14"/>
-  </svg>
-);
-
-// Universities — columned building / institution
-const IconUniversities = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 21h18"/>
-    <path d="M3 10h18"/>
-    <path d="M5 10V6l7-3 7 3v4"/>
-    <rect x="5" y="10" width="4" height="11"/>
-    <rect x="10" y="10" width="4" height="11"/>
-    <rect x="15" y="10" width="4" height="11"/>
-  </svg>
-);
-
-// Protocol Sponsors — network nodes / hexagonal links
-const IconSponsors = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="5"  r="2"/>
-    <circle cx="5"  cy="19" r="2"/>
-    <circle cx="19" cy="19" r="2"/>
-    <line x1="12" y1="7"  x2="5"  y2="17"/>
-    <line x1="12" y1="7"  x2="19" y2="17"/>
-    <line x1="7"  y1="19" x2="17" y2="19"/>
-  </svg>
-);
-
-// Talent Marketplace — person with upward arrow / pipeline
-const IconTalent = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="9" cy="7" r="3"/>
-    <path d="M3 21v-2a4 4 0 0 1 4-4h4"/>
-    <path d="M16 18l3-3 3 3"/>
-    <line x1="19" y1="21" x2="19" y2="15"/>
-  </svg>
-);
-
-// Researchers (home page) — graduation cap / diploma
-const IconResearchers = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-    <path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/>
-  </svg>
-);
-
-// Protocols (home page) — circuit / hex node
-const IconProtocols = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="12 2 19.5 6 19.5 14 12 18 4.5 14 4.5 6"/>
-    <line x1="12" y1="2"  x2="12" y2="18"/>
-    <line x1="4.5" y1="6"  x2="19.5" y2="14"/>
-    <line x1="19.5" y1="6"  x2="4.5" y2="14"/>
-  </svg>
-);
-
-// Builders (home page) — wrench + code bracket
-const IconBuilders = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="16 18 22 12 16 6"/>
-    <polyline points="8 6 2 12 8 18"/>
-    <line x1="12" y1="4" x2="12" y2="20" strokeDasharray="2 2"/>
-  </svg>
-);
-
-// Sponsored Programs — document + dollar / contract
-const IconSponsoredPrograms = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-    <polyline points="14 2 14 8 20 8"/>
-    <line x1="9" y1="13" x2="15" y2="13"/>
-    <line x1="9" y1="17" x2="12" y2="17"/>
-  </svg>
-);
-
-// Research Bounties — target crosshair
-const IconBounties = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/>
-    <circle cx="12" cy="12" r="5"/>
-    <circle cx="12" cy="12" r="1" fill={color}/>
-    <line x1="12" y1="2"  x2="12" y2="7"/>
-    <line x1="12" y1="17" x2="12" y2="22"/>
-    <line x1="2"  y1="12" x2="7"  y2="12"/>
-    <line x1="17" y1="12" x2="22" y2="12"/>
-  </svg>
-);
-
-// Builder Cohort Fees — layered stages / pipeline
-const IconCohortFees = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-    <path d="M2 12l10 5 10-5"/>
-    <path d="M2 17l10 5 10-5"/>
-  </svg>
-);
-
-// Terminal Subscriptions — terminal prompt / monitor
-const IconTerminal = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="4" width="20" height="16" rx="2"/>
-    <polyline points="8 9 4 12 8 15"/>
-    <line x1="12" y1="15" x2="20" y2="15"/>
-  </svg>
-);
-
-// Talent Placement — person + checkmark / confirmed hire
-const IconTalentPlacement = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-    <circle cx="12" cy="7" r="4"/>
-    <polyline points="16 11 17.5 13 21 10"/>
-  </svg>
-);
-
-// Startup Equity — chart trending up / investment growth
-const IconStartupEquity = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-    <polyline points="16 7 22 7 22 13"/>
-  </svg>
-);
-
-// Labs row icon (small, 42×42 archive-icon context) — same flask
-const IconLabsSmall = ({ color="#1C1C27" }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9 3h6"/>
-    <path d="M9 3v6l-4 9a1 1 0 0 0 .9 1.45h12.2A1 1 0 0 0 21 18l-4-9V3"/>
-    <line x1="6.5" y1="14" x2="17.5" y2="14"/>
-  </svg>
-);
-
-// Talent row icon (small, 42×42 archive-icon context)
-const IconTalentSmall = ({ color="#1C1C27" }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="9" cy="7" r="3"/>
-    <path d="M3 21v-2a4 4 0 0 1 4-4h4"/>
-    <path d="M16 18l3-3 3 3"/>
-    <line x1="19" y1="21" x2="19" y2="15"/>
-  </svg>
-);
-
-// Paper document icon (small, used in profile page)
-const IconPaperSmall = ({ color="#1C1C27" }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-    <polyline points="14 2 14 8 20 8"/>
-    <line x1="9" y1="13" x2="15" y2="13"/>
-    <line x1="9" y1="17" x2="12" y2="17"/>
-  </svg>
-);
-
-// Briefcase icon (small, used in talent page rows)
-const IconBriefcaseSmall = ({ color="#1C1C27" }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="7" width="20" height="14" rx="2"/>
-    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-    <line x1="12" y1="12" x2="12" y2="16"/>
-    <line x1="8"  y1="14" x2="16" y2="14"/>
-  </svg>
-);
-
 // Funding page icon lookup — maps label key → icon component
 const FUNDING_ICONS = {
   SPONSORED_PROGRAMS: IconSponsoredPrograms,
@@ -940,49 +789,6 @@ const BrandBlock = ({ compact=false }) => (
         </p>
       )}
     </div>
-  </div>
-);
-
-const Logo = ({ onClick }) => (
-  <button className="nav-logo" onClick={onClick} aria-label="Go to AthenaX home">
-    <div className="size-8 bg-gray-900 rounded text-white flex items-center justify-center text-lg shadow-sm p-1">
-      <img
-        src="https://athenax.mypinx.store/Logo_Icon_White.png"
-        alt="AthenaX Logo"
-        width={200}
-        height={100}
-        className="size-7 object-contain"
-      />
-    </div>
-    <span
-      style={{
-        fontFamily: "var(--font-londrina), cursive",
-        fontSize: 32,
-        lineHeight: 1,
-        letterSpacing: "-0.02em",
-        color: "#1C1C27",
-      }}
-    >
-      AthenaX
-    </span>
-  </button>
-);
-
-const TrafficLights = () => (
-  <div style={{display:"flex",gap:5}}>
-    <div className="dot dot-r"/>
-    <div className="dot dot-y"/>
-    <div className="dot dot-g"/>
-  </div>
-);
-
-const WindowCard = ({ label, bodyClass="window-body", children, style={} }) => (
-  <div className="window-card" style={style}>
-    <div className="window-titlebar">
-      <TrafficLights/>
-      <span className="titlebar-label">{label}</span>
-    </div>
-    <div className={bodyClass}>{children}</div>
   </div>
 );
 
@@ -1163,79 +969,6 @@ const ArsBreakdown = ({ r }) => {
         FORMULA: citations×0.30 + peerReviews×0.25 + downloads×0.15 + votes×0.15 + endorsements×0.10 + bounties×0.05
       </div>
     </div>
-  );
-};
-
-// ═══════════════════════════════════════════════════════════
-// NAVBAR
-// ═══════════════════════════════════════════════════════════
-const NAV_ITEMS = [
-  {id:"home",      label:"Home"},
-  {id:"archive",   label:"Research"},
-  {id:"network",   label:"Network"},
-  {id:"funding",   label:"Funding"},
-  // {id:"terminal",  label:"Terminal"},
-  {id:"docs",      label:"Docs"},
-];
-
-const getActiveNav = (page) => {
-  if(["home","how-it-works","business-model","about"].includes(page)) return "home";
-  if(["archive","paper","leaderboard","reports","roundtables","digest"].includes(page)) return "archive";
-  if(["network","labs","lab-profile","universities","sponsors","talent"].includes(page)) return "network";
-  if(["funding","bounties","post-bounty","cohorts","apply-cohort"].includes(page)) return "funding";
-  if(["terminal"].includes(page)) return "terminal";
-  if(page.startsWith("docs")) return "docs";
-  return page;
-};
-
-const NAV_DESCRIPTIONS = {
-  home:     "Platform overview & latest research",
-  archive:  "Papers, essays, and knowledge archive",
-  network:  "Labs, universities, and researchers",
-  funding:  "Bounties, sponsors, and cohorts",
-  terminal: "Research intelligence platform",
-  docs:     "Guides and protocol documentation",
-};
-
-const Navbar = ({ current, setPage, user, onAuthClick }) => {
-  const activeNav = getActiveNav(current);
-  const [hovered, setHovered] = useState(null);
-  return (
-    <nav className="navbar">
-      <div className="navbar-inner">
-        <Logo onClick={()=>setPage("home")}/>
-        <div className="nav-links">
-          {NAV_ITEMS.map(n=>(
-            <div key={n.id} style={{position:"relative"}}
-              onMouseEnter={()=>setHovered(n.id)}
-              onMouseLeave={()=>setHovered(null)}>
-              <button className={`nav-link${activeNav===n.id?" active":""}`} onClick={()=>setPage(n.id)}>{n.label}</button>
-              {hovered===n.id && activeNav!==n.id && (
-                <div style={{position:"absolute",top:"calc(100% + 8px)",left:"50%",transform:"translateX(-50%)",background:"#1C1C27",color:"#F2EFE9",fontSize:11,fontFamily:"'Space Mono',monospace",letterSpacing:"0.04em",padding:"5px 10px",borderRadius:6,whiteSpace:"nowrap",zIndex:200,pointerEvents:"none"}}>
-                  {NAV_DESCRIPTIONS[n.id]}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="nav-right">
-          {user ? (
-            <>
-              <button className="btn btn-ghost btn-sm" onClick={()=>setPage("profile")}>
-                <span style={{width:22,height:22,borderRadius:"50%",background:"#F5D94E",border:"1.5px solid #1C1C27",display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700}}>{user.avatar}</span>
-                {user.name.split(" ")[0]}
-              </button>
-              <button className="btn btn-outline btn-sm" onClick={()=>onAuthClick("logout")}>Out</button>
-            </>
-          ) : (
-            <>
-              <button className="btn btn-ghost btn-sm" onClick={()=>onAuthClick("login")}>Sign In</button>
-              <button className="btn btn-primary btn-sm" onClick={()=>setPage("apply-cohort")}>Apply →</button>
-            </>
-          )}
-        </div>
-      </div>
-    </nav>
   );
 };
 
@@ -2500,6 +2233,8 @@ const ApplyCohortPage = ({ setPage, user, showToast }) => {
     </div>
   );
 };
+
+
 
 // ═══════════════════════════════════════════════════════════
 // BUSINESS MODEL PAGE
@@ -3952,6 +3687,10 @@ export default function App() {
       const mediaId = page.replace("media:","");
       return <MediaPage mediaId={mediaId} setPage={navigate}/>;
     }
+    if(page.startsWith("launch-detail:")) {
+      const launchId = page.replace("launch-detail:","");
+      return <LaunchDetailPage launchId={launchId} setPage={navigate} user={user} showToast={showToast}/>;
+    }
     if(page.startsWith("terminal:topic:")) {
       const topic = page.replace("terminal:topic:","");
       return <TerminalPage setPage={navigate} user={user} showToast={showToast} initialQuery={`topic: ${topic}`}/>;
@@ -3975,6 +3714,7 @@ export default function App() {
       case "bounties":         return <BountiesPage setPage={navigate} user={user} showToast={showToast}/>;
       case "post-bounty":      return <PostBountyPage setPage={navigate} user={user} showToast={showToast}/>;
       case "cohorts":          return <CohortsPage setPage={navigate}/>;
+      case "launch":           return <LaunchPage setPage={navigate} user={user} showToast={showToast}/>;
       case "apply-cohort":     return <ApplyCohortPage setPage={navigate} user={user} showToast={showToast}/>;
       case "terminal":          return <TerminalPage setPage={navigate} user={user} showToast={showToast}/>;
       case "business-model":   return <BusinessModelPage setPage={navigate}/>;

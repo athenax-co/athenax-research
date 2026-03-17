@@ -1125,7 +1125,6 @@ const HomePage = ({ setPage, latestArticles, articlesLoading, articlesError }) =
             <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
               <button className="btn btn-primary" style={{fontSize:16,padding:"13px 28px"}} onClick={()=>setPage("how-it-works")}>How It Works →</button>
               <button className="btn btn-outline" style={{fontSize:16,padding:"13px 28px"}} onClick={()=>setPage("archive")}>Research Archive</button>
-              <button className="btn btn-outline" style={{fontSize:16,padding:"13px 28px"}} onClick={()=>setPage("docs-media")}>Media Kit</button>
             </div>
           </div>
           <div>

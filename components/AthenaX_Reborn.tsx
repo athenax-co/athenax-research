@@ -3,6 +3,7 @@
 // AthenaX_Reborn — v3 — Terminal page + icon refresh + business model update
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import LexicalRenderer from "./LexicalRenderer";
 import LaunchPage, {LaunchDetailPage} from "./page/launch";
 import Navbar from "./Navbar";
@@ -209,6 +210,55 @@ const useContentItem = (kind, slug, initialItem = null) => {
   }, [kind, slug]);
 
   return { item, loading, error };
+};
+
+const ROUTED_PAGES = {
+  "archive": "/archive",
+  "home": "/",
+  "research": "/research",
+};
+
+const getPathForPage = (page) => {
+  if (!page) return "/";
+  if (page.startsWith("article:")) {
+    return `/archive/${page.replace("article:", "")}`;
+  }
+  if (page.startsWith("research:")) {
+    return `/research/${page.replace("research:", "")}`;
+  }
+  return ROUTED_PAGES[page] ?? null;
+};
+
+const getPageForPathname = (pathname) => {
+  if (!pathname || pathname === "/") {
+    return { page: "home", archiveTab: "articles" };
+  }
+
+  const articleMatch = pathname.match(/^\/archive\/([^/]+)$/);
+  if (articleMatch) {
+    return {
+      page: `article:${decodeURIComponent(articleMatch[1])}`,
+      archiveTab: "articles",
+    };
+  }
+
+  const researchMatch = pathname.match(/^\/research\/([^/]+)$/);
+  if (researchMatch) {
+    return {
+      page: `research:${decodeURIComponent(researchMatch[1])}`,
+      archiveTab: "research",
+    };
+  }
+
+  const page = Object.entries(ROUTED_PAGES).find(([, path]) => path === pathname)?.[0];
+  if (page) {
+    return {
+      page: page === "research" ? "archive" : page,
+      archiveTab: page === "research" ? "research" : "articles",
+    };
+  }
+
+  return { page: "home", archiveTab: "articles" };
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -1397,9 +1447,8 @@ const ContentDetailPage = ({ kind, slug, setPage, initialItem }) => {
                   {formatContentDate(item.publishedAt)}
                 </span>
               </div>
-              <h1 style={{fontSize:42,marginBottom:0}}>{item.title}</h1>
             </div>
-            <WindowCard label={`${kind.toUpperCase()}_CONTENT`}>
+            <div>
               {isLexicalContent(item?.content) ? (
                 <LexicalRenderer content={item.content} />
               ) : contentBlocks.length > 0 ? contentBlocks.map((block, index) => (
@@ -1411,7 +1460,7 @@ const ContentDetailPage = ({ kind, slug, setPage, initialItem }) => {
                   {JSON.stringify(item.content, null, 2)}
                 </pre>
               )}
-            </WindowCard>
+            </div>
           </>
         )}
       </div>
@@ -1423,12 +1472,16 @@ const ContentDetailPage = ({ kind, slug, setPage, initialItem }) => {
 // ═══════════════════════════════════════════════════════════
 // ARCHIVE PAGE
 // ═══════════════════════════════════════════════════════════
-const ArchivePage = ({ setPage, articles, research, loading, error }) => {
-  const [tab, setTab] = useState("articles");
+const ArchivePage = ({ setPage, articles, research, loading, error, initialTab = "articles" }) => {
+  const [tab, setTab] = useState(initialTab);
   const [researchFilter, setResearchFilter] = useState("all");
   const filteredResearch = researchFilter === "all"
     ? research
     : research.filter((item) => normalizeTag(item.tag) === researchFilter);
+
+  useEffect(() => {
+    setTab(initialTab);
+  }, [initialTab]);
 
   return (
     <div>
@@ -3789,6 +3842,9 @@ const PlaceholderPage = ({ title, description, setPage }) => (
 // APP ROOT
 // ═══════════════════════════════════════════════════════════
 export default function App() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const routeState = getPageForPathname(pathname);
   const [page,setPage]               = useState("home");
   const [selectedLab,setSelectedLab] = useState(null);
   const [user,setUser]               = useState(null);
@@ -3799,6 +3855,9 @@ export default function App() {
   const latestArticles = articles.slice(0, 5);
 
   useEffect(()=>{ initDB(); const session=authSvc.getSession(); if(session)setUser(session); },[]);
+  useEffect(() => {
+    setPage(routeState.page);
+  }, [routeState.page]);
 
   const showToast = (text, type="info") => {
     const id=Math.random().toString(36).slice(2,8);
@@ -3808,10 +3867,14 @@ export default function App() {
   _globalShowToast = showToast;
   const removeToast = (id) => setToasts(t=>t.filter(x=>x.id!==id));
 
-  const handleLogout = () => { authSvc.logout(); setUser(null); showToast("Signed out.","info"); setPage("home"); };
+  const handleLogout = () => { authSvc.logout(); setUser(null); showToast("Signed out.","info"); navigate("home"); };
 
   const navigate = (target) => {
+    const nextPath = getPathForPage(target);
     setPage(target);
+    if (nextPath && nextPath !== pathname) {
+      router.push(nextPath);
+    }
     window.scrollTo({top:0,behavior:"smooth"});
   };
 
@@ -3852,8 +3915,8 @@ export default function App() {
       case "home":              return <HomePage setPage={navigate} latestArticles={latestArticles} articlesLoading={archiveLoading} articlesError={archiveError}/>;
       case "how-it-works":     return <HowItWorksPage setPage={navigate}/>;
       case "about":            return <AboutPage setPage={navigate}/>;
-      case "archive":          return <ArchivePage setPage={navigate} articles={articles} research={research} loading={archiveLoading} error={archiveError}/>;
-      case "leaderboard":      return <ArchivePage setPage={navigate} articles={articles} research={research} loading={archiveLoading} error={archiveError}/>;
+      case "archive":          return <ArchivePage setPage={navigate} articles={articles} research={research} loading={archiveLoading} error={archiveError} initialTab={routeState.archiveTab}/>;
+      case "leaderboard":      return <ArchivePage setPage={navigate} articles={articles} research={research} loading={archiveLoading} error={archiveError} initialTab={routeState.archiveTab}/>;
       case "submit-paper":     return <SubmitPaperPage setPage={navigate} user={user} showToast={showToast}/>;
       case "network":          return <NetworkPage setPage={navigate}/>;
       case "labs":             return <LabsPage setPage={navigate} setSelectedLab={setSelectedLab}/>;

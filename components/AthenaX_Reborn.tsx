@@ -3,7 +3,31 @@
 // AthenaX_Reborn — v3 — Terminal page + icon refresh + business model update
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import LexicalRenderer from "./LexicalRenderer";
+import LaunchPage, {LaunchDetailPage} from "./page/launch";
+import Navbar from "./Navbar";
+import TrafficLights from "./ui/TrafficLights";
+import WindowCard from "./ui/WindowCard";
+import {
+  IconLabs,
+  IconUniversities,
+  IconSponsors,
+  IconTalent,
+  IconResearchers,
+  IconProtocols,
+  IconBuilders,
+  IconSponsoredPrograms,
+  IconBounties,
+  IconCohortFees,
+  IconTerminal,
+  IconTalentPlacement,
+  IconStartupEquity,
+  IconLabsSmall,
+  IconTalentSmall,
+  IconPaperSmall,
+  IconBriefcaseSmall,
+} from "./Icons";
 
 const API_BASE_URL = "https://admin.athenax.co/api";
 const CONTENT_DEFAULT_PARAMS = {
@@ -186,6 +210,55 @@ const useContentItem = (kind, slug, initialItem = null) => {
   }, [kind, slug]);
 
   return { item, loading, error };
+};
+
+const ROUTED_PAGES = {
+  "archive": "/archive",
+  "home": "/",
+  "research": "/research",
+};
+
+const getPathForPage = (page) => {
+  if (!page) return "/";
+  if (page.startsWith("article:")) {
+    return `/archive/${page.replace("article:", "")}`;
+  }
+  if (page.startsWith("research:")) {
+    return `/research/${page.replace("research:", "")}`;
+  }
+  return ROUTED_PAGES[page] ?? null;
+};
+
+const getPageForPathname = (pathname) => {
+  if (!pathname || pathname === "/") {
+    return { page: "home", archiveTab: "articles" };
+  }
+
+  const articleMatch = pathname.match(/^\/archive\/([^/]+)$/);
+  if (articleMatch) {
+    return {
+      page: `article:${decodeURIComponent(articleMatch[1])}`,
+      archiveTab: "articles",
+    };
+  }
+
+  const researchMatch = pathname.match(/^\/research\/([^/]+)$/);
+  if (researchMatch) {
+    return {
+      page: `research:${decodeURIComponent(researchMatch[1])}`,
+      archiveTab: "research",
+    };
+  }
+
+  const page = Object.entries(ROUTED_PAGES).find(([, path]) => path === pathname)?.[0];
+  if (page) {
+    return {
+      page: page === "research" ? "archive" : page,
+      archiveTab: page === "research" ? "research" : "articles",
+    };
+  }
+
+  return { page: "home", archiveTab: "articles" };
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -719,180 +792,6 @@ const GlobalStyles = () => (
   `}</style>
 );
 
-// ═══════════════════════════════════════════════════════════
-// ICON REGISTRY — /components/icons.jsx
-// All product icons as pure SVG. Consistent 24×24 viewBox,
-// 2px stroke, round joins/caps — matches Lucide visual language.
-// Container sizing/colors stay in .icon-tile CSS (unchanged).
-// ═══════════════════════════════════════════════════════════
-
-// Research Labs — flask / beaker silhouette
-const IconLabs = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9 3h6"/>
-    <path d="M9 3v6l-4 9a1 1 0 0 0 .9 1.45h12.2A1 1 0 0 0 21 18l-4-9V3"/>
-    <line x1="6.5" y1="14" x2="17.5" y2="14"/>
-  </svg>
-);
-
-// Universities — columned building / institution
-const IconUniversities = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 21h18"/>
-    <path d="M3 10h18"/>
-    <path d="M5 10V6l7-3 7 3v4"/>
-    <rect x="5" y="10" width="4" height="11"/>
-    <rect x="10" y="10" width="4" height="11"/>
-    <rect x="15" y="10" width="4" height="11"/>
-  </svg>
-);
-
-// Protocol Sponsors — network nodes / hexagonal links
-const IconSponsors = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="5"  r="2"/>
-    <circle cx="5"  cy="19" r="2"/>
-    <circle cx="19" cy="19" r="2"/>
-    <line x1="12" y1="7"  x2="5"  y2="17"/>
-    <line x1="12" y1="7"  x2="19" y2="17"/>
-    <line x1="7"  y1="19" x2="17" y2="19"/>
-  </svg>
-);
-
-// Talent Marketplace — person with upward arrow / pipeline
-const IconTalent = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="9" cy="7" r="3"/>
-    <path d="M3 21v-2a4 4 0 0 1 4-4h4"/>
-    <path d="M16 18l3-3 3 3"/>
-    <line x1="19" y1="21" x2="19" y2="15"/>
-  </svg>
-);
-
-// Researchers (home page) — graduation cap / diploma
-const IconResearchers = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-    <path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/>
-  </svg>
-);
-
-// Protocols (home page) — circuit / hex node
-const IconProtocols = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="12 2 19.5 6 19.5 14 12 18 4.5 14 4.5 6"/>
-    <line x1="12" y1="2"  x2="12" y2="18"/>
-    <line x1="4.5" y1="6"  x2="19.5" y2="14"/>
-    <line x1="19.5" y1="6"  x2="4.5" y2="14"/>
-  </svg>
-);
-
-// Builders (home page) — wrench + code bracket
-const IconBuilders = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="16 18 22 12 16 6"/>
-    <polyline points="8 6 2 12 8 18"/>
-    <line x1="12" y1="4" x2="12" y2="20" strokeDasharray="2 2"/>
-  </svg>
-);
-
-// Sponsored Programs — document + dollar / contract
-const IconSponsoredPrograms = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-    <polyline points="14 2 14 8 20 8"/>
-    <line x1="9" y1="13" x2="15" y2="13"/>
-    <line x1="9" y1="17" x2="12" y2="17"/>
-  </svg>
-);
-
-// Research Bounties — target crosshair
-const IconBounties = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/>
-    <circle cx="12" cy="12" r="5"/>
-    <circle cx="12" cy="12" r="1" fill={color}/>
-    <line x1="12" y1="2"  x2="12" y2="7"/>
-    <line x1="12" y1="17" x2="12" y2="22"/>
-    <line x1="2"  y1="12" x2="7"  y2="12"/>
-    <line x1="17" y1="12" x2="22" y2="12"/>
-  </svg>
-);
-
-// Builder Cohort Fees — layered stages / pipeline
-const IconCohortFees = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-    <path d="M2 12l10 5 10-5"/>
-    <path d="M2 17l10 5 10-5"/>
-  </svg>
-);
-
-// Terminal Subscriptions — terminal prompt / monitor
-const IconTerminal = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="4" width="20" height="16" rx="2"/>
-    <polyline points="8 9 4 12 8 15"/>
-    <line x1="12" y1="15" x2="20" y2="15"/>
-  </svg>
-);
-
-// Talent Placement — person + checkmark / confirmed hire
-const IconTalentPlacement = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-    <circle cx="12" cy="7" r="4"/>
-    <polyline points="16 11 17.5 13 21 10"/>
-  </svg>
-);
-
-// Startup Equity — chart trending up / investment growth
-const IconStartupEquity = ({ size=26, color="#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-    <polyline points="16 7 22 7 22 13"/>
-  </svg>
-);
-
-// Labs row icon (small, 42×42 archive-icon context) — same flask
-const IconLabsSmall = ({ color="#1C1C27" }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9 3h6"/>
-    <path d="M9 3v6l-4 9a1 1 0 0 0 .9 1.45h12.2A1 1 0 0 0 21 18l-4-9V3"/>
-    <line x1="6.5" y1="14" x2="17.5" y2="14"/>
-  </svg>
-);
-
-// Talent row icon (small, 42×42 archive-icon context)
-const IconTalentSmall = ({ color="#1C1C27" }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="9" cy="7" r="3"/>
-    <path d="M3 21v-2a4 4 0 0 1 4-4h4"/>
-    <path d="M16 18l3-3 3 3"/>
-    <line x1="19" y1="21" x2="19" y2="15"/>
-  </svg>
-);
-
-// Paper document icon (small, used in profile page)
-const IconPaperSmall = ({ color="#1C1C27" }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-    <polyline points="14 2 14 8 20 8"/>
-    <line x1="9" y1="13" x2="15" y2="13"/>
-    <line x1="9" y1="17" x2="12" y2="17"/>
-  </svg>
-);
-
-// Briefcase icon (small, used in talent page rows)
-const IconBriefcaseSmall = ({ color="#1C1C27" }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="7" width="20" height="14" rx="2"/>
-    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-    <line x1="12" y1="12" x2="12" y2="16"/>
-    <line x1="8"  y1="14" x2="16" y2="14"/>
-  </svg>
-);
-
 // Funding page icon lookup — maps label key → icon component
 const FUNDING_ICONS = {
   SPONSORED_PROGRAMS: IconSponsoredPrograms,
@@ -940,49 +839,6 @@ const BrandBlock = ({ compact=false }) => (
         </p>
       )}
     </div>
-  </div>
-);
-
-const Logo = ({ onClick }) => (
-  <button className="nav-logo" onClick={onClick} aria-label="Go to AthenaX home">
-    <div className="size-8 bg-gray-900 rounded text-white flex items-center justify-center text-lg shadow-sm p-1">
-      <img
-        src="https://athenax.mypinx.store/Logo_Icon_White.png"
-        alt="AthenaX Logo"
-        width={200}
-        height={100}
-        className="size-7 object-contain"
-      />
-    </div>
-    <span
-      style={{
-        fontFamily: "var(--font-londrina), cursive",
-        fontSize: 32,
-        lineHeight: 1,
-        letterSpacing: "-0.02em",
-        color: "#1C1C27",
-      }}
-    >
-      AthenaX
-    </span>
-  </button>
-);
-
-const TrafficLights = () => (
-  <div style={{display:"flex",gap:5}}>
-    <div className="dot dot-r"/>
-    <div className="dot dot-y"/>
-    <div className="dot dot-g"/>
-  </div>
-);
-
-const WindowCard = ({ label, bodyClass="window-body", children, style={} }) => (
-  <div className="window-card" style={style}>
-    <div className="window-titlebar">
-      <TrafficLights/>
-      <span className="titlebar-label">{label}</span>
-    </div>
-    <div className={bodyClass}>{children}</div>
   </div>
 );
 
@@ -1167,79 +1023,6 @@ const ArsBreakdown = ({ r }) => {
 };
 
 // ═══════════════════════════════════════════════════════════
-// NAVBAR
-// ═══════════════════════════════════════════════════════════
-const NAV_ITEMS = [
-  {id:"home",      label:"Home"},
-  {id:"archive",   label:"Research"},
-  {id:"network",   label:"Network"},
-  {id:"funding",   label:"Funding"},
-  // {id:"terminal",  label:"Terminal"},
-  {id:"docs",      label:"Docs"},
-];
-
-const getActiveNav = (page) => {
-  if(["home","how-it-works","business-model","about"].includes(page)) return "home";
-  if(["archive","paper","leaderboard","reports","roundtables","digest"].includes(page)) return "archive";
-  if(["network","labs","lab-profile","universities","sponsors","talent"].includes(page)) return "network";
-  if(["funding","bounties","post-bounty","cohorts","apply-cohort"].includes(page)) return "funding";
-  if(["terminal"].includes(page)) return "terminal";
-  if(page.startsWith("docs")) return "docs";
-  return page;
-};
-
-const NAV_DESCRIPTIONS = {
-  home:     "Platform overview & latest research",
-  archive:  "Papers, essays, and knowledge archive",
-  network:  "Labs, universities, and researchers",
-  funding:  "Bounties, sponsors, and cohorts",
-  terminal: "Research intelligence platform",
-  docs:     "Guides and protocol documentation",
-};
-
-const Navbar = ({ current, setPage, user, onAuthClick }) => {
-  const activeNav = getActiveNav(current);
-  const [hovered, setHovered] = useState(null);
-  return (
-    <nav className="navbar">
-      <div className="navbar-inner">
-        <Logo onClick={()=>setPage("home")}/>
-        <div className="nav-links">
-          {NAV_ITEMS.map(n=>(
-            <div key={n.id} style={{position:"relative"}}
-              onMouseEnter={()=>setHovered(n.id)}
-              onMouseLeave={()=>setHovered(null)}>
-              <button className={`nav-link${activeNav===n.id?" active":""}`} onClick={()=>setPage(n.id)}>{n.label}</button>
-              {hovered===n.id && activeNav!==n.id && (
-                <div style={{position:"absolute",top:"calc(100% + 8px)",left:"50%",transform:"translateX(-50%)",background:"#1C1C27",color:"#F2EFE9",fontSize:11,fontFamily:"'Space Mono',monospace",letterSpacing:"0.04em",padding:"5px 10px",borderRadius:6,whiteSpace:"nowrap",zIndex:200,pointerEvents:"none"}}>
-                  {NAV_DESCRIPTIONS[n.id]}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="nav-right">
-          {user ? (
-            <>
-              <button className="btn btn-ghost btn-sm" onClick={()=>setPage("profile")}>
-                <span style={{width:22,height:22,borderRadius:"50%",background:"#F5D94E",border:"1.5px solid #1C1C27",display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700}}>{user.avatar}</span>
-                {user.name.split(" ")[0]}
-              </button>
-              <button className="btn btn-outline btn-sm" onClick={()=>onAuthClick("logout")}>Out</button>
-            </>
-          ) : (
-            <>
-              <button className="btn btn-ghost btn-sm" onClick={()=>onAuthClick("login")}>Sign In</button>
-              <button className="btn btn-primary btn-sm" onClick={()=>setPage("apply-cohort")}>Apply →</button>
-            </>
-          )}
-        </div>
-      </div>
-    </nav>
-  );
-};
-
-// ═══════════════════════════════════════════════════════════
 // FOOTER
 // ═══════════════════════════════════════════════════════════
 // Global toast ref — lets Footer call showToast without prop drilling
@@ -1309,6 +1092,7 @@ const Footer = ({ setPage }) => (
           <button className="footer-link" onClick={()=>setPage("how-it-works")}>How It Works</button>
           <button className="footer-link" onClick={()=>setPage("about")}>About</button>
           <button className="footer-link" onClick={()=>setPage("business-model")}>Business Model</button>
+          <button className="footer-link" onClick={()=>setPage("docs-media")}>Media Kit</button>
         </div>
       </div>
     </div>
@@ -1662,9 +1446,8 @@ const ContentDetailPage = ({ kind, slug, setPage, initialItem }) => {
                   {formatContentDate(item.publishedAt)}
                 </span>
               </div>
-              <h1 style={{fontSize:42,marginBottom:0}}>{item.title}</h1>
             </div>
-            <WindowCard label={`${kind.toUpperCase()}_CONTENT`}>
+            <div>
               {isLexicalContent(item?.content) ? (
                 <LexicalRenderer content={item.content} />
               ) : contentBlocks.length > 0 ? contentBlocks.map((block, index) => (
@@ -1676,7 +1459,7 @@ const ContentDetailPage = ({ kind, slug, setPage, initialItem }) => {
                   {JSON.stringify(item.content, null, 2)}
                 </pre>
               )}
-            </WindowCard>
+            </div>
           </>
         )}
       </div>
@@ -1688,12 +1471,16 @@ const ContentDetailPage = ({ kind, slug, setPage, initialItem }) => {
 // ═══════════════════════════════════════════════════════════
 // ARCHIVE PAGE
 // ═══════════════════════════════════════════════════════════
-const ArchivePage = ({ setPage, articles, research, loading, error }) => {
-  const [tab, setTab] = useState("articles");
+const ArchivePage = ({ setPage, articles, research, loading, error, initialTab = "articles" }) => {
+  const [tab, setTab] = useState(initialTab);
   const [researchFilter, setResearchFilter] = useState("all");
   const filteredResearch = researchFilter === "all"
     ? research
     : research.filter((item) => normalizeTag(item.tag) === researchFilter);
+
+  useEffect(() => {
+    setTab(initialTab);
+  }, [initialTab]);
 
   return (
     <div>
@@ -2500,6 +2287,8 @@ const ApplyCohortPage = ({ setPage, user, showToast }) => {
     </div>
   );
 };
+
+
 
 // ═══════════════════════════════════════════════════════════
 // BUSINESS MODEL PAGE
@@ -3595,28 +3384,179 @@ const DocsGovernancePage = ({ setPage }) => (
   </DocsShell>
 );
 
-const DocsMediaPage = ({ setPage }) => (
-  <DocsShell current="docs-media" setPage={setPage} title="Media Kit" subtitle="Assets for press and partners." fileTag="/root/docs/media">
-    <DocSection title="Brand Guidelines">
-      <p style={{fontSize:15,lineHeight:1.7,color:"#1C1C27",marginBottom:18}}>AthenaX is CC0. No rights reserved. All assets are open source and free to use.</p>
-      <div className="grid-2" style={{gap:14,marginBottom:20}}>
-        {[{name:"Primary Red",hex:"#E8323C"},{name:"Near-Black",hex:"#1C1C27"},{name:"Cream",hex:"#F2EFE9"},{name:"Yellow",hex:"#F5D94E"}].map(c=>(
-          <div key={c.name} style={{padding:20,background:c.hex,border:"2px solid #1C1C27",borderRadius:10}}>
-            <div style={{fontWeight:700,color:c.hex==="#F2EFE9"||c.hex==="#F5D94E"?"#1C1C27":"#fff",fontSize:14}}>{c.name}</div>
-            <div style={{fontFamily:"'Space Mono',monospace",fontSize:11,color:c.hex==="#F2EFE9"||c.hex==="#F5D94E"?"#1C1C27":"rgba(255,255,255,0.7)"}}>{c.hex}</div>
+const DocsMediaPage = ({ setPage }) => {
+  const mediaLogos = [
+    { title:"Primary Lockup", src:"Logo_Dark.svg", bg:"#F2EFE9", bodyClass:"window-body" },
+    { title:"Inverse Lockup", src:"Logo_White.svg", bg:"#1C1C27", bodyClass:"window-body", dark:true },
+    { title:"Accent Lockup", src:"Logo_Yellow.svg", bg:"#1C1C27", bodyClass:"window-body", dark:true },
+    { title:"Icon Mark", src:"Logo.svg", bg:"#F2EFE9", bodyClass:"window-body" },
+  ];
+
+  const palette = [
+    { name:"Primary Red", hex:"#E8323C", bg:"#E8323C", fg:"#F2EFE9", use:"Primary accents, calls to action, and key emphasis" },
+    { name:"Near-Black", hex:"#1C1C27", bg:"#1C1C27", fg:"#F2EFE9", use:"Primary text, strokes, dark surfaces" },
+    { name:"Cream", hex:"#F2EFE9", bg:"#F2EFE9", fg:"#1C1C27", use:"Page fields, neutral canvas, and brand background" },
+    { name:"Yellow", hex:"#F5D94E", bg:"#F5D94E", fg:"#1C1C27", use:"Labels, highlights, and category markers" },
+  ];
+
+  const usageGood = [
+    "Use the supplied lockups and icon files without distortion.",
+    "Keep generous clear space around the mark in crowded layouts.",
+    "Pair the brand with high-contrast surfaces and strong typography.",
+    "Attribute AthenaX accurately when describing sponsorship or partnership.",
+  ];
+
+  const usageBad = [
+    "Do not redraw, stretch, skew, or rotate the symbol.",
+    "Do not invent gradients, shadows, or alternate colorways.",
+    "Do not imply endorsement, investment, or partnership unless confirmed.",
+    "Do not combine the mark with unrelated icons into a new hybrid logo.",
+  ];
+
+  return (
+    <DocsShell current="docs-media" setPage={setPage} title="Media Kit" subtitle="Press-ready assets, voice notes, and brand usage for partners, media, and ecosystem teams." fileTag="/root/docs/media-kit">
+      <div className="section-stack-lg">
+        <WindowCard label="MEDIA_KIT_OVERVIEW" bodyClass="window-body window-body-yellow">
+          <div style={{display:"grid",gridTemplateColumns:"1.2fr 0.8fr",gap:24,alignItems:"start"}}>
+            <div>
+              <div className="path-badge" style={{marginBottom:14}}>CC0 / OPEN BRAND SYSTEM</div>
+              <h2 style={{fontSize:34,lineHeight:1.02,marginBottom:12}}>AthenaX Press & Brand Pack</h2>
+              <p style={{fontSize:15,color:"#6B6B7A",lineHeight:1.7,marginBottom:18}}>
+                AthenaX is a research coordination system for frontier technology. This media kit gives editors, sponsors, and builders a clean way to talk about the project and use the brand responsibly.
+              </p>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:18}}>
+                {["CC0 assets","Logo lockups","Palette","Voice notes","Usage rules"].map((item)=>(
+                  <span key={item} className="ftag">{item}</span>
+                ))}
+              </div>
+              <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+                <Link href="https://athenax.mypinx.store/Brand/Brand%20Guidelines.pdf" target="_blank" rel="noopener noreferrer">
+                  <button className="btn btn-primary">Download Brand PDF</button>
+                </Link>
+                <button className="btn btn-outline" onClick={()=>setPage("launch")}>See Product Surface</button>
+              </div>
+            </div>
+            <div className="stat-card" style={{background:"#fff"}}>
+              <div className="stat-label">Boilerplate</div>
+              <div style={{fontSize:14,lineHeight:1.75,color:"#1C1C27"}}>
+                AthenaX connects researchers, builders, and protocol ecosystems so validated ideas can move from paper to product. It is designed to make open research fundable, legible, and easier to build on.
+              </div>
+            </div>
           </div>
-        ))}
+        </WindowCard>
+
+        <DocSection title="Logo System">
+          <div className="grid-2" style={{gap:18}}>
+            {mediaLogos.map((logo)=>(
+              <WindowCard key={logo.title} label={logo.title.toUpperCase().replace(/ /g,"_")} bodyClass={logo.bodyClass}>
+                <div style={{background:logo.bg,border:"2px solid #1C1C27",borderRadius:12,padding:"28px 24px",display:"flex",alignItems:"center",justifyContent:"center",minHeight:180}}>
+                  <img
+                    src={`https://athenax.mypinx.store/Brand/${logo.src}`}
+                    alt={logo.title}
+                    width={520}
+                    height={240}
+                    style={{width:logo.title === "Icon Mark" ? 180 : "78%",height:"auto",display:"block"}}
+                  />
+                </div>
+                <div style={{marginTop:14,fontSize:13,color:"#6B6B7A",lineHeight:1.65}}>
+                  {logo.title === "Primary Lockup" && "Default mark for editorial coverage, decks, landing pages, and ecosystem references."}
+                  {logo.title === "Inverse Lockup" && "Use on dark surfaces where maximum legibility is needed."}
+                  {logo.title === "Accent Lockup" && "Best for highlighted placements, feature cards, and branded modules."}
+                  {logo.title === "Icon Mark" && "Use the icon on its own in tight UI contexts or social/profile placements."}
+                </div>
+              </WindowCard>
+            ))}
+          </div>
+        </DocSection>
+
+        <DocSection title="Palette & Voice">
+          <div className="grid-2" style={{gap:18,alignItems:"start"}}>
+            <WindowCard label="PALETTE.TOKENS" bodyClass="window-body window-body-blue">
+              <div style={{display:"flex",flexDirection:"column",gap:12}}>
+                {palette.map((color)=>(
+                  <div key={color.name} style={{display:"grid",gridTemplateColumns:"88px 1fr",gap:14,alignItems:"center",padding:"10px 0",borderBottom:"1px solid rgba(31,41,55,0.08)"}}>
+                    <div style={{height:52,borderRadius:10,border:"2px solid #1C1C27",background:color.bg,boxShadow:"3px 3px 0 #1C1C27"}}/>
+                    <div>
+                      <div style={{fontWeight:700,fontSize:14,color:"#1C1C27"}}>{color.name} <span style={{fontFamily:"'Space Mono',monospace",fontSize:11,color:"#6B6B7A"}}>{color.hex}</span></div>
+                      <div style={{fontSize:13,color:"#6B6B7A",lineHeight:1.55}}>{color.use}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </WindowCard>
+
+            <WindowCard label="VOICE_AND_COPY" bodyClass="window-body">
+              <div style={{fontSize:14,lineHeight:1.8,color:"#1C1C27"}}>
+                <div style={{marginBottom:12}}><strong>Core tone:</strong> rigorous, open, builder-literate, quietly ambitious.</div>
+                <div style={{marginBottom:12}}><strong>Preferred language:</strong> research coordination, protocol ecosystems, public goods, frontier technology, open infrastructure.</div>
+                <div style={{marginBottom:12}}><strong>Avoid:</strong> vague hype language, empty futurism, or framing AthenaX as just another media/news brand.</div>
+                <div style={{marginBottom:16}}><strong>Short descriptor:</strong> AthenaX is a research operating system for frontier technology.</div>
+                <div className="stat-card" style={{background:"#F2EFE9",padding:16}}>
+                  <div className="stat-label">Recommended quote</div>
+                  <div style={{fontSize:15,lineHeight:1.7}}>
+                    “AthenaX helps serious research travel farther by giving it structure, visibility, and a path into products.”
+                  </div>
+                </div>
+              </div>
+            </WindowCard>
+          </div>
+        </DocSection>
+
+        <DocSection title="Usage Rules">
+          <div className="grid-2" style={{gap:18}}>
+            <WindowCard label="DO" bodyClass="window-body window-body-yellow">
+              <div style={{display:"flex",flexDirection:"column",gap:14}}>
+                {usageGood.map((item, index)=>(
+                  <div key={item} style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+                    <div style={{width:30,height:30,borderRadius:8,border:"2px solid #1C1C27",background:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,boxShadow:"2px 2px 0 #1C1C27"}}>{index + 1}</div>
+                    <div style={{fontSize:14,lineHeight:1.7,color:"#1C1C27"}}>{item}</div>
+                  </div>
+                ))}
+              </div>
+            </WindowCard>
+
+            <WindowCard label="DO_NOT" bodyClass="window-body">
+              <div style={{display:"flex",flexDirection:"column",gap:14}}>
+                {usageBad.map((item, index)=>(
+                  <div key={item} style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+                    <div style={{width:30,height:30,borderRadius:8,border:"2px solid #1C1C27",background:"#F5DDE0",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,boxShadow:"2px 2px 0 #1C1C27",color:"#E8323C"}}>{index + 1}</div>
+                    <div style={{fontSize:14,lineHeight:1.7,color:"#1C1C27"}}>{item}</div>
+                  </div>
+                ))}
+              </div>
+            </WindowCard>
+          </div>
+        </DocSection>
+
+        <DocSection title="Press Contact & Downloads">
+          <div className="grid-2" style={{gap:18}}>
+            <WindowCard label="PRESS_CONTACT" bodyClass="window-body">
+              <div style={{fontSize:14,lineHeight:1.8,color:"#1C1C27"}}>
+                <div style={{marginBottom:10}}><strong>Email:</strong> <a href="mailto:info@athenax.co" style={{color:"#E8323C",textDecoration:"underline"}}>info@athenax.co</a></div>
+                <div style={{marginBottom:10}}><strong>Best for:</strong> press requests, partner decks, conference materials, podcast notes, sponsorship references.</div>
+                <div><strong>Licence:</strong> CC0. Assets are open to use, adapt, and distribute, but usage must not falsely imply endorsement or a formal partnership.</div>
+              </div>
+            </WindowCard>
+
+            <WindowCard label="DOWNLOADS" bodyClass="window-body window-body-blue">
+              <div style={{display:"flex",flexDirection:"column",gap:12}}>
+                <Link href="https://athenax.mypinx.store/Brand/Brand%20Guidelines.pdf" target="_blank" rel="noopener noreferrer">
+                  <button className="btn btn-primary" style={{width:"100%",justifyContent:"center"}}>Download Brand Guidelines PDF</button>
+                </Link>
+                <Link href="https://athenax.mypinx.store/Brand/Logo.svg" target="_blank" rel="noopener noreferrer">
+                  <button className="btn btn-outline" style={{width:"100%",justifyContent:"center"}}>Download SVG Mark</button>
+                </Link>
+                <Link href="https://athenax.mypinx.store/Brand/Logo_Dark.svg" target="_blank" rel="noopener noreferrer">
+                  <button className="btn btn-outline" style={{width:"100%",justifyContent:"center"}}>Download Primary Lockup</button>
+                </Link>
+              </div>
+            </WindowCard>
+          </div>
+        </DocSection>
       </div>
-      <WindowCard label="COPY_GUIDELINES.TXT">
-        <div style={{fontSize:14,lineHeight:1.7}}>
-          <div style={{marginBottom:8}}><strong>Use:</strong> AthenaX, onchain, public goods, proof of work</div>
-          <div style={{marginBottom:8}}><strong>Avoid:</strong> Web3, blockchain innovation, decentralized future, disruptive</div>
-          <div><strong>Tagline:</strong> "Researchers get paid. Protocols get credibility. Ideas become companies."</div>
-        </div>
-      </WindowCard>
-    </DocSection>
-  </DocsShell>
-);
+    </DocsShell>
+  );
+};
 
 // ═══════════════════════════════════════════════════════════
 // NEWSLETTER CARD — reusable sub/unsub widget
@@ -3901,6 +3841,9 @@ const PlaceholderPage = ({ title, description, setPage }) => (
 // APP ROOT
 // ═══════════════════════════════════════════════════════════
 export default function App() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const routeState = getPageForPathname(pathname);
   const [page,setPage]               = useState("home");
   const [selectedLab,setSelectedLab] = useState(null);
   const [user,setUser]               = useState(null);
@@ -3911,6 +3854,9 @@ export default function App() {
   const latestArticles = articles.slice(0, 5);
 
   useEffect(()=>{ initDB(); const session=authSvc.getSession(); if(session)setUser(session); },[]);
+  useEffect(() => {
+    setPage(routeState.page);
+  }, [routeState.page]);
 
   const showToast = (text, type="info") => {
     const id=Math.random().toString(36).slice(2,8);
@@ -3920,10 +3866,14 @@ export default function App() {
   _globalShowToast = showToast;
   const removeToast = (id) => setToasts(t=>t.filter(x=>x.id!==id));
 
-  const handleLogout = () => { authSvc.logout(); setUser(null); showToast("Signed out.","info"); setPage("home"); };
+  const handleLogout = () => { authSvc.logout(); setUser(null); showToast("Signed out.","info"); navigate("home"); };
 
   const navigate = (target) => {
+    const nextPath = getPathForPage(target);
     setPage(target);
+    if (nextPath && nextPath !== pathname) {
+      router.push(nextPath);
+    }
     window.scrollTo({top:0,behavior:"smooth"});
   };
 
@@ -3952,6 +3902,10 @@ export default function App() {
       const mediaId = page.replace("media:","");
       return <MediaPage mediaId={mediaId} setPage={navigate}/>;
     }
+    if(page.startsWith("launch-detail:")) {
+      const launchId = page.replace("launch-detail:","");
+      return <LaunchDetailPage launchId={launchId} setPage={navigate} user={user} showToast={showToast}/>;
+    }
     if(page.startsWith("terminal:topic:")) {
       const topic = page.replace("terminal:topic:","");
       return <TerminalPage setPage={navigate} user={user} showToast={showToast} initialQuery={`topic: ${topic}`}/>;
@@ -3960,8 +3914,8 @@ export default function App() {
       case "home":              return <HomePage setPage={navigate} latestArticles={latestArticles} articlesLoading={archiveLoading} articlesError={archiveError}/>;
       case "how-it-works":     return <HowItWorksPage setPage={navigate}/>;
       case "about":            return <AboutPage setPage={navigate}/>;
-      case "archive":          return <ArchivePage setPage={navigate} articles={articles} research={research} loading={archiveLoading} error={archiveError}/>;
-      case "leaderboard":      return <ArchivePage setPage={navigate} articles={articles} research={research} loading={archiveLoading} error={archiveError}/>;
+      case "archive":          return <ArchivePage setPage={navigate} articles={articles} research={research} loading={archiveLoading} error={archiveError} initialTab={routeState.archiveTab}/>;
+      case "leaderboard":      return <ArchivePage setPage={navigate} articles={articles} research={research} loading={archiveLoading} error={archiveError} initialTab={routeState.archiveTab}/>;
       case "submit-paper":     return <SubmitPaperPage setPage={navigate} user={user} showToast={showToast}/>;
       case "network":          return <NetworkPage setPage={navigate}/>;
       case "labs":             return <LabsPage setPage={navigate} setSelectedLab={setSelectedLab}/>;
@@ -3975,6 +3929,7 @@ export default function App() {
       case "bounties":         return <BountiesPage setPage={navigate} user={user} showToast={showToast}/>;
       case "post-bounty":      return <PostBountyPage setPage={navigate} user={user} showToast={showToast}/>;
       case "cohorts":          return <CohortsPage setPage={navigate}/>;
+      case "launch":           return <LaunchPage setPage={navigate} user={user} showToast={showToast}/>;
       case "apply-cohort":     return <ApplyCohortPage setPage={navigate} user={user} showToast={showToast}/>;
       case "terminal":          return <TerminalPage setPage={navigate} user={user} showToast={showToast}/>;
       case "business-model":   return <BusinessModelPage setPage={navigate}/>;
@@ -3988,6 +3943,7 @@ export default function App() {
       case "docs-standards":   return <DocsStandardsPage setPage={navigate}/>;
       case "docs-governance":  return <DocsGovernancePage setPage={navigate}/>;
       case "docs-media":       return <DocsMediaPage setPage={navigate}/>;
+      case "brand":            return <DocsMediaPage setPage={navigate}/>;
       default: return <PlaceholderPage title={page} description="Page coming soon." setPage={navigate}/>;
     }
   };

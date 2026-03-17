@@ -15,6 +15,47 @@ interface LexicalContent {
    root: LexicalNode;
 }
 
+const styles = {
+   empty: {
+      color: "#6B6B7A",
+   },
+   container: {
+      maxWidth: "none",
+      color: "#1C1C27",
+      fontSize: 16,
+      lineHeight: 1.8,
+   },
+   paragraph: {
+      margin: "0 0 16px",
+      lineHeight: 1.8,
+   },
+   quote: {
+      borderLeft: "4px solid #E8323C",
+      paddingLeft: 16,
+      margin: "24px 0",
+      fontStyle: "italic" as const,
+      color: "#6B6B7A",
+   },
+   rule: {
+      margin: "32px 0",
+      border: "none",
+      borderTop: "1px solid #D8D4CC",
+   },
+   bulletList: {
+      margin: "0 0 16px",
+      paddingLeft: 24,
+      listStyleType: "disc" as const,
+   },
+   numberList: {
+      margin: "0 0 16px",
+      paddingLeft: 24,
+      listStyleType: "decimal" as const,
+   },
+   listItem: {
+      marginBottom: 8,
+   },
+};
+
 function renderTextNode(node: LexicalNode) {
    if (typeof node.text !== "string") return null;
 
@@ -52,7 +93,7 @@ function renderNode(node: LexicalNode, index: number): React.ReactNode {
    // Paragraph
    if (node.type === "paragraph") {
       return (
-         <p key={index} className="mb-4 leading-relaxed">
+         <p key={index} style={styles.paragraph}>
             {node.children?.map((child, i) => renderNode(child, i))}
          </p>
       );
@@ -63,15 +104,15 @@ function renderNode(node: LexicalNode, index: number): React.ReactNode {
       const Tag = node.tag as keyof JSX.IntrinsicElements;
       const className =
          node.tag === "h1"
-            ? "text-4xl font-bold mb-6 mt-8"
+            ? { fontSize: 40, fontWeight: 700, margin: "32px 0 24px", lineHeight: 1.1 }
             : node.tag === "h2"
-              ? "text-3xl font-bold mb-4 mt-6"
+              ? { fontSize: 32, fontWeight: 700, margin: "24px 0 16px", lineHeight: 1.15 }
               : node.tag === "h3"
-                ? "text-2xl font-bold mb-4 mt-6"
-                : "text-xl font-bold mb-3 mt-4";
+                ? { fontSize: 28, fontWeight: 700, margin: "24px 0 16px", lineHeight: 1.2 }
+                : { fontSize: 24, fontWeight: 700, margin: "16px 0 12px", lineHeight: 1.25 };
 
       return (
-         <Tag key={index} className={className}>
+         <Tag key={index} style={className}>
             {node.children?.map((child, i) => renderNode(child, i))}
          </Tag>
       );
@@ -80,10 +121,7 @@ function renderNode(node: LexicalNode, index: number): React.ReactNode {
    // Quote
    if (node.type === "quote") {
       return (
-         <blockquote
-            key={index}
-            className="border-l-4 border-accent-red pl-4 italic my-6 text-gray-700"
-         >
+         <blockquote key={index} style={styles.quote}>
             {node.children?.map((child, i) => renderNode(child, i))}
          </blockquote>
       );
@@ -91,18 +129,18 @@ function renderNode(node: LexicalNode, index: number): React.ReactNode {
 
    // Horizontal rule
    if (node.type === "horizontalrule") {
-      return <hr key={index} className="my-8 border-gray-300" />;
+      return <hr key={index} style={styles.rule} />;
    }
 
    // Lists
    if (node.type === "list") {
       const ListTag = node.listType === "bullet" ? "ul" : "ol";
-      const listClassName =
+      const listStyle =
          node.listType === "bullet"
-            ? "list-disc list-outside pl-6 mb-4 space-y-2"
-            : "list-decimal list-outside pl-6 mb-4 space-y-2";
+            ? styles.bulletList
+            : styles.numberList;
       return (
-         <ListTag key={index} className={listClassName}>
+         <ListTag key={index} style={listStyle}>
             {node.children?.map((child, i) => renderNode(child, i))}
          </ListTag>
       );
@@ -117,7 +155,7 @@ function renderNode(node: LexicalNode, index: number): React.ReactNode {
       if (children.length === 0) return null;
 
       return (
-         <li key={index}>
+         <li key={index} style={styles.listItem}>
             {children}
          </li>
       );
@@ -134,8 +172,8 @@ function renderNode(node: LexicalNode, index: number): React.ReactNode {
 
 export default function LexicalRenderer({ content }: { content: LexicalContent }) {
    if (!content || !content.root) {
-      return <p className="text-gray-500">No content available.</p>;
+      return <p style={styles.empty}>No content available.</p>;
    }
 
-   return <div className="prose prose-lg max-w-none">{renderNode(content.root, 0)}</div>;
+   return <div style={styles.container}>{renderNode(content.root, 0)}</div>;
 }

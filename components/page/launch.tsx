@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════
 // LAUNCH DETAIL PAGE — individual startup page
 
-import { SEED_LAUNCHES, SEED_PAPERS } from "@/data/data";
+import { SEED_LAUNCHES, SEED_PAPERS } from "@/data/seed";
 import { useState } from "react";
 import WindowCard from "../ui/WindowCard";
 import BookmarkButton from "../BookmarkButton";

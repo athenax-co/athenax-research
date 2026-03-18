@@ -1,9 +1,9 @@
-"use client";
 import ContentDetailPage from "@/components/page/content-details";
-import { use } from "react";
+import { getResearchBySlug } from "@/lib/api";
 
-export default function Page({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const item = await getResearchBySlug(slug);
 
-  return <ContentDetailPage kind="research" slug={slug} />;
+  return <ContentDetailPage kind="research" item={item} slug={slug} />;
 }

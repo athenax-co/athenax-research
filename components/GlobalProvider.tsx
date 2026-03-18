@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { authSvc, initDB } from "@/lib/db-helper";
-import { getArticles, getResearch, sortByPublishedAtDesc } from "@/lib/api";
 import Navbar from "./Navbar";
 import Toast from "./ui/Toast";
 import LoginModal from "./ui/LoginModal";
@@ -20,10 +19,6 @@ type GlobalContextType = {
   setUser: (user: any) => void;
   showToast: (text: string, type?: string) => void;
   handleAuthClick: (action: string) => void;
-  articles: any[];
-  research: any[];
-  archiveLoading: boolean;
-  archiveError: string;
   selectedLab: any;
   setSelectedLab: (lab: any) => void;
 };
@@ -49,31 +44,9 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
   const pathname = usePathname();
   const router = useRouter();
 
-  const [articles, setArticles] = useState<any[]>([]);
-  const [research, setResearch] = useState<any[]>([]);
-  const [archiveLoading, setArchiveLoading] = useState(true);
-  const [archiveError, setArchiveError] = useState("");
   const [selectedLab, setSelectedLab] = useState<any>(null);
 
   useEffect(() => {
-    let mounted = true;
-    const loadArchive = async () => {
-      setArchiveLoading(true);
-      setArchiveError("");
-      try {
-        const [articleItems, researchItems] = await Promise.all([getArticles(), getResearch()]);
-        if (!mounted) return;
-        setArticles(sortByPublishedAtDesc(articleItems as any));
-        setResearch(sortByPublishedAtDesc(researchItems as any));
-      } catch (err) {
-        if (!mounted) return;
-        setArchiveError("Could not load archive content right now.");
-      } finally {
-        if (mounted) setArchiveLoading(false);
-      }
-    };
-    loadArchive();
-
     initDB();
     const session = authSvc.getSession();
     if (session) setUser(session);
@@ -113,9 +86,7 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
   };
 
   return (
-    <GlobalContext.Provider
-      value={{ user, setUser, showToast, handleAuthClick, articles, research, archiveLoading, archiveError, selectedLab, setSelectedLab }}
-    >
+    <GlobalContext.Provider value={{ user, setUser, showToast, handleAuthClick, selectedLab, setSelectedLab }}>
       <div style={{ minHeight: "100vh", background: "#F2EFE9" }}>
         <Navbar current={pathname} user={user} onAuthClick={handleAuthClick} />
         {children}

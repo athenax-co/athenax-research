@@ -1,39 +1,9 @@
 import Link from "next/link";
-import { extractContentText, formatContentDate, getArticleBySlug, getResearchBySlug, isLexicalContent } from "@/lib/api";
+import { extractContentText, formatContentDate, isLexicalContent } from "@/lib/api";
 import { ContentListState } from "../Content";
 import LexicalRenderer from "../LexicalRenderer";
-import { useEffect, useState } from "react";
 
-const useContentItem = (kind: "article" | "research", slug: string, initialItem = null) => {
-  const [item, setItem] = useState<any>(initialItem);
-  const [loading, setLoading] = useState(!initialItem);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!slug) return;
-    let mounted = true;
-
-    const load = async () => {
-      setLoading(true);
-      setError("");
-      const nextItem = kind === "research" ? await getResearchBySlug(slug) : await getArticleBySlug(slug);
-      if (!mounted) return;
-      setItem(nextItem);
-      setLoading(false);
-      if (!nextItem) setError("Not found.");
-    };
-
-    load();
-    return () => {
-      mounted = false;
-    };
-  }, [kind, slug]);
-
-  return { item, loading, error };
-};
-
-const ContentDetailPage = ({ kind, slug, initialItem }: { kind: "article" | "research"; slug: string; initialItem?: any }) => {
-  const { item, loading, error } = useContentItem(kind, slug, initialItem);
+const ContentDetailPage = ({ kind, item, slug }: { kind: "article" | "research"; item: any | null; slug: string }) => {
   const contentBlocks = extractContentText(item?.content);
 
   return (
@@ -42,15 +12,13 @@ const ContentDetailPage = ({ kind, slug, initialItem }: { kind: "article" | "res
         <Link href="/archive" className="link-arrow" style={{ marginBottom: 0 }}>
           ← Back to Research
         </Link>
-        {loading && !item ? (
-          <ContentListState loading={true} error="" emptyText="" />
-        ) : error || !item ? (
-          <ContentListState loading={false} error={error || "Not found."} emptyText="Not found." />
+        {!item ? (
+          <ContentListState loading={false} error="Not found." emptyText="Not found." />
         ) : (
           <>
             <div className="section-heading-tight">
               <div className="path-badge">
-                /root/{kind}/{item.slug}
+                /root/{kind}/{item.slug || slug}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                 <span className="topic-pill" style={kind === "research" ? { background: "#EAF0F6" } : {}}>

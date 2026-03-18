@@ -1,9 +1,6 @@
-"use client";
-
 // ═══════════════════════════════════════════════════════════
 // HOME PAGE
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { IconBounties, IconBuilders, IconLabs, IconProtocols, IconResearchers, IconTerminal } from "../Icons";
 import WindowCard from "../ui/WindowCard";
@@ -24,12 +21,6 @@ const StatCard = ({ label, value, sub = "" }: { label: string; value: string; su
 
 // ═══════════════════════════════════════════════════════════
 const HomePage = ({ latestArticles, articlesLoading, articlesError }: any) => {
-  const [tick, setTick] = useState(true);
-  useEffect(() => {
-    const id = setInterval(() => setTick((t) => !t), 800);
-    return () => clearInterval(id);
-  }, []);
-
   return (
     <div>
       <div className="page-wrap section">
@@ -106,7 +97,7 @@ const HomePage = ({ latestArticles, articlesLoading, articlesError }: any) => {
                   color: "#1C1C27",
                 }}
               >
-                <span style={{ color: "#4CAF50" }}>●</span> CURSOR: {tick ? "_" : " "}&nbsp;&nbsp;EPOCH 420.69
+                <span style={{ color: "#4CAF50" }}>●</span> CURSOR: _&nbsp;&nbsp;EPOCH 420.69
               </div>
             </WindowCard>
           </div>
@@ -255,7 +246,7 @@ const HomePage = ({ latestArticles, articlesLoading, articlesError }: any) => {
           <hr className="divider" />
           {latestArticles.length > 0 ? (
             latestArticles.map((item: Article) => (
-              <div key={item.slug} onClick={() => undefined} style={{cursor: "pointer", display: "block"}}>
+              <div key={item.slug} style={{ cursor: "pointer", display: "block" }}>
                 <Link href={`/archive/${item.slug}`} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
                   <ContentRow item={item} kind="article" />
                 </Link>

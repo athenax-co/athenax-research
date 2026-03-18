@@ -1,6 +1,9 @@
 "use client";
 import ContentDetailPage from "@/components/page/content-details";
+import { use } from "react";
 
-export default function Page({ params }: { params: { slug: string } }) {
-  return <ContentDetailPage kind="research" slug={params.slug} />;
+export default function Page({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
+
+  return <ContentDetailPage kind="research" slug={slug} />;
 }

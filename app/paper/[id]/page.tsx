@@ -1,8 +1,11 @@
 "use client";
 import PaperPage from "@/components/page/paper";
 import { useGlobal } from "@/components/GlobalProvider";
+import { use } from "react";
 
-export default function Page({ params }: { params: { id: string } }) {
+export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { user, showToast } = useGlobal();
-  return <PaperPage paperId={params.id} user={user} showToast={showToast} />;
+  const { id } = use(params);
+
+  return <PaperPage paperId={id} user={user} showToast={showToast} />;
 }

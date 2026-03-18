@@ -18,7 +18,7 @@ const MediaPage = ({ mediaId }: { mediaId: string }) => {
   return (
     <div>
       <div className="page-wrap section">
-        <Link href="/archive" className="link-arrow" style={{ marginBottom: 20 }}>
+        <Link href="/archive" className="link-arrow" style={{ marginBottom: 20, marginRight: 12 }}>
           ← Back to Archive
         </Link>
         <div className="path-badge">/root/archive/{item.slug}</div>

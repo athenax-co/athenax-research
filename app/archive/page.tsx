@@ -1,7 +1,20 @@
-"use client";
+import ArchivePage from "@/components/page/archive";
+import { getArticles, getResearch, sortByPublishedAtDesc } from "@/lib/api";
 
-import App from "../../components/AthenaX_Reborn";
+export const revalidate = 3600;
 
-export default function ArchivePage() {
-  return <App />;
+export default async function Page() {
+  let articles: any[] = [];
+  let research: any[] = [];
+  let archiveError = "";
+
+  try {
+    const [articleItems, researchItems] = await Promise.all([getArticles(), getResearch()]);
+    articles = sortByPublishedAtDesc(articleItems as any);
+    research = sortByPublishedAtDesc(researchItems as any);
+  } catch (error) {
+    archiveError = "Could not load archive content right now.";
+  }
+
+  return <ArchivePage articles={articles} research={research} loading={false} error={archiveError} />;
 }

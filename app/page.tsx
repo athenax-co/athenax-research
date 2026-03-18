@@ -1,7 +1,5 @@
-"use client";
+import HomePage from "@/components/page/home";
 
-import App from "../components/AthenaX_Reborn";
-
-export default function Home() {
-  return <App />;
+export default function Page() {
+  return <HomePage />;
 }

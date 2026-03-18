@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Londrina_Solid, Space_Grotesk, VT323 } from "next/font/google";
 import "./globals.css";
+import "./styles.css";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -33,6 +34,9 @@ export const metadata: Metadata = {
   title: "AthenaX Research",
 };
 
+import GlobalProvider from "@/components/GlobalProvider";
+import Footer from "@/components/Footer";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -44,7 +48,10 @@ export default function RootLayout({
         className={`${spaceGrotesk.variable} ${londrinaSolid.variable} ${vt323.variable} ${inter.variable} antialiased`}
         style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
       >
-        {children}
+        <GlobalProvider>
+          {children}
+          <Footer />
+        </GlobalProvider>
       </body>
     </html>
   );

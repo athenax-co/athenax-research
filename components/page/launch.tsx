@@ -1,13 +1,13 @@
 // ═══════════════════════════════════════════════════════════
-// LAUNCH DETAIL PAGE — individual startup page
+// LAUNCH PAGE (REFACTORED) — No more setPage
 
-import { SEED_LAUNCHES, SEED_PAPERS } from "@/data/data";
+import { SEED_LAUNCHES, SEED_PAPERS } from "@/data/seed";
 import { useState } from "react";
+import Link from "next/link";
 import WindowCard from "../ui/WindowCard";
 import BookmarkButton from "../BookmarkButton";
 import SEOMeta, { toSlug } from "../SEOMeta";
 import { IconPaperSmall } from "../Icons";
-import Footer from "../Footer";
 import { bookmarkSvc } from "@/utils/lib";
 import Modal from "../ui/Modal";
 
@@ -45,17 +45,7 @@ const calcLaunchScore = (l: {
   (l.papers?.length || 0) * 5.0; // research depth bonus
 
 // ═══════════════════════════════════════════════════════════
-const LaunchDetailPage = ({
-  launchId,
-  setPage,
-  user,
-  showToast,
-}: {
-  launchId: string;
-  setPage: (page: string) => void;
-  user: any;
-  showToast: (message: string, type: string) => void;
-}) => {
+const LaunchDetailPage = ({ launchId, user, showToast }: { launchId: string; user: any; showToast: (message: string, type: string) => void }) => {
   const launch = SEED_LAUNCHES.find((l) => l.id === launchId);
   const [voted, setVoted] = useState(false);
   const [voteCount, setVoteCount] = useState(launch?.votes || 0);
@@ -64,9 +54,9 @@ const LaunchDetailPage = ({
     return (
       <div className="page-wrap section">
         <p>Launch not found.</p>
-        <button className="link-arrow" onClick={() => setPage("launch")}>
+        <Link className="link-arrow" href="/launch">
           ← Back to Launch
-        </button>
+        </Link>
       </div>
     );
 
@@ -94,10 +84,12 @@ const LaunchDetailPage = ({
           description={`${launch.name} launched on AthenaX. Built by ARS-scored researchers. ${launch.desc.slice(0, 120)}`}
           type="product"
         />
-        <button className="link-arrow" onClick={() => setPage("launch")} style={{ marginBottom: 20 }}>
+        <Link className="link-arrow" href="/launch" style={{ marginBottom: 20 }}>
           ← Back to Launch
-        </button>
-        <div className="path-badge">/root/launch/{toSlug(launch.name)}</div>
+        </Link>
+        <div className="path-badge" style={{ marginLeft: 12 }}>
+          /root/launch/{toSlug(launch.name)}
+        </div>
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "flex-start", gap: 20, marginBottom: 20, flexWrap: "wrap" }}>
@@ -167,7 +159,12 @@ const LaunchDetailPage = ({
               </div>
               {linkedPapers.length > 0 ? (
                 linkedPapers.map((p) => (
-                  <div key={p.id} className="archive-row" style={{ marginBottom: 8, cursor: "pointer" }} onClick={() => setPage(`paper:${p.id}`)}>
+                  <Link
+                    href={`/paper/${p.id}`}
+                    key={p.id}
+                    className="archive-row"
+                    style={{ marginBottom: 8, cursor: "pointer", textDecoration: "none", color: "inherit" }}
+                  >
                     <IconPaperSmall />
                     <div style={{ flex: 1, marginLeft: 8 }}>
                       <div className="archive-title" style={{ fontSize: 13 }}>
@@ -178,7 +175,7 @@ const LaunchDetailPage = ({
                       </div>
                     </div>
                     <span style={{ color: "#6B6B7A", fontSize: 14 }}>→</span>
-                  </div>
+                  </Link>
                 ))
               ) : (
                 <p style={{ fontSize: 13, color: "#6B6B7A" }}>Research lineage indexed. {launch.papers.join(", ")}</p>
@@ -193,14 +190,14 @@ const LaunchDetailPage = ({
                 </div>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   {launch.tags.map((t) => (
-                    <button
+                    <Link
                       key={t}
+                      href={`/terminal/topic/${encodeURIComponent(t)}`}
                       className="topic-pill"
-                      style={{ cursor: "pointer", border: "none", fontFamily: "'Space Grotesk',sans-serif" }}
-                      onClick={() => setPage(`terminal:topic:${t}`)}
+                      style={{ cursor: "pointer", border: "none", fontFamily: "'Space Grotesk',sans-serif", textDecoration: "none" }}
                     >
                       {t}
-                    </button>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -257,7 +254,12 @@ const LaunchDetailPage = ({
                 ARS-VERIFIED FOUNDERS
               </div>
               {launch.founders.map((f) => (
-                <div key={f.name} className="lb-row" style={{ cursor: "pointer", padding: "12px 0" }} onClick={() => setPage("researchers")}>
+                <Link
+                  href="/docs-researchers"
+                  key={f.name}
+                  className="lb-row"
+                  style={{ cursor: "pointer", padding: "12px 0", textDecoration: "none", color: "inherit" }}
+                >
                   <div className="lb-avatar" style={{ width: 40, height: 40, fontSize: 15 }}>
                     {f.name.charAt(0)}
                   </div>
@@ -268,7 +270,7 @@ const LaunchDetailPage = ({
                   <div style={{ textAlign: "right" }}>
                     <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 14, fontWeight: 700, color: "#E8323C" }}>ARS {f.ars}</div>
                   </div>
-                </div>
+                </Link>
               ))}
             </WindowCard>
 
@@ -304,12 +306,12 @@ const LaunchDetailPage = ({
                   ★ Register Investor Interest
                 </button>
                 <BookmarkButton user={user} launch={launch} showToast={showToast} size="sm" />
-                <button className="btn btn-outline" style={{ justifyContent: "center", marginTop: 4 }} onClick={() => setPage("talent")}>
+                <Link className="btn btn-outline" href="/talent" style={{ justifyContent: "center", marginTop: 4, textDecoration: "none" }}>
                   Startup Marketplace →
-                </button>
-                <button className="btn btn-ghost btn-sm" style={{ justifyContent: "center" }} onClick={() => setPage("terminal")}>
+                </Link>
+                <Link className="btn btn-ghost btn-sm" href="/terminal" style={{ justifyContent: "center", textDecoration: "none" }}>
                   Research in Terminal →
-                </button>
+                </Link>
               </div>
             </WindowCard>
 
@@ -357,9 +359,9 @@ const LaunchDetailPage = ({
                 <span style={{ color: "#6B6B7A" }}>Filled via AthenaX</span>
                 <span style={{ fontFamily: "'Space Mono',monospace", fontWeight: 700, color: "#15803D" }}>{launch.rolesFilledViaAthenaX || 0}</span>
               </div>
-              <button className="btn btn-outline btn-sm" style={{ width: "100%", justifyContent: "center" }} onClick={() => setPage("talent")}>
+              <Link className="btn btn-outline btn-sm" href="/talent" style={{ width: "100%", justifyContent: "center", textDecoration: "none" }}>
                 Browse All Startups →
-              </button>
+              </Link>
               {user && (
                 <button
                   className="btn btn-ghost btn-sm"
@@ -439,7 +441,6 @@ const LaunchDetailPage = ({
           </WindowCard>
         </div>
       </div>
-      <Footer setPage={setPage} />
     </div>
   );
 };
@@ -477,18 +478,10 @@ const TOPIC_META = {
   },
 };
 
-const LaunchPage = ({
-  setPage,
-  user,
-  showToast,
-}: {
-  setPage: (page: string) => void;
-  user: any;
-  showToast: (message: string, type: string) => void;
-}) => {
+const LaunchPage = ({ user, showToast }: { user: any; showToast: (message: string, type: string) => void }) => {
   const [filter, setFilter] = useState("All");
   const [sortBy, setSortBy] = useState("score");
-  const [timeTab, setTimeTab] = useState("month"); // "today"|"week"|"month"
+  const [timeTab, setTimeTab] = useState("all"); // "all"|"week"|"month"
   const [showSubmit, setShowSubmit] = useState(false);
   const [submitForm, setSubmitForm] = useState({
     name: "",
@@ -500,25 +493,24 @@ const LaunchPage = ({
     arsEmail: user?.email || "",
   });
   const SECTORS = ["All", "AI & Agents", "Robotics", "Biotech", "Crypto & DeFi", "Developer Tools", "Infrastructure", "Climate & Energy"];
-  const SORTS = [
-    ["score", "⬡ Ranked"],
-    ["votes", "▲ Top"],
-    ["new", "New"],
-    ["devViews", "Developer Interest"],
-    ["investorRegs", "Investor Interest"],
-    ["papers", "Research Depth"],
-  ];
+  // const SORTS = [
+  //   ["score", "⬡ Ranked"],
+  //   ["votes", "▲ Top"],
+  //   ["new", "New"],
+  //   ["devViews", "Developer Interest"],
+  //   ["investorRegs", "Investor Interest"],
+  //   ["papers", "Research Depth"],
+  // ];
   const TIME_TABS = [
-    ["today", "Today"],
+    ["all", "All"],
     ["week", "This Week"],
     ["month", "This Month"],
   ];
 
   const todayCount = SEED_LAUNCHES.filter((l) => l.launchedToday).length;
 
-  // Time filtering (demo: "today" = launchedToday, "week" = first 4, "month" = all)
-  const timeFiltered =
-    timeTab === "today" ? SEED_LAUNCHES.filter((l) => l.launchedToday) : timeTab === "week" ? SEED_LAUNCHES.slice(0, 5) : SEED_LAUNCHES;
+  // Time filtering (demo: "all" = all launches, "week" = first 5, "month" = all)
+  const timeFiltered = timeTab === "all" ? SEED_LAUNCHES : timeTab === "week" ? SEED_LAUNCHES.slice(0, 5) : SEED_LAUNCHES;
 
   const filtered = (filter === "All" ? timeFiltered : timeFiltered.filter((l) => l.sector === filter)).sort((a, b) => {
     if (sortBy === "score") return calcLaunchScore(b) - calcLaunchScore(a);
@@ -601,7 +593,7 @@ const LaunchPage = ({
               style={timeTab === k ? { background: "#F5D94E" } : {}}
               onClick={() => setTimeTab(k)}
             >
-              {l} {k === "today" && todayCount > 0 ? `(${todayCount})` : ""}
+              {l} {k === "all" ? `(${SEED_LAUNCHES.length})` : ""}
             </button>
           ))}
           <span style={{ marginLeft: "auto", fontSize: 12, color: "#6B6B7A", alignSelf: "center", fontFamily: "'Space Mono',monospace" }}>
@@ -624,7 +616,7 @@ const LaunchPage = ({
         </div>
 
         {/* Sort bar */}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24, justifyContent: "flex-end" }}>
+        {/* <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24, justifyContent: "flex-end" }}>
           {SORTS.map(([k, l]) => (
             <button
               key={k}
@@ -635,7 +627,7 @@ const LaunchPage = ({
               {l}
             </button>
           ))}
-        </div>
+        </div> */}
 
         {/* Launch listings */}
         {filtered.map((launch) => (
@@ -644,8 +636,10 @@ const LaunchPage = ({
               {/* Left: main info */}
               <div style={{ flex: 1, minWidth: 260 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
-                  <h3 style={{ fontSize: 21, marginBottom: 0, cursor: "pointer" }} onClick={() => setPage(`launch-detail:${launch.id}`)}>
-                    {launch.name}
+                  <h3 style={{ fontSize: 21, marginBottom: 0 }}>
+                    <Link href={`/launch/${launch.id}`} style={{ cursor: "pointer", textDecoration: "none", color: "inherit" }}>
+                      {launch.name}
+                    </Link>
                   </h3>
                   <span className="topic-pill">{launch.sector}</span>
                   <span className="ftag" style={{ background: "#EAF0F6", fontSize: 10 }}>
@@ -689,9 +683,9 @@ const LaunchPage = ({
                 <span className="ftag" style={{ background: launch.stage === "Seed" ? "#D4EDDA" : "#EAF0F6", textAlign: "center", fontSize: 11 }}>
                   {launch.stage} · {launch.funding}
                 </span>
-                <button className="btn btn-primary btn-sm" style={{ justifyContent: "center" }} onClick={() => setPage(`launch-detail:${launch.id}`)}>
+                <Link href={`/launch/${launch.id}`} className="btn btn-primary btn-sm" style={{ justifyContent: "center", textDecoration: "none" }}>
                   View →
-                </button>
+                </Link>
                 <BookmarkButton user={user} launch={launch} showToast={showToast} size="sm" />
               </div>
             </div>
@@ -834,7 +828,6 @@ const LaunchPage = ({
           </Modal>
         )}
       </div>
-      <Footer setPage={setPage} />
     </div>
   );
 };

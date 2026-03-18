@@ -1,7 +1,11 @@
-"use client";
+import ContentDetailPage from "@/components/page/content-details";
+import { getResearchBySlug } from "@/lib/api";
 
-import App from "../../../components/AthenaX_Reborn";
+export const revalidate = 3600;
 
-export default function ResearchArticlePage() {
-  return <App />;
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const item = await getResearchBySlug(slug);
+
+  return <ContentDetailPage kind="research" item={item} slug={slug} />;
 }

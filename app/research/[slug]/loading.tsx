@@ -6,11 +6,6 @@ export default function Loading() {
           ← Back to Research
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "#6B6B7A" }}>
-          <span className="spinner" />
-          Loading research...
-        </div>
-
         <div className="path-badge">/root/research/...</div>
 
         {Array.from({ length: 4 }).map((_, index) => (

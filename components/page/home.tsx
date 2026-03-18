@@ -1,15 +1,11 @@
 // ═══════════════════════════════════════════════════════════
 // HOME PAGE
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { IconBounties, IconBuilders, IconLabs, IconProtocols, IconResearchers, IconTerminal } from "../Icons";
 import WindowCard from "../ui/WindowCard";
-import { ContentListState, ContentRow } from "../Content";
-
-interface Article {
-  slug: string;
-  [key: string]: unknown;
-}
+import { HomeArchiveSection, HomeArchiveSectionLoading } from "./home-archive-section";
 
 const StatCard = ({ label, value, sub = "" }: { label: string; value: string; sub?: string }) => (
   <div className="stat-card">
@@ -20,7 +16,7 @@ const StatCard = ({ label, value, sub = "" }: { label: string; value: string; su
 );
 
 // ═══════════════════════════════════════════════════════════
-const HomePage = ({ latestArticles, articlesLoading, articlesError }: any) => {
+const HomePage = () => {
   return (
     <div>
       <div className="page-wrap section">
@@ -233,29 +229,9 @@ const HomePage = ({ latestArticles, articlesLoading, articlesError }: any) => {
         </div>
 
         {/* Recent Archive */}
-        <div style={{ marginTop: 72 }}>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 8 }}>
-            <div>
-              <div className="path-badge">/root/archive</div>
-              <h2 style={{ fontSize: 32 }}>The Archive</h2>
-            </div>
-            <Link href="/archive" className="link-arrow" style={{ display: "inline-block" }}>
-              View Full Archive →
-            </Link>
-          </div>
-          <hr className="divider" />
-          {latestArticles.length > 0 ? (
-            latestArticles.map((item: Article) => (
-              <div key={item.slug} style={{ cursor: "pointer", display: "block" }}>
-                <Link href={`/archive/${item.slug}`} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
-                  <ContentRow item={item} kind="article" />
-                </Link>
-              </div>
-            ))
-          ) : (
-            <ContentListState loading={articlesLoading} error={articlesError} emptyText="No published articles available yet." />
-          )}
-        </div>
+        <Suspense fallback={<HomeArchiveSectionLoading />}>
+          <HomeArchiveSection />
+        </Suspense>
       </div>
     </div>
   );

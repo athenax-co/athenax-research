@@ -1,6 +1,9 @@
+"use client";
+
 import { subscriberSvc } from "@/utils/lib";
 import { useState } from "react";
-import { _globalShowToast } from "./AthenaX_Reborn";
+import Link from "next/link";
+import { _globalShowToast } from "./GlobalProvider";
 
 export const FooterSubscribe = () => {
   const [email, setEmail] = useState("");
@@ -37,7 +40,7 @@ export const FooterSubscribe = () => {
           <div style={{ fontSize: 14, color: "#6B6B7A" }}>Top AI papers, bounties, and cohort news — every Monday.</div>
         </div>
         {done ? (
-          <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: "#15803D", letterSpacing: "0.05em" }}>✓ YOU'RE IN</div>
+          <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: "#15803D", letterSpacing: "0.05em" }}>✓ YOU&apos;RE IN</div>
         ) : (
           <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
             <input
@@ -58,7 +61,8 @@ export const FooterSubscribe = () => {
   );
 };
 
-const Footer = ({ setPage }: { setPage: (page: string) => void }) => (
+const Footer = () => {
+  return (
   <footer className="footer" style={{ paddingTop: 0 }}>
     <div style={{ paddingTop: 48 }}>
       <FooterSubscribe />{" "}
@@ -71,65 +75,66 @@ const Footer = ({ setPage }: { setPage: (page: string) => void }) => (
       <div style={{ display: "flex", gap: 56, flexWrap: "wrap" }}>
         <div>
           <div className="footer-col-label">Research</div>
-          <button className="footer-link" onClick={() => setPage("archive")}>
+          <Link href="/archive" className="footer-link">
             Archive
-          </button>
-          <button className="footer-link" onClick={() => setPage("leaderboard")}>
+          </Link>
+          <Link href="/leaderboard" className="footer-link">
             Leaderboard
-          </button>
-          <button className="footer-link" onClick={() => setPage("submit-paper")}>
+          </Link>
+          <Link href="/submit-paper" className="footer-link">
             Submit a Paper
-          </button>
-          <button className="footer-link" onClick={() => setPage("bounties")}>
+          </Link>
+          <Link href="/bounties" className="footer-link">
             Bounties
-          </button>
-          <button className="footer-link" onClick={() => setPage("cohorts")}>
+          </Link>
+          <Link href="/cohorts" className="footer-link">
             Cohorts
-          </button>
-          <button className="footer-link" onClick={() => setPage("launch")}>
+          </Link>
+          <Link href="/launch" className="footer-link">
             Launch
-          </button>
+          </Link>
         </div>
         <div>
           <div className="footer-col-label">Network</div>
-          <button className="footer-link" onClick={() => setPage("researchers")}>
+          <Link href="/researchers" className="footer-link">
             Researchers
-          </button>
-          <button className="footer-link" onClick={() => setPage("labs")}>
+          </Link>
+          <Link href="/labs" className="footer-link">
             Labs
-          </button>
-          <button className="footer-link" onClick={() => setPage("universities")}>
+          </Link>
+          <Link href="/universities" className="footer-link">
             Universities
-          </button>
-          <button className="footer-link" onClick={() => setPage("sponsors")}>
+          </Link>
+          <Link href="/sponsors" className="footer-link">
             Sponsors
-          </button>
-          <button className="footer-link" onClick={() => setPage("technology")}>
+          </Link>
+          <Link href="/technology" className="footer-link">
             Companies
-          </button>
+          </Link>
         </div>
         <div>
           <div className="footer-col-label">Resources</div>
-          <button className="footer-link" onClick={() => setPage("docs")}>
+          <Link href="/docs" className="footer-link">
             Docs
-          </button>
-          <button className="footer-link" onClick={() => setPage("digest")}>
+          </Link>
+          <Link href="/digest" className="footer-link">
             Newsletter
-          </button>
-          <button className="footer-link" onClick={() => setPage("how-it-works")}>
+          </Link>
+          <Link href="/how-it-works" className="footer-link">
             How It Works
-          </button>
-          <button className="footer-link" onClick={() => setPage("about")}>
+          </Link>
+          <Link href="/about" className="footer-link">
             About
-          </button>
-          <button className="footer-link" onClick={() => setPage("business-model")}>
+          </Link>
+          <Link href="/business-model" className="footer-link">
             Business Model
-          </button>
+          </Link>
         </div>
       </div>
     </div>
     <div className="footer-legal">CC0 /// NO RIGHTS RESERVED /// OPEN SOURCE</div>
   </footer>
-);
+  );
+};
 
 export default Footer;

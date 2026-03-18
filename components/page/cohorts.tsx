@@ -1,12 +1,14 @@
 // ═══════════════════════════════════════════════════════════
 // COHORTS PAGE
 
+"use client";
+
 import { useState } from "react";
-import Footer from "../Footer";
+import Link from "next/link";
 import WindowCard from "../ui/WindowCard";
 
 // ═══════════════════════════════════════════════════════════
-const CohortsPage = ({ setPage }: { setPage: (page: string) => void }) => {
+const CohortsPage = () => {
   const topics = ["AI Agents", "DAO Governance", "Protocol Economics", "Tokenomics", "DeFi Systems", "Digital Nations"];
   const [sel, setSel] = useState<string | null>(null);
   return (
@@ -33,9 +35,9 @@ const CohortsPage = ({ setPage }: { setPage: (page: string) => void }) => {
             </div>
           </div>
           <hr className="divider-sm" />
-          <button className="btn btn-primary" onClick={() => setPage("apply-cohort")}>
+          <Link className="btn btn-primary" href="/apply-cohort">
             Apply to Cohort →
-          </button>
+          </Link>
         </WindowCard>
 
         <h2 style={{ fontSize: 28, marginBottom: 18 }}>Research Tracks</h2>
@@ -58,7 +60,6 @@ const CohortsPage = ({ setPage }: { setPage: (page: string) => void }) => {
           ))}
         </div>
       </div>
-      <Footer setPage={setPage} />
     </div>
   );
 };

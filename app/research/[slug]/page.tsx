@@ -1,7 +1,6 @@
 "use client";
+import ContentDetailPage from "@/components/page/content-details";
 
-import App from "../../../components/AthenaX_Reborn";
-
-export default function ResearchArticlePage() {
-  return <App />;
+export default function Page({ params }: { params: { slug: string } }) {
+  return <ContentDetailPage kind="research" slug={params.slug} />;
 }

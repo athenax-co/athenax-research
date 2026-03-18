@@ -1,8 +1,8 @@
 import { DocSection, DocsShell } from "../ui/Docs";
 import WindowCard from "../ui/WindowCard";
 
-const DocsGovernancePage = ({ setPage }: { setPage: (page: string) => void }) => (
-  <DocsShell current="docs-governance" setPage={setPage} title="Governance" subtitle="How decisions get made." fileTag="/root/docs/governance">
+const DocsGovernancePage = () => (
+  <DocsShell current="docs-governance" title="Governance" subtitle="How decisions get made." fileTag="/root/docs/governance">
     <DocSection title="Governance Model">
       <p style={{ fontSize: 15, lineHeight: 1.7, color: "#1C1C27", marginBottom: 16 }}>
         AthenaX uses an optimistic governance model inspired by NounsDAO. High-ARS researchers and verified sponsors have voting weight on protocol

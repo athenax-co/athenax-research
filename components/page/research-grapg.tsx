@@ -2,7 +2,6 @@ import { SEED_LABS, SEED_PAPERS, SEED_RESEARCHERS } from "@/data/seed";
 import { calcARS } from "@/lib/db-helper";
 import { useEffect, useRef, useState } from "react";
 import WindowCard from "../ui/WindowCard";
-import Footer from "../Footer";
 import TrafficLights from "../ui/TrafficLights";
 
 // ═══════════════════════════════════════════════════════════
@@ -120,7 +119,7 @@ const runForce = (nodes: PositionedNode[], edges: GraphEdge[], W: number, H: num
   return nodes;
 };
 
-const ResearchGraphPage = ({ setPage }: { setPage: (page: string) => void }): React.ReactNode => {
+const ResearchGraphPage = (): React.ReactNode => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stateRef = useRef<{
     nodes: PositionedNode[];
@@ -445,7 +444,6 @@ const ResearchGraphPage = ({ setPage }: { setPage: (page: string) => void }): Re
           </div>
         </div>
       </div>
-      <Footer setPage={setPage} />
     </div>
   );
 };

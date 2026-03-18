@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Footer from "../Footer";
+import Link from "next/link";
 import { IconBriefcaseSmall } from "../Icons";
 import Modal from "../ui/Modal";
 import WindowCard from "../ui/WindowCard";
@@ -18,15 +18,7 @@ type Role = {
   desc: string;
 };
 
-const TalentPage = ({
-  setPage,
-  user,
-  showToast,
-}: {
-  setPage: (page: string) => void;
-  user: any;
-  showToast: (text: string, type: string) => void;
-}) => {
+const TalentPage = ({ user, showToast }: { user: any; showToast: (text: string, type: string) => void }) => {
   const roles: Role[] = [
     {
       id: "r1",
@@ -180,9 +172,9 @@ const TalentPage = ({
               companies pay a placement fee on successful hire.
             </p>
             <p style={{ fontSize: 13, color: "#6B6B7A", marginBottom: 18 }}>Average time-to-hire: 3 weeks. All candidates are ARS-scored.</p>
-            <button className="btn btn-primary" onClick={() => setPage("sponsor-onboarding")}>
+            <Link className="btn btn-primary" href="/sponsor-onboarding" style={{ textDecoration: "none" }}>
               Post a Role →
-            </button>
+            </Link>
           </WindowCard>
         </div>
       </div>
@@ -222,8 +214,6 @@ const TalentPage = ({
           </button>
         </Modal>
       )}
-
-      <Footer setPage={setPage} />
     </div>
   );
 };

@@ -1,8 +1,10 @@
+"use client";
+
 // ═══════════════════════════════════════════════════════════
 // HOME PAGE
 
 import { useEffect, useState } from "react";
-import Footer from "../Footer";
+import Link from "next/link";
 import { IconBounties, IconBuilders, IconLabs, IconProtocols, IconResearchers, IconTerminal } from "../Icons";
 import WindowCard from "../ui/WindowCard";
 import { ContentListState, ContentRow } from "../Content";
@@ -21,7 +23,7 @@ const StatCard = ({ label, value, sub = "" }: { label: string; value: string; su
 );
 
 // ═══════════════════════════════════════════════════════════
-const HomePage = ({ setPage, latestArticles, articlesLoading, articlesError }: any) => {
+const HomePage = ({ latestArticles, articlesLoading, articlesError }: any) => {
   const [tick, setTick] = useState(true);
   useEffect(() => {
     const id = setInterval(() => setTick((t) => !t), 800);
@@ -51,12 +53,12 @@ const HomePage = ({ setPage, latestArticles, articlesLoading, articlesError }: a
               Researchers get paid. Protocols get credibility. Ideas become companies.
             </p>
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-              <button className="btn btn-primary" style={{ fontSize: 16, padding: "13px 28px" }} onClick={() => setPage("how-it-works")}>
+              <Link href="/how-it-works" className="btn btn-primary" style={{ fontSize: 16, padding: "13px 28px", display: "inline-block" }}>
                 How It Works →
-              </button>
-              <button className="btn btn-outline" style={{ fontSize: 16, padding: "13px 28px" }} onClick={() => setPage("archive")}>
+              </Link>
+              <Link href="/archive" className="btn btn-outline" style={{ fontSize: 16, padding: "13px 28px", display: "inline-block" }}>
                 Research Archive
-              </button>
+              </Link>
             </div>
           </div>
           <div>
@@ -142,9 +144,9 @@ const HomePage = ({ setPage, latestArticles, articlesLoading, articlesError }: a
                 Browse papers, essays, and the full AthenaX knowledge archive.
               </p>
               <hr className="divider-sm" />
-              <button className="link-arrow" onClick={() => setPage("archive")}>
+              <Link href="/archive" className="link-arrow" style={{ display: "inline-block" }}>
                 Open Archive →
-              </button>
+              </Link>
             </WindowCard>
             <WindowCard label="DIR: /TERMINAL" bodyClass="window-body window-body-yellow">
               <div className="icon-tile icon-tile-yellow">
@@ -155,9 +157,9 @@ const HomePage = ({ setPage, latestArticles, articlesLoading, articlesError }: a
                 Query the research graph. Protocol intelligence, ARS scores, trending topics.
               </p>
               <hr className="divider-sm" />
-              <button className="link-arrow" onClick={() => setPage("terminal")}>
+              <Link href="/terminal" className="link-arrow" style={{ display: "inline-block" }}>
                 Open Terminal →
-              </button>
+              </Link>
             </WindowCard>
             <WindowCard label="DIR: /BOUNTIES">
               <div className="icon-tile icon-tile-green">
@@ -168,9 +170,9 @@ const HomePage = ({ setPage, latestArticles, articlesLoading, articlesError }: a
                 Funded research challenges from protocol sponsors. Apply and get paid.
               </p>
               <hr className="divider-sm" />
-              <button className="link-arrow" onClick={() => setPage("bounties")}>
+              <Link href="/bounties" className="link-arrow" style={{ display: "inline-block" }}>
                 View Bounties →
-              </button>
+              </Link>
             </WindowCard>
             <WindowCard label="DIR: /COHORTS">
               <div className="icon-tile icon-tile-pink">
@@ -181,9 +183,9 @@ const HomePage = ({ setPage, latestArticles, articlesLoading, articlesError }: a
                 Turn validated research into a funded startup with AthenaX backing.
               </p>
               <hr className="divider-sm" />
-              <button className="link-arrow" onClick={() => setPage("apply-cohort")}>
+              <Link href="/apply-cohort" className="link-arrow" style={{ display: "inline-block" }}>
                 Apply Now →
-              </button>
+              </Link>
             </WindowCard>
           </div>
         </div>
@@ -206,9 +208,9 @@ const HomePage = ({ setPage, latestArticles, articlesLoading, articlesError }: a
                 Funded cohort positions. AthenaX Reputation Scores. Direct access to protocol ecosystems.
               </p>
               <hr className="divider-sm" />
-              <button className="link-arrow" onClick={() => setPage("apply-cohort")}>
+              <Link href="/apply-cohort" className="link-arrow" style={{ display: "inline-block" }}>
                 Join as Researcher →
-              </button>
+              </Link>
             </WindowCard>
             <WindowCard label="DIR: /PROTOCOLS" bodyClass="window-body window-body-yellow">
               <div className="icon-tile icon-tile-yellow">
@@ -219,9 +221,9 @@ const HomePage = ({ setPage, latestArticles, articlesLoading, articlesError }: a
                 Sponsor credentialed academic work. Open-access papers from top labs. Fund what matters.
               </p>
               <hr className="divider-sm" />
-              <button className="link-arrow" onClick={() => setPage("bounties")}>
+              <Link href="/bounties" className="link-arrow" style={{ display: "inline-block" }}>
                 Sponsor Research →
-              </button>
+              </Link>
             </WindowCard>
             <WindowCard label="DIR: /BUILDERS" bodyClass="window-body">
               <div className="icon-tile icon-tile-pink">
@@ -232,9 +234,9 @@ const HomePage = ({ setPage, latestArticles, articlesLoading, articlesError }: a
                 Take validated research through the builder pipeline into funded startups.
               </p>
               <hr className="divider-sm" />
-              <button className="link-arrow" onClick={() => setPage("cohorts")}>
+              <Link href="/cohorts" className="link-arrow" style={{ display: "inline-block" }}>
                 Join as Builder →
-              </button>
+              </Link>
             </WindowCard>
           </div>
         </div>
@@ -246,21 +248,24 @@ const HomePage = ({ setPage, latestArticles, articlesLoading, articlesError }: a
               <div className="path-badge">/root/archive</div>
               <h2 style={{ fontSize: 32 }}>The Archive</h2>
             </div>
-            <button className="link-arrow" onClick={() => setPage("archive")}>
+            <Link href="/archive" className="link-arrow" style={{ display: "inline-block" }}>
               View Full Archive →
-            </button>
+            </Link>
           </div>
           <hr className="divider" />
           {latestArticles.length > 0 ? (
             latestArticles.map((item: Article) => (
-              <ContentRow key={item.slug} item={item} kind="article" onClick={() => setPage(`article:${item.slug}`)} />
+              <div key={item.slug} onClick={() => undefined} style={{cursor: "pointer", display: "block"}}>
+                <Link href={`/archive/${item.slug}`} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+                  <ContentRow item={item} kind="article" />
+                </Link>
+              </div>
             ))
           ) : (
             <ContentListState loading={articlesLoading} error={articlesError} emptyText="No published articles available yet." />
           )}
         </div>
       </div>
-      <Footer setPage={setPage} />
     </div>
   );
 };

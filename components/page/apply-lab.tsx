@@ -3,10 +3,9 @@
 
 import { useState } from "react";
 import WindowCard from "../ui/WindowCard";
-import Footer from "../Footer";
 
 // ═══════════════════════════════════════════════════════════
-const ApplyLabPage = ({ setPage, showToast }: { setPage: (page: string) => void; showToast: (text: string, type: string) => void }) => {
+const ApplyLabPage = ({ showToast }: { showToast: (text: string, type: string) => void }) => {
   const [form, setForm] = useState({ name: "", focus: "", university: "", contact: "", email: "", why: "", url: "" });
   const set = (k: string) => (e: { target: { value: any } }) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const submit = () => {
@@ -15,7 +14,6 @@ const ApplyLabPage = ({ setPage, showToast }: { setPage: (page: string) => void;
       return;
     }
     showToast("Lab application submitted! We'll review and respond within one week.", "success");
-    setPage("labs");
   };
   return (
     <div>
@@ -66,7 +64,6 @@ const ApplyLabPage = ({ setPage, showToast }: { setPage: (page: string) => void;
           </button>
         </WindowCard>
       </div>
-      <Footer setPage={setPage} />
     </div>
   );
 };

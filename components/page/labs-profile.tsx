@@ -1,21 +1,21 @@
 // ═══════════════════════════════════════════════════════════
 // LAB PROFILE
 
+import Link from "next/link";
 import { SEED_PAPERS } from "@/data/seed";
-import Footer from "../Footer";
 import WindowCard from "../ui/WindowCard";
 
 // ═══════════════════════════════════════════════════════════
-const LabProfilePage = ({ lab, setPage }: { lab: any; setPage: (page: string) => void }) => {
+const LabProfilePage = ({ lab }: { lab: any }) => {
   if (!lab) return null;
   const labPapers = SEED_PAPERS.filter((p) => p.lab === lab.name);
   const realCount = labPapers.length || lab.papers;
   return (
     <div>
       <div className="page-wrap section">
-        <button className="link-arrow" onClick={() => setPage("labs")} style={{ marginBottom: 20 }}>
+        <Link href="/labs" className="link-arrow" style={{ marginBottom: 20 }}>
           ← Back to Labs
-        </button>
+        </Link>
         <div className="path-badge">/root/network/labs/{lab.id}</div>
         <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 8 }}>
           <h1 style={{ fontSize: 42 }}>{lab.name}</h1>
@@ -76,32 +76,33 @@ const LabProfilePage = ({ lab, setPage }: { lab: any; setPage: (page: string) =>
                 <p style={{ color: "#6B6B7A", fontSize: 14 }}>No indexed papers yet.</p>
               ) : (
                 labPapers.map((p) => (
-                  <div key={p.id} className="archive-row" style={{ marginBottom: 8 }} onClick={() => setPage(`paper:${p.id}`)}>
-                    <div style={{ flex: 1 }}>
-                      <div className="archive-title" style={{ fontSize: 14 }}>
-                        {p.title}
-                      </div>
-                      <div className="archive-meta">
-                        {p.year} // {p.topic}
+                  <Link key={p.id} href={`/paper/${p.id}`}>
+                    <div className="archive-row" style={{ marginBottom: 8 }}>
+                      <div style={{ flex: 1 }}>
+                        <div className="archive-title" style={{ fontSize: 14 }}>
+                          {p.title}
+                        </div>
+                        <div className="archive-meta">
+                          {p.year} // {p.topic}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))
               )}
               {lab.active && (
-                <button
+                <Link
+                  href="/cohorts"
                   className="btn btn-primary btn-sm"
-                  style={{ width: "100%", marginTop: 12, justifyContent: "center" }}
-                  onClick={() => setPage("cohorts")}
+                  style={{ width: "100%", marginTop: 12, justifyContent: "center", display: "inline-flex" }}
                 >
                   View Open Cohorts →
-                </button>
+                </Link>
               )}
             </WindowCard>
           </div>
         </div>
       </div>
-      <Footer setPage={setPage} />
     </div>
   );
 };

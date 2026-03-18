@@ -1,8 +1,8 @@
 import { DocSection, DocsShell } from "../ui/Docs";
 import WindowCard from "../ui/WindowCard";
 
-const DocsStandardsPage = ({ setPage }: { setPage: (page: string) => void }) => (
-  <DocsShell current="docs-standards" setPage={setPage} title="ARS Standards" subtitle="How reputation is calculated." fileTag="/root/docs/ars-standards">
+const DocsStandardsPage = () => (
+  <DocsShell current="docs-standards" title="ARS Standards" subtitle="How reputation is calculated." fileTag="/root/docs/ars-standards">
     <DocSection title="AthenaX Reputation Score">
       <p style={{fontSize:15,lineHeight:1.7,color:"#1C1C27",marginBottom:16}}>The ARS is a composite score calculated from six verified data points. It is immutable once computed for a given snapshot, and updates every 24 hours.</p>
       <WindowCard label="ARS_WEIGHTS.SYS" bodyClass="window-body window-body-blue">

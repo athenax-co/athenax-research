@@ -1,15 +1,15 @@
 // ═══════════════════════════════════════════════════════════
 // PAPER PAGE
 
+import Link from "next/link";
 import { SEED_PAPERS } from "@/data/seed";
-import Footer from "../Footer";
 import WindowCard from "../ui/WindowCard";
 import { MediaIcon } from "../Icons";
 import ArsBreakdown from "../ui/ArsBreakdown";
 import { useEffect, useState } from "react";
 
 // ═══════════════════════════════════════════════════════════
-const PaperPage = ({ paperId, setPage, user, showToast }: { paperId: string; setPage: (page: string) => void; user: any; showToast: Function }) => {
+const PaperPage = ({ paperId, user, showToast }: { paperId: string; user: any; showToast: Function }) => {
   const paper = SEED_PAPERS.find((p) => p.id === paperId);
   const [voted, setVoted] = useState(false);
   const [voteCount, setVoteCount] = useState(0);
@@ -40,19 +40,19 @@ const PaperPage = ({ paperId, setPage, user, showToast }: { paperId: string; set
   return (
     <div>
       <div className="page-wrap section">
-        <button className="link-arrow" onClick={() => setPage("archive")} style={{ marginBottom: 20 }}>
+        <Link href="/archive" className="link-arrow" style={{ marginBottom: 20 }}>
           ← Back to Archive
-        </button>
+        </Link>
         <div className="path-badge">/root/archive/{paper.id}</div>
         <h1 style={{ fontSize: 36, marginBottom: 16, letterSpacing: "-0.02em" }}>{paper.title}</h1>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 28 }}>
-          <button
+          <Link
+            href={`/terminal?query=topic:${paper.topic}`}
             className="topic-pill"
-            style={{ cursor: "pointer", border: "none", fontFamily: "'Space Grotesk',sans-serif" }}
-            onClick={() => setPage(`terminal:topic:${paper.topic}`)}
+            style={{ cursor: "pointer", border: "none", fontFamily: "'Space Grotesk',sans-serif", textDecoration: "none" }}
           >
             {paper.topic}
-          </button>
+          </Link>
           <span className="ftag">{paper.year}</span>
           <span className="ftag">{paper.lab}</span>
           <span className="ftag">{paper.university}</span>
@@ -121,26 +121,27 @@ const PaperPage = ({ paperId, setPage, user, showToast }: { paperId: string; set
                   PAPERS ON SAME TOPIC OR FROM SAME LAB
                 </div>
                 {related.map((p) => (
-                  <div key={p.id} className="archive-row" onClick={() => setPage(`paper:${p.id}`)}>
-                    <MediaIcon type="Essay" />
-                    <div style={{ flex: 1 }}>
-                      <div className="archive-title">{p.title}</div>
-                      <div className="archive-meta">
-                        {p.year} // {p.topic} // {p.lab}
+                  <Link key={p.id} href={`/paper/${p.id}`}>
+                    <div className="archive-row">
+                      <MediaIcon type="Essay" />
+                      <div style={{ flex: 1 }}>
+                        <div className="archive-title">{p.title}</div>
+                        <div className="archive-meta">
+                          {p.year} // {p.topic} // {p.lab}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: "right", flexShrink: 0 }}>
+                        <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: "#E8323C" }}>{p.citations}</div>
+                        <div style={{ fontSize: 10, color: "#6B6B7A" }}>cites</div>
                       </div>
                     </div>
-                    <div style={{ textAlign: "right", flexShrink: 0 }}>
-                      <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: "#E8323C" }}>{p.citations}</div>
-                      <div style={{ fontSize: 10, color: "#6B6B7A" }}>cites</div>
-                    </div>
-                  </div>
+                  </Link>
                 ))}
               </WindowCard>
             </div>
           );
         })()}
       </div>
-      <Footer setPage={setPage} />
     </div>
   );
 };

@@ -1,7 +1,8 @@
 "use client";
+import ArchivePage from "@/components/page/archive";
+import { useGlobal } from "@/components/GlobalProvider";
 
-import App from "../../components/AthenaX_Reborn";
-
-export default function ArchivePage() {
-  return <App />;
+export default function Page() {
+  const { articles, research, archiveLoading, archiveError } = useGlobal();
+  return <ArchivePage articles={articles} research={research} loading={archiveLoading} error={archiveError} />;
 }

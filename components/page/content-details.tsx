@@ -1,7 +1,7 @@
+import Link from "next/link";
 import { extractContentText, formatContentDate, getArticleBySlug, getResearchBySlug, isLexicalContent } from "@/lib/api";
 import { ContentListState } from "../Content";
 import LexicalRenderer from "../LexicalRenderer";
-import Footer from "../Footer";
 import { useEffect, useState } from "react";
 
 const useContentItem = (kind: "article" | "research", slug: string, initialItem = null) => {
@@ -32,26 +32,16 @@ const useContentItem = (kind: "article" | "research", slug: string, initialItem 
   return { item, loading, error };
 };
 
-const ContentDetailPage = ({
-  kind,
-  slug,
-  setPage,
-  initialItem,
-}: {
-  kind: "article" | "research";
-  slug: string;
-  setPage: (page: string) => void;
-  initialItem?: any;
-}) => {
+const ContentDetailPage = ({ kind, slug, initialItem }: { kind: "article" | "research"; slug: string; initialItem?: any }) => {
   const { item, loading, error } = useContentItem(kind, slug, initialItem);
   const contentBlocks = extractContentText(item?.content);
 
   return (
     <div>
       <div className="page-wrap section section-stack-md">
-        <button className="link-arrow" onClick={() => setPage("archive")} style={{ marginBottom: 0 }}>
+        <Link href="/archive" className="link-arrow" style={{ marginBottom: 0 }}>
           ← Back to Research
-        </button>
+        </Link>
         {loading && !item ? (
           <ContentListState loading={true} error="" emptyText="" />
         ) : error || !item ? (
@@ -102,7 +92,6 @@ const ContentDetailPage = ({
           </>
         )}
       </div>
-      <Footer setPage={setPage} />
     </div>
   );
 };

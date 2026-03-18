@@ -2,6 +2,7 @@
 // NAVBAR
 
 import { useState } from "react";
+import Link from "next/link";
 
 // ═══════════════════════════════════════════════════════════
 const NAV_ITEMS = [
@@ -14,7 +15,24 @@ const NAV_ITEMS = [
   { id: "docs", label: "Docs" },
 ];
 
-const getActiveNav = (page: string) => {
+const PATH_MAP: Record<string, string> = {
+  home: "/",
+  launch: "/launch",
+  archive: "/archive",
+  network: "/network",
+  funding: "/funding",
+  docs: "/docs",
+  terminal: "/terminal",
+};
+
+const getPageKeyFromPathname = (pathname: string): string => {
+  const segment = pathname.split("/")[1] || "home";
+  return segment === "" ? "home" : segment;
+};
+
+const getActiveNav = (current: string) => {
+  const page = current.startsWith("/") ? getPageKeyFromPathname(current) : current;
+
   if (["home", "how-it-works", "business-model", "about"].includes(page)) return "home";
   if (["archive", "paper", "leaderboard", "reports", "roundtables", "digest"].includes(page)) return "archive";
   if (["network", "labs", "lab-profile", "universities", "sponsors", "talent"].includes(page)) return "network";
@@ -34,8 +52,8 @@ const NAV_DESCRIPTIONS: Record<string, string> = {
   docs: "Guides and protocol documentation",
 };
 
-const Logo = ({ onClick }: { onClick: () => void }) => (
-  <button className="nav-logo" onClick={onClick} aria-label="Go to AthenaX home">
+const Logo = () => (
+  <Link className="nav-logo" href="/" aria-label="Go to AthenaX home">
     <div className="size-8 bg-gray-900 rounded text-white flex items-center justify-center text-lg shadow-sm p-1">
       <img src="https://athenax.mypinx.store/Logo_Icon_White.png" alt="AthenaX Logo" width={200} height={100} className="size-7 object-contain" />
     </div>
@@ -50,32 +68,22 @@ const Logo = ({ onClick }: { onClick: () => void }) => (
     >
       AthenaX
     </span>
-  </button>
+  </Link>
 );
 
-const Navbar = ({
-  current,
-  setPage,
-  user,
-  onAuthClick,
-}: {
-  current: string;
-  setPage: (page: string) => void;
-  user: any;
-  onAuthClick: (action: string) => void;
-}) => {
+const Navbar = ({ current, user, onAuthClick }: { current: string; user: any; onAuthClick: (action: string) => void }) => {
   const activeNav = getActiveNav(current);
   const [hovered, setHovered] = useState<string | null>(null);
   return (
     <nav className="navbar">
       <div className="navbar-inner">
-        <Logo onClick={() => setPage("home")} />
+        <Logo />
         <div className="nav-links">
           {NAV_ITEMS.map((n) => (
             <div key={n.id} style={{ position: "relative" }} onMouseEnter={() => setHovered(n.id)} onMouseLeave={() => setHovered(null)}>
-              <button className={`nav-link${activeNav === n.id ? " active" : ""}`} onClick={() => setPage(n.id)}>
+              <Link href={PATH_MAP[n.id]} className={`nav-link${activeNav === n.id ? " active" : ""}`}>
                 {n.label}
-              </button>
+              </Link>
               {hovered === n.id && activeNav !== n.id && (
                 <div
                   style={{
@@ -104,7 +112,7 @@ const Navbar = ({
         <div className="nav-right">
           {user ? (
             <>
-              <button className="btn btn-ghost btn-sm" onClick={() => setPage("profile")}>
+              <Link className="btn btn-ghost btn-sm" href="/profile">
                 <span
                   style={{
                     width: 22,
@@ -122,7 +130,7 @@ const Navbar = ({
                   {user.avatar}
                 </span>
                 {user.name.split(" ")[0]}
-              </button>
+              </Link>
               <button className="btn btn-outline btn-sm" onClick={() => onAuthClick("logout")}>
                 Out
               </button>
@@ -132,9 +140,9 @@ const Navbar = ({
               <button className="btn btn-ghost btn-sm" onClick={() => onAuthClick("login")}>
                 Sign In
               </button>
-              <button className="btn btn-primary btn-sm" onClick={() => setPage("apply-cohort")}>
+              <Link className="btn btn-primary btn-sm" href="/apply-cohort">
                 Apply →
-              </button>
+              </Link>
             </>
           )}
         </div>

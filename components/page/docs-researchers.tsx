@@ -1,8 +1,8 @@
 import { DocSection, DocsShell, DocStep } from "../ui/Docs";
 import WindowCard from "../ui/WindowCard";
 
-const DocsResearchersPage = ({ setPage }: { setPage: (page: string) => void }) => (
-  <DocsShell current="docs-researchers" setPage={setPage} title="For Researchers" subtitle="Get paid to do research." fileTag="/root/docs/researchers">
+const DocsResearchersPage = () => (
+  <DocsShell current="docs-researchers" title="For Researchers" subtitle="Get paid to do research." fileTag="/root/docs/researchers">
     <DocSection title="How Researchers Participate">
       <p style={{fontSize:15,lineHeight:1.7,color:"#1C1C27",marginBottom:16}}>Researchers submit papers, earn ARS scores, receive sponsor endorsements, and compete for bounties. Top researchers get placed in protocol roles via the Talent Marketplace.</p>
       <DocStep n={1} title="Submit a Paper" desc="Upload your research. It enters peer review immediately."/>

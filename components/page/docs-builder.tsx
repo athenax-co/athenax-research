@@ -1,8 +1,8 @@
 import { DocSection, DocsShell, DocStep } from "../ui/Docs";
 
 
-const DocsBuilderPage = ({ setPage }: { setPage: (page: string) => void }) => (
-  <DocsShell current="docs-builders" setPage={setPage} title="For Builders" subtitle="Turn research into products." fileTag="/root/docs/builders">
+const DocsBuilderPage = () => (
+  <DocsShell current="docs-builders" title="For Builders" subtitle="Turn research into products." fileTag="/root/docs/builders">
     <DocSection title="The Builder Pipeline">
       <p style={{fontSize:15,lineHeight:1.7,color:"#1C1C27",marginBottom:16}}>Builders take validated research from the AthenaX archive and turn it into protocol-ready products. Each cohort runs 12 weeks with structured support, sponsor access, and prize pools.</p>
       <DocStep n={1} title="Browse Research" desc="Find validated papers with high ARS scores in your technical area."/>

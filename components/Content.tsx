@@ -1,7 +1,7 @@
 import { formatContentDate } from "@/lib/api";
 import { ContentIcon } from "./Icons";
 
-export const ContentRow = ({ item, kind, onClick }: { item: any; kind: string; onClick: () => void }) => (
+export const ContentRow = ({ item, kind, onClick }: { item: any; kind: string; onClick?: () => void }) => (
   <div className="archive-row" onClick={onClick}>
     <ContentIcon kind={kind} />
     <div style={{ flex: 1, minWidth: 0 }}>

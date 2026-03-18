@@ -1,8 +1,8 @@
 // ═══════════════════════════════════════════════════════════
 // PROFILE PAGE
 
+import Link from "next/link";
 import { NEWSLETTERS } from "@/data/seed";
-import Footer from "../Footer";
 import WindowCard from "../ui/WindowCard";
 import ArsBreakdown from "../ui/ArsBreakdown";
 import { useState } from "react";
@@ -26,7 +26,7 @@ type Application = {
   status: string;
 };
 
-const ProfilePage = ({ user, setPage, showToast, onUserUpdate }: { user: any; setPage: any; showToast: any; onUserUpdate: any }) => {
+const ProfilePage = ({ user, showToast, onUserUpdate }: { user: any; showToast: any; onUserUpdate: any }) => {
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState<EditForm | null>(null);
   const researcher = user?.role === "researcher" ? authSvc.getResearcher(user.id) : null;
@@ -117,9 +117,9 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }: { user: any; se
                     Edit Profile
                   </button>
                   {user.role === "researcher" && (
-                    <button className="btn btn-primary btn-sm" style={{ marginTop: 8 }} onClick={() => setPage("submit-paper")}>
+                    <Link href="/submit-paper" className="btn btn-primary btn-sm" style={{ marginTop: 8, display: "inline-block" }}>
                       Submit a Paper →
-                    </button>
+                    </Link>
                   )}
                 </>
               ) : (
@@ -168,23 +168,23 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }: { user: any; se
             {user.role === "sponsor" && (
               <WindowCard label="SPONSOR_PANEL.SYS" bodyClass="window-body window-body-blue">
                 <h3 style={{ fontSize: 18, marginBottom: 12 }}>Sponsor Actions</h3>
-                <button
+                <Link
+                  href="/post-bounty"
                   className="btn btn-primary btn-sm"
-                  style={{ width: "100%", marginBottom: 8, justifyContent: "center" }}
-                  onClick={() => setPage("post-bounty")}
+                  style={{ width: "100%", marginBottom: 8, justifyContent: "center", display: "flex" }}
                 >
                   Post a Bounty
-                </button>
-                <button
+                </Link>
+                <Link
+                  href="/bounties"
                   className="btn btn-ghost btn-sm"
-                  style={{ width: "100%", marginBottom: 8, justifyContent: "center" }}
-                  onClick={() => setPage("bounties")}
+                  style={{ width: "100%", marginBottom: 8, justifyContent: "center", display: "flex" }}
                 >
                   View Bounties
-                </button>
-                <button className="btn btn-ghost btn-sm" style={{ width: "100%", justifyContent: "center" }} onClick={() => setPage("sponsors")}>
+                </Link>
+                <Link href="/sponsors" className="btn btn-ghost btn-sm" style={{ width: "100%", justifyContent: "center", display: "flex" }}>
                   Sponsor Overview
-                </button>
+                </Link>
               </WindowCard>
             )}
             <WindowCard label="NEWSLETTERS.SYS" style={{ marginTop: 20 }} bodyClass="window-body window-body-cream">
@@ -199,19 +199,21 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }: { user: any; se
             {papers.length > 0 && (
               <WindowCard label="MY_PAPERS.SYS" style={{ marginBottom: 20 }}>
                 {papers.map((p) => (
-                  <div key={p.id} className="archive-row" onClick={() => setPage(`paper:${p.id}`)}>
-                    <div className="archive-icon" style={{ background: "#F9F5DC" }}>
-                      <IconPaperSmall />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div className="archive-title" style={{ fontSize: 14 }}>
-                        {p.title.slice(0, 50)}…
+                  <Link key={p.id} href={`/paper/${p.id}`}>
+                    <div className="archive-row">
+                      <div className="archive-icon" style={{ background: "#F9F5DC" }}>
+                        <IconPaperSmall />
                       </div>
-                      <div className="archive-meta">
-                        {p.year} // {p.topic}
+                      <div style={{ flex: 1 }}>
+                        <div className="archive-title" style={{ fontSize: 14 }}>
+                          {p.title.slice(0, 50)}…
+                        </div>
+                        <div className="archive-meta">
+                          {p.year} // {p.topic}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </WindowCard>
             )}
@@ -219,9 +221,9 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }: { user: any; se
               {applications.length === 0 ? (
                 <div>
                   <p style={{ fontSize: 14, color: "#6B6B7A", marginBottom: 14 }}>No applications yet.</p>
-                  <button className="btn btn-primary btn-sm" onClick={() => setPage("bounties")}>
+                  <Link href="/bounties" className="btn btn-primary btn-sm">
                     Browse Bounties →
-                  </button>
+                  </Link>
                 </div>
               ) : (
                 applications.map((a) => (
@@ -244,7 +246,6 @@ const ProfilePage = ({ user, setPage, showToast, onUserUpdate }: { user: any; se
           </div>
         </div>
       </div>
-      <Footer setPage={setPage} />
     </div>
   );
 };

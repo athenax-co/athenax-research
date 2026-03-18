@@ -1,8 +1,8 @@
 // ═══════════════════════════════════════════════════════════
-// TERMINAL PAGE
+// TERMINAL PAGE (REFACTORED) — Using useRouter instead of setPage
 
 import { useEffect, useState } from "react";
-import Footer from "../Footer";
+import Link from "next/link";
 import WindowCard from "../ui/WindowCard";
 import { SEED_LABS, SEED_PAPERS, SEED_RESEARCHERS, SEED_SPONSORS } from "@/data/seed";
 import { MediaIcon, IconLabsSmall } from "../Icons";
@@ -16,12 +16,10 @@ type SearchResult =
   | { kind: "researcher"; item: (typeof SEED_RESEARCHERS)[0] };
 
 const TerminalPage = ({
-  setPage,
   user,
   showToast,
   initialQuery = "",
 }: {
-  setPage: (page: string) => void;
   user: any;
   showToast: (message: string, type: string) => void;
   initialQuery?: string;
@@ -315,7 +313,7 @@ const TerminalPage = ({
                 {results.map((r: SearchResult, i: number) => {
                   if (r.kind === "paper")
                     return (
-                      <div key={i} className="archive-row" onClick={() => setPage(`paper:${r.item.id}`)}>
+                      <Link key={i} href={`/paper/${r.item.id}`} className="archive-row" style={{ textDecoration: "none", color: "inherit" }}>
                         <MediaIcon type="Essay" />
                         <div style={{ flex: 1 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
@@ -340,7 +338,7 @@ const TerminalPage = ({
                             <div style={{ fontSize: 10, color: "#6B6B7A" }}>score</div>
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     );
                   if (r.kind === "lab")
                     return (
@@ -398,7 +396,7 @@ const TerminalPage = ({
                   HIGHEST CITED — ALL TIME
                 </div>
                 {topPapers.map((p, i) => (
-                  <div key={p.id} className="lb-row" style={{ cursor: "pointer" }} onClick={() => setPage(`paper:${p.id}`)}>
+                  <Link key={p.id} href={`/paper/${p.id}`} className="lb-row" style={{ cursor: "pointer", textDecoration: "none", color: "inherit" }}>
                     <div className="lb-rank">{i + 1}</div>
                     <div style={{ flex: 1 }}>
                       <div className="lb-name" style={{ fontSize: 13 }}>
@@ -410,7 +408,7 @@ const TerminalPage = ({
                       <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: "#E8323C" }}>{p.citations}</div>
                       <div style={{ fontSize: 10, color: "#6B6B7A" }}>cites</div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </WindowCard>
               <WindowCard label="TOP_RESEARCHERS.SYS">
@@ -525,7 +523,12 @@ const TerminalPage = ({
                     <p style={{ color: "#6B6B7A", fontSize: 13 }}>No indexed papers yet for this protocol.</p>
                   ) : (
                     proto.papers.slice(0, 3).map((p: (typeof SEED_PAPERS)[0]) => (
-                      <div key={p.id} className="archive-row" style={{ marginBottom: 8 }} onClick={() => setPage(`paper:${p.id}`)}>
+                      <Link
+                        key={p.id}
+                        href={`/paper/${p.id}`}
+                        className="archive-row"
+                        style={{ marginBottom: 8, textDecoration: "none", color: "inherit" }}
+                      >
                         <MediaIcon type="Essay" />
                         <div style={{ flex: 1 }}>
                           <div className="archive-title" style={{ fontSize: 13 }}>
@@ -535,7 +538,7 @@ const TerminalPage = ({
                             {p.topic} // {p.citations} cites
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     ))
                   )}
                 </WindowCard>
@@ -664,12 +667,12 @@ const TerminalPage = ({
                 </div>
               </div>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                <button className="btn btn-primary" onClick={() => setPage("research-graph")}>
+                <Link className="btn btn-primary" href="/research-grapg" style={{ textDecoration: "none" }}>
                   Open Full Graph →
-                </button>
-                <button className="btn btn-outline" onClick={() => setPage("archive")}>
+                </Link>
+                <Link className="btn btn-outline" href="/archive" style={{ textDecoration: "none" }}>
                   Browse Archive
-                </button>
+                </Link>
               </div>
             </WindowCard>
             <div className="grid-3" style={{ gap: 20 }}>
@@ -891,7 +894,6 @@ const TerminalPage = ({
           </div>
         )}
       </div>
-      <Footer setPage={setPage} />
     </div>
   );
 };

@@ -1,11 +1,9 @@
 // ═══════════════════════════════════════════════════════════
 // HOW IT WORKS
-
-import Footer from "../Footer";
 import WindowCard from "../ui/WindowCard";
 
 // ═══════════════════════════════════════════════════════════
-const HowItWorksPage = ({ setPage }: { setPage: (page: string) => void }) => (
+const HowItWorksPage = () => (
   <div>
     <div className="page-wrap section">
       <div className="path-badge">/root/how-it-works</div>
@@ -83,7 +81,6 @@ const HowItWorksPage = ({ setPage }: { setPage: (page: string) => void }) => (
         </div>
       </WindowCard>
     </div>
-    <Footer setPage={setPage} />
   </div>
 );
 

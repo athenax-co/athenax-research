@@ -1,4 +1,5 @@
-import Footer from "../Footer";
+"use client";
+import Link from "next/link";
 
 export const DOCS_NAV = [
   { id: "docs", label: "Overview" },
@@ -10,7 +11,7 @@ export const DOCS_NAV = [
   { id: "docs-media", label: "Media Kit" },
 ];
 
-const DocsSidebar = ({ current, setPage }: { current: string; setPage: (id: string) => void }) => (
+const DocsSidebar = ({ current }: { current: string }) => (
   <div className="docs-sidebar">
     <div
       style={{
@@ -25,23 +26,25 @@ const DocsSidebar = ({ current, setPage }: { current: string; setPage: (id: stri
       Documentation
     </div>
     {DOCS_NAV.map((item) => (
-      <button key={item.id} className={`docs-sidebar-link${current === item.id ? " active" : ""}`} onClick={() => setPage(item.id)}>
+      <Link
+        key={item.id}
+        href={`/${item.id}`}
+        className={`docs-sidebar-link${current === item.id ? " active" : ""}`}
+      >
         {item.label}
-      </button>
+      </Link>
     ))}
   </div>
 );
 
 const DocsShell = ({
   current,
-  setPage,
   children,
   title,
   subtitle,
   fileTag,
 }: {
   current: string;
-  setPage: (id: string) => void;
   children: React.ReactNode;
   title: string;
   subtitle: string;
@@ -56,11 +59,10 @@ const DocsShell = ({
       </div>
       <hr className="divider" />
       <div className="docs-layout">
-        <DocsSidebar current={current} setPage={setPage} />
+        <DocsSidebar current={current} />
         <div className="docs-content">{children}</div>
       </div>
     </div>
-    <Footer setPage={setPage} />
   </div>
 );
 

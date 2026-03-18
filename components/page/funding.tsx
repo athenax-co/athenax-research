@@ -1,7 +1,6 @@
 // ═══════════════════════════════════════════════════════════
 // FUNDING PAGE
-
-import Footer from "../Footer";
+import Link from "next/link";
 import { IconBounties, IconCohortFees, IconSponsoredPrograms, IconStartupEquity, IconTalentPlacement, IconTerminal } from "../Icons";
 import WindowCard from "../ui/WindowCard";
 
@@ -16,7 +15,7 @@ const FUNDING_ICONS = {
 };
 
 // ═══════════════════════════════════════════════════════════
-const FundingPage = ({ setPage }: { setPage: (page: string) => void }) => (
+const FundingPage = () => (
   <div>
     <div className="page-wrap section">
       <div className="path-badge">/root/funding</div>
@@ -76,15 +75,14 @@ const FundingPage = ({ setPage }: { setPage: (page: string) => void }) => (
         })}
       </div>
       <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-        <button className="btn btn-primary" onClick={() => setPage("bounties")}>
+        <Link className="btn btn-primary" href="/bounties">
           View Bounties →
-        </button>
-        <button className="btn btn-outline" onClick={() => setPage("business-model")}>
+        </Link>
+        <Link className="btn btn-outline" href="/business-model">
           Business Model
-        </button>
+        </Link>
       </div>
     </div>
-    <Footer setPage={setPage} />
   </div>
 );
 

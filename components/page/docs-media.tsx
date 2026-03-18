@@ -3,7 +3,7 @@ import WindowCard from "../ui/WindowCard";
 import { DocSection, DocsShell } from "../ui/Docs";
  
 
-const DocsMediaPage = ({ setPage }: { setPage: (page: string) => void }) => {
+const DocsMediaPage = () => {
   const mediaLogos = [
     { title:"Primary Lockup", src:"Logo_Dark.svg", bg:"#F2EFE9", bodyClass:"window-body" },
     { title:"Inverse Lockup", src:"Logo_White.svg", bg:"#1C1C27", bodyClass:"window-body", dark:true },
@@ -33,7 +33,7 @@ const DocsMediaPage = ({ setPage }: { setPage: (page: string) => void }) => {
   ];
 
   return (
-    <DocsShell current="docs-media" setPage={setPage} title="Media Kit" subtitle="Press-ready assets, voice notes, and brand usage for partners, media, and ecosystem teams." fileTag="/root/docs/media-kit">
+    <DocsShell current="docs-media" title="Media Kit" subtitle="Press-ready assets, voice notes, and brand usage for partners, media, and ecosystem teams." fileTag="/root/docs/media-kit">
       <div className="section-stack-lg">
         <WindowCard label="MEDIA_KIT_OVERVIEW" bodyClass="window-body window-body-yellow">
           <div style={{display:"grid",gridTemplateColumns:"1.2fr 0.8fr",gap:24,alignItems:"start"}}>
@@ -52,7 +52,7 @@ const DocsMediaPage = ({ setPage }: { setPage: (page: string) => void }) => {
                 <Link href="https://athenax.mypinx.store/Brand/Brand%20Guidelines.pdf" target="_blank" rel="noopener noreferrer">
                   <button className="btn btn-primary">Download Brand PDF</button>
                 </Link>
-                <button className="btn btn-outline" onClick={()=>setPage("launch")}>See Product Surface</button>
+                <Link href="/launch"><button className="btn btn-outline">See Product Surface</button></Link>
               </div>
             </div>
             <div className="stat-card" style={{background:"#fff"}}>

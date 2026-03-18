@@ -1,7 +1,7 @@
 import { DocSection, DocsShell, DocStep } from "../ui/Docs";
 
-const DocsProtocolsPage = ({ setPage }: { setPage: (page: string) => void }) => (
-  <DocsShell current="docs-protocols" setPage={setPage} title="For Protocols" subtitle="Fund research that matters." fileTag="/root/docs/protocols">
+const DocsProtocolsPage = () => (
+  <DocsShell current="docs-protocols" title="For Protocols" subtitle="Fund research that matters." fileTag="/root/docs/protocols">
     <DocSection title="How Protocols Participate">
       <p style={{fontSize:15,lineHeight:1.7,color:"#1C1C27",marginBottom:16}}>Protocols fund research tracks, post bounties, sponsor cohorts, and access the Research Terminal. You get credentialed academic work on your protocol's specific research needs.</p>
       <DocStep n={1} title="Choose a funding model" desc="Sponsored programs, one-off bounties, or cohort sponsorship. Mix and match."/>

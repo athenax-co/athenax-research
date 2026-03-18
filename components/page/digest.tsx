@@ -4,17 +4,10 @@
 import { NEWSLETTERS, SEED_MEDIA } from "@/data/seed";
 import NewsletterCard from "../ui/NewsletterCard";
 import { MediaIcon } from "../Icons";
-import Footer from "../Footer";
+import Link from "next/link";
 
 // ═══════════════════════════════════════════════════════════
-const DigestPage = ({
-  setPage,
-  user,
-}: {
-  setPage: (page: string) => void;
-  user: any;
-  showToast: (text: string, type: string) => void;
-}) => {
+const DigestPage = ({ user }: { user: any }) => {
   const pastIssues = SEED_MEDIA.filter((m) => m.type === "Essay" || m.type === "Log").slice(0, 4);
 
   return (
@@ -47,7 +40,7 @@ const DigestPage = ({
             <p style={{ fontSize: 15, color: "#6B6B7A", marginBottom: 0 }}>The archive. Everything is CC0.</p>
           </div>
           {pastIssues.map((item) => (
-            <div key={item.id} className="archive-row" onClick={() => setPage(`media:${item.id}`)}>
+            <Link key={item.id} href={`/media/${item.id}`} className="archive-row" style={{ textDecoration: "none", color: "inherit" }}>
               <MediaIcon type={item.type} />
               <div style={{ flex: 1 }}>
                 <div className="archive-title">{item.title}</div>
@@ -56,16 +49,15 @@ const DigestPage = ({
                 </div>
               </div>
               <span style={{ color: "#6B6B7A", fontSize: 18 }}>→</span>
-            </div>
+            </Link>
           ))}
           <div style={{ marginTop: 16 }}>
-            <button className="link-arrow" onClick={() => setPage("archive")}>
+            <Link href="/archive" className="link-arrow" style={{ display: "inline-block" }}>
               View Full Archive →
-            </button>
+            </Link>
           </div>
         </div>
       </div>
-      <Footer setPage={setPage} />
     </div>
   );
 };

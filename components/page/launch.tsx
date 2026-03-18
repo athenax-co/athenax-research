@@ -87,7 +87,9 @@ const LaunchDetailPage = ({ launchId, user, showToast }: { launchId: string; use
         <Link className="link-arrow" href="/launch" style={{ marginBottom: 20 }}>
           ← Back to Launch
         </Link>
-        <div className="path-badge">/root/launch/{toSlug(launch.name)}</div>
+        <div className="path-badge" style={{ marginLeft: 12 }}>
+          /root/launch/{toSlug(launch.name)}
+        </div>
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "flex-start", gap: 20, marginBottom: 20, flexWrap: "wrap" }}>
@@ -479,7 +481,7 @@ const TOPIC_META = {
 const LaunchPage = ({ user, showToast }: { user: any; showToast: (message: string, type: string) => void }) => {
   const [filter, setFilter] = useState("All");
   const [sortBy, setSortBy] = useState("score");
-  const [timeTab, setTimeTab] = useState("month"); // "today"|"week"|"month"
+  const [timeTab, setTimeTab] = useState("all"); // "all"|"week"|"month"
   const [showSubmit, setShowSubmit] = useState(false);
   const [submitForm, setSubmitForm] = useState({
     name: "",
@@ -500,16 +502,15 @@ const LaunchPage = ({ user, showToast }: { user: any; showToast: (message: strin
   //   ["papers", "Research Depth"],
   // ];
   const TIME_TABS = [
-    ["today", "Today"],
+    ["all", "All"],
     ["week", "This Week"],
     ["month", "This Month"],
   ];
 
   const todayCount = SEED_LAUNCHES.filter((l) => l.launchedToday).length;
 
-  // Time filtering (demo: "today" = launchedToday, "week" = first 4, "month" = all)
-  const timeFiltered =
-    timeTab === "today" ? SEED_LAUNCHES.filter((l) => l.launchedToday) : timeTab === "week" ? SEED_LAUNCHES.slice(0, 5) : SEED_LAUNCHES;
+  // Time filtering (demo: "all" = all launches, "week" = first 5, "month" = all)
+  const timeFiltered = timeTab === "all" ? SEED_LAUNCHES : timeTab === "week" ? SEED_LAUNCHES.slice(0, 5) : SEED_LAUNCHES;
 
   const filtered = (filter === "All" ? timeFiltered : timeFiltered.filter((l) => l.sector === filter)).sort((a, b) => {
     if (sortBy === "score") return calcLaunchScore(b) - calcLaunchScore(a);
@@ -592,7 +593,7 @@ const LaunchPage = ({ user, showToast }: { user: any; showToast: (message: strin
               style={timeTab === k ? { background: "#F5D94E" } : {}}
               onClick={() => setTimeTab(k)}
             >
-              {l} {k === "today" && todayCount > 0 ? `(${todayCount})` : ""}
+              {l} {k === "all" ? `(${SEED_LAUNCHES.length})` : ""}
             </button>
           ))}
           <span style={{ marginLeft: "auto", fontSize: 12, color: "#6B6B7A", alignSelf: "center", fontFamily: "'Space Mono',monospace" }}>
@@ -636,7 +637,7 @@ const LaunchPage = ({ user, showToast }: { user: any; showToast: (message: strin
               <div style={{ flex: 1, minWidth: 260 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
                   <h3 style={{ fontSize: 21, marginBottom: 0 }}>
-                    <Link href={`/launch-detail/${launch.id}`} style={{ cursor: "pointer", textDecoration: "none", color: "inherit" }}>
+                    <Link href={`/launch/${launch.id}`} style={{ cursor: "pointer", textDecoration: "none", color: "inherit" }}>
                       {launch.name}
                     </Link>
                   </h3>
@@ -682,11 +683,7 @@ const LaunchPage = ({ user, showToast }: { user: any; showToast: (message: strin
                 <span className="ftag" style={{ background: launch.stage === "Seed" ? "#D4EDDA" : "#EAF0F6", textAlign: "center", fontSize: 11 }}>
                   {launch.stage} · {launch.funding}
                 </span>
-                <Link
-                  href={`/launch-detail/${launch.id}`}
-                  className="btn btn-primary btn-sm"
-                  style={{ justifyContent: "center", textDecoration: "none" }}
-                >
+                <Link href={`/launch/${launch.id}`} className="btn btn-primary btn-sm" style={{ justifyContent: "center", textDecoration: "none" }}>
                   View →
                 </Link>
                 <BookmarkButton user={user} launch={launch} showToast={showToast} size="sm" />

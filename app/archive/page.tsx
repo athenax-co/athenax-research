@@ -1,6 +1,8 @@
 import ArchivePage from "@/components/page/archive";
 import { getArticles, getResearch, sortByPublishedAtDesc } from "@/lib/api";
 
+export const revalidate = 3600;
+
 export default async function Page() {
   let articles: any[] = [];
   let research: any[] = [];

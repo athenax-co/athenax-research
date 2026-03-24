@@ -1,12 +1,23 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { authSvc, initDB } from "@/lib/db-helper";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AUTH_QUERY_KEYS, useLogout, useSession } from "@/hooks/useAuth";
 import Navbar from "./Navbar";
 import Toast from "./ui/Toast";
 import LoginModal from "./ui/LoginModal";
 import RegisterModal from "./ui/RegisterModal";
 import { usePathname, useRouter } from "next/navigation";
+
+// ─── singleton QueryClient ────────────────────────────────────────────────────
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { refetchOnWindowFocus: false },
+  },
+});
+
+// ─── context ──────────────────────────────────────────────────────────────────
 
 type ToastItem = {
   id: string;
@@ -33,25 +44,44 @@ export function useGlobal() {
   return context;
 }
 
-// Global toast ref — lets Footer call showToast without prop drilling
+// Global toast ref — lets Footer / non-component code call showToast
 export let _globalShowToast = (text: string, type: string) => {};
 
-export default function GlobalProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any>(null);
+// ─── inner provider (needs QueryClient in scope) ──────────────────────────────
+
+function InnerProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  const [selectedLab, setSelectedLab] = useState<any>(null);
+
   const pathname = usePathname();
   const router = useRouter();
 
-  const [selectedLab, setSelectedLab] = useState<any>(null);
+  // ── session ──────────────────────────────────────────────────────────────
+  const { data: sessionUser } = useSession();
 
-  useEffect(() => {
-    initDB();
-    const session = authSvc.getSession();
-    if (session) setUser(session);
-  }, []);
+  // Allow manual override (e.g. after modal login resolves before session refetch)
+  const [userOverride, setUserOverride] = useState<any>(undefined);
+  const user = userOverride !== undefined ? userOverride : (sessionUser ?? null);
 
+  // ── logout mutation ───────────────────────────────────────────────────────
+  const { mutate: logoutMutate } = useLogout({
+    onSuccess: () => {
+      setUserOverride(null);
+      showToast("Signed out.", "info");
+      router.push("/");
+    },
+    onError: () => {
+      // Even if the server call fails, clear local state
+      setUserOverride(null);
+      queryClient.setQueryData(AUTH_QUERY_KEYS.session, null);
+      showToast("Signed out.", "info");
+      router.push("/");
+    },
+  });
+
+  // ── toasts ────────────────────────────────────────────────────────────────
   const showToast = (text: string, type: string = "info") => {
     const id = Math.random().toString(36).slice(2, 8);
     setToasts((t) => [...t, { id, text, type }]);
@@ -61,32 +91,32 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
     _globalShowToast = showToast;
   }, [toasts]);
 
-  const removeToast = (id: string) => setToasts((t) => t.filter((x) => x.id !== id));
+  const removeToast = (id: string) =>
+    setToasts((t) => t.filter((x) => x.id !== id));
 
-  const handleLogout = () => {
-    authSvc.logout();
-    setUser(null);
-    showToast("Signed out.", "info");
-    router.push("/");
+  // ── auth click dispatcher ─────────────────────────────────────────────────
+  const handleAuthClick = (action: string) => {
+    if (action === "login") { setShowLogin(true); return; }
+    if (action === "register") { setShowRegister(true); return; }
+    if (action === "logout") { logoutMutate(); return; }
   };
 
-  const handleAuthClick = (action: string) => {
-    if (action === "login") {
-      setShowLogin(true);
-      return;
-    }
-    if (action === "register") {
-      setShowRegister(true);
-      return;
-    }
-    if (action === "logout") {
-      handleLogout();
-      return;
-    }
+  // Called by modals when login/signup succeeds so the UI updates instantly
+  const handleAuthSuccess = (user: any) => {
+    setUserOverride(user);
   };
 
   return (
-    <GlobalContext.Provider value={{ user, setUser, showToast, handleAuthClick, selectedLab, setSelectedLab }}>
+    <GlobalContext.Provider
+      value={{
+        user,
+        setUser: setUserOverride,
+        showToast,
+        handleAuthClick,
+        selectedLab,
+        setSelectedLab,
+      }}
+    >
       <div style={{ minHeight: "100vh", background: "#F2EFE9" }}>
         <Navbar current={pathname} user={user} onAuthClick={handleAuthClick} />
         {children}
@@ -96,8 +126,36 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
           <Toast key={t.id} msg={t} onClose={() => removeToast(t.id)} />
         ))}
       </div>
-      {showLogin && <LoginModal onClose={() => setShowLogin(false)} onSuccess={setUser} showToast={showToast} />}
-      {showRegister && <RegisterModal onClose={() => setShowRegister(false)} onSuccess={setUser} showToast={showToast} />}
+      {showLogin && (
+        <LoginModal
+          open={showLogin}
+          onOpenChange={setShowLogin}
+          onSuccess={handleAuthSuccess}
+          showToast={showToast}
+        />
+      )}
+      {showRegister && (
+        <RegisterModal
+          open={showRegister}
+          onOpenChange={setShowRegister}
+          onSuccess={handleAuthSuccess}
+          showToast={showToast}
+        />
+      )}
     </GlobalContext.Provider>
+  );
+}
+
+// ─── public export ────────────────────────────────────────────────────────────
+
+export default function GlobalProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <InnerProvider>{children}</InnerProvider>
+    </QueryClientProvider>
   );
 }

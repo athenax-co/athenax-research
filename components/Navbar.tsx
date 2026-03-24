@@ -137,12 +137,18 @@ const Navbar = ({ current, user, onAuthClick }: { current: string; user: any; on
             </>
           ) : (
             <>
-              <button className="btn btn-ghost btn-sm" onClick={() => onAuthClick("login")}>
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => onAuthClick("register")}
+              >
+                Join Network →
+              </button>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => onAuthClick("login")}
+              >
                 Sign In
               </button>
-              <Link className="btn btn-primary btn-sm" href="/apply-cohort">
-                Apply →
-              </Link>
             </>
           )}
         </div>

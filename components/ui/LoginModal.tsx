@@ -1,51 +1,110 @@
-// ═══════════════════════════════════════════════════════════
-// LOGIN MODAL
+"use client";
 
 import { useState } from "react";
-import Modal from "./Modal";
-import { authSvc } from "@/lib/db-helper";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBody, DialogTrafficLights } from "@/components/ui/Dialog";
+import { useLogin } from "@/hooks/useAuth";
+import { useGlobal } from "@/components/GlobalProvider";
+import Link from "next/link";
 
-// ═══════════════════════════════════════════════════════════
-const LoginModal = ({ onClose, onSuccess, showToast }: { onClose: () => void; onSuccess: (user: any) => void; showToast: (message: string, type: string) => void }) => {
-  const [email,setEmail] = useState("");
-  const [pw,setPw] = useState("");
-  const [loading,setLoading] = useState(false);
-  const [error,setError] = useState("");
+interface LoginDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: (user: any) => void;
+  showToast: (message: string, type: string) => void;
+}
+
+export default function LoginModal({ open, onOpenChange, onSuccess, showToast }: LoginDialogProps) {
+  const { handleAuthClick } = useGlobal();
+  const [email, setEmail] = useState("");
+  const [pw, setPw] = useState("");
+
+  const {
+    mutate: login,
+    isPending,
+    error,
+    reset,
+  } = useLogin({
+    onSuccess: () => {
+      // Session query is invalidated by useLogin; keep user source-of-truth there.
+      onSuccess(undefined);
+      onOpenChange(false);
+      showToast("Welcome back!", "success");
+      setEmail("");
+      setPw("");
+      reset();
+    },
+  });
 
   const submit = () => {
-    if(!email||!pw){setError("Please fill in all fields.");return;}
-    setLoading(true); setError("");
-    setTimeout(()=>{
-      const r=authSvc.login(email,pw); setLoading(false);
-      if(r.error){setError(r.error);return;}
-      onSuccess(r.user); onClose(); showToast(`Welcome back, ${r.user.name.split(" ")[0]}!`,"success");
-    },400);
+    if (!email || !pw) return;
+    login({ email, password: pw });
   };
 
   return (
-    <Modal title="SIGN_IN.SYS" onClose={onClose}>
-      <div className="inp-group">
-        <label className="inp-label">Email</label>
-        <input className="inp" type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@university.edu" onKeyDown={e=>e.key==="Enter"&&submit()}/>
-      </div>
-      <div className="inp-group">
-        <label className="inp-label">Password</label>
-        <input className="inp" type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="••••••••" onKeyDown={e=>e.key==="Enter"&&submit()}/>
-      </div>
-      {error && <div className="inp-error">{error}</div>}
-      <button className="btn btn-primary" style={{width:"100%",marginTop:8,justifyContent:"center"}} onClick={submit} disabled={loading}>
-        {loading ? <span className="spinner"/> : "Sign In →"}
-      </button>
-      <hr className="divider-sm" style={{margin:"18px 0 12px"}}/>
-      <div style={{fontSize:11,color:"#6B6B7A",fontFamily:"'Space Mono',monospace",marginBottom:8,letterSpacing:"0.04em"}}>DEMO ACCOUNTS</div>
-      {authSvc.DEMO_ACCOUNTS.map(a=>(
-        <button key={a.email} className="btn btn-ghost btn-sm" style={{width:"100%",marginBottom:6,justifyContent:"flex-start",fontSize:12}}
-          onClick={()=>{setEmail(a.email);setPw(a.password);}}>
-          {a.label}
-        </button>
-      ))}
-    </Modal>
-  );
-};
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <div className="flex items-center gap-1">
+            <DialogTrafficLights />
+            <DialogTitle>SIGN_IN.SYS</DialogTitle>
+          </div>
+          <DialogClose />
+        </DialogHeader>
 
-export default LoginModal;
+        <DialogBody>
+          <div className="inp-group">
+            <label className="inp-label">Email</label>
+            <input
+              className="inp"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@university.edu"
+              onKeyDown={(e) => e.key === "Enter" && submit()}
+            />
+          </div>
+          <div className="inp-group">
+            <label className="inp-label">Password</label>
+            <input
+              className="inp"
+              type="password"
+              value={pw}
+              onChange={(e) => setPw(e.target.value)}
+              placeholder="••••••••"
+              onKeyDown={(e) => e.key === "Enter" && submit()}
+            />
+          </div>
+
+          <div className="text-right -mt-1 mb-1">
+            <Link
+              href="/forgot-password"
+              className="text-xs font-semibold text-[#1c1c27] hover:text-[#e8323c] transition-colors"
+              onClick={() => onOpenChange(false)}
+            >
+              Forgot password?
+            </Link>
+          </div>
+
+          {error && <div className="inp-error">{error.message}</div>}
+
+          <button className="btn btn-primary w-full justify-center mt-2" onClick={submit} disabled={isPending || !email || !pw}>
+            {isPending ? <span className="spinner" /> : "Sign In →"}
+          </button>
+
+          <p className="text-xs text-[#6B6B7A] text-center mt-5">
+            Don&apos;t have an account?{" "}
+            <button
+              className="font-semibold text-[#1c1c27] hover:text-[#e8323c] transition-colors"
+              onClick={() => {
+                onOpenChange(false);
+                setTimeout(() => handleAuthClick("register"), 150);
+              }}
+            >
+              Sign up →
+            </button>
+          </p>
+        </DialogBody>
+      </DialogContent>
+    </Dialog>
+  );
+}

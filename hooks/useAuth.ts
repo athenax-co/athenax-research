@@ -1,13 +1,3 @@
-/**
- * hooks/useAuth.ts
- *
- * Custom hooks for every auth flow, powered by TanStack Query.
- * All mutations surface `isPending`, `isError`, `error`, and `isSuccess`
- * so that UI components stay thin.
- */
-
-"use client";
-
 import { useMutation, useQuery, useQueryClient, type UseMutationOptions } from "@tanstack/react-query";
 import * as authApi from "@/lib/auth-api";
 
@@ -20,7 +10,7 @@ export const AUTH_QUERY_KEYS = {
 // ─── useSignup ────────────────────────────────────────────────────────────────
 
 /**
- * Registers a new user.  Role is always forced to "user" by the API layer.
+ * Registers a new user.
  *
  * @example
  * const { mutate: signup, isPending, error } = useSignup();
@@ -46,7 +36,7 @@ export function useVerifyEmail(options?: UseMutationOptions<authApi.VerifyEmailR
     ...options,
     mutationFn: authApi.verifyEmail,
     onSuccess: (...args) => {
-      // If backend sets/updates auth cookie during verification, refresh navbar/session state.
+      // If backend sets/updates auth cookie during verification, refresh session state.
       queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEYS.session });
       options?.onSuccess?.(...args);
     },
@@ -89,8 +79,6 @@ export function useLogin(options?: UseMutationOptions<authApi.LoginResponse, Err
 
 /**
  * Loads the currently authenticated user by sending a POST /verify with
- * the existing cookie.  Returns `null` when unauthenticated rather than
- * throwing, so callers don't need to catch 401s themselves.
  *
  * @example
  * const { data: user, isLoading } = useSession();

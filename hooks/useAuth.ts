@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient, type UseMutationOptions } from "@tanstack/react-query";
 import * as authApi from "@/lib/auth-api";
+import { setUserCategories, type CategoryRef } from "@/lib/reference-api";
 
 // ─── query keys ──────────────────────────────────────────────────────────────
 
@@ -118,6 +119,21 @@ export function useForgotPassword(options?: UseMutationOptions<authApi.ForgotPas
 export function useResetPassword(options?: UseMutationOptions<authApi.ResetPasswordResponse, Error, authApi.ResetPasswordPayload>) {
   return useMutation<authApi.ResetPasswordResponse, Error, authApi.ResetPasswordPayload>({
     mutationFn: authApi.resetPassword,
+    ...options,
+  });
+}
+
+// ─── useSetUserCategories ─────────────────────────────────────────────────────
+
+/**
+ * Sets (replaces) the category list for the given user.
+ * Used to apply categories collected during signup after the session is verified.
+ */
+export function useSetUserCategories(
+  options?: UseMutationOptions<CategoryRef[], Error, { userId: number; categoryIds: number[] }>
+) {
+  return useMutation<CategoryRef[], Error, { userId: number; categoryIds: number[] }>({
+    mutationFn: ({ userId, categoryIds }) => setUserCategories(userId, categoryIds),
     ...options,
   });
 }

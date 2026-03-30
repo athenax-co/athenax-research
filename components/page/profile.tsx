@@ -5,10 +5,11 @@ import Link from "next/link";
 import { NEWSLETTERS } from "@/data/seed";
 import WindowCard from "../ui/WindowCard";
 import ArsBreakdown from "../ui/ArsBreakdown";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { authSvc, calcARS } from "@/lib/db-helper";
 import { IconPaperSmall } from "../Icons";
 import NewsletterCard from "../ui/NewsletterCard";
+import { useResendVerification } from "@/hooks/useAuth";
 
 // ═══════════════════════════════════════════════════════════
 type EditForm = {
@@ -29,6 +30,15 @@ type Application = {
 const ProfilePage = ({ user, showToast, onUserUpdate }: { user: any; showToast: any; onUserUpdate: any }) => {
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState<EditForm | null>(null);
+  const [resendTimer, setResendTimer] = useState(0);
+  const { mutate: resend, isPending: resending, isSuccess: resent } = useResendVerification();
+
+  useEffect(() => {
+    if (resendTimer <= 0) return;
+    const id = setInterval(() => setResendTimer((t) => t - 1), 1000);
+    return () => clearInterval(id);
+  }, [resendTimer]);
+
   const researcher = user?.role === "researcher" ? authSvc.getResearcher(user.id) : null;
   const papers = user ? authSvc.getPapersByUser(user.id) : [];
   const applications: Application[] = user ? authSvc.getApplications(user.id) : [];
@@ -66,61 +76,58 @@ const ProfilePage = ({ user, showToast, onUserUpdate }: { user: any; showToast: 
     <div>
       <div className="page-wrap section">
         <div className="path-badge">/root/profile</div>
-        <h1 style={{ fontSize: 42, marginBottom: 8 }}>Profile</h1>
+        <h1 className="text-[42px] mb-2">Profile</h1>
         <hr className="divider" />
-        <div className="grid-2" style={{ gap: 22, alignItems: "flex-start" }}>
+        <div className="grid-2 gap-5 items-start">
           <div>
             <WindowCard label="IDENTITY.SYS" style={{ marginBottom: 20 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
-                <div
-                  style={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: "50%",
-                    background: "#F5D94E",
-                    border: "2px solid #1C1C27",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 22,
-                    fontWeight: 700,
-                  }}
-                >
+              <div className="flex items-center gap-4 mb-5">
+                <div className="w-14 h-14 rounded-full bg-yellow border-2 border-ink flex items-center justify-center text-[22px] font-bold shrink-0">
                   {user.avatar}
                 </div>
                 <div>
-                  <div style={{ fontSize: 20, fontWeight: 700 }}>{user.name}</div>
-                  <div style={{ fontSize: 13, color: "#6B6B7A" }}>{user.email}</div>
-                  <span className="ftag" style={{ marginTop: 4, display: "inline-block" }}>
-                    {user.role}
-                  </span>
+                  <div className="text-xl font-bold">{user.name}</div>
+                  <div className="text-[13px] text-muted">{user.email}</div>
+                  <span className="ftag mt-1 inline-block">{user.role}</span>
                 </div>
               </div>
+
               {!editing || !editForm ? (
                 <>
                   {researcher && (
-                    <p style={{ fontSize: 14, color: "#6B6B7A", lineHeight: 1.6, marginBottom: 12 }}>{researcher.bio || "No bio yet."}</p>
+                    <p className="text-sm text-muted leading-relaxed mb-3">{researcher.bio || "No bio yet."}</p>
                   )}
                   {researcher && (
-                    <div style={{ fontSize: 13, color: "#6B6B7A" }}>
+                    <div className="text-[13px] text-muted">
                       {researcher.university} · {researcher.lab}
                     </div>
                   )}
-                  <button
-                    className="btn btn-ghost btn-sm"
-                    style={{ marginTop: 14 }}
-                    onClick={() => {
-                      setEditing(true);
-                      startEdit();
-                    }}
-                  >
-                    Edit Profile
-                  </button>
-                  {user.role === "researcher" && (
-                    <Link href="/submit-paper" className="btn btn-primary btn-sm" style={{ marginTop: 8, display: "inline-block" }}>
-                      Submit a Paper →
-                    </Link>
+                  {!user.verified && (
+                    <div className="mt-4 mb-3 px-3 py-2.5 bg-amber-50 border border-yellow rounded-lg">
+                      <p className="text-xs text-amber-800 mb-2">Your email is not verified.</p>
+                      {resent && <p className="text-xs text-green-700 mb-1.5">Verification email sent!</p>}
+                      <button
+                        className="btn btn-ghost btn-sm w-full justify-center"
+                        onClick={() => { resend({ email: user.email }); setResendTimer(60); }}
+                        disabled={resending || resendTimer > 0}
+                      >
+                        {resending ? <span className="spinner" /> : resendTimer > 0 ? `Resend link (${resendTimer}s)` : "Resend verification link"}
+                      </button>
+                    </div>
                   )}
+                  <div className="flex items-center gap-3 mt-4">
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => { setEditing(true); startEdit(); }}
+                    >
+                      Edit Profile
+                    </button>
+                    {user.role === "researcher" && (
+                      <Link href="/submit-paper" className="btn btn-primary btn-sm">
+                        Submit a Paper →
+                      </Link>
+                    )}
+                  </div>
                 </>
               ) : (
                 <>
@@ -148,13 +155,9 @@ const ProfilePage = ({ user, showToast, onUserUpdate }: { user: any; showToast: 
                       </div>
                     </>
                   )}
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <button className="btn btn-primary btn-sm" onClick={saveEdit}>
-                      Save
-                    </button>
-                    <button className="btn btn-ghost btn-sm" onClick={cancelEdit}>
-                      Cancel
-                    </button>
+                  <div className="flex gap-2.5">
+                    <button className="btn btn-primary btn-sm" onClick={saveEdit}>Save</button>
+                    <button className="btn btn-ghost btn-sm" onClick={cancelEdit}>Cancel</button>
                   </div>
                 </>
               )}
@@ -167,31 +170,25 @@ const ProfilePage = ({ user, showToast, onUserUpdate }: { user: any; showToast: 
             )}
             {user.role === "sponsor" && (
               <WindowCard label="SPONSOR_PANEL.SYS" bodyClass="window-body window-body-blue">
-                <h3 style={{ fontSize: 18, marginBottom: 12 }}>Sponsor Actions</h3>
-                <Link
-                  href="/post-bounty"
-                  className="btn btn-primary btn-sm"
-                  style={{ width: "100%", marginBottom: 8, justifyContent: "center", display: "flex" }}
-                >
+                <h3 className="text-lg mb-3">Sponsor Actions</h3>
+                <Link href="/post-bounty" className="btn btn-primary btn-sm w-full justify-center flex mb-2">
                   Post a Bounty
                 </Link>
-                <Link
-                  href="/bounties"
-                  className="btn btn-ghost btn-sm"
-                  style={{ width: "100%", marginBottom: 8, justifyContent: "center", display: "flex" }}
-                >
+                <Link href="/bounties" className="btn btn-ghost btn-sm w-full justify-center flex mb-2">
                   View Bounties
                 </Link>
-                <Link href="/sponsors" className="btn btn-ghost btn-sm" style={{ width: "100%", justifyContent: "center", display: "flex" }}>
+                <Link href="/sponsors" className="btn btn-ghost btn-sm w-full justify-center flex">
                   Sponsor Overview
                 </Link>
               </WindowCard>
             )}
             <WindowCard label="NEWSLETTERS.SYS" style={{ marginTop: 20 }} bodyClass="window-body window-body-cream">
-              <h3 style={{ fontSize: 18, marginBottom: 16 }}>Your Subscriptions</h3>
-              {NEWSLETTERS.map((nl) => (
-                <NewsletterCard key={nl.id} nl={nl} email={user.email} />
-              ))}
+              <h3 className="text-lg mb-4">Your Subscriptions</h3>
+              <div className="flex flex-col gap-4">
+                {NEWSLETTERS.map((nl) => (
+                  <NewsletterCard key={nl.id} nl={nl} email={user.email} />
+                ))}
+              </div>
             </WindowCard>
           </div>
 
@@ -201,13 +198,11 @@ const ProfilePage = ({ user, showToast, onUserUpdate }: { user: any; showToast: 
                 {papers.map((p) => (
                   <Link key={p.id} href={`/paper/${p.id}`}>
                     <div className="archive-row">
-                      <div className="archive-icon" style={{ background: "#F9F5DC" }}>
+                      <div className="archive-icon bg-paper">
                         <IconPaperSmall />
                       </div>
-                      <div style={{ flex: 1 }}>
-                        <div className="archive-title" style={{ fontSize: 14 }}>
-                          {p.title.slice(0, 50)}…
-                        </div>
+                      <div className="flex-1">
+                        <div className="archive-title text-sm">{p.title.slice(0, 50)}…</div>
                         <div className="archive-meta">
                           {p.year} // {p.topic}
                         </div>
@@ -220,7 +215,7 @@ const ProfilePage = ({ user, showToast, onUserUpdate }: { user: any; showToast: 
             <WindowCard label="APPLICATIONS.SYS" bodyClass="window-body window-body-cream">
               {applications.length === 0 ? (
                 <div>
-                  <p style={{ fontSize: 14, color: "#6B6B7A", marginBottom: 14 }}>No applications yet.</p>
+                  <p className="text-sm text-muted mb-3.5">No applications yet.</p>
                   <Link href="/bounties" className="btn btn-primary btn-sm">
                     Browse Bounties →
                   </Link>
@@ -228,15 +223,13 @@ const ProfilePage = ({ user, showToast, onUserUpdate }: { user: any; showToast: 
               ) : (
                 applications.map((a) => (
                   <div key={a.id} className="archive-row">
-                    <div style={{ flex: 1 }}>
-                      <div className="archive-title" style={{ fontSize: 14 }}>
-                        Bounty {a.bountyId}
-                      </div>
+                    <div className="flex-1">
+                      <div className="archive-title text-sm">Bounty {a.bountyId}</div>
                       <div className="archive-meta">
                         {new Date(a.appliedAt).toLocaleDateString()} // {a.status}
                       </div>
                     </div>
-                    <span className="ftag" style={{ background: a.status === "pending" ? "#FEF3C7" : "#D4EDDA" }}>
+                    <span className={`ftag ${a.status === "pending" ? "bg-amber-100" : "bg-success"}`}>
                       {a.status}
                     </span>
                   </div>

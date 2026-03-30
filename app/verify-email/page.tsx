@@ -60,20 +60,13 @@ export default function VerifyEmailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlToken]);
 
-  useEffect(() => {
-    if (!done) return;
-    const timeout = setTimeout(() => {
-      router.replace("/");
-    }, 1200);
-    return () => clearTimeout(timeout);
-  }, [done, router]);
 
   const isPending = verifyingPost;
   const error = postError;
 
   return (
     <main className="min-h-screen flex items-center justify-center px-6 py-10">
-      <div className="bg-white border-2 border-[#1c1c27] rounded-xl p-9 w-full max-w-md shadow-[5px_5px_0_#1c1c27]">
+      <div className="bg-white border-2 border-ink rounded-xl p-9 w-full max-w-md shadow-[5px_5px_0_#1c1c27]">
         <h1 className="font-mono text-xs tracking-widest text-[#1a1a2e] uppercase mb-6">VERIFY_EMAIL.SYS</h1>
 
         {done ? (
@@ -82,23 +75,23 @@ export default function VerifyEmailPage() {
             <p className="text-sm text-[#1a1a2e] mb-5">
               {autoLoginError ? "Email verified successfully." : "Email verified successfully. You are now signed in."}
             </p>
-            {autoLoginError && <p className="text-[#e8323c] text-xs mb-4">{autoLoginError}</p>}
+            {autoLoginError && <p className="text-danger text-xs mb-4">{autoLoginError}</p>}
             <button className="btn btn-primary w-full justify-center" onClick={() => router.push("/")}>
               Continue to Home →
             </button>
-            <p className="mt-3 text-xs text-[#6B6B7A]">Redirecting automatically...</p>
+            <p className="mt-3 text-xs text-muted">Or click above to continue.</p>
           </div>
         ) : urlToken ? (
           <div className="text-center">
             {isPending && (
               <>
                 <span className="spinner inline-block" />
-                <p className="mt-4 text-xs text-[#6B6B7A]">Verifying your email…</p>
+                <p className="mt-4 text-xs text-muted">Verifying your email…</p>
               </>
             )}
             {error && (
               <>
-                <p className="text-[#e8323c] text-xs mb-4">{error.message}</p>
+                <p className="text-danger text-xs mb-4">{error.message}</p>
                 <button
                   className="btn btn-ghost btn-sm w-full justify-center"
                   onClick={() => verifyViaPost({ token: urlToken })}
@@ -111,7 +104,7 @@ export default function VerifyEmailPage() {
           </div>
         ) : (
           <>
-            <p className="text-xs text-[#6B6B7A] mb-5">Enter the verification token from your email, or paste the full link&apos;s token here.</p>
+            <p className="text-xs text-muted mb-5">Enter the verification token from your email, or paste the full link&apos;s token here.</p>
             <div className="inp-group">
               <label className="inp-label">Verification Token</label>
               <input className="inp" value={manualToken} onChange={(e) => setManualToken(e.target.value)} placeholder="Paste token here" />
@@ -127,7 +120,7 @@ export default function VerifyEmailPage() {
 
             <hr className="divider-sm" />
 
-            <p className="text-xs text-[#6B6B7A] mb-2">Didn&apos;t receive an email?</p>
+            <p className="text-xs text-muted mb-2">Didn&apos;t receive an email?</p>
             <div className="inp-group">
               <label className="inp-label">Your email address</label>
               <input className="inp" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@university.edu" />

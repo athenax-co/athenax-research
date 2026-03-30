@@ -10,6 +10,16 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-space-grotesk);
   --font-mono: var(--font-vt323);
+
+  /* Brand palette */
+  --color-ink: #1c1c27;
+  --color-cream: #F2EFE9;
+  --color-muted: #6B6B7A;
+  --color-subtle: #3a3a4a;
+  --color-yellow: #F5D94E;
+  --color-paper: #F9F5DC;
+  --color-success: #D4EDDA;
+  --color-danger: #e8323c;
 }
 
 @media (prefers-color-scheme: dark) {

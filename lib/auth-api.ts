@@ -1,4 +1,6 @@
-const AUTH_BASE = `${process.env.NEXT_PUBLIC_API_BASE_URL}/user`;
+import { BASE_URL } from "./api";
+
+const AUTH_BASE = `${BASE_URL}/user`;
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -13,13 +15,37 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 // ─── types ───────────────────────────────────────────────────────────────────
 
-export type Roles = "user" | "researcher" | "sponsor" | "builder";
+/** Matches the backend UserRole enum (admin excluded — not self-selectable). */
+export type UserRole = "user" | "researcher" | "sponsor" | "founder" | "investor";
+
+/** Kept as alias for any existing imports of `Roles`. */
+export type Roles = UserRole;
+
+export type InvestorType = "VC" | "Angel" | "Corporate" | "Family Office";
+
+export interface ResearcherProfileInput {
+  labId?: number | null;
+  bio?: string | null;
+}
+
+export interface SponsorProfileInput {
+  bio?: string | null;
+  amount?: number | null;
+}
+
+export interface InvestorProfileInput {
+  investorType: InvestorType;
+  balance?: number | null;
+}
 
 export interface SignupPayload {
   name: string;
   email: string;
   password: string;
-  role?: Roles;
+  role?: UserRole;
+  researcherProfile?: ResearcherProfileInput;
+  sponsorProfile?: SponsorProfileInput;
+  investorProfile?: InvestorProfileInput;
 }
 
 export interface SignupResponse {
@@ -53,11 +79,18 @@ export interface LoginResponse {
 }
 
 export interface SessionUser {
-  id: string;
+  id: number;
   name: string;
   email: string;
-  role: string;
-  [key: string]: unknown;
+  role: UserRole;
+  verified: boolean;
+  createdAt: string;
+  updatedAt: string;
+  externalId?: string | null;
+  researcherProfile?: { labId?: number | null; bio?: string | null } | null;
+  sponsorProfile?: { bio?: string | null; amount?: number | null } | null;
+  investorProfile?: { investorType: string; balance?: number | null } | null;
+  categories?: { categoryId: number }[];
 }
 
 export interface ForgotPasswordPayload {

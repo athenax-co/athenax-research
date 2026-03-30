@@ -3,10 +3,13 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AUTH_QUERY_KEYS, useLogout, useSession } from "@/hooks/useAuth";
+import { REFERENCE_QUERY_KEYS } from "@/hooks/useReference";
+import { getCategories } from "@/lib/reference-api";
 import Navbar from "./Navbar";
 import Toast from "./ui/Toast";
 import LoginModal from "./ui/LoginModal";
 import RegisterModal from "./ui/RegisterModal";
+import CategoryPickerModal from "./ui/CategoryPickerModal";
 import { usePathname, useRouter } from "next/navigation";
 
 // ─── singleton QueryClient ────────────────────────────────────────────────────
@@ -53,10 +56,21 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [selectedLab, setSelectedLab] = useState<any>(null);
 
   const pathname = usePathname();
   const router = useRouter();
+
+  // ── prefetch reference data ───────────────────────────────────────────────
+  useEffect(() => {
+    queryClient.prefetchQuery({
+      queryKey: REFERENCE_QUERY_KEYS.categories,
+      queryFn: getCategories,
+      staleTime: 10 * 60 * 1000,
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── session ──────────────────────────────────────────────────────────────
   const { data: sessionUser } = useSession();
@@ -64,6 +78,14 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
   // Allow manual override (e.g. after modal login resolves before session refetch)
   const [userOverride, setUserOverride] = useState<any>(undefined);
   const user = userOverride !== undefined ? userOverride : (sessionUser ?? null);
+
+  // ── show category picker once after email verification ───────────────────
+  useEffect(() => {
+    if (sessionUser?.verified && sessionUser?.categories?.length === 0) {
+      setShowCategoryPicker(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionUser?.id, sessionUser?.verified]);
 
   // ── logout mutation ───────────────────────────────────────────────────────
   const { mutate: logoutMutate } = useLogout({
@@ -140,6 +162,13 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
           onOpenChange={setShowRegister}
           onSuccess={handleAuthSuccess}
           showToast={showToast}
+        />
+      )}
+      {showCategoryPicker && sessionUser?.id && (
+        <CategoryPickerModal
+          open={showCategoryPicker}
+          userId={sessionUser.id}
+          onDone={() => { setShowCategoryPicker(false); router.push("/"); }}
         />
       )}
     </GlobalContext.Provider>

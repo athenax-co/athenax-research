@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBo
 import { useSignup, useResendVerification } from "@/hooks/useAuth";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useUniversities, useLabs } from "@/hooks/useReference";
-import type { UserRole, InvestorType } from "@/lib/auth-api";
+import type { UserRole, InvestorType } from "@/types/auth";
 
 interface RegisterDialogProps {
   open: boolean;

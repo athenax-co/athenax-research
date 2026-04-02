@@ -63,77 +63,77 @@ export const FooterSubscribe = () => {
 
 const Footer = () => {
   return (
-  <footer className="footer" style={{ paddingTop: 0 }}>
-    <div style={{ paddingTop: 48 }}>
-      <FooterSubscribe />{" "}
-    </div>
-    <div className="footer-inner">
-      <div>
-        <div className="footer-brand">AthenaX</div>
-        <div className="footer-tagline">Where New Products Begin.</div>
+    <footer className="footer" style={{ paddingTop: 0 }}>
+      <div style={{ paddingTop: 48 }}>
+        <FooterSubscribe />{" "}
       </div>
-      <div style={{ display: "flex", gap: 56, flexWrap: "wrap" }}>
+      <div className="footer-inner">
         <div>
-          <div className="footer-col-label">Research</div>
-          <Link href="/archive" className="footer-link">
-            Archive
-          </Link>
-          <Link href="/leaderboard" className="footer-link">
-            Leaderboard
-          </Link>
-          <Link href="/submit-paper" className="footer-link">
-            Submit a Paper
-          </Link>
-          <Link href="/bounties" className="footer-link">
-            Bounties
-          </Link>
-          <Link href="/cohorts" className="footer-link">
-            Cohorts
-          </Link>
-          <Link href="/launch" className="footer-link">
-            Launch
-          </Link>
+          <div className="footer-brand">AthenaX</div>
+          <div className="footer-tagline">Where New Products Begin.</div>
         </div>
-        <div>
-          <div className="footer-col-label">Network</div>
-          <Link href="/researchers" className="footer-link">
-            Researchers
-          </Link>
-          <Link href="/labs" className="footer-link">
-            Labs
-          </Link>
-          <Link href="/universities" className="footer-link">
-            Universities
-          </Link>
-          <Link href="/sponsors" className="footer-link">
-            Sponsors
-          </Link>
-          <Link href="/technology" className="footer-link">
-            Companies
-          </Link>
-        </div>
-        <div>
-          <div className="footer-col-label">Resources</div>
-          <Link href="/docs" className="footer-link">
-            Docs
-          </Link>
-          <Link href="/digest" className="footer-link">
-            Newsletter
-          </Link>
-          <Link href="/how-it-works" className="footer-link">
-            How It Works
-          </Link>
-          <Link href="/about" className="footer-link">
-            About
-          </Link>
-          <Link href="/business-model" className="footer-link">
-            Business Model
-          </Link>
+        <div style={{ display: "flex", gap: 56, flexWrap: "wrap" }}>
+          <div>
+            <div className="footer-col-label">Research</div>
+            <Link href="/archive" className="footer-link">
+              Archive
+            </Link>
+            <Link href="/leaderboard" className="footer-link">
+              Leaderboard
+            </Link>
+            <Link href="/paper/submit" className="footer-link">
+              Submit a Paper
+            </Link>
+            <Link href="/funding/bounties" className="footer-link">
+              Bounties
+            </Link>
+            <Link href="/funding/cohorts" className="footer-link">
+              Cohorts
+            </Link>
+            <Link href="/launch" className="footer-link">
+              Launch
+            </Link>
+          </div>
+          <div>
+            <div className="footer-col-label">Network</div>
+            <Link href="/researchers" className="footer-link">
+              Researchers
+            </Link>
+            <Link href="/labs" className="footer-link">
+              Labs
+            </Link>
+            <Link href="/network/universities" className="footer-link">
+              Universities
+            </Link>
+            <Link href="/sponsors" className="footer-link">
+              Sponsors
+            </Link>
+            <Link href="/startups" className="footer-link">
+              Companies
+            </Link>
+          </div>
+          <div>
+            <div className="footer-col-label">Resources</div>
+            <Link href="/docs" className="footer-link">
+              Docs
+            </Link>
+            <Link href="/digest" className="footer-link">
+              Newsletter
+            </Link>
+            <Link href="/how-it-works" className="footer-link">
+              How It Works
+            </Link>
+            <Link href="/about" className="footer-link">
+              About
+            </Link>
+            <Link href="/business-model" className="footer-link">
+              Business Model
+            </Link>
+          </div>
         </div>
       </div>
-    </div>
-    <div className="footer-legal">CC0 /// NO RIGHTS RESERVED /// OPEN SOURCE</div>
-  </footer>
+      <div className="footer-legal">CC0 /// NO RIGHTS RESERVED /// OPEN SOURCE</div>
+    </footer>
   );
 };
 

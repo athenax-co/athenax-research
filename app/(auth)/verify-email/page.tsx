@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { verifySession } from "@/lib/auth-api";
 import { useVerifyEmail, useResendVerification } from "@/hooks/useAuth";
+import { useCountdown, useRedirectCountdown } from "@/hooks/useCountdown";
 
 /**
  * /verify-email
@@ -14,13 +15,15 @@ import { useVerifyEmail, useResendVerification } from "@/hooks/useAuth";
  */
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const urlToken = searchParams.get("token") ?? "";
 
   const [manualToken, setManualToken] = useState(urlToken);
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
   const [autoLoginError, setAutoLoginError] = useState<string | null>(null);
+
+  const { remaining: redirectIn, start: startRedirect } = useRedirectCountdown("/", 5);
+  const { remaining: resendTimer, start: startResendTimer } = useCountdown(60);
 
   const {
     mutate: verifyViaPost,
@@ -36,30 +39,16 @@ export default function VerifyEmailPage() {
         setAutoLoginError("Email verified, but auto sign-in could not be confirmed. Please sign in manually.");
       }
       setDone(true);
+      startRedirect();
     },
   });
 
   const { mutate: resend, isPending: resending, isSuccess: resent } = useResendVerification();
 
-  const [resendTimer, setResendTimer] = useState(0);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (resendTimer > 0) {
-      interval = setInterval(() => {
-        setResendTimer((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [resendTimer]);
-
   useEffect(() => {
     if (urlToken) verifyViaPost({ token: urlToken });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlToken]);
-
 
   const isPending = verifyingPost;
   const error = postError;
@@ -76,10 +65,10 @@ export default function VerifyEmailPage() {
               {autoLoginError ? "Email verified successfully." : "Email verified successfully. You are now signed in."}
             </p>
             {autoLoginError && <p className="text-danger text-xs mb-4">{autoLoginError}</p>}
-            <button className="btn btn-primary w-full justify-center" onClick={() => router.push("/")}>
+            <button className="btn btn-primary w-full justify-center" onClick={() => startRedirect()}>
               Continue to Home →
             </button>
-            <p className="mt-3 text-xs text-muted">Or click above to continue.</p>
+            <p className="mt-3 text-xs text-muted">Redirecting in {redirectIn}s…</p>
           </div>
         ) : urlToken ? (
           <div className="text-center">
@@ -130,7 +119,7 @@ export default function VerifyEmailPage() {
               className="btn btn-ghost btn-sm w-full justify-center"
               onClick={() => {
                 resend({ email });
-                setResendTimer(60);
+                startResendTimer();
               }}
               disabled={resending || !email || resendTimer > 0}
             >

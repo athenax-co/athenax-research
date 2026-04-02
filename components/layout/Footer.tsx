@@ -1,0 +1,119 @@
+"use client";
+
+import { subscriberSvc } from "@/utils/lib";
+import { useState } from "react";
+import Link from "next/link";
+import { _globalShowToast } from "@/components/GlobalProvider";
+
+const NAV_COLS = [
+  {
+    label: "Research",
+    links: [
+      { href: "/archive", text: "Archive" },
+      { href: "/leaderboard", text: "Leaderboard" },
+      { href: "/paper/submit", text: "Submit a Paper" },
+      { href: "/funding/bounties", text: "Bounties" },
+      { href: "/funding/cohorts", text: "Cohorts" },
+      { href: "/launch", text: "Launch" },
+    ],
+  },
+  {
+    label: "Network",
+    links: [
+      { href: "/researchers", text: "Researchers" },
+      { href: "/labs", text: "Labs" },
+      { href: "/network/universities", text: "Universities" },
+      { href: "/sponsors", text: "Sponsors" },
+      { href: "/startups", text: "Companies" },
+    ],
+  },
+  {
+    label: "Resources",
+    links: [
+      { href: "/docs", text: "Docs" },
+      { href: "/digest", text: "Newsletter" },
+      { href: "/how-it-works", text: "How It Works" },
+      { href: "/about", text: "About" },
+      { href: "/business-model", text: "Business Model" },
+    ],
+  },
+];
+
+export const FooterSubscribe = () => {
+  const [email, setEmail] = useState("");
+  const [done, setDone] = useState(false);
+
+  const submit = () => {
+    if (!email.includes("@")) {
+      _globalShowToast("Enter a valid email.", "error");
+      return;
+    }
+    const r = subscriberSvc.subscribe(email.trim(), "weekly-digest");
+    if (r.error) {
+      _globalShowToast("Already subscribed!", "info");
+    } else {
+      setDone(true);
+      _globalShowToast("Subscribed to the Weekly Digest!", "success");
+    }
+  };
+
+  return (
+    <div className="border-b border-[#D8D4CC] pb-10 mb-10">
+      <div className="max-w-7xl mx-auto px-10 flex items-center justify-between gap-8 flex-wrap">
+        <div>
+          <div className="font-bold text-[17px] mb-1">Weekly Research Digest</div>
+          <div className="text-sm text-muted">Top AI papers, bounties, and cohort news — every Monday.</div>
+        </div>
+        {done ? (
+          <div className="font-mono text-xs text-green-700 tracking-[0.05em]">✓ YOU&apos;RE IN</div>
+        ) : (
+          <div className="flex gap-2 shrink-0">
+            <input
+              className="inp w-60! py-2.25! px-3.5! text-sm!"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              onKeyDown={(e) => e.key === "Enter" && submit()}
+            />
+            <button className="btn btn-primary btn-sm" onClick={submit}>
+              Subscribe →
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const Footer = () => {
+  return (
+    <footer className="bg-cream border-t-2 border-ink pt-0 px-10 pb-7 mt-25">
+      <div className="pt-12">
+        <FooterSubscribe />
+      </div>
+      <div className="max-w-7xl mx-auto flex justify-between items-start gap-10 flex-wrap">
+        <div>
+          <div className="text-[26px] font-bold text-ink mb-2">AthenaX</div>
+          <div className="text-sm text-ink leading-relaxed">Where New Products Begin.</div>
+        </div>
+        <div className="flex gap-14 flex-wrap">
+          {NAV_COLS.map((col) => (
+            <div key={col.label}>
+              <div className="text-[10px] font-bold tracking-widest uppercase text-ink mb-3.5">{col.label}</div>
+              {col.links.map((link) => (
+                <Link key={link.href} href={link.href} className="block text-sm text-ink mb-2.25 hover:text-danger">
+                  {link.text}
+                </Link>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="font-mono text-[11px] text-muted text-center mt-11 pt-5.5 border-t border-[#D8D4CC] tracking-[0.04em]">
+        CC0 /// NO RIGHTS RESERVED /// OPEN SOURCE
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;

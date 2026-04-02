@@ -173,91 +173,97 @@ const IconBriefcaseSmall = ({ color = "#1C1C27" }) => (
 );
 
 interface IconProps {
-   name: string;
-   size?: number;
-   className?: string;
+  name: string;
+  size?: number;
+  className?: string;
 }
 
 const Icon: React.FC<IconProps> = ({ name, size = 20, className = "" }) => {
-   const icons: Record<string, React.ReactElement> = {
-      terminal: <path d="M4 17l6-6-6-6M12 19h8" />,
-      folder: (
-         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-      ),
-      file: <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />,
-      play: <path d="M5 3l14 9-14 9V3z" />,
-      arrow: <path d="M5 12h14M12 5l7 7-7 7" />,
-      menu: <path d="M4 6h16M4 12h16M4 18h16" />,
-      x: <path d="M18 6L6 18M6 6l12 12" />,
-      check: <path d="M20 6L9 17l-5-5" />,
-      sparkle: (
-         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-      ),
-   };
+  const icons: Record<string, React.ReactElement> = {
+    terminal: <path d="M4 17l6-6-6-6M12 19h8" />,
+    folder: <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />,
+    file: <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />,
+    play: <path d="M5 3l14 9-14 9V3z" />,
+    arrow: <path d="M5 12h14M12 5l7 7-7 7" />,
+    menu: <path d="M4 6h16M4 12h16M4 18h16" />,
+    x: <path d="M18 6L6 18M6 6l12 12" />,
+    check: <path d="M20 6L9 17l-5-5" />,
+    sparkle: <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />,
+  };
 
-   return (
-      <svg
-         className={className}
-         width={size}
-         height={size}
-         viewBox="0 0 24 24"
-         fill="none"
-         stroke="currentColor"
-         strokeWidth="2"
-         strokeLinecap="round"
-         strokeLinejoin="round"
-      >
-         {icons[name] || icons.sparkle}
-      </svg>
-   );
+  return (
+    <svg
+      className={className}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {icons[name] || icons.sparkle}
+    </svg>
+  );
 };
 
 const MediaIcon = ({ type }: { type: string }) => {
-  if (type === "Video") return (
-    <div className="archive-icon" style={{background:"#EAF0F6"}}>
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <polygon points="5,3 13,8 5,13" fill="#1C1C27"/>
-      </svg>
-    </div>
-  );
-  if (type === "Log") return (
-    <div className="archive-icon" style={{background:"#1C1C27"}}>
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <text x="2" y="12" fontSize="11" fill="#F2EFE9" fontFamily="monospace">&gt;_</text>
-      </svg>
-    </div>
-  );
+  if (type === "Video")
+    return (
+      <div className="archive-icon" style={{ background: "#EAF0F6" }}>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <polygon points="5,3 13,8 5,13" fill="#1C1C27" />
+        </svg>
+      </div>
+    );
+  if (type === "Log")
+    return (
+      <div className="archive-icon" style={{ background: "#1C1C27" }}>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <text x="2" y="12" fontSize="11" fill="#F2EFE9" fontFamily="monospace">
+            &gt;_
+          </text>
+        </svg>
+      </div>
+    );
   // Essay / default
   return (
-    <div className="archive-icon" style={{background:"#F9F5DC"}}>
+    <div className="archive-icon" style={{ background: "#F9F5DC" }}>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <rect x="3" y="1" width="10" height="14" rx="1" stroke="#1C1C27" strokeWidth="1.5"/>
-        <line x1="5" y1="5" x2="11" y2="5" stroke="#1C1C27" strokeWidth="1.2"/>
-        <line x1="5" y1="8" x2="11" y2="8" stroke="#1C1C27" strokeWidth="1.2"/>
-        <line x1="5" y1="11" x2="9" y2="11" stroke="#1C1C27" strokeWidth="1.2"/>
+        <rect x="3" y="1" width="10" height="14" rx="1" stroke="#1C1C27" strokeWidth="1.5" />
+        <line x1="5" y1="5" x2="11" y2="5" stroke="#1C1C27" strokeWidth="1.2" />
+        <line x1="5" y1="8" x2="11" y2="8" stroke="#1C1C27" strokeWidth="1.2" />
+        <line x1="5" y1="11" x2="9" y2="11" stroke="#1C1C27" strokeWidth="1.2" />
       </svg>
     </div>
   );
 };
 
 const ContentIcon = ({ kind }: { kind: string }) => (
-  <div className="archive-icon" style={{background:kind === "research" ? "#EAF0F6" : "#F9F5DC"}}>
-    {kind === "research" ? <IconLabsSmall/> : (
+  <div className="archive-icon" style={{ background: kind === "research" ? "#EAF0F6" : "#F9F5DC" }}>
+    {kind === "research" ? (
+      <IconLabsSmall />
+    ) : (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <rect x="3" y="1" width="10" height="14" rx="1" stroke="#1C1C27" strokeWidth="1.5"/>
-        <line x1="5" y1="5" x2="11" y2="5" stroke="#1C1C27" strokeWidth="1.2"/>
-        <line x1="5" y1="8" x2="11" y2="8" stroke="#1C1C27" strokeWidth="1.2"/>
-        <line x1="5" y1="11" x2="9" y2="11" stroke="#1C1C27" strokeWidth="1.2"/>
+        <rect x="3" y="1" width="10" height="14" rx="1" stroke="#1C1C27" strokeWidth="1.5" />
+        <line x1="5" y1="5" x2="11" y2="5" stroke="#1C1C27" strokeWidth="1.2" />
+        <line x1="5" y1="8" x2="11" y2="8" stroke="#1C1C27" strokeWidth="1.2" />
+        <line x1="5" y1="11" x2="9" y2="11" stroke="#1C1C27" strokeWidth="1.2" />
       </svg>
     )}
   </div>
 );
 
-const AthenaXMark = ({ size=28 }) => (
+const AthenaXMark = ({ size = 28 }) => (
   <svg width={size} height={size} viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <rect width="28" height="28" rx="6" fill="#1C1C27"/>
-    <path d="M7 14C7 10.134 10.134 7 14 7C17.866 7 21 10.134 21 14C21 17.866 17.866 21 14 21C10.134 21 7 17.866 7 14Z" stroke="#F2EFE9" strokeWidth="2"/>
-    <path d="M10 14C10 12.343 11.343 11 13 11H15C16.657 11 18 12.343 18 14C18 15.657 16.657 17 15 17H13C11.343 17 10 15.657 10 14Z" fill="#F5D94E"/>
+    <rect width="28" height="28" rx="6" fill="#1C1C27" />
+    <path
+      d="M7 14C7 10.134 10.134 7 14 7C17.866 7 21 10.134 21 14C21 17.866 17.866 21 14 21C10.134 21 7 17.866 7 14Z"
+      stroke="#F2EFE9"
+      strokeWidth="2"
+    />
+    <path d="M10 14C10 12.343 11.343 11 13 11H15C16.657 11 18 12.343 18 14C18 15.657 16.657 17 15 17H13C11.343 17 10 15.657 10 14Z" fill="#F5D94E" />
   </svg>
 );
 
@@ -284,4 +290,4 @@ export {
   AthenaXMark,
 };
 
-export default Icon
+export default Icon;

@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AthenaX Research
+
+A Next.js frontend for the AthenaX research network — connecting researchers, labs, founders, investors, and sponsors.
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun dev     # runs on http://localhost:3543
+bun build
+bun lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Project Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+api/           # HTTP fetch functions (one file per domain)
+├── client.ts  # BASE_URL + shared handleResponse helper
+├── auth.ts    # auth endpoints (/user/*)
+└── reference.ts  # categories, universities, labs
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+types/         # TypeScript interfaces only, no logic
+├── auth.ts
+└── reference.ts
 
-## Learn More
+hooks/
+└── queries/   # React Query hooks wrapping api/ functions
+    ├── useAuth.ts
+    └── useReference.ts
 
-To learn more about Next.js, take a look at the following resources:
+components/
+├── GlobalProvider.tsx  # root context: session, toasts, modals
+├── Navbar.tsx
+├── ui/        # modals, dialogs, form controls
+└── page/      # page-specific components
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+app/           # Next.js app router pages
+├── (auth)/    # verify-email, forgot-password, reset-password
+└── ...        # all other routes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+lib/
+└── api.ts     # Payload CMS content API (articles, research)
 
-## Deploy on Vercel
+utils/
+└── lib.ts     # cn() helper, localStorage read/write
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## How It Fits Together
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **`api/`** talks to the backend (`NEXT_PUBLIC_API_BASE_URL`, default `localhost:8000/api/v1`).
+- **`hooks/queries/`** wraps those calls in React Query for caching and state.
+- **`GlobalProvider`** sits at the root and owns the auth session, toast system, and login/register/category-picker modals. Any component can call `useGlobal()` to access `user`, `showToast`, or `handleAuthClick`.
+- **`lib/api.ts`** is separate — it fetches published content (articles, research posts) from the Payload CMS at `https://admin.athenax.co/api`.
+
+## Environment
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
+```

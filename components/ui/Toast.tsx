@@ -1,18 +1,25 @@
 import { useEffect } from "react";
+import { cn } from "@/utils/lib";
+
+const dotColor = {
+  success: "text-[#4caf50]",
+  error: "text-[#e8323c]",
+  info: "text-[#f5d94e]",
+} as const;
 
 const Toast = ({ msg, onClose }: { msg: any; onClose: () => void }) => {
   useEffect(() => {
     const t = setTimeout(onClose, 3500);
     return () => clearTimeout(t);
   }, []);
-  const icon = msg.type === "success" ? "●" : msg.type === "error" ? "●" : "●";
+
   return (
-    <div className={`toast toast-${msg.type}`}>
-      <span className="toast-dot">{icon}</span>
+    <div className="toast-slide-in flex items-center gap-3 bg-ink text-white rounded-[10px] px-4.5 py-3.25 text-sm font-medium shadow-[4px_4px_0_rgba(0,0,0,0.2)]">
+      <span className={cn(dotColor[msg.type as keyof typeof dotColor] ?? "text-[#f5d94e]")}>●</span>
       <span>{msg.text}</span>
       <button
         onClick={onClose}
-        style={{ marginLeft: "auto", background: "none", border: "none", color: "#fff", cursor: "pointer", fontSize: 16, lineHeight: 1 }}
+        className="ml-auto bg-transparent border-none text-white cursor-pointer text-base leading-none"
       >
         ×
       </button>

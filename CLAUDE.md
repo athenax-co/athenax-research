@@ -25,7 +25,7 @@ Code is organized into three distinct layers — types, API, hooks:
   - `api/client.ts` — `BASE_URL` (from `NEXT_PUBLIC_API_BASE_URL` env) and shared `handleResponse<T>` helper
   - `api/auth.ts` — auth endpoints (`/user/*`)
   - `api/reference.ts` — reference data endpoints (`/category`, `/university`, `/lab`)
-- **`hooks/`** — React Query wrappers around `api/` functions. Import types directly from `types/`, never re-exported from `api/`.
+- **`hooks/queries/`** — React Query wrappers around `api/` functions. Import types directly from `types/`, never re-exported from `api/`. All query hooks live here (`useAuth.ts`, `useReference.ts`). Non-query hooks (e.g. `useCountdown.ts`) stay at `hooks/` root.
 
 `lib/api.ts` is a separate concern — it handles the Payload CMS content API (`https://admin.athenax.co/api`) for articles and research. It is **not** part of the 3-layer structure above.
 

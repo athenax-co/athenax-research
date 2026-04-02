@@ -35,7 +35,8 @@ export const metadata: Metadata = {
 };
 
 import GlobalProvider from "@/components/GlobalProvider";
-import Footer from "@/components/Footer";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
 export default function RootLayout({
   children,
@@ -49,6 +50,7 @@ export default function RootLayout({
         style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
       >
         <GlobalProvider>
+          <Navbar />
           {children}
           <Footer />
         </GlobalProvider>

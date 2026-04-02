@@ -1,3 +1,11 @@
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+// ── Utility: Combine classnames ────────────────────────────
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
 // DB helpers first — everything else depends on these
 export const dbRead = (k: string, fb = []) => {
   try {
@@ -37,20 +45,23 @@ export const subscriberSvc = {
   getAll: () => dbRead(DB_KEYS.SUBSCRIBERS, []),
   isSubscribed: (email: any, newsletterId: any) => {
     const subs = dbRead(DB_KEYS.SUBSCRIBERS, []);
-    return subs.some((s: { email: any; newsletterId: any; }) => s.email === email && s.newsletterId === newsletterId);
+    return subs.some((s: { email: any; newsletterId: any }) => s.email === email && s.newsletterId === newsletterId);
   },
   subscribe: (email: any, newsletterId: any) => {
     const subs = dbRead(DB_KEYS.SUBSCRIBERS, []);
-    if (subs.some((s: { email: any; newsletterId: any; }) => s.email === email && s.newsletterId === newsletterId)) return { error: "Already subscribed." };
+    if (subs.some((s: { email: any; newsletterId: any }) => s.email === email && s.newsletterId === newsletterId))
+      return { error: "Already subscribed." };
     dbWrite(DB_KEYS.SUBSCRIBERS, [...subs, { id: dbUid("sub"), email, newsletterId, subscribedAt: dbNow() }]);
     return { ok: true };
   },
   unsubscribe: (email: any, newsletterId: any) => {
-    const subs = dbRead(DB_KEYS.SUBSCRIBERS, []).filter((s: { email: any; newsletterId: any; }) => !(s.email === email && s.newsletterId === newsletterId));
+    const subs = dbRead(DB_KEYS.SUBSCRIBERS, []).filter(
+      (s: { email: any; newsletterId: any }) => !(s.email === email && s.newsletterId === newsletterId)
+    );
     dbWrite(DB_KEYS.SUBSCRIBERS, subs);
     return { ok: true };
   },
-  getByEmail: (email: any) => dbRead(DB_KEYS.SUBSCRIBERS, []).filter((s: { email: any; }) => s.email === email),
+  getByEmail: (email: any) => dbRead(DB_KEYS.SUBSCRIBERS, []).filter((s: { email: any }) => s.email === email),
 };
 
 export const bookmarkSvc = {

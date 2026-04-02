@@ -38,8 +38,9 @@ const getActiveNav = (current: string) => {
   if (["home", "how-it-works", "business-model", "about"].includes(page)) return "home";
   if (["archive", "paper", "leaderboard", "reports", "roundtables", "digest"].includes(page)) return "archive";
   if (["researchers"].includes(page)) return "researchers";
-  if (["network", "companies", "labs", "lab-profile", "universities", "sponsors", "talent", "investors", "founders", "technology"].includes(page)) return "network";
-  if (["funding", "bounties", "post-bounty", "cohorts", "apply-cohort"].includes(page)) return "funding";
+  if (["network", "companies", "labs", "lab-profile", "universities", "sponsors", "talent", "investors", "founders", "technology"].includes(page))
+    return "network";
+  if (["funding", "bounties", "post-bounty", "cohorts", "cohort"].includes(page)) return "funding";
   if (["terminal"].includes(page)) return "terminal";
   if (page.startsWith("docs")) return "docs";
   return page;
@@ -146,16 +147,10 @@ const Navbar = ({ current, user, onAuthClick }: { current: string; user: NavbarU
             </>
           ) : (
             <>
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => onAuthClick("register")}
-              >
+              <button className="btn btn-primary btn-sm" onClick={() => onAuthClick("register")}>
                 Join Network →
               </button>
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={() => onAuthClick("login")}
-              >
+              <button className="btn btn-ghost btn-sm" onClick={() => onAuthClick("login")}>
                 Sign In
               </button>
             </>

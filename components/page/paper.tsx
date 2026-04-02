@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { SEED_PAPERS } from "@/data/seed";
-import WindowCard from "../ui/WindowCard";
+import WindowCard from "@/components/ui/WindowCard";
 import { MediaIcon } from "../Icons";
 import ArsBreakdown from "../ui/ArsBreakdown";
 import { useEffect, useState } from "react";

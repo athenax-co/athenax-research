@@ -69,7 +69,7 @@ function DialogContent({
           // sizing
           "w-full max-w-lg max-h-[90vh] overflow-y-auto outline-none",
           // design — matches existing AthenaX window-card aesthetic
-          "bg-[#f2efe9] border-2 border-[#1c1c27] rounded-[14px]",
+          "bg-[#f2efe9] border-2 border-ink rounded-[14px]",
           "shadow-[8px_8px_0_#1c1c27]",
           // animations
           "transition-all duration-200",
@@ -99,7 +99,7 @@ function DialogHeader({
     <div
       className={[
         "flex items-center justify-between px-5 py-4",
-        "border-b-2 border-[#1c1c27] bg-[#f2efe9]",
+        "border-b-2 border-ink bg-[#f2efe9]",
         className,
       ]
         .filter(Boolean)
@@ -122,7 +122,7 @@ function DialogTitle({
   return (
     <BaseDialog.Title
       className={[
-        "font-mono text-[10px] tracking-widest uppercase text-[#1c1c27]",
+        "font-mono text-[10px] tracking-widest uppercase text-ink",
         className,
       ]
         .filter(Boolean)
@@ -144,7 +144,7 @@ function DialogDescription({
 }) {
   return (
     <BaseDialog.Description
-      className={["text-sm text-[#6B6B7A] mt-1", className]
+      className={["text-sm text-muted mt-1", className]
         .filter(Boolean)
         .join(" ")}
     >
@@ -182,7 +182,7 @@ function DialogFooter({
     <div
       className={[
         "flex items-center justify-end gap-2.5 px-5 py-4",
-        "border-t-2 border-[#1c1c27]",
+        "border-t-2 border-ink",
         className,
       ]
         .filter(Boolean)
@@ -205,7 +205,7 @@ function DialogClose({
   return (
     <BaseDialog.Close
       className={[
-        "text-[#1c1c27] text-xl leading-none cursor-pointer",
+        "text-ink text-xl leading-none cursor-pointer",
         "hover:opacity-60 transition-opacity",
         className,
       ]

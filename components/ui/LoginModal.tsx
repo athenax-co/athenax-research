@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBody, DialogTrafficLights } from "@/components/ui/Dialog";
-import { useLogin } from "@/hooks/useAuth";
+import { useLogin } from "@/hooks/queries/useAuth";
 import { useGlobal } from "@/components/GlobalProvider";
 import Link from "next/link";
 

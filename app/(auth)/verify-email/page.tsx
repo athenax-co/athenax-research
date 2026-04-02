@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { verifySession } from "@/api/auth";
-import { useVerifyEmail, useResendVerification } from "@/hooks/useAuth";
+import { useVerifyEmail, useResendVerification } from "@/hooks/queries/useAuth";
 import { useCountdown, useRedirectCountdown } from "@/hooks/useCountdown";
 
 /**

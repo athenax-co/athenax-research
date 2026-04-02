@@ -2,8 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AUTH_QUERY_KEYS, useLogout, useSession } from "@/hooks/useAuth";
-import { REFERENCE_QUERY_KEYS } from "@/hooks/useReference";
+import { AUTH_QUERY_KEYS, useLogout, useSession } from "@/hooks/queries/useAuth";
+import { REFERENCE_QUERY_KEYS } from "@/hooks/queries/useReference";
 import { getCategories } from "@/api/reference";
 import Navbar from "./Navbar";
 import Toast from "./ui/Toast";

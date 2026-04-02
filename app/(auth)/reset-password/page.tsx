@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useResetPassword } from "@/hooks/useAuth";
+import { useResetPassword } from "@/hooks/queries/useAuth";
 
 /**
  * /reset-password?token=...

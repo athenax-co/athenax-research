@@ -9,9 +9,10 @@ const NAV_ITEMS = [
   { id: "home", label: "Home" },
   { id: "launch", label: "Launch" },
   { id: "archive", label: "Research" },
-  { id: "network", label: "Network" },
-  { id: "funding", label: "Funding" },
-  // {id:"terminal",  label:"Terminal"},
+  { id: "researchers", label: "Researchers" },
+  { id: "network", label: "Companies" },
+  // { id: "funding", label: "Funding" },
+  { id: "terminal", label: "Terminal" },
   { id: "docs", label: "Docs" },
 ];
 
@@ -19,7 +20,8 @@ const PATH_MAP: Record<string, string> = {
   home: "/",
   launch: "/launch",
   archive: "/archive",
-  network: "/network",
+  researchers: "/researchers",
+  network: "/companies",
   funding: "/funding",
   docs: "/docs",
   terminal: "/terminal",
@@ -35,7 +37,8 @@ const getActiveNav = (current: string) => {
 
   if (["home", "how-it-works", "business-model", "about"].includes(page)) return "home";
   if (["archive", "paper", "leaderboard", "reports", "roundtables", "digest"].includes(page)) return "archive";
-  if (["network", "labs", "lab-profile", "universities", "sponsors", "talent"].includes(page)) return "network";
+  if (["researchers"].includes(page)) return "researchers";
+  if (["network", "companies", "labs", "lab-profile", "universities", "sponsors", "talent", "investors", "founders", "technology"].includes(page)) return "network";
   if (["funding", "bounties", "post-bounty", "cohorts", "apply-cohort"].includes(page)) return "funding";
   if (["terminal"].includes(page)) return "terminal";
   if (page.startsWith("docs")) return "docs";
@@ -46,6 +49,7 @@ const NAV_DESCRIPTIONS: Record<string, string> = {
   home: "Platform overview & latest research",
   launch: "Research-backed products across frontier tech",
   archive: "Papers, essays, and knowledge archive",
+  researchers: "ARS-scored researcher directory",
   network: "Labs, universities, and researchers",
   funding: "Bounties, sponsors, and cohorts",
   terminal: "Research intelligence platform",
@@ -71,7 +75,12 @@ const Logo = () => (
   </Link>
 );
 
-const Navbar = ({ current, user, onAuthClick }: { current: string; user: any; onAuthClick: (action: string) => void }) => {
+type NavbarUser = {
+  avatar: string;
+  name: string;
+} | null;
+
+const Navbar = ({ current, user, onAuthClick }: { current: string; user: NavbarUser; onAuthClick: (action: string) => void }) => {
   const activeNav = getActiveNav(current);
   const [hovered, setHovered] = useState<string | null>(null);
   return (

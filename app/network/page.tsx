@@ -1,5 +1,5 @@
-import NetworkPage from "@/components/page/network";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <NetworkPage />;
+  redirect("/companies");
 }

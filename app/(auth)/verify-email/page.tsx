@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { verifySession } from "@/api/auth";
-import { useVerifyEmail, useResendVerification } from "@/hooks/queries/useAuth";
+import { useQueryClient } from "@tanstack/react-query";
+import { useVerifyEmail, useResendVerification, AUTH_QUERY_KEYS } from "@/hooks/queries/useAuth";
 import { useCountdown, useRedirectCountdown } from "@/hooks/useCountdown";
 
 /**
@@ -20,8 +20,8 @@ export default function VerifyEmailPage() {
   const [manualToken, setManualToken] = useState(urlToken);
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
-  const [autoLoginError, setAutoLoginError] = useState<string | null>(null);
 
+  const queryClient = useQueryClient();
   const { remaining: redirectIn, start: startRedirect } = useRedirectCountdown("/", 5);
   const { remaining: resendTimer, start: startResendTimer } = useCountdown(60);
 
@@ -31,13 +31,8 @@ export default function VerifyEmailPage() {
     error: postError,
   } = useVerifyEmail({
     onSuccess: async () => {
-      setAutoLoginError(null);
-      try {
-        // Refresh auth state immediately after verification in case the cookie was just issued.
-        await verifySession();
-      } catch {
-        setAutoLoginError("Email verified, but auto sign-in could not be confirmed. Please sign in manually.");
-      }
+      // Wait for session to refetch so Navbar reflects the logged-in user on redirect
+      await queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEYS.session });
       setDone(true);
       startRedirect();
     },
@@ -61,10 +56,7 @@ export default function VerifyEmailPage() {
         {done ? (
           <div className="text-center">
             <div className="text-5xl mb-4">✅</div>
-            <p className="text-sm text-[#1a1a2e] mb-5">
-              {autoLoginError ? "Email verified successfully." : "Email verified successfully. You are now signed in."}
-            </p>
-            {autoLoginError && <p className="text-danger text-xs mb-4">{autoLoginError}</p>}
+            <p className="text-sm text-[#1a1a2e] mb-5">Email verified successfully. You are now signed in.</p>
             <button className="btn btn-primary w-full justify-center" onClick={() => startRedirect()}>
               Continue to Home →
             </button>

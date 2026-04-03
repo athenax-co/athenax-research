@@ -26,7 +26,7 @@ const getPageKeyFromPathname = (pathname: string): string => {
 const getActiveNav = (current: string) => {
   const page = current.startsWith("/") ? getPageKeyFromPathname(current) : current;
 
-  if (["home", "how-it-works", "business-model", "about"].includes(page)) return "home";
+  if (["home", "how-it-works", "business-model", "about", "dashboard", "sponsor"].includes(page)) return "home";
   if (["archive", "paper", "leaderboard", "reports", "roundtables", "digest"].includes(page)) return "archive";
   if (["researchers"].includes(page)) return "researchers";
   if (["network", "companies", "labs", "lab-profile", "universities", "sponsors", "talent", "investors", "founders", "technology"].includes(page))
@@ -83,6 +83,14 @@ const Navbar = () => {
         <div className="flex items-center gap-2.5">
           {user ? (
             <>
+              {["sponsor", "admin"].includes(user.role) && (
+                <Link className="btn btn-ghost btn-sm" href="/sponsors/dashboard" title="Sponsor Dashboard">
+                  ◈
+                </Link>
+              )}
+              <Link className="btn btn-ghost btn-sm" href="/dashboard" title="Dashboard">
+                ⊞
+              </Link>
               <Link className="btn btn-ghost btn-sm" href="/profile">
                 <span className="size-5 rounded-full bg-yellow border-[1.5px] border-ink inline-flex items-center justify-center text-[11px] font-bold">
                   {user.avatar}

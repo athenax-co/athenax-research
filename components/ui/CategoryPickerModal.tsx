@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody, DialogTrafficLights } from "@/components/ui/Dialog";
-import { useCategories } from "@/hooks/useReference";
-import { useSetUserCategories } from "@/hooks/useAuth";
+import { useCategories } from "@/hooks/queries/useReference";
+import { useSetUserCategories } from "@/hooks/queries/useAuth";
 
 interface CategoryPickerModalProps {
   open: boolean;

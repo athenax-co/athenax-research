@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Dialog as BaseDialog } from "@base-ui/react";
+import TrafficLights from "./TrafficLights";
 
 // ─── Dialog ──────────────────────────────────────────────────────────────────
 
@@ -52,13 +53,7 @@ function DialogOverlay({ className }: { className?: string }) {
 
 // ─── DialogContent ────────────────────────────────────────────────────────────
 
-function DialogContent({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+function DialogContent({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -88,23 +83,9 @@ function DialogContent({
 
 // ─── DialogHeader ─────────────────────────────────────────────────────────────
 
-function DialogHeader({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+function DialogHeader({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div
-      className={[
-        "flex items-center justify-between px-5 py-4",
-        "border-b-2 border-ink bg-[#f2efe9]",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
+    <div className={["flex items-center justify-between px-5 py-4", "border-b-2 border-ink bg-[#f2efe9]", className].filter(Boolean).join(" ")}>
       {children}
     </div>
   );
@@ -112,22 +93,9 @@ function DialogHeader({
 
 // ─── DialogTitle ──────────────────────────────────────────────────────────────
 
-function DialogTitle({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+function DialogTitle({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <BaseDialog.Title
-      className={[
-        "font-mono text-[10px] tracking-widest uppercase text-ink",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
+    <BaseDialog.Title className={["font-mono text-[10px] tracking-widest uppercase text-ink", className].filter(Boolean).join(" ")}>
       {children}
     </BaseDialog.Title>
   );
@@ -135,59 +103,21 @@ function DialogTitle({
 
 // ─── DialogDescription ────────────────────────────────────────────────────────
 
-function DialogDescription({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <BaseDialog.Description
-      className={["text-sm text-muted mt-1", className]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      {children}
-    </BaseDialog.Description>
-  );
+function DialogDescription({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <BaseDialog.Description className={["text-sm text-muted mt-1", className].filter(Boolean).join(" ")}>{children}</BaseDialog.Description>;
 }
 
 // ─── DialogBody ───────────────────────────────────────────────────────────────
 
-function DialogBody({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={["px-5 py-6", className].filter(Boolean).join(" ")}>
-      {children}
-    </div>
-  );
+function DialogBody({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <div className={["px-5 py-6", className].filter(Boolean).join(" ")}>{children}</div>;
 }
 
 // ─── DialogFooter ─────────────────────────────────────────────────────────────
 
-function DialogFooter({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+function DialogFooter({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div
-      className={[
-        "flex items-center justify-end gap-2.5 px-5 py-4",
-        "border-t-2 border-ink",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
+    <div className={["flex items-center justify-end gap-2.5 px-5 py-4", "border-t-2 border-ink", className].filter(Boolean).join(" ")}>
       {children}
     </div>
   );
@@ -195,22 +125,10 @@ function DialogFooter({
 
 // ─── DialogClose ──────────────────────────────────────────────────────────────
 
-function DialogClose({
-  children,
-  className,
-}: {
-  children?: React.ReactNode;
-  className?: string;
-}) {
+function DialogClose({ children, className }: { children?: React.ReactNode; className?: string }) {
   return (
     <BaseDialog.Close
-      className={[
-        "text-ink text-xl leading-none cursor-pointer",
-        "hover:opacity-60 transition-opacity",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      className={["text-ink text-xl leading-none cursor-pointer", "hover:opacity-60 transition-opacity", className].filter(Boolean).join(" ")}
     >
       {children ?? "×"}
     </BaseDialog.Close>
@@ -220,13 +138,7 @@ function DialogClose({
 // ─── Traffic-lights decoration (matches existing Modal aesthetic) ─────────────
 
 function DialogTrafficLights() {
-  return (
-    <span className="flex items-center gap-1.5 mr-2">
-      <span className="dot dot-r" />
-      <span className="dot dot-y" />
-      <span className="dot dot-g" />
-    </span>
-  );
+  return <TrafficLights className="gap-2" />;
 }
 
 // ─── exports ──────────────────────────────────────────────────────────────────

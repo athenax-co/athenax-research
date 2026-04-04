@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForgotPassword } from "@/hooks/useAuth";
+import { useForgotPassword } from "@/hooks/queries/useAuth";
 
 /**
  * /forgot-password

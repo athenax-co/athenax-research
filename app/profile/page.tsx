@@ -9,7 +9,7 @@ import { authSvc, calcARS } from "@/lib/db-helper";
 import { IconPaperSmall } from "@/components/Icons";
 import NewsletterCard from "@/components/ui/NewsletterCard";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useResendVerification } from "@/hooks/useAuth";
+import { useResendVerification } from "@/hooks/queries/useAuth";
 
 type EditForm = {
   name: string;

@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBody, DialogTrafficLights } from "@/components/ui/Dialog";
-import { useSignup, useResendVerification } from "@/hooks/useAuth";
+import { useSignup, useResendVerification } from "@/hooks/queries/useAuth";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useUniversities, useLabs } from "@/hooks/useReference";
-import type { UserRole, InvestorType } from "@/lib/auth-api";
+import { useUniversities, useLabs } from "@/hooks/queries/useReference";
+import type { UserRole, InvestorType } from "@/types/auth";
 
 interface RegisterDialogProps {
   open: boolean;

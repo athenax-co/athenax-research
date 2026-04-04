@@ -1,47 +1,5 @@
-// ─── helpers ─────────────────────────────────────────────────────────────────
-
-import { BASE_URL } from "./api";
-
-async function handleResponse<T>(res: Response): Promise<T> {
-  const body = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const msg = body?.detail || body?.message || body?.error || `Request failed (${res.status})`;
-    throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
-  }
-  return body as T;
-}
-
-// ─── types ────────────────────────────────────────────────────────────────────
-
-export interface CategoryOut {
-  id: number;
-  name: string;
-}
-
-export interface UniversityOut {
-  id: number;
-  name: string;
-  country: string;
-  focus?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface LabOut {
-  id: number;
-  universityId: number;
-  name: string;
-  focus?: string | null;
-  description?: string | null;
-  active: boolean;
-  categories: CategoryOut[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CategoryRef {
-  categoryId: number;
-}
+import { BASE_URL, handleResponse } from "@/api/client";
+import type { CategoryOut, UniversityOut, LabOut, CategoryRef } from "@/types/reference";
 
 // ─── category ─────────────────────────────────────────────────────────────────
 

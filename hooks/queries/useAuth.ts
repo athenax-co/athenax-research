@@ -1,6 +1,23 @@
 import { useMutation, useQuery, useQueryClient, type UseMutationOptions } from "@tanstack/react-query";
-import * as authApi from "@/lib/auth-api";
-import { setUserCategories, type CategoryRef } from "@/lib/reference-api";
+import * as authApi from "@/api/auth";
+import { setUserCategories } from "@/api/reference";
+import type {
+  SignupPayload,
+  SignupResponse,
+  VerifyEmailPayload,
+  VerifyEmailResponse,
+  ResendVerificationPayload,
+  ResendVerificationResponse,
+  LoginPayload,
+  LoginResponse,
+  SessionUser,
+  ForgotPasswordPayload,
+  ForgotPasswordResponse,
+  ResetPasswordPayload,
+  ResetPasswordResponse,
+  LogoutResponse,
+} from "@/types/auth";
+import type { CategoryRef } from "@/types/reference";
 
 // ─── query keys ──────────────────────────────────────────────────────────────
 
@@ -17,8 +34,8 @@ export const AUTH_QUERY_KEYS = {
  * const { mutate: signup, isPending, error } = useSignup();
  * signup({ name, email, password });
  */
-export function useSignup(options?: UseMutationOptions<authApi.SignupResponse, Error, authApi.SignupPayload>) {
-  return useMutation<authApi.SignupResponse, Error, authApi.SignupPayload>({
+export function useSignup(options?: UseMutationOptions<SignupResponse, Error, SignupPayload>) {
+  return useMutation<SignupResponse, Error, SignupPayload>({
     mutationFn: authApi.signup,
     ...options,
   });
@@ -30,10 +47,10 @@ export function useSignup(options?: UseMutationOptions<authApi.SignupResponse, E
  * Verifies a user's email using the token query param (GET).
  * Backend sets auth cookie on success and session query is refreshed.
  */
-export function useVerifyEmail(options?: UseMutationOptions<authApi.VerifyEmailResponse, Error, authApi.VerifyEmailPayload>) {
+export function useVerifyEmail(options?: UseMutationOptions<VerifyEmailResponse, Error, VerifyEmailPayload>) {
   const queryClient = useQueryClient();
 
-  return useMutation<authApi.VerifyEmailResponse, Error, authApi.VerifyEmailPayload>({
+  return useMutation<VerifyEmailResponse, Error, VerifyEmailPayload>({
     ...options,
     mutationFn: authApi.verifyEmail,
     onSuccess: (...args) => {
@@ -49,8 +66,8 @@ export function useVerifyEmail(options?: UseMutationOptions<authApi.VerifyEmailR
 /**
  * Requests a new verification email for the given address.
  */
-export function useResendVerification(options?: UseMutationOptions<authApi.ResendVerificationResponse, Error, authApi.ResendVerificationPayload>) {
-  return useMutation<authApi.ResendVerificationResponse, Error, authApi.ResendVerificationPayload>({
+export function useResendVerification(options?: UseMutationOptions<ResendVerificationResponse, Error, ResendVerificationPayload>) {
+  return useMutation<ResendVerificationResponse, Error, ResendVerificationPayload>({
     mutationFn: authApi.resendVerification,
     ...options,
   });
@@ -62,10 +79,10 @@ export function useResendVerification(options?: UseMutationOptions<authApi.Resen
  * Logs a user in.  On success the backend sets an HTTP-only cookie.
  * The session query is invalidated so `useSession` re-fetches automatically.
  */
-export function useLogin(options?: UseMutationOptions<authApi.LoginResponse, Error, authApi.LoginPayload>) {
+export function useLogin(options?: UseMutationOptions<LoginResponse, Error, LoginPayload>) {
   const queryClient = useQueryClient();
 
-  return useMutation<authApi.LoginResponse, Error, authApi.LoginPayload>({
+  return useMutation<LoginResponse, Error, LoginPayload>({
     ...options,
     mutationFn: authApi.login,
     onSuccess: (...args) => {
@@ -85,7 +102,7 @@ export function useLogin(options?: UseMutationOptions<authApi.LoginResponse, Err
  * const { data: user, isLoading } = useSession();
  */
 export function useSession() {
-  return useQuery<authApi.SessionUser | null, Error>({
+  return useQuery<SessionUser | null, Error>({
     queryKey: AUTH_QUERY_KEYS.session,
     queryFn: async () => {
       try {
@@ -104,8 +121,8 @@ export function useSession() {
 /**
  * Sends a password-reset email to the provided address.
  */
-export function useForgotPassword(options?: UseMutationOptions<authApi.ForgotPasswordResponse, Error, authApi.ForgotPasswordPayload>) {
-  return useMutation<authApi.ForgotPasswordResponse, Error, authApi.ForgotPasswordPayload>({
+export function useForgotPassword(options?: UseMutationOptions<ForgotPasswordResponse, Error, ForgotPasswordPayload>) {
+  return useMutation<ForgotPasswordResponse, Error, ForgotPasswordPayload>({
     mutationFn: authApi.forgotPassword,
     ...options,
   });
@@ -116,8 +133,8 @@ export function useForgotPassword(options?: UseMutationOptions<authApi.ForgotPas
 /**
  * Completes a password reset with the token from the email.
  */
-export function useResetPassword(options?: UseMutationOptions<authApi.ResetPasswordResponse, Error, authApi.ResetPasswordPayload>) {
-  return useMutation<authApi.ResetPasswordResponse, Error, authApi.ResetPasswordPayload>({
+export function useResetPassword(options?: UseMutationOptions<ResetPasswordResponse, Error, ResetPasswordPayload>) {
+  return useMutation<ResetPasswordResponse, Error, ResetPasswordPayload>({
     mutationFn: authApi.resetPassword,
     ...options,
   });
@@ -143,10 +160,10 @@ export function useSetUserCategories(
 /**
  * Logs the current user out.  Clears the session query cache on success.
  */
-export function useLogout(options?: UseMutationOptions<authApi.LogoutResponse, Error, void>) {
+export function useLogout(options?: UseMutationOptions<LogoutResponse, Error, void>) {
   const queryClient = useQueryClient();
 
-  return useMutation<authApi.LogoutResponse, Error, void>({
+  return useMutation<LogoutResponse, Error, void>({
     ...options,
     mutationFn: () => authApi.logout(),
     onSuccess: (...args) => {

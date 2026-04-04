@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import * as referenceApi from "@/lib/reference-api";
+import * as referenceApi from "@/api/reference";
 
 // ─── query keys ──────────────────────────────────────────────────────────────
 

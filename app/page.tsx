@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SEED_LAUNCHES, SEED_PAPERS } from "@/data/seed";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useCategories } from "@/hooks/useReference";
+import { useCategories } from "@/hooks/queries/useReference";
 import { IconBounties, IconBuilders, IconLabs, IconPaperSmall, IconTerminal } from "@/components/Icons";
 import WindowCard from "@/components/ui/WindowCard";
 

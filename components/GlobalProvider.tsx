@@ -2,15 +2,14 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AUTH_QUERY_KEYS, useLogout, useSession } from "@/hooks/useAuth";
-import { REFERENCE_QUERY_KEYS } from "@/hooks/useReference";
-import { getCategories } from "@/lib/reference-api";
-import Navbar from "./Navbar";
+import { AUTH_QUERY_KEYS, useLogout, useSession } from "@/hooks/queries/useAuth";
+import { REFERENCE_QUERY_KEYS } from "@/hooks/queries/useReference";
+import { getCategories } from "@/api/reference";
 import Toast from "./ui/Toast";
 import LoginModal from "./ui/LoginModal";
 import RegisterModal from "./ui/RegisterModal";
 import CategoryPickerModal from "./ui/CategoryPickerModal";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 // ─── singleton QueryClient ────────────────────────────────────────────────────
 
@@ -59,7 +58,6 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [selectedLab, setSelectedLab] = useState<any>(null);
 
-  const pathname = usePathname();
   const router = useRouter();
 
   // ── prefetch reference data ───────────────────────────────────────────────
@@ -140,7 +138,6 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
       }}
     >
       <div style={{ minHeight: "100vh", background: "#F2EFE9" }}>
-        <Navbar current={pathname} user={user} onAuthClick={handleAuthClick} />
         {children}
       </div>
       <div className="toast-wrap">

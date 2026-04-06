@@ -4,57 +4,69 @@ import Link from "next/link";
 import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
 import SEOMeta from "@/components/SEOMeta";
-import { SEED_LAUNCHES } from "@/data/seed";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useState } from "react";
 import Modal from "@/components/ui/Modal";
-import { bookmarkSvc } from "@/utils/lib";
-
-const calcLaunchScore = (l: any) =>
-  (l.votes || 0) * 0.4 + (l.devViews || 0) * 0.0004 + (l.githubStars || 0) * 0.2 + (l.investorRegs || 0) * 2.0 + (l.papers?.length || 0) * 5.0;
+import CategorySelector from "@/components/ui/CategorySelector";
+import { submitProduct } from "@/api/product";
+import { ProductStage, QualityBadge } from "@/enums";
+import { useCategories } from "@/hooks/queries/useReference";
+import { useProducts } from "@/hooks/queries/useProduct";
 
 export default function Page() {
   const { user, showToast } = useGlobal();
+  const { data: categories = [] } = useCategories();
+  const { data: products = [] } = useProducts("approved");
   const [filter, setFilter] = useState("All");
   const [sortBy, setSortBy] = useState("score");
   const [timeTab, setTimeTab] = useState("all");
   const [showSubmit, setShowSubmit] = useState(false);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
   const [submitForm, setSubmitForm] = useState({
     name: "",
     url: "",
-    sector: "AI & Agents",
-    desc: "",
+    stage: ProductStage.SEED as string,
+    description: "",
     github: "",
-    tier: "standard",
-    arsEmail: user?.email || "",
+    funding: "",
+    founded: String(new Date().getFullYear()),
+    qualityBadge: QualityBadge.RESEARCH_BASED as string,
   });
 
-  const SECTORS = ["All", "AI & Agents", "Robotics", "Biotech", "Crypto & DeFi", "Developer Tools", "Infrastructure", "Climate & Energy"];
   const TIME_TABS = [
     ["all", "All"],
     ["week", "This Week"],
     ["month", "This Month"],
   ];
 
-  const todayCount = SEED_LAUNCHES.filter((l) => l.launchedToday).length;
-  const timeFiltered = timeTab === "all" ? SEED_LAUNCHES : timeTab === "week" ? SEED_LAUNCHES.slice(0, 5) : SEED_LAUNCHES;
-  const filtered = (filter === "All" ? timeFiltered : timeFiltered.filter((l) => l.sector === filter)).sort((a, b) => {
-    if (sortBy === "score") return calcLaunchScore(b) - calcLaunchScore(a);
-    if (sortBy === "votes") return b.votes - a.votes;
-    if (sortBy === "devViews") return b.devViews - a.devViews;
-    if (sortBy === "investorRegs") return b.investorRegs - a.investorRegs;
-    if (sortBy === "papers") return b.papers.length - a.papers.length;
-    if (sortBy === "new") return b.founded.localeCompare(a.founded);
-    return 0;
+  const filtered = (filter === "All" ? products : products.filter((p) => p.categories.some((c) => c.name === filter))).sort((a, b) => {
+    if (sortBy === "votes") return b.voteCount - a.voteCount;
+    if (sortBy === "new") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    return b.voteCount - a.voteCount;
   });
 
-  const submitLaunch = () => {
+  const submitLaunch = async () => {
     if (!submitForm.name || !submitForm.url) {
       showToast("Product name and URL are required.", "error");
       return;
     }
-    showToast(`${submitForm.name} launch submitted! We'll review within 48 hours.`, "success");
-    setShowSubmit(false);
+    try {
+      await submitProduct({
+        name: submitForm.name,
+        stage: submitForm.stage,
+        funding: Number(submitForm.funding) || 0,
+        founded: Number(submitForm.founded) || new Date().getFullYear(),
+        description: submitForm.description,
+        qualityBadge: submitForm.qualityBadge,
+        github: submitForm.github || undefined,
+        demo: submitForm.url,
+        categoryIds: selectedCategoryIds,
+      });
+      showToast(`${submitForm.name} launch submitted! We'll review within 48 hours.`, "success");
+      setShowSubmit(false);
+    } catch {
+      showToast("Failed to submit launch. Please try again.", "error");
+    }
   };
 
   return (
@@ -71,7 +83,7 @@ export default function Page() {
             <h1 className="mb-1 text-[48px]">AthenaX Launch</h1>
             <span className="status-badge mb-0">
               <div className="status-dot" />
-              {todayCount} Launched Today · {SEED_LAUNCHES.length} This Month
+              {products.length} Products Listed
             </span>
           </div>
           <button
@@ -96,7 +108,7 @@ export default function Page() {
 
         <div className="mb-7 grid grid-cols-4 gap-3.5">
           {[
-            { label: "Launches This Month", value: SEED_LAUNCHES.length },
+            { label: "Launches This Month", value: products.length },
             { label: "Total Funding Raised", value: "$18.4M" },
             { label: "Avg. Founder ARS", value: "7.3" },
             { label: "Investor Intros Made", value: "142" },
@@ -116,7 +128,7 @@ export default function Page() {
               style={timeTab === k ? { background: "#F5D94E" } : {}}
               onClick={() => setTimeTab(k)}
             >
-              {l} {k === "all" ? `(${SEED_LAUNCHES.length})` : ""}
+              {l} {k === "all" ? `(${products.length})` : ""}
             </button>
           ))}
           <span className="ml-auto self-center font-['Space_Mono',monospace] text-xs text-muted">
@@ -125,61 +137,52 @@ export default function Page() {
         </div>
 
         <div className="mb-2.5 flex flex-wrap gap-2">
-          {SECTORS.map((c) => (
+          {[{ id: 0, name: "All" }, ...categories].map((c) => (
             <button
-              key={c}
-              className={filter === c ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}
-              style={filter === c ? { background: "#F5D94E" } : {}}
-              onClick={() => setFilter(c)}
+              key={c.id}
+              className={filter === c.name ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}
+              style={filter === c.name ? { background: "#F5D94E" } : {}}
+              onClick={() => setFilter(c.name)}
             >
-              {c}
+              {c.name}
             </button>
           ))}
         </div>
 
-        {filtered.map((launch) => (
-          <div key={launch.id} className="mb-1 border-b-2 border-b-[#D8D4CC] py-5">
+        {filtered.map((product) => (
+          <div key={product.id} className="mb-1 border-b-2 border-b-[#D8D4CC] py-5">
             <div className="flex flex-wrap gap-5">
               <div className="min-w-65 flex-1">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <h3 className="mb-0 text-[21px]">
-                    <Link href={`/launch/${launch.id}`} className="cursor-pointer text-inherit no-underline">
-                      {launch.name}
+                    <Link href={`/launch/${product.slug}`} className="cursor-pointer text-inherit no-underline">
+                      {product.name}
                     </Link>
                   </h3>
-                  <span className="topic-pill">{launch.sector}</span>
-                  <span className="ftag bg-[#EAF0F6] text-[10px]">{launch.qualityBadge}</span>
-                  {launch.launchedToday && <span className="ftag bg-success text-[10px] font-bold">✦ Today</span>}
-                </div>
-                <p className="mb-2.5 text-[13px] leading-[1.6] text-[#1C1C27]">{launch.desc}</p>
-
-                <div className="mb-2.5 flex flex-wrap items-center gap-2">
-                  {launch.founders.map((f) => (
-                    <span key={f.name} className="flex items-center gap-1 text-xs text-muted">
-                      <span className="font-['Space_Mono',monospace] font-bold text-[#E8323C]">ARS {f.ars}</span>
-                      {f.name.split(" ").slice(-1)[0]}
+                  {product.categories.map((c) => (
+                    <span key={c.id} className="topic-pill">
+                      {c.name}
                     </span>
                   ))}
-                  <span className="text-xs text-muted">·</span>
-                  <span className="text-xs text-muted">{launch.category}</span>
+                  {product.qualityBadge && <span className="ftag bg-[#EAF0F6] text-[10px]">{product.qualityBadge}</span>}
                 </div>
+                <p className="mb-2.5 text-[13px] leading-[1.6] text-[#1C1C27]">{product.description}</p>
 
                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                  <span className="font-['Space_Mono',monospace] text-xs font-bold text-[#E8323C]">▲ {launch.votes.toLocaleString()}</span>
-                  <span className="text-xs text-muted">💬 {launch.comments.length}</span>
-                  <span className="text-xs text-muted">★ {Math.max(bookmarkSvc.count(launch.id), Math.floor(launch.votes * 0.08))}</span>
-                  <span className="ftag bg-[#EAF0F6] text-[10px]">{launch.qualityBadge}</span>
+                  <span className="font-['Space_Mono',monospace] text-xs font-bold text-[#E8323C]">▲ {product.voteCount.toLocaleString()}</span>
+                  <span className="text-xs text-muted">★ {product.bookmarkCount}</span>
+                  <span className="text-xs text-muted">Founded {product.founded}</span>
                 </div>
               </div>
 
               <div className="flex min-w-30 shrink-0 flex-col justify-start gap-1.5">
                 <span className="ftag bg-[#EAF0F6] text-center text-[11px]">
-                  {launch.stage} · {launch.funding}
+                  {product.stage} · ${product.funding.toLocaleString()}
                 </span>
-                <Link href={`/launch/${launch.id}`} className="btn btn-primary btn-sm justify-center no-underline">
+                <Link href={`/launch/${product.slug}`} className="btn btn-primary btn-sm justify-center no-underline">
                   View →
                 </Link>
-                <BookmarkButton user={user} launch={launch} showToast={showToast} size="sm" />
+                <BookmarkButton user={user} launch={product} showToast={showToast} size="sm" useApi />
               </div>
             </div>
           </div>
@@ -280,33 +283,67 @@ export default function Page() {
                 placeholder="github.com/you/repo"
               />
             </div>
-            <div className="inp-group">
-              <label className="inp-label">Sector</label>
-              <select className="inp" value={submitForm.sector} onChange={(e) => setSubmitForm((f) => ({ ...f, sector: e.target.value }))}>
-                {["AI & Agents", "Robotics", "Biotech", "Crypto & DeFi", "Developer Tools", "Infrastructure", "Climate & Energy"].map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </select>
+            <div className="flex gap-3">
+              <div className="inp-group flex-1">
+                <label className="inp-label">Stage</label>
+                <select className="inp" value={submitForm.stage} onChange={(e) => setSubmitForm((f) => ({ ...f, stage: e.target.value }))}>
+                  {Object.values(ProductStage).map((s) => (
+                    <option key={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="inp-group flex-1">
+                <label className="inp-label">Quality Badge</label>
+                <select
+                  className="inp"
+                  value={submitForm.qualityBadge}
+                  onChange={(e) => setSubmitForm((f) => ({ ...f, qualityBadge: e.target.value }))}
+                >
+                  {Object.values(QualityBadge).map((b) => (
+                    <option key={b}>{b}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="inp-group flex-1">
+                <label className="inp-label">Funding Raised ($)</label>
+                <input
+                  className="inp"
+                  type="number"
+                  min={0}
+                  value={submitForm.funding}
+                  onChange={(e) => setSubmitForm((f) => ({ ...f, funding: e.target.value }))}
+                  placeholder="e.g. 500000"
+                />
+              </div>
+              <div className="inp-group flex-1">
+                <label className="inp-label">Founded (Year)</label>
+                <input
+                  className="inp"
+                  type="number"
+                  min={1900}
+                  max={new Date().getFullYear()}
+                  value={submitForm.founded}
+                  onChange={(e) => setSubmitForm((f) => ({ ...f, founded: e.target.value }))}
+                  placeholder="e.g. 2024"
+                />
+              </div>
             </div>
             <div className="inp-group">
               <label className="inp-label">One-line Description</label>
               <input
                 className="inp"
-                value={submitForm.desc}
-                onChange={(e) => setSubmitForm((f) => ({ ...f, desc: e.target.value }))}
+                value={submitForm.description}
+                onChange={(e) => setSubmitForm((f) => ({ ...f, description: e.target.value }))}
                 placeholder="What does your product do?"
               />
             </div>
             <div className="inp-group">
-              <label className="inp-label">Launch Tier</label>
-              <select className="inp" value={submitForm.tier} onChange={(e) => setSubmitForm((f) => ({ ...f, tier: e.target.value }))}>
-                <option value="standard">Standard — Free</option>
-                <option value="verified">Verified — $2,000 (featured 48h)</option>
-                <option value="premier">Premier — $7,500 (investor blast)</option>
-                <option value="homepage">Homepage — $15,000 (7-day placement)</option>
-              </select>
+              <label className="inp-label">Categories</label>
+              <CategorySelector onChangeIds={setSelectedCategoryIds} />
             </div>
-            <div className="mb-3.5 text-xs text-muted">Quality requirement: ARS-scored founder, indexed research paper, or cohort graduate.</div>
+            {/* <div className="mb-3.5 text-xs text-muted">Quality requirement: ARS-scored founder, indexed research paper, or cohort graduate.</div> */}
             <button className="btn btn-primary w-full justify-center" onClick={submitLaunch}>
               Submit Launch →
             </button>

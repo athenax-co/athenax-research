@@ -17,6 +17,16 @@ export async function getProducts(status?: ProductStatus): Promise<ProductOut[]>
   return handleResponse<ProductOut[]>(res);
 }
 
+export async function bookmarkProduct(id: number, bookmarked: boolean): Promise<void> {
+  const res = await fetch(`${BASE_URL}/product/${id}/bookmark`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ bookmarked }),
+    credentials: "include",
+  });
+  return handleResponse<void>(res);
+}
+
 export async function updateProductStatus(id: number, status: ProductStatus): Promise<ProductOut> {
   const res = await fetch(`${BASE_URL}/product/${id}/status`, {
     method: "PATCH",

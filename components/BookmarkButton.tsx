@@ -1,4 +1,7 @@
+import { bookmarkProduct } from "@/api/product";
 import { bookmarkSvc } from "@/utils/lib";
+import type { ProductOut } from "@/types/product";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 const BookmarkButton = ({
@@ -7,29 +10,56 @@ const BookmarkButton = ({
   showToast,
   size = "sm",
   showCount = true,
+  useApi = false,
 }: {
   user: any;
   launch: any;
   showToast: (message: string, type: string) => void;
   size?: string;
   showCount?: boolean;
+  useApi?: boolean;
 }) => {
+  const queryClient = useQueryClient();
   const [saved, setSaved] = useState(() => (user ? bookmarkSvc.isBookmarked(user.id, launch.id) : false));
-  const [count, setCount] = useState(() => bookmarkSvc.count(launch.id));
-  const toggle = () => {
+  const [count, setCount] = useState(() => (useApi ? (launch.bookmarkCount ?? 0) : bookmarkSvc.count(launch.id)));
+
+  const toggle = async () => {
     if (!user) {
       showToast("Sign in to bookmark.", "error");
       return;
     }
-    const r = bookmarkSvc.toggle(user.id, launch);
-    setSaved(r.saved);
-    setCount((c: number) => (r.saved ? c + 1 : Math.max(0, c - 1)));
-    showToast(r.saved ? `Saved ${launch.name}` : `Removed ${launch.name}`, r.saved ? "success" : "info");
+
+    if (useApi) {
+      const next = !saved;
+
+      try {
+        await bookmarkProduct(launch.id, next);
+        setSaved(next);
+        setCount((currentCount: number) => (next ? currentCount + 1 : Math.max(0, currentCount - 1)));
+        queryClient.setQueriesData({ queryKey: ["products"] }, (products: ProductOut[] | undefined) => {
+          if (!products) return products;
+          return products.map((product) =>
+            product.id === launch.id ? { ...product, bookmarkCount: Math.max(0, product.bookmarkCount + (next ? 1 : -1)) } : product
+          );
+        });
+        showToast(next ? `Saved ${launch.name}` : `Removed ${launch.name}`, next ? "success" : "info");
+      } catch {
+        showToast("Failed to bookmark. Please try again.", "error");
+      }
+
+      return;
+    }
+
+    const result = bookmarkSvc.toggle(user.id, launch);
+    setSaved(result.saved);
+    setCount((currentCount: number) => (result.saved ? currentCount + 1 : Math.max(0, currentCount - 1)));
+    showToast(result.saved ? `Saved ${launch.name}` : `Removed ${launch.name}`, result.saved ? "success" : "info");
   };
+
   return (
-    <button className={`btn btn-${saved ? "ghost" : "outline"} btn-${size}`} style={saved ? { background: "#F5D94E" } : {}} onClick={toggle}>
-      {saved ? "★" : "☆"}{" "}
-      {showCount && count > 0 && <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, marginLeft: 3, opacity: 0.7 }}>{count}</span>}
+    <button className={`btn btn-${saved ? "ghost" : "outline"} btn-${size} ${saved ? "bg-yellow text-black" : "text-black"}`} onClick={toggle}>
+      {saved ? "★ Bookmarked" : "☆ Bookmark"}{" "}
+      {showCount && count > 0 && <span className="ml-1.5 font-['Space_Mono',monospace] text-[10px] opacity-70">{count}</span>}
     </button>
   );
 };

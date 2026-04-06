@@ -10,12 +10,12 @@ export function useSubmitProduct() {
   });
 }
 
-// ─── usePendingProducts ───────────────────────────────────────────────────────
+// ─── useProducts ──────────────────────────────────────────────────────────────
 
-export function usePendingProducts() {
+export function useProducts(status: ProductStatus) {
   return useQuery({
-    queryKey: ["products", "pending"],
-    queryFn: () => productApi.getProducts("pending"),
+    queryKey: ["products", status],
+    queryFn: () => productApi.getProducts(status),
   });
 }
 
@@ -24,10 +24,9 @@ export function usePendingProducts() {
 export function useUpdateProductStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }: { id: number; status: ProductStatus }) =>
-      productApi.updateProductStatus(id, status),
+    mutationFn: ({ id, status }: { id: number; status: ProductStatus }) => productApi.updateProductStatus(id, status),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products", "pending"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
 }

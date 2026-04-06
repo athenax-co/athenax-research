@@ -4,22 +4,19 @@ import Link from "next/link";
 import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
 import SEOMeta from "@/components/SEOMeta";
-import { SEED_LAUNCHES } from "@/data/seed";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useState } from "react";
 import Modal from "@/components/ui/Modal";
-import { bookmarkSvc } from "@/utils/lib";
 import CategorySelector from "@/components/ui/CategorySelector";
 import { submitProduct } from "@/api/product";
 import { ProductStage, QualityBadge } from "@/enums";
 import { useCategories } from "@/hooks/queries/useReference";
-
-const calcLaunchScore = (l: any) =>
-  (l.votes || 0) * 0.4 + (l.devViews || 0) * 0.0004 + (l.githubStars || 0) * 0.2 + (l.investorRegs || 0) * 2.0 + (l.papers?.length || 0) * 5.0;
+import { useProducts } from "@/hooks/queries/useProduct";
 
 export default function Page() {
   const { user, showToast } = useGlobal();
   const { data: categories = [] } = useCategories();
+  const { data: products = [] } = useProducts("approved");
   const [filter, setFilter] = useState("All");
   const [sortBy, setSortBy] = useState("score");
   const [timeTab, setTimeTab] = useState("all");
@@ -42,16 +39,10 @@ export default function Page() {
     ["month", "This Month"],
   ];
 
-  const todayCount = SEED_LAUNCHES.filter((l) => l.launchedToday).length;
-  const timeFiltered = timeTab === "all" ? SEED_LAUNCHES : timeTab === "week" ? SEED_LAUNCHES.slice(0, 5) : SEED_LAUNCHES;
-  const filtered = (filter === "All" ? timeFiltered : timeFiltered.filter((l) => l.sector === filter)).sort((a, b) => {
-    if (sortBy === "score") return calcLaunchScore(b) - calcLaunchScore(a);
-    if (sortBy === "votes") return b.votes - a.votes;
-    if (sortBy === "devViews") return b.devViews - a.devViews;
-    if (sortBy === "investorRegs") return b.investorRegs - a.investorRegs;
-    if (sortBy === "papers") return b.papers.length - a.papers.length;
-    if (sortBy === "new") return b.founded.localeCompare(a.founded);
-    return 0;
+  const filtered = (filter === "All" ? products : products.filter((p) => p.categories.some((c) => c.name === filter))).sort((a, b) => {
+    if (sortBy === "votes") return b.voteCount - a.voteCount;
+    if (sortBy === "new") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    return b.voteCount - a.voteCount;
   });
 
   const submitLaunch = async () => {
@@ -92,7 +83,7 @@ export default function Page() {
             <h1 className="mb-1 text-[48px]">AthenaX Launch</h1>
             <span className="status-badge mb-0">
               <div className="status-dot" />
-              {todayCount} Launched Today · {SEED_LAUNCHES.length} This Month
+              {products.length} Products Listed
             </span>
           </div>
           <button
@@ -117,7 +108,7 @@ export default function Page() {
 
         <div className="mb-7 grid grid-cols-4 gap-3.5">
           {[
-            { label: "Launches This Month", value: SEED_LAUNCHES.length },
+            { label: "Launches This Month", value: products.length },
             { label: "Total Funding Raised", value: "$18.4M" },
             { label: "Avg. Founder ARS", value: "7.3" },
             { label: "Investor Intros Made", value: "142" },
@@ -137,7 +128,7 @@ export default function Page() {
               style={timeTab === k ? { background: "#F5D94E" } : {}}
               onClick={() => setTimeTab(k)}
             >
-              {l} {k === "all" ? `(${SEED_LAUNCHES.length})` : ""}
+              {l} {k === "all" ? `(${products.length})` : ""}
             </button>
           ))}
           <span className="ml-auto self-center font-['Space_Mono',monospace] text-xs text-muted">
@@ -158,49 +149,40 @@ export default function Page() {
           ))}
         </div>
 
-        {filtered.map((launch) => (
-          <div key={launch.id} className="mb-1 border-b-2 border-b-[#D8D4CC] py-5">
+        {filtered.map((product) => (
+          <div key={product.id} className="mb-1 border-b-2 border-b-[#D8D4CC] py-5">
             <div className="flex flex-wrap gap-5">
               <div className="min-w-65 flex-1">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <h3 className="mb-0 text-[21px]">
-                    <Link href={`/launch/${launch.id}`} className="cursor-pointer text-inherit no-underline">
-                      {launch.name}
+                    <Link href={`/launch/${product.slug}`} className="cursor-pointer text-inherit no-underline">
+                      {product.name}
                     </Link>
                   </h3>
-                  <span className="topic-pill">{launch.sector}</span>
-                  <span className="ftag bg-[#EAF0F6] text-[10px]">{launch.qualityBadge}</span>
-                  {launch.launchedToday && <span className="ftag bg-success text-[10px] font-bold">✦ Today</span>}
-                </div>
-                <p className="mb-2.5 text-[13px] leading-[1.6] text-[#1C1C27]">{launch.desc}</p>
-
-                <div className="mb-2.5 flex flex-wrap items-center gap-2">
-                  {launch.founders.map((f) => (
-                    <span key={f.name} className="flex items-center gap-1 text-xs text-muted">
-                      <span className="font-['Space_Mono',monospace] font-bold text-[#E8323C]">ARS {f.ars}</span>
-                      {f.name.split(" ").slice(-1)[0]}
+                  {product.categories.map((c) => (
+                    <span key={c.id} className="topic-pill">
+                      {c.name}
                     </span>
                   ))}
-                  <span className="text-xs text-muted">·</span>
-                  <span className="text-xs text-muted">{launch.category}</span>
+                  {product.qualityBadge && <span className="ftag bg-[#EAF0F6] text-[10px]">{product.qualityBadge}</span>}
                 </div>
+                <p className="mb-2.5 text-[13px] leading-[1.6] text-[#1C1C27]">{product.description}</p>
 
                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                  <span className="font-['Space_Mono',monospace] text-xs font-bold text-[#E8323C]">▲ {launch.votes.toLocaleString()}</span>
-                  <span className="text-xs text-muted">💬 {launch.comments.length}</span>
-                  <span className="text-xs text-muted">★ {Math.max(bookmarkSvc.count(launch.id), Math.floor(launch.votes * 0.08))}</span>
-                  <span className="ftag bg-[#EAF0F6] text-[10px]">{launch.qualityBadge}</span>
+                  <span className="font-['Space_Mono',monospace] text-xs font-bold text-[#E8323C]">▲ {product.voteCount.toLocaleString()}</span>
+                  <span className="text-xs text-muted">★ {product.bookmarkCount}</span>
+                  <span className="text-xs text-muted">Founded {product.founded}</span>
                 </div>
               </div>
 
               <div className="flex min-w-30 shrink-0 flex-col justify-start gap-1.5">
                 <span className="ftag bg-[#EAF0F6] text-center text-[11px]">
-                  {launch.stage} · {launch.funding}
+                  {product.stage} · ${product.funding.toLocaleString()}
                 </span>
-                <Link href={`/launch/${launch.id}`} className="btn btn-primary btn-sm justify-center no-underline">
+                <Link href={`/launch/${product.slug}`} className="btn btn-primary btn-sm justify-center no-underline">
                   View →
                 </Link>
-                <BookmarkButton user={user} launch={launch} showToast={showToast} size="sm" />
+                <BookmarkButton user={user} launch={product} showToast={showToast} size="sm" useApi />
               </div>
             </div>
           </div>

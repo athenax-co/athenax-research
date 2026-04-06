@@ -7,7 +7,7 @@ import BookmarkButton from "@/components/BookmarkButton";
 import { useGlobal } from "@/components/GlobalProvider";
 import { SEED_LAUNCHES } from "@/data/seed";
 import { dbNow, dbRead, dbUid, dbWrite, bookmarkSvc } from "@/utils/lib";
-import { usePendingProducts, useUpdateProductStatus } from "@/hooks/queries/useProduct";
+import { useProducts, useUpdateProductStatus } from "@/hooks/queries/useProduct";
 
 const FOLLOW_KEYS = {
   FOLLOWS: "ax_follows_v1",
@@ -99,7 +99,7 @@ function LaunchMini({ launch, user, showToast }: { launch: any; user: any; showT
 }
 
 function AdminPendingReview({ showToast }: { showToast: (text: string, type?: string) => void }) {
-  const { data: products, isLoading } = usePendingProducts();
+  const { data: products, isLoading } = useProducts("pending");
   const { mutate: updateStatus, isPending } = useUpdateProductStatus();
 
   return (
@@ -120,35 +120,25 @@ function AdminPendingReview({ showToast }: { showToast: (text: string, type?: st
                 <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
                   <span className="font-mono text-[11px] text-muted">{product.stage}</span>
                   {product.categories.map((c) => (
-                    <span key={c.id} className="topic-pill text-[10px]">{c.name}</span>
+                    <span key={c.id} className="topic-pill text-[10px]">
+                      {c.name}
+                    </span>
                   ))}
-                  <span className="font-mono text-[10px] text-muted">
-                    {new Date(product.createdAt).toLocaleDateString()}
-                  </span>
+                  <span className="font-mono text-[10px] text-muted">{new Date(product.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
               <div className="flex shrink-0 gap-1.5">
                 <button
                   className="btn btn-primary btn-sm"
                   disabled={isPending}
-                  onClick={() =>
-                    updateStatus(
-                      { id: product.id, status: "approved" },
-                      { onSuccess: () => showToast(`${product.name} approved`) }
-                    )
-                  }
+                  onClick={() => updateStatus({ id: product.id, status: "approved" }, { onSuccess: () => showToast(`${product.name} approved`) })}
                 >
                   Approve
                 </button>
                 <button
                   className="btn btn-outline btn-sm"
                   disabled={isPending}
-                  onClick={() =>
-                    updateStatus(
-                      { id: product.id, status: "rejected" },
-                      { onSuccess: () => showToast(`${product.name} rejected`) }
-                    )
-                  }
+                  onClick={() => updateStatus({ id: product.id, status: "rejected" }, { onSuccess: () => showToast(`${product.name} rejected`) })}
                 >
                   Reject
                 </button>

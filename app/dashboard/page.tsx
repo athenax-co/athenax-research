@@ -7,6 +7,7 @@ import BookmarkButton from "@/components/BookmarkButton";
 import { useGlobal } from "@/components/GlobalProvider";
 import { SEED_LAUNCHES } from "@/data/seed";
 import { dbNow, dbRead, dbUid, dbWrite, bookmarkSvc } from "@/utils/lib";
+import { usePendingProducts, useUpdateProductStatus } from "@/hooks/queries/useProduct";
 
 const FOLLOW_KEYS = {
   FOLLOWS: "ax_follows_v1",
@@ -97,6 +98,69 @@ function LaunchMini({ launch, user, showToast }: { launch: any; user: any; showT
   );
 }
 
+function AdminPendingReview({ showToast }: { showToast: (text: string, type?: string) => void }) {
+  const { data: products, isLoading } = usePendingProducts();
+  const { mutate: updateStatus, isPending } = useUpdateProductStatus();
+
+  return (
+    <div className="mb-8">
+      <WindowCard label="PENDING_REVIEW.SYS" bodyClass="window-body window-body-yellow">
+        {isLoading ? (
+          <p className="text-[13px] text-muted">Loading…</p>
+        ) : !products || products.length === 0 ? (
+          <p className="text-[13px] text-muted">No pending products.</p>
+        ) : (
+          products.map((product) => (
+            <div key={product.id} className="flex items-start gap-3 border-b border-[#D8D4CC] py-3 last:border-b-0">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border-[1.5px] border-ink bg-paper text-[13px] font-bold">
+                {product.name.charAt(0)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[13px] font-semibold">{product.name}</div>
+                <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                  <span className="font-mono text-[11px] text-muted">{product.stage}</span>
+                  {product.categories.map((c) => (
+                    <span key={c.id} className="topic-pill text-[10px]">{c.name}</span>
+                  ))}
+                  <span className="font-mono text-[10px] text-muted">
+                    {new Date(product.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+              <div className="flex shrink-0 gap-1.5">
+                <button
+                  className="btn btn-primary btn-sm"
+                  disabled={isPending}
+                  onClick={() =>
+                    updateStatus(
+                      { id: product.id, status: "approved" },
+                      { onSuccess: () => showToast(`${product.name} approved`) }
+                    )
+                  }
+                >
+                  Approve
+                </button>
+                <button
+                  className="btn btn-outline btn-sm"
+                  disabled={isPending}
+                  onClick={() =>
+                    updateStatus(
+                      { id: product.id, status: "rejected" },
+                      { onSuccess: () => showToast(`${product.name} rejected`) }
+                    )
+                  }
+                >
+                  Reject
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </WindowCard>
+    </div>
+  );
+}
+
 export default function Page() {
   const { user, showToast } = useGlobal();
   const [tick, setTick] = useState(0);
@@ -141,6 +205,8 @@ export default function Page() {
       </div>
       <p className="mb-0 text-[17px] text-muted">Your saves, votes, follows, and activity in one place.</p>
       <hr className="divider" />
+
+      {(user.role as string) === "admin" && <AdminPendingReview showToast={showToast} />}
 
       <div className="grid-4 mb-7 gap-3.5">
         {[

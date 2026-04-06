@@ -1,3 +1,11 @@
+export const ProductStatus = {
+    PENDING:  "pending",
+    APPROVED: "approved",
+    REJECTED: "rejected",
+} as const;
+
+export type ProductStatus = (typeof ProductStatus)[keyof typeof ProductStatus];
+
 export const ProductStage = {
     PRE_SEED: "Pre-Seed",
     SEED: "Seed",

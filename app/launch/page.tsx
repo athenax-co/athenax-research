@@ -9,27 +9,33 @@ import { useGlobal } from "@/components/GlobalProvider";
 import { useState } from "react";
 import Modal from "@/components/ui/Modal";
 import { bookmarkSvc } from "@/utils/lib";
+import CategorySelector from "@/components/ui/CategorySelector";
+import { submitProduct } from "@/api/product";
+import { ProductStage, QualityBadge } from "@/enums";
+import { useCategories } from "@/hooks/queries/useReference";
 
 const calcLaunchScore = (l: any) =>
   (l.votes || 0) * 0.4 + (l.devViews || 0) * 0.0004 + (l.githubStars || 0) * 0.2 + (l.investorRegs || 0) * 2.0 + (l.papers?.length || 0) * 5.0;
 
 export default function Page() {
   const { user, showToast } = useGlobal();
+  const { data: categories = [] } = useCategories();
   const [filter, setFilter] = useState("All");
   const [sortBy, setSortBy] = useState("score");
   const [timeTab, setTimeTab] = useState("all");
   const [showSubmit, setShowSubmit] = useState(false);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
   const [submitForm, setSubmitForm] = useState({
     name: "",
     url: "",
-    sector: "AI & Agents",
-    desc: "",
+    stage: ProductStage.SEED as string,
+    description: "",
     github: "",
-    tier: "standard",
-    arsEmail: user?.email || "",
+    funding: "",
+    founded: String(new Date().getFullYear()),
+    qualityBadge: QualityBadge.RESEARCH_BASED as string,
   });
 
-  const SECTORS = ["All", "AI & Agents", "Robotics", "Biotech", "Crypto & DeFi", "Developer Tools", "Infrastructure", "Climate & Energy"];
   const TIME_TABS = [
     ["all", "All"],
     ["week", "This Week"],
@@ -48,13 +54,28 @@ export default function Page() {
     return 0;
   });
 
-  const submitLaunch = () => {
+  const submitLaunch = async () => {
     if (!submitForm.name || !submitForm.url) {
       showToast("Product name and URL are required.", "error");
       return;
     }
-    showToast(`${submitForm.name} launch submitted! We'll review within 48 hours.`, "success");
-    setShowSubmit(false);
+    try {
+      await submitProduct({
+        name: submitForm.name,
+        stage: submitForm.stage,
+        funding: Number(submitForm.funding) || 0,
+        founded: Number(submitForm.founded) || new Date().getFullYear(),
+        description: submitForm.description,
+        qualityBadge: submitForm.qualityBadge,
+        github: submitForm.github || undefined,
+        demo: submitForm.url,
+        categoryIds: selectedCategoryIds,
+      });
+      showToast(`${submitForm.name} launch submitted! We'll review within 48 hours.`, "success");
+      setShowSubmit(false);
+    } catch {
+      showToast("Failed to submit launch. Please try again.", "error");
+    }
   };
 
   return (
@@ -125,14 +146,14 @@ export default function Page() {
         </div>
 
         <div className="mb-2.5 flex flex-wrap gap-2">
-          {SECTORS.map((c) => (
+          {[{ id: 0, name: "All" }, ...categories].map((c) => (
             <button
-              key={c}
-              className={filter === c ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}
-              style={filter === c ? { background: "#F5D94E" } : {}}
-              onClick={() => setFilter(c)}
+              key={c.id}
+              className={filter === c.name ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}
+              style={filter === c.name ? { background: "#F5D94E" } : {}}
+              onClick={() => setFilter(c.name)}
             >
-              {c}
+              {c.name}
             </button>
           ))}
         </div>
@@ -280,33 +301,67 @@ export default function Page() {
                 placeholder="github.com/you/repo"
               />
             </div>
-            <div className="inp-group">
-              <label className="inp-label">Sector</label>
-              <select className="inp" value={submitForm.sector} onChange={(e) => setSubmitForm((f) => ({ ...f, sector: e.target.value }))}>
-                {["AI & Agents", "Robotics", "Biotech", "Crypto & DeFi", "Developer Tools", "Infrastructure", "Climate & Energy"].map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </select>
+            <div className="flex gap-3">
+              <div className="inp-group flex-1">
+                <label className="inp-label">Stage</label>
+                <select className="inp" value={submitForm.stage} onChange={(e) => setSubmitForm((f) => ({ ...f, stage: e.target.value }))}>
+                  {Object.values(ProductStage).map((s) => (
+                    <option key={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="inp-group flex-1">
+                <label className="inp-label">Quality Badge</label>
+                <select
+                  className="inp"
+                  value={submitForm.qualityBadge}
+                  onChange={(e) => setSubmitForm((f) => ({ ...f, qualityBadge: e.target.value }))}
+                >
+                  {Object.values(QualityBadge).map((b) => (
+                    <option key={b}>{b}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="inp-group flex-1">
+                <label className="inp-label">Funding Raised ($)</label>
+                <input
+                  className="inp"
+                  type="number"
+                  min={0}
+                  value={submitForm.funding}
+                  onChange={(e) => setSubmitForm((f) => ({ ...f, funding: e.target.value }))}
+                  placeholder="e.g. 500000"
+                />
+              </div>
+              <div className="inp-group flex-1">
+                <label className="inp-label">Founded (Year)</label>
+                <input
+                  className="inp"
+                  type="number"
+                  min={1900}
+                  max={new Date().getFullYear()}
+                  value={submitForm.founded}
+                  onChange={(e) => setSubmitForm((f) => ({ ...f, founded: e.target.value }))}
+                  placeholder="e.g. 2024"
+                />
+              </div>
             </div>
             <div className="inp-group">
               <label className="inp-label">One-line Description</label>
               <input
                 className="inp"
-                value={submitForm.desc}
-                onChange={(e) => setSubmitForm((f) => ({ ...f, desc: e.target.value }))}
+                value={submitForm.description}
+                onChange={(e) => setSubmitForm((f) => ({ ...f, description: e.target.value }))}
                 placeholder="What does your product do?"
               />
             </div>
             <div className="inp-group">
-              <label className="inp-label">Launch Tier</label>
-              <select className="inp" value={submitForm.tier} onChange={(e) => setSubmitForm((f) => ({ ...f, tier: e.target.value }))}>
-                <option value="standard">Standard — Free</option>
-                <option value="verified">Verified — $2,000 (featured 48h)</option>
-                <option value="premier">Premier — $7,500 (investor blast)</option>
-                <option value="homepage">Homepage — $15,000 (7-day placement)</option>
-              </select>
+              <label className="inp-label">Categories</label>
+              <CategorySelector onChangeIds={setSelectedCategoryIds} />
             </div>
-            <div className="mb-3.5 text-xs text-muted">Quality requirement: ARS-scored founder, indexed research paper, or cohort graduate.</div>
+            {/* <div className="mb-3.5 text-xs text-muted">Quality requirement: ARS-scored founder, indexed research paper, or cohort graduate.</div> */}
             <button className="btn btn-primary w-full justify-center" onClick={submitLaunch}>
               Submit Launch →
             </button>

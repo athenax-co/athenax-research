@@ -161,18 +161,18 @@ export default function Page() {
 
           <div className="mb-13">
             <WindowCard label="NETWORK_ACTIVITY.SYS">
-              <div className="flex flex-wrap gap-0">
+              <div className="grid grid-cols-2 sm:grid-cols-4">
                 {[
                   { value: `${SEED_LAUNCHES.length}`, label: "launches this month" },
                   { value: `$${totalRaised.toFixed(1)}M`, label: "raised by AthenaX startups" },
                   { value: averageFounderArs, label: "average founder ARS" },
                   { value: `${SEED_LAUNCHES.reduce((sum, launch) => sum + launch.investorRegs, 0)}`, label: "investor introductions" },
-                ].map((metric, index, items) => (
+                ].map((metric, index) => (
                   <div
                     key={metric.label}
-                    className={`basis-40 px-6 py-5 ${index < items.length - 1 ? "border-r-[1.5px] border-r-[#D8D4CC]" : ""} flex-1`}
+                    className={`px-5 py-4 sm:px-6 sm:py-5 ${index % 2 === 0 ? "border-r-[1.5px] border-r-[#D8D4CC]" : ""} ${index < 2 ? "border-b-[1.5px] border-b-[#D8D4CC] sm:border-b-0" : ""} sm:not-last:border-r-[1.5px] sm:border-r-[#D8D4CC]`}
                   >
-                    <div className="mb-1.5 font-['Space_Mono',monospace] text-[26px] font-bold leading-none text-danger">{metric.value}</div>
+                    <div className="mb-1.5 font-['Space_Mono',monospace] text-[22px] sm:text-[26px] font-bold leading-none text-danger">{metric.value}</div>
                     <div className="font-['Space_Mono',monospace] text-xs tracking-[0.03em] text-muted">{metric.label}</div>
                   </div>
                 ))}

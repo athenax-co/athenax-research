@@ -48,72 +48,178 @@ const Logo = () => (
   </Link>
 );
 
+const HamburgerIcon = ({ open }: { open: boolean }) => (
+  <div className="flex flex-col justify-center items-center w-5 h-5 gap-2">
+    <span className={cn("block h-1 w-5 bg-ink rounded transition-all duration-200", open && "translate-y-2 rotate-45")} />
+    <span className={cn("block h-1 w-5 bg-ink rounded transition-all duration-200", open && "opacity-0")} />
+    <span className={cn("block h-1 w-5 bg-ink rounded transition-all duration-200", open && "-translate-y-2 -rotate-45")} />
+  </div>
+);
+
 const Navbar = () => {
   const { user, handleAuthClick } = useGlobal();
   const pathname = usePathname();
   const activeNav = getActiveNav(pathname);
   const [hovered, setHovered] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-100 bg-cream border-b-2 border-ink h-17 flex items-center">
-      <div className="flex items-center justify-between w-full max-w-7xl mx-auto px-10">
-        <Logo />
-        <div className="hidden md:flex items-center gap-2">
-          {NAV_ITEMS.map((n) => (
-            <div key={n.id} className="relative" onMouseEnter={() => setHovered(n.id)} onMouseLeave={() => setHovered(null)}>
-              <Link
-                href={n.href || `/${n.id === "home" ? "" : n.id}`}
-                className={cn(
-                  "px-4 py-2 text-[15px] font-medium text-ink rounded-full transition-all duration-100",
-                  activeNav === n.id
-                    ? "bg-yellow border-2 border-ink font-semibold shadow-[2px_2px_0_#1C1C27] hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0_#1C1C27]"
-                    : "hover:bg-ink/7"
-                )}
-              >
-                {n.label}
-              </Link>
-              {hovered === n.id && activeNav !== n.id && (
-                <div className="absolute top-[calc(100%+8px)] left-1/2 -translate-x-1/2 bg-ink text-cream text-[11px] font-['Space_Mono',monospace] tracking-[0.04em] px-2 py-1 rounded-md whitespace-nowrap z-200 pointer-events-none">
-                  {n.description}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="flex items-center gap-2.5">
-          {user ? (
-            <>
-              {["sponsor", "admin"].includes(user.role) && (
-                <Link className="btn btn-ghost btn-sm" href="/sponsors/dashboard" title="Sponsor Dashboard">
-                  ◈
+    <>
+      <nav className="sticky top-0 z-100 bg-cream border-b-2 border-ink h-17 flex items-center">
+        <div className="flex items-center justify-between w-full max-w-7xl mx-auto px-5 md:px-10">
+          <Logo />
+
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-2">
+            {NAV_ITEMS.map((n) => (
+              <div key={n.id} className="relative" onMouseEnter={() => setHovered(n.id)} onMouseLeave={() => setHovered(null)}>
+                <Link
+                  href={n.href || `/${n.id === "home" ? "" : n.id}`}
+                  className={cn(
+                    "px-4 py-2 text-[15px] font-medium text-ink rounded-full transition-all duration-100",
+                    activeNav === n.id
+                      ? "bg-yellow border-2 border-ink font-semibold shadow-[2px_2px_0_#1C1C27] hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0_#1C1C27]"
+                      : "hover:bg-ink/7"
+                  )}
+                >
+                  {n.label}
                 </Link>
-              )}
-              <Link className="btn btn-ghost btn-sm" href="/dashboard" title="Dashboard">
-                ⊞
-              </Link>
+                {hovered === n.id && activeNav !== n.id && (
+                  <div className="absolute top-[calc(100%+8px)] left-1/2 -translate-x-1/2 bg-ink text-cream text-[11px] font-['Space_Mono',monospace] tracking-[0.04em] px-2 py-1 rounded-md whitespace-nowrap z-200 pointer-events-none">
+                    {n.description}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop auth */}
+          <div className="hidden md:flex items-center gap-2.5">
+            {user ? (
+              <>
+                {["sponsor", "admin"].includes(user.role) && (
+                  <Link className="btn btn-ghost btn-sm" href="/sponsors/dashboard" title="Sponsor Dashboard">
+                    ◈
+                  </Link>
+                )}
+                <Link className="btn btn-ghost btn-sm" href="/dashboard" title="Dashboard">
+                  ⊞
+                </Link>
+                <Link className="btn btn-ghost btn-sm" href="/profile">
+                  <span className="size-5 rounded-full bg-yellow border-[1.5px] border-ink inline-flex items-center justify-center text-[11px] font-bold">
+                    {user.avatar}
+                  </span>
+                  {user.name.split(" ")[0]}
+                </Link>
+                <button className="btn btn-outline btn-sm" onClick={() => handleAuthClick("logout")}>
+                  Out
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="btn btn-primary btn-sm" onClick={() => handleAuthClick("register")}>
+                  Join Network →
+                </button>
+                <button className="btn btn-ghost btn-sm" onClick={() => handleAuthClick("login")}>
+                  Sign In
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Mobile: auth shortcut + hamburger */}
+          <div className="flex md:hidden items-center gap-2">
+            {user ? (
               <Link className="btn btn-ghost btn-sm" href="/profile">
                 <span className="size-5 rounded-full bg-yellow border-[1.5px] border-ink inline-flex items-center justify-center text-[11px] font-bold">
                   {user.avatar}
                 </span>
-                {user.name.split(" ")[0]}
               </Link>
-              <button className="btn btn-outline btn-sm" onClick={() => handleAuthClick("logout")}>
-                Out
-              </button>
-            </>
-          ) : (
-            <>
+            ) : (
               <button className="btn btn-primary btn-sm" onClick={() => handleAuthClick("register")}>
-                Join Network →
+                Join →
               </button>
-              <button className="btn btn-ghost btn-sm" onClick={() => handleAuthClick("login")}>
-                Sign In
-              </button>
-            </>
-          )}
+            )}
+            <button
+              className="btn btn-ghost btn-sm px-2.5"
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label="Toggle menu"
+              aria-expanded={menuOpen}
+            >
+              <HamburgerIcon open={menuOpen} />
+            </button>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {/* Mobile drawer */}
+      {menuOpen && (
+        <div className="md:hidden fixed inset-0 top-17 z-99 bg-cream border-t-2 border-ink overflow-y-auto">
+          <div className="px-5 py-4 flex flex-col gap-1">
+            {NAV_ITEMS.map((n) => (
+              <Link
+                key={n.id}
+                href={n.href || `/${n.id === "home" ? "" : n.id}`}
+                onClick={() => setMenuOpen(false)}
+                className={cn(
+                  "flex flex-col px-4 py-3.5 rounded-xl border-2 transition-all duration-100 no-underline",
+                  activeNav === n.id
+                    ? "bg-yellow border-ink shadow-[3px_3px_0_#1C1C27]"
+                    : "border-transparent hover:border-ink/20 hover:bg-ink/5"
+                )}
+              >
+                <span className="text-[16px] font-semibold text-ink">{n.label}</span>
+              </Link>
+            ))}
+
+            <div className="mt-4 pt-4 border-t-2 border-[#D8D4CC] flex flex-col gap-2">
+              {user ? (
+                <>
+                  <Link className="btn btn-ghost justify-center" href="/dashboard" onClick={() => setMenuOpen(false)}>
+                    ⊞ Dashboard
+                  </Link>
+                  {["sponsor", "admin"].includes(user.role) && (
+                    <Link className="btn btn-ghost justify-center" href="/sponsors/dashboard" onClick={() => setMenuOpen(false)}>
+                      ◈ Sponsor Dashboard
+                    </Link>
+                  )}
+                  <button
+                    className="btn btn-outline justify-center"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      handleAuthClick("logout");
+                    }}
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    className="btn btn-primary justify-center"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      handleAuthClick("register");
+                    }}
+                  >
+                    Join Network →
+                  </button>
+                  <button
+                    className="btn btn-ghost justify-center"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      handleAuthClick("login");
+                    }}
+                  >
+                    Sign In
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

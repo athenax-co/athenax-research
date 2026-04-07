@@ -87,7 +87,7 @@ export default function Page() {
             </span>
           </div>
           <button
-            className="btn btn-primary self-start"
+            className="btn btn-primary self-start hidden sm:inline-flex"
             onClick={() => {
               if (!user) {
                 showToast("Sign in to submit a launch.", "error");
@@ -104,9 +104,21 @@ export default function Page() {
           Research-backed products launching across AI, robotics, biotech, crypto, developer tools, infrastructure, and climate. Every founder is
           ARS-scored. Every product is grounded in indexed research.
         </p>
+        <button
+          className="btn btn-primary w-full justify-center mt-4 sm:hidden"
+          onClick={() => {
+            if (!user) {
+              showToast("Sign in to submit a launch.", "error");
+              return;
+            }
+            setShowSubmit(true);
+          }}
+        >
+          + Submit Your Product
+        </button>
         <hr className="divider" />
 
-        <div className="mb-7 grid grid-cols-4 gap-3.5">
+        <div className="mb-7 grid grid-cols-2 sm:grid-cols-4 gap-3.5">
           {[
             { label: "Launches This Month", value: products.length },
             { label: "Total Funding Raised", value: "$18.4M" },
@@ -136,11 +148,11 @@ export default function Page() {
           </span>
         </div>
 
-        <div className="mb-2.5 flex flex-wrap gap-2">
+        <div className="mb-2.5 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
           {[{ id: 0, name: "All" }, ...categories].map((c) => (
             <button
               key={c.id}
-              className={filter === c.name ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}
+              className={`shrink-0 ${filter === c.name ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}`}
               style={filter === c.name ? { background: "#F5D94E" } : {}}
               onClick={() => setFilter(c.name)}
             >
@@ -175,14 +187,16 @@ export default function Page() {
                 </div>
               </div>
 
-              <div className="flex min-w-30 shrink-0 flex-col justify-start gap-1.5">
+              <div className="flex shrink-0 flex-col justify-start gap-1.5 w-full sm:min-w-30 sm:w-auto">
                 <span className="ftag bg-[#EAF0F6] text-center text-[11px]">
                   {product.stage} · ${product.funding.toLocaleString()}
                 </span>
-                <Link href={`/launch/${product.slug}`} className="btn btn-primary btn-sm justify-center no-underline">
-                  View →
-                </Link>
-                <BookmarkButton user={user} launch={product} showToast={showToast} size="sm" useApi initialBookmarked={product.bookmarked} />
+                <div className="flex gap-1.5 sm:flex-col">
+                  <Link href={`/launch/${product.slug}`} className="btn btn-primary btn-sm flex-1 justify-center no-underline">
+                    View →
+                  </Link>
+                  <BookmarkButton user={user} launch={product} showToast={showToast} size="sm" useApi initialBookmarked={product.bookmarked} />
+                </div>
               </div>
             </div>
           </div>
@@ -190,7 +204,7 @@ export default function Page() {
 
         <WindowCard label="LAUNCH_TIERS.SYS" className="mt-7">
           <div className="mb-4 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">LAUNCH PROMOTION TIERS</div>
-          <div className="mb-5 grid grid-cols-4 gap-3.5">
+          <div className="mb-5 grid grid-cols-2 sm:grid-cols-4 gap-3.5">
             {[
               {
                 tier: "Standard",
@@ -238,7 +252,7 @@ export default function Page() {
               </div>
             ))}
           </div>
-          <div className="flex justify-end">
+          <div className="flex justify-center md:justify-end">
             <button
               className="btn btn-primary"
               onClick={() => {

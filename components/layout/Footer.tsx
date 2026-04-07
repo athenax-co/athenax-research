@@ -87,11 +87,11 @@ export const FooterSubscribe = () => {
 
 const Footer = () => {
   return (
-    <footer className="bg-cream border-t-2 border-ink pt-0 px-10 pb-7 mt-25">
+    <footer className="bg-cream border-t-2 border-ink pt-0 pb-7 mt-25">
       <div className="pt-12">
         <FooterSubscribe />
       </div>
-      <div className="max-w-7xl mx-auto flex justify-between items-start gap-10 flex-wrap">
+      <div className="max-w-7xl mx-auto px-10 flex justify-between items-start gap-10 flex-wrap">
         <div>
           <div className="text-[26px] font-bold text-ink mb-2">AthenaX</div>
           <div className="text-sm text-ink leading-relaxed">Where New Products Begin.</div>
@@ -109,7 +109,7 @@ const Footer = () => {
           ))}
         </div>
       </div>
-      <div className="font-mono text-[11px] text-muted text-center mt-11 pt-5.5 border-t border-[#D8D4CC] tracking-[0.04em]">
+      <div className="max-w-7xl mx-auto px-10 font-mono text-[11px] text-muted text-center mt-11 pt-5.5 border-t border-[#D8D4CC] tracking-[0.04em]">
         CC0 /// NO RIGHTS RESERVED /// OPEN SOURCE
       </div>
     </footer>

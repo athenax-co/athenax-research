@@ -48,7 +48,7 @@ export default function Page() {
         </p>
         <hr className="divider" />
 
-        <div className="mb-8 grid grid-cols-1 gap-3.5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mb-8 grid grid-cols-2 gap-3.5 xl:grid-cols-4">
           {[
             { label: "Indexed Researchers", value: SEED_RESEARCHERS.length },
             { label: "Avg. ARS Score", value: avgArs },
@@ -86,11 +86,11 @@ export default function Page() {
           </div>
         </div>
 
-        <div className="mb-7 flex flex-wrap gap-2">
+        <div className="mb-7 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
           {allTopics.map((topic) => (
             <button
               key={topic}
-              className={topicFilter === topic ? "btn btn-ghost btn-sm bg-yellow" : "btn btn-outline btn-sm"}
+              className={`shrink-0 ${topicFilter === topic ? "btn btn-ghost btn-sm bg-yellow" : "btn btn-outline btn-sm"}`}
               onClick={() => setTopicFilter(topic)}
             >
               {topic}
@@ -107,47 +107,76 @@ export default function Page() {
             const cohortEligible = ars >= 6.5;
 
             return (
-              <Link key={researcher.id} href="/profile" className="lb-row px-4.5 py-4 text-inherit no-underline">
-                <div className={`lb-rank ${index === 0 ? "text-danger" : "text-muted"}`}>#{index + 1}</div>
-                <div className="lb-avatar h-10 w-10 text-[15px]">{researcher.name.charAt(0)}</div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="lb-name text-[15px]">{researcher.name}</div>
-                    {openToHire && <span className="ftag bg-success text-[10px]">Open to Hire</span>}
-                    {cohortEligible && <span className="ftag bg-yellow text-[10px]">Cohort Eligible</span>}
-                  </div>
-                  <div className="lb-meta">
-                    {researcher.university} · {researcher.lab}
-                  </div>
-                  <div className="mt-0.75 text-xs text-muted">{researcher.bio}</div>
-                  {papers.length > 0 && (
-                    <div className="mt-1.5 flex flex-wrap gap-1.5">
-                      {papers.slice(0, 2).map((paper) => (
-                        <span key={paper.id} className="topic-pill px-2 py-0.5 text-[10px]">
-                          {paper.topic}
-                        </span>
-                      ))}
+              <Link
+                key={researcher.id}
+                href="/profile"
+                className="block border-b border-[#D8D4CC] px-4.5 py-4 text-inherit no-underline last:border-b-0"
+              >
+                <div className="grid grid-cols-[auto_auto_1fr] items-start gap-x-3 gap-y-2 sm:flex sm:items-center sm:gap-3.5">
+                  <div className={`pt-2 font-mono text-[13px] font-bold ${index === 0 ? "text-danger" : "text-muted"}`}>#{index + 1}</div>
+                  <div className="lb-avatar h-10 w-10 text-[15px]">{researcher.name.charAt(0)}</div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1 flex flex-wrap items-center gap-2">
+                      <div className="lb-name text-[15px] leading-tight">{researcher.name}</div>
+                      {openToHire && <span className="ftag bg-success text-[10px]">Open to Hire</span>}
+                      {cohortEligible && <span className="ftag bg-yellow text-[10px]">Cohort Eligible</span>}
                     </div>
-                  )}
-                </div>
-                <div className="shrink-0 text-right">
-                  <div className="lb-ars text-xl">{ars.toFixed(1)}</div>
-                  <div className="mt-0.5 font-mono text-[10px] text-muted">ARS</div>
-                  <div className="mt-1 text-[11px] text-muted">{(researcher.citations || 0).toLocaleString()} cites</div>
-                  <button
-                    className="btn btn-outline btn-sm mt-2"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      if (!user) {
-                        showToast("Sign in to save researchers.", "error");
-                        return;
-                      }
-                      showToast(`Saved ${researcher.name} to your shortlist.`, "success");
-                    }}
-                  >
-                    Save
-                  </button>
+                    <div className="lb-meta">
+                      {researcher.university} · {researcher.lab}
+                    </div>
+                    <div className="mt-0.75 text-xs text-muted">{researcher.bio}</div>
+                    {papers.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {papers.slice(0, 2).map((paper) => (
+                          <span key={paper.id} className="topic-pill px-2 py-0.5 text-[10px]">
+                            {paper.topic}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="hidden shrink-0 text-right sm:block">
+                    <div className="lb-ars text-xl">{ars.toFixed(1)}</div>
+                    <div className="mt-0.5 font-mono text-[10px] text-muted">ARS</div>
+                    <div className="mt-1 text-[11px] text-muted">{(researcher.citations || 0).toLocaleString()} cites</div>
+                    <button
+                      className="btn btn-outline btn-sm mt-2"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        if (!user) {
+                          showToast("Sign in to save researchers.", "error");
+                          return;
+                        }
+                        showToast(`Saved ${researcher.name} to your shortlist.`, "success");
+                      }}
+                    >
+                      Save
+                    </button>
+                  </div>
+
+                  <div className="col-span-3 mt-1 flex items-center justify-between border-t border-[#D8D4CC] pt-2 sm:hidden">
+                    <div>
+                      <div className="font-mono text-lg font-bold text-danger leading-none">{ars.toFixed(1)}</div>
+                      <div className="font-mono text-[10px] text-muted">ARS · {(researcher.citations || 0).toLocaleString()} cites</div>
+                    </div>
+                    <button
+                      className="btn btn-outline btn-sm"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        if (!user) {
+                          showToast("Sign in to save researchers.", "error");
+                          return;
+                        }
+                        showToast(`Saved ${researcher.name} to your shortlist.`, "success");
+                      }}
+                    >
+                      Save
+                    </button>
+                  </div>
                 </div>
               </Link>
             );

@@ -41,8 +41,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   // Seed-only vote state
   const [voted, setVoted] = useState(false);
   const [voteCount, setVoteCount] = useState(seedLaunch?.votes ?? 0);
-  const actionButtonStyle = { minHeight: 82, padding: "14px 22px" };
-
   const shareLaunch = async (name: string, slug: string) => {
     const shareUrl = `${window.location.origin}/launch/${slug}`;
 
@@ -100,37 +98,36 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           <Link className="link-arrow" href="/launch" style={{ marginBottom: 20 }}>
             ← Back to Launch
           </Link>
-          <div className="path-badge" style={{ marginLeft: 12 }}>
-            /root/launch/{toSlug(launch.name)}
-          </div>
+          <div className="path-badge ml-0 sm:ml-3">/root/launch/{toSlug(launch.name)}</div>
 
-          <div className="mb-5 flex flex-wrap items-start gap-5">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border-2 border-[#1C1C27] bg-paper text-2xl font-bold">
-              {launch.name.charAt(0)}
-            </div>
-            <div className="flex-1">
-              <div className="mb-1.5 flex flex-wrap items-center gap-2.5">
-                <h1 className="mb-0 text-[36px]">{launch.name}</h1>
-                <span className="topic-pill">{launch.category}</span>
-                <span className="ftag" style={{ background: launch.stage === "Seed" ? "#D4EDDA" : "#EAF0F6" }}>
-                  {launch.stage}
-                </span>
-                <span className="ftag bg-paper font-bold text-[#15803D]">{launch.funding}</span>
+          <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:gap-5">
+            <div className="flex items-start gap-3 sm:flex-1">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border-2 border-[#1C1C27] bg-paper text-xl font-bold sm:h-16 sm:w-16 sm:text-2xl">
+                {launch.name.charAt(0)}
               </div>
-              <p className="text-base leading-[1.6] text-muted">{launch.desc}</p>
+              <div className="min-w-0 flex-1">
+                <h1 className="mb-2 text-[34px] leading-none sm:text-[36px]">{launch.name}</h1>
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <span className="topic-pill">{launch.category}</span>
+                  <span className="ftag" style={{ background: launch.stage === "Seed" ? "#D4EDDA" : "#EAF0F6" }}>
+                    {launch.stage}
+                  </span>
+                  <span className="ftag bg-paper font-bold text-[#15803D]">{launch.funding}</span>
+                </div>
+                <p className="text-sm leading-[1.6] text-muted sm:text-base">{launch.desc}</p>
+              </div>
             </div>
-            <div className="shrink-0 text-center flex flex-col gap-2">
+            <div className="flex w-full shrink-0 gap-2 sm:w-auto sm:flex-col sm:text-center">
               <button
-                className={voted ? "btn btn-ghost" : "btn btn-outline"}
-                style={{ ...(voted ? { background: "#D4EDDA" } : {}), ...actionButtonStyle, flexDirection: "column" }}
+                className={`${voted ? "btn btn-ghost" : "btn btn-outline"} flex-1 flex-col justify-center px-4 py-2 sm:min-h-20.5 sm:flex-none sm:px-5.5 sm:py-3.5`}
+                style={{ ...(voted ? { background: "#D4EDDA" } : {}) }}
                 onClick={handleVote}
               >
                 <div className="text-[22px] leading-none">▲</div>
                 <div className="mt-1 font-['Space_Mono',monospace] text-sm font-bold text-[#E8323C]">{voteCount.toLocaleString()}</div>
               </button>
               <button
-                className="btn btn-ghost"
-                style={{ ...actionButtonStyle, fontSize: 12 }}
+                className="btn btn-ghost flex-1 justify-center px-4 py-2 text-xs sm:min-h-20.5 sm:flex-none sm:px-5.5 sm:py-3.5"
                 onClick={() => shareLaunch(launch.name, toSlug(launch.name))}
               >
                 ⬡ Share
@@ -345,9 +342,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                 </div>
               ))}
               {user ? (
-                <div className="mt-3.5 flex gap-2">
+                <div className="mt-3.5 flex flex-col gap-2 sm:flex-row">
                   <input className="inp flex-1 py-2 px-3 text-[13px]" placeholder="Add a technical comment or question…" />
-                  <button className="btn btn-primary btn-sm" onClick={() => showToast("Comment posted!", "success")}>
+                  <button className="btn btn-primary btn-sm w-full justify-center sm:w-auto" onClick={() => showToast("Comment posted!", "success")}>
                     Post
                   </button>
                 </div>
@@ -457,28 +454,28 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         <Link className="link-arrow" href="/launch" style={{ marginBottom: 20 }}>
           ← Back to Launch
         </Link>
-        <div className="path-badge" style={{ marginLeft: 12 }}>
-          /root/launch/{p.slug}
-        </div>
+        <div className="path-badge ml-0 sm:ml-3">/root/launch/{p.slug}</div>
 
-        <div className="mb-5 flex flex-wrap items-start gap-5">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border-2 border-[#1C1C27] bg-paper text-2xl font-bold">
-            {p.name.charAt(0)}
-          </div>
-          <div className="flex-1">
-            <div className="mb-1.5 flex flex-wrap items-center gap-2.5">
-              <h1 className="mb-0 text-[36px]">{p.name}</h1>
-              <span className="topic-pill">{primaryCategory}</span>
-              <span className="ftag" style={{ background: p.stage === "Seed" ? "#D4EDDA" : "#EAF0F6" }}>
-                {p.stage}
-              </span>
-              <span className="ftag bg-paper font-bold text-[#15803D]">${p.funding.toLocaleString()}</span>
+        <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:gap-5">
+          <div className="flex items-start gap-3 sm:flex-1">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border-2 border-[#1C1C27] bg-paper text-xl font-bold sm:h-16 sm:w-16 sm:text-2xl">
+              {p.name.charAt(0)}
             </div>
-            <p className="text-base leading-[1.6] text-muted">{p.description}</p>
+            <div className="min-w-0 flex-1">
+              <h1 className="mb-2 text-[34px] leading-none sm:text-[36px]">{p.name}</h1>
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                <span className="topic-pill">{primaryCategory}</span>
+                <span className="ftag" style={{ background: p.stage === "Seed" ? "#D4EDDA" : "#EAF0F6" }}>
+                  {p.stage}
+                </span>
+                <span className="ftag bg-paper font-bold text-[#15803D]">${p.funding.toLocaleString()}</span>
+              </div>
+              <p className="text-sm leading-[1.6] text-muted sm:text-base">{p.description}</p>
+            </div>
           </div>
-          <div className="shrink-0 flex items-center gap-2">
+          <div className="shrink-0 flex w-full items-center gap-2 sm:w-auto">
             <button
-              className={p.voted ? "btn btn-ghost" : "btn btn-outline"}
+              className={`${p.voted ? "btn btn-ghost" : "btn btn-outline"} flex-1 justify-center sm:flex-none`}
               style={{ ...(p.voted ? { background: "#D4EDDA" } : {}), padding: "8px 14px", gap: 6 }}
               onClick={handleApiVote}
               disabled={voting}
@@ -486,7 +483,11 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               <span className="text-[16px] leading-none">{voting ? "…" : "▲"}</span>
               <span className="font-['Space_Mono',monospace] text-xs font-bold text-[#E8323C]">{p.voteCount.toLocaleString()}</span>
             </button>
-            <button className="btn btn-ghost btn-sm" style={{ fontSize: 12 }} onClick={() => shareLaunch(p.name, p.slug)}>
+            <button
+              className="btn btn-ghost btn-sm flex-1 justify-center sm:flex-none"
+              style={{ fontSize: 12 }}
+              onClick={() => shareLaunch(p.name, p.slug)}
+            >
               <Share2 size={14} />
               Share
             </button>
@@ -766,7 +767,7 @@ function DiscussionSection({
                 <span className="ml-2 opacity-50">{formatSubmittedDateTime(c.createdAt)}</span>
               </div>
               {editId === c.id ? (
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <input
                     className="inp flex-1 py-1.5 px-2.5 text-[13px]"
                     value={editText}
@@ -774,10 +775,14 @@ function DiscussionSection({
                     onKeyDown={(e) => e.key === "Enter" && handleUpdate(c.id)}
                     autoFocus
                   />
-                  <button className="btn btn-primary btn-sm" onClick={() => handleUpdate(c.id)} disabled={updatingComment}>
+                  <button
+                    className="btn btn-primary btn-sm w-full justify-center sm:w-auto"
+                    onClick={() => handleUpdate(c.id)}
+                    disabled={updatingComment}
+                  >
                     {updatingComment ? "Saving…" : "Save"}
                   </button>
-                  <button className="btn btn-ghost btn-sm" onClick={() => setEditId(null)} disabled={updatingComment}>
+                  <button className="btn btn-ghost btn-sm w-full justify-center sm:w-auto" onClick={() => setEditId(null)} disabled={updatingComment}>
                     Cancel
                   </button>
                 </div>
@@ -796,17 +801,26 @@ function DiscussionSection({
                       {openMenuId === c.id && (
                         <>
                           <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
-                          <div className="absolute right-0 top-full z-20 mt-1 min-w-32.5 rounded-lg border-2 border-[#1C1C27] bg-white shadow-md" style={{ boxShadow: "2px 2px 0 #1C1C27" }}>
+                          <div
+                            className="absolute right-0 top-full z-20 mt-1 min-w-32.5 rounded-lg border-2 border-[#1C1C27] bg-white shadow-md"
+                            style={{ boxShadow: "2px 2px 0 #1C1C27" }}
+                          >
                             <button
                               className="flex w-full items-center gap-2 px-3 py-2 text-[13px] font-medium hover:bg-[#F5F3EE]"
-                              onClick={() => { handleEdit(c); setOpenMenuId(null); }}
+                              onClick={() => {
+                                handleEdit(c);
+                                setOpenMenuId(null);
+                              }}
                             >
                               <Pencil size={13} className="text-muted" />
                               Edit
                             </button>
                             <button
                               className="flex w-full items-center gap-2 px-3 py-2 text-[13px] font-medium text-[#E8323C] hover:bg-[#FFF0F0]"
-                              onClick={() => { handleDelete(c.id); setOpenMenuId(null); }}
+                              onClick={() => {
+                                handleDelete(c.id);
+                                setOpenMenuId(null);
+                              }}
                               disabled={deletingComment}
                             >
                               <Trash2 size={13} />
@@ -824,7 +838,7 @@ function DiscussionSection({
         ))}
 
         {user ? (
-          <div className="mt-3.5 flex gap-2">
+          <div className="mt-3.5 flex flex-col gap-2 sm:flex-row">
             <input
               className="inp flex-1 py-2 px-3 text-[13px]"
               placeholder="Add a technical comment or question…"
@@ -832,7 +846,7 @@ function DiscussionSection({
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handlePost()}
             />
-            <button className="btn btn-primary btn-sm" onClick={handlePost} disabled={posting || !text.trim()}>
+            <button className="btn btn-primary btn-sm w-full justify-center sm:w-auto" onClick={handlePost} disabled={posting || !text.trim()}>
               Post
             </button>
           </div>

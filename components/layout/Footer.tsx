@@ -67,15 +67,15 @@ export const FooterSubscribe = () => {
         {done ? (
           <div className="font-mono text-xs text-green-700 tracking-[0.05em]">✓ YOU&apos;RE IN</div>
         ) : (
-          <div className="flex gap-2 shrink-0">
+          <div className="flex w-full sm:w-auto flex-col sm:flex-row gap-2 shrink-0">
             <input
-              className="inp w-60! py-2.25! px-3.5! text-sm!"
+              className="inp w-full sm:w-60! py-2.25! px-3.5! text-sm!"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your@email.com"
               onKeyDown={(e) => e.key === "Enter" && submit()}
             />
-            <button className="btn btn-primary btn-sm" onClick={submit}>
+            <button className="btn btn-primary btn-sm w-full sm:w-auto" onClick={submit}>
               Subscribe →
             </button>
           </div>

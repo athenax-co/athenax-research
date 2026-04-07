@@ -3,11 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import WindowCard from "@/components/ui/WindowCard";
-import BookmarkButton from "@/components/BookmarkButton";
 import { useGlobal } from "@/components/GlobalProvider";
-import { SEED_LAUNCHES } from "@/data/seed";
-import { bookmarkSvc, dbNow, dbRead, dbUid, dbWrite, formatShortDate, notifSvc } from "@/utils/lib";
-import { useMyProducts } from "@/hooks/queries/useProduct";
+import { dbNow, dbRead, dbUid, dbWrite, formatShortDate, notifSvc } from "@/utils/lib";
+import { useMyProducts, useMyVotedProducts, useMyBookmarkedProducts } from "@/hooks/queries/useProduct";
+import type { ProductSummary } from "@/types/product";
 
 const FOLLOW_KEYS = {
   FOLLOWS: "ax_follows_v1",
@@ -53,23 +52,17 @@ const followSvc = {
   },
 };
 
-function LaunchMini({ launch, user, showToast }: { launch: any; user: any; showToast: (text: string, type?: string) => void }) {
-  if (!launch) return null;
-
+function ProductMini({ product }: { product: ProductSummary }) {
   return (
-    <Link className="archive-row cursor-pointer no-underline text-inherit" href={`/launch/${launch.id}`}>
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border-[1.5px] border-ink bg-paper text-[13px] font-bold">
-        {launch.name.charAt(0)}
+    <Link className="archive-row cursor-pointer no-underline text-inherit" href={`/launch/${product.slug}`}>
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-md border-[1.5px] border-ink bg-paper text-[13px] font-bold">
+        {product.name.charAt(0)}
       </div>
       <div className="ml-2.5 flex-1">
-        <div className="archive-title text-sm">{launch.name}</div>
-        <div className="archive-meta">
-          {launch.sector} · {launch.stage} · ▲ {launch.votes}
-        </div>
+        <div className="archive-title text-sm">{product.name}</div>
+        <div className="archive-meta">{product.stage} · ▲ {product.voteCount}</div>
       </div>
-      <div className="flex shrink-0 gap-1.5">
-        <BookmarkButton user={user} launch={launch} showToast={showToast} size="sm" />
-      </div>
+      <span className="ftag shrink-0 bg-yellow text-[11px] font-semibold">★ {product.bookmarkCount}</span>
     </Link>
   );
 }
@@ -124,8 +117,10 @@ function FounderSubmissions() {
 }
 
 export default function Page() {
-  const { user, showToast } = useGlobal();
+  const { user } = useGlobal();
   const [, setTick] = useState(0);
+  const { data: bookmarkedProducts, isLoading: bookmarksLoading } = useMyBookmarkedProducts();
+  const { data: votedProducts, isLoading: votesLoading } = useMyVotedProducts();
 
   if (!user)
     return (
@@ -141,19 +136,8 @@ export default function Page() {
       </div>
     );
 
-  const bookmarks = bookmarkSvc.getAll(user.id);
   const follows = followSvc.getAll(user.id);
   const notifs = notifSvc.getAll(user.id).slice(0, 10);
-  const votes = dbRead(FOLLOW_KEYS.VOTES, []).filter((v: any) => v.userId === user.id);
-
-  const bookmarkedLaunches = bookmarks.map((b: any) => SEED_LAUNCHES.find((l) => l.id === b.launchId)).filter(Boolean);
-
-  const votedLaunches = votes.map((v: any) => SEED_LAUNCHES.find((l) => l.id === v.launchId)).filter(Boolean);
-
-  const followedLaunches = follows
-    .filter((f) => f.type === "launch")
-    .map((f) => SEED_LAUNCHES.find((l) => l.id === f.targetId))
-    .filter(Boolean);
 
   const followedResearchers = follows.filter((f) => f.type === "researcher");
   const followedTopics = follows.filter((f) => f.type === "topic");
@@ -172,8 +156,8 @@ export default function Page() {
 
       <div className="grid-4 mb-7 gap-3.5">
         {[
-          { label: "Saved Products", value: bookmarks.length },
-          { label: "Products Voted", value: votes.length },
+          { label: "Saved Products", value: bookmarkedProducts?.length ?? 0 },
+          { label: "Products Voted", value: votedProducts?.length ?? 0 },
           { label: "Following", value: follows.length },
           { label: "Notifications", value: notifSvc.unread(user.id) },
         ].map((s) => (
@@ -188,8 +172,10 @@ export default function Page() {
         <div>
           <div className="mb-8">
             <WindowCard label="SAVED_PRODUCTS.SYS">
-              {bookmarkedLaunches.length > 0 ? (
-                bookmarkedLaunches.map((l: any) => <LaunchMini key={l.id} launch={l} user={user} showToast={showToast} />)
+              {bookmarksLoading ? (
+                <p className="text-[13px] text-muted">Loading…</p>
+              ) : bookmarkedProducts && bookmarkedProducts.length > 0 ? (
+                bookmarkedProducts.map((p) => <ProductMini key={p.id} product={p} />)
               ) : (
                 <div className="flex flex-wrap gap-2.5">
                   <p className="mb-3 text-[13px] text-muted">No saved products yet.</p>
@@ -203,8 +189,10 @@ export default function Page() {
 
           <div className="mb-8">
             <WindowCard label="VOTED_PRODUCTS.SYS">
-              {votedLaunches.length > 0 ? (
-                votedLaunches.map((l: any) => <LaunchMini key={l.id} launch={l} user={user} showToast={showToast} />)
+              {votesLoading ? (
+                <p className="text-[13px] text-muted">Loading…</p>
+              ) : votedProducts && votedProducts.length > 0 ? (
+                votedProducts.map((p) => <ProductMini key={p.id} product={p} />)
               ) : (
                 <div>
                   <p className="mb-3 text-[13px] text-muted">Vote on launches to build your activity history.</p>
@@ -215,16 +203,6 @@ export default function Page() {
               )}
             </WindowCard>
           </div>
-
-          {followedLaunches.length > 0 && (
-            <div className="mb-8">
-              <WindowCard label="FOLLOWED_PRODUCTS.SYS">
-                {followedLaunches.map((l: any) => (
-                  <LaunchMini key={l.id} launch={l} user={user} showToast={showToast} />
-                ))}
-              </WindowCard>
-            </div>
-          )}
         </div>
 
         <div>

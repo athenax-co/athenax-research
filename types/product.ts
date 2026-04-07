@@ -52,6 +52,17 @@ export interface ProductDetailOut extends ProductOut {
   interested: boolean | null;
 }
 
+export interface ProductSummary {
+  id: number;
+  slug: string;
+  name: string;
+  stage: string;
+  categoryIds: number[];
+  bookmarkCount: number;
+  voteCount: number;
+  createdAt: string;
+}
+
 export interface ProductComment {
   id: number;
   productId: number;

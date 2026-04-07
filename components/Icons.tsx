@@ -172,6 +172,43 @@ const IconBriefcaseSmall = ({ color = "#1C1C27" }) => (
   </svg>
 );
 
+const IconNotification = ({ size = 18, color = "#1C1C27" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+  </svg>
+);
+
+const IconAdmin = ({ size = 18, color = "#E8323C" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M12 3v2" />
+    <path d="M12 19v2" />
+    <path d="M3 12h2" />
+    <path d="M19 12h2" />
+    <path d="m5.64 5.64 1.41 1.41" />
+    <path d="m16.95 16.95 1.41 1.41" />
+    <path d="m5.64 18.36 1.41-1.41" />
+    <path d="m16.95 7.05 1.41-1.41" />
+  </svg>
+);
+
+const IconSponsorDashboard = ({ size = 18, color = "#1C1C27" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 4 18 10 12 16 6 10 12 4Z" />
+    <path d="M12 8.5 13.5 10 12 11.5 10.5 10 12 8.5Z" />
+  </svg>
+);
+
+const IconDashboardGrid = ({ size = 18, color = "#1C1C27" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="5" y="5" width="6" height="6" />
+    <rect x="13" y="5" width="6" height="6" />
+    <rect x="5" y="13" width="6" height="6" />
+    <rect x="13" y="13" width="6" height="6" />
+  </svg>
+);
+
 interface IconProps {
   name: string;
   size?: number;
@@ -285,6 +322,10 @@ export {
   IconTalentSmall,
   IconPaperSmall,
   IconBriefcaseSmall,
+  IconNotification,
+  IconAdmin,
+  IconSponsorDashboard,
+  IconDashboardGrid,
   MediaIcon,
   ContentIcon,
   AthenaXMark,

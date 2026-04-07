@@ -6,7 +6,7 @@ import WindowCard from "@/components/ui/WindowCard";
 import Modal from "@/components/ui/Modal";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useProducts } from "@/hooks/queries/useProduct";
-import { SEED_BOUNTIES, SEED_PAPERS, SEED_RESEARCHERS, SEED_SPONSORS, SEED_STARTUPS } from "@/data/seed";
+import { SEED_BOUNTIES, SEED_LAUNCHES, SEED_PAPERS, SEED_RESEARCHERS, SEED_SPONSORS, SEED_STARTUPS } from "@/data/seed";
 import { cn } from "@/utils/lib";
 
 type AdminTab = "launches" | "papers" | "cohorts" | "bounties" | "platform";
@@ -161,7 +161,7 @@ export default function Page() {
               <QueueRow
                 key={product.id}
                 name={product.name}
-                meta={`${product.stage} · ${(product.founders ?? []).map((founder) => `ARS ${founder.ars}`).join(" · ") || `Funding $${product.funding.toLocaleString()}`} · Submitted ${new Date(product.createdAt).toLocaleDateString("en-CA")}`}
+                meta={`${product.stage} · Funding $${product.funding.toLocaleString()} · Founded ${product.founded} · Submitted ${new Date(product.createdAt).toLocaleDateString("en-CA")}`}
                 chips={(product.categories ?? []).map((category) => category.name)}
                 onApprove={() => handleApprove(product.name)}
                 onReject={() => handleReject(product.name)}
@@ -173,7 +173,7 @@ export default function Page() {
                     meta: [
                       { label: "Stage", value: product.stage },
                       { label: "Funding", value: `$${product.funding.toLocaleString()}` },
-                      { label: "Founded", value: product.founded },
+                      { label: "Founded", value: String(product.founded) },
                     ],
                     details: [
                       { label: "GitHub", value: product.github || "Not provided" },

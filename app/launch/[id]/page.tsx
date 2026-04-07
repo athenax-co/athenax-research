@@ -6,7 +6,7 @@ import { SEED_LAUNCHES, SEED_PAPERS } from "@/data/seed";
 import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
 import SEOMeta, { toSlug } from "@/components/SEOMeta";
-import { IconEdit, IconMore, IconPaperSmall, IconShare, IconTrash } from "@/components/Icons";
+import { IconMore, IconPaperSmall, IconShare, IconTrash } from "@/components/Icons";
 import { useGlobal } from "@/components/GlobalProvider";
 import {
   useProductBySlug,
@@ -14,7 +14,6 @@ import {
   useInterestProduct,
   useComments,
   useCreateComment,
-  useUpdateComment,
   useDeleteComment,
 } from "@/hooks/queries/useProduct";
 import type { ProductDetailOut, ProductComment } from "@/types/product";
@@ -34,8 +33,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const apiProductId = apiProduct?.id ?? 0;
   const { data: comments = [] } = useComments(apiProductId);
   const { mutate: createComment, isPending: posting } = useCreateComment(apiProductId);
-  const { mutate: updateComment, isPending: updatingComment } = useUpdateComment(apiProductId);
-  const { mutate: deleteComment, isPending: deletingComment } = useDeleteComment(apiProductId);
+const { mutate: deleteComment, isPending: deletingComment } = useDeleteComment(apiProductId);
 
   // Seed-only vote state
   const [voted, setVoted] = useState(false);
@@ -662,10 +660,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           isAdmin={isAdmin}
           comments={comments}
           posting={posting}
-          updatingComment={updatingComment}
           deletingComment={deletingComment}
           createComment={createComment}
-          updateComment={updateComment}
           deleteComment={deleteComment}
           showToast={showToast}
           user={user}
@@ -681,10 +677,8 @@ function DiscussionSection({
   isAdmin,
   comments,
   posting,
-  updatingComment,
   deletingComment,
   createComment,
-  updateComment,
   deleteComment,
   showToast,
   user,
@@ -694,17 +688,13 @@ function DiscussionSection({
   isAdmin: boolean;
   comments: ProductComment[];
   posting: boolean;
-  updatingComment: boolean;
   deletingComment: boolean;
   createComment: (text: string, opts?: any) => void;
-  updateComment: (args: { commentId: number; text: string }, opts?: any) => void;
   deleteComment: (commentId: number, opts?: any) => void;
   showToast: (msg: string, type: string) => void;
   user: any;
 }) {
   const [text, setText] = useState("");
-  const [editId, setEditId] = useState<number | null>(null);
-  const [editText, setEditText] = useState("");
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   const handlePost = () => {
@@ -718,33 +708,12 @@ function DiscussionSection({
     });
   };
 
-  const handleEdit = (c: ProductComment) => {
-    setEditId(c.id);
-    setEditText(c.text);
-  };
-
-  const handleUpdate = (commentId: number) => {
-    if (!editText.trim()) return;
-    updateComment(
-      { commentId, text: editText.trim() },
-      {
-        onSuccess: () => {
-          setEditId(null);
-          showToast("Comment updated.", "success");
-        },
-        onError: () => showToast("Failed to update comment.", "error"),
-      }
-    );
-  };
-
   const handleDelete = (commentId: number) => {
     deleteComment(commentId, {
       onSuccess: () => showToast("Comment deleted.", "info"),
       onError: () => showToast("Failed to delete comment.", "error"),
     });
   };
-
-  const canModify = (commentUserId: number) => isAdmin || userId === commentUserId;
 
   return (
     <div className="mt-8">
@@ -765,34 +734,12 @@ function DiscussionSection({
                 {c.userId === userId ? (user?.name ?? "You") : `User #${c.userId}`}
                 <span className="ml-2 opacity-50">{formatSubmittedDateTime(c.createdAt)}</span>
               </div>
-              {editId === c.id ? (
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <input
-                    className="inp flex-1 py-1.5 px-2.5 text-[13px]"
-                    value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleUpdate(c.id)}
-                    autoFocus
-                  />
-                  <button
-                    className="btn btn-primary btn-sm w-full justify-center sm:w-auto"
-                    onClick={() => handleUpdate(c.id)}
-                    disabled={updatingComment}
-                  >
-                    {updatingComment ? "Saving…" : "Save"}
-                  </button>
-                  <button className="btn btn-ghost btn-sm w-full justify-center sm:w-auto" onClick={() => setEditId(null)} disabled={updatingComment}>
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-start justify-between gap-2">
+              <div className="flex items-start justify-between gap-2">
                   <div className="text-sm leading-[1.6] text-[#1C1C27]">{c.text}</div>
-                  {canModify(c.userId) && (
+                  {isAdmin && (
                     <div className="relative shrink-0">
                       <button
-                        className="btn btn-ghost btn-sm"
-                        style={{ padding: "2px 6px" }}
+                        className="btn btn-ghost btn-sm px-2 py-1"
                         onClick={() => setOpenMenuId(openMenuId === c.id ? null : c.id)}
                       >
                         <IconMore size={15} />
@@ -804,16 +751,6 @@ function DiscussionSection({
                             className="absolute right-0 top-full z-20 mt-1 min-w-32.5 rounded-lg border-2 border-[#1C1C27] bg-white shadow-md"
                             style={{ boxShadow: "2px 2px 0 #1C1C27" }}
                           >
-                            <button
-                              className="flex w-full items-center gap-2 px-3 py-2 text-[13px] font-medium hover:bg-[#F5F3EE]"
-                              onClick={() => {
-                                handleEdit(c);
-                                setOpenMenuId(null);
-                              }}
-                            >
-                              <IconEdit size={13} />
-                              Edit
-                            </button>
                             <button
                               className="flex w-full items-center gap-2 px-3 py-2 text-[13px] font-medium text-[#E8323C] hover:bg-[#FFF0F0]"
                               onClick={() => {
@@ -831,7 +768,6 @@ function DiscussionSection({
                     </div>
                   )}
                 </div>
-              )}
             </div>
           </div>
         ))}

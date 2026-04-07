@@ -1,13 +1,12 @@
 "use client";
 
 import { use, useState } from "react";
-import { Share2, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { SEED_LAUNCHES, SEED_PAPERS } from "@/data/seed";
 import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
 import SEOMeta, { toSlug } from "@/components/SEOMeta";
-import { IconPaperSmall } from "@/components/Icons";
+import { IconEdit, IconMore, IconPaperSmall, IconShare, IconTrash } from "@/components/Icons";
 import { useGlobal } from "@/components/GlobalProvider";
 import {
   useProductBySlug,
@@ -148,7 +147,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       <div className="ml-2 flex-1">
                         <div className="archive-title text-[13px]">{p.title}</div>
                         <div className="archive-meta">
-                          {p.year} // {p.topic} // {p.citations} cites
+                          {p.year} · {p.topic} · {p.citations} cites
                         </div>
                       </div>
                       <span className="text-sm text-muted">→</span>
@@ -488,7 +487,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               style={{ fontSize: 12 }}
               onClick={() => shareLaunch(p.name, p.slug)}
             >
-              <Share2 size={14} />
+              <IconShare size={14} />
               Share
             </button>
           </div>
@@ -796,7 +795,7 @@ function DiscussionSection({
                         style={{ padding: "2px 6px" }}
                         onClick={() => setOpenMenuId(openMenuId === c.id ? null : c.id)}
                       >
-                        <MoreHorizontal size={15} />
+                        <IconMore size={15} />
                       </button>
                       {openMenuId === c.id && (
                         <>
@@ -812,7 +811,7 @@ function DiscussionSection({
                                 setOpenMenuId(null);
                               }}
                             >
-                              <Pencil size={13} className="text-muted" />
+                              <IconEdit size={13} />
                               Edit
                             </button>
                             <button
@@ -823,7 +822,7 @@ function DiscussionSection({
                               }}
                               disabled={deletingComment}
                             >
-                              <Trash2 size={13} />
+                              <IconTrash size={13} />
                               {deletingComment ? "Deleting…" : "Delete"}
                             </button>
                           </div>

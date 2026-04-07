@@ -1,15 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Package, FileText, ArrowUpRight } from "lucide-react";
 import WindowCard from "@/components/ui/WindowCard";
-import { IconPaperSmall } from "@/components/Icons";
+import { IconArrowUpRight, IconFileTextSmall, IconPackageSmall, IconPaperSmall } from "@/components/Icons";
 import { useMyProducts } from "@/hooks/queries/useProduct";
 import { authSvc } from "@/lib/db-helper";
 import type { SessionUser } from "@/types/auth";
 import SubmitProductButton from "@/components/SubmitProductModal";
 
-function ProductsList({ userId }: { userId: number }) {
+function ProductsList() {
   const { data: products = [], isLoading } = useMyProducts();
 
   if (isLoading) {
@@ -36,7 +35,7 @@ function ProductsList({ userId }: { userId: number }) {
       {products.map((p) => (
         <Link key={p.id} href={`/launch/${p.slug}`} className="archive-row mb-2 cursor-pointer text-inherit no-underline">
           <div className="archive-icon bg-paper flex items-center justify-center">
-            <Package size={14} className="text-muted" />
+            <IconPackageSmall />
           </div>
           <div className="flex-1">
             <div className="archive-title text-sm">{p.name}</div>
@@ -51,7 +50,7 @@ function ProductsList({ userId }: { userId: number }) {
       ))}
       <div className="mt-3 flex items-center gap-2">
         <Link href="/launch" className="btn btn-ghost btn-sm flex items-center gap-1.5">
-          View All on Launch <ArrowUpRight size={12} />
+          View All on Launch <IconArrowUpRight />
         </Link>
         <SubmitProductButton />
       </div>
@@ -105,17 +104,17 @@ export default function ProfileSubmissions({ user }: { user: SessionUser }) {
       {(isFounder || isAdmin) && (
         <WindowCard label="MY_PRODUCTS.SYS" className="mb-5">
           <div className="mb-3 flex items-center gap-2 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">
-            <Package size={11} />
+            <IconPackageSmall size={11} />
             SUBMITTED PRODUCTS
           </div>
-          <ProductsList userId={user.id} />
+          <ProductsList />
         </WindowCard>
       )}
 
       {(isResearcher || isAdmin) && (
         <WindowCard label="MY_PAPERS.SYS" className="mb-5">
           <div className="mb-3 flex items-center gap-2 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">
-            <FileText size={11} />
+            <IconFileTextSmall />
             SUBMITTED PAPERS
           </div>
           <PapersList userId={user.id} />

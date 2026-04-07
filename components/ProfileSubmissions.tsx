@@ -7,6 +7,7 @@ import { IconPaperSmall } from "@/components/Icons";
 import { useMyProducts } from "@/hooks/queries/useProduct";
 import { authSvc } from "@/lib/db-helper";
 import type { SessionUser } from "@/types/auth";
+import SubmitProductButton from "@/components/SubmitProductModal";
 
 function ProductsList({ userId }: { userId: number }) {
   const { data: products = [], isLoading } = useMyProducts();
@@ -25,9 +26,7 @@ function ProductsList({ userId }: { userId: number }) {
     return (
       <div>
         <p className="mb-3.5 text-sm text-muted">No products submitted yet.</p>
-        <Link href="/launch" className="btn btn-primary btn-sm">
-          Submit a Product →
-        </Link>
+        <SubmitProductButton label="Submit a Product →" />
       </div>
     );
   }
@@ -54,9 +53,7 @@ function ProductsList({ userId }: { userId: number }) {
         <Link href="/launch" className="btn btn-ghost btn-sm flex items-center gap-1.5">
           View All on Launch <ArrowUpRight size={12} />
         </Link>
-        <Link href="/launch" className="btn btn-primary btn-sm">
-          + Submit a Product
-        </Link>
+        <SubmitProductButton />
       </div>
     </div>
   );

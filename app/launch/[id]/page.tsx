@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
+import { Share2, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { SEED_LAUNCHES, SEED_PAPERS } from "@/data/seed";
 import WindowCard from "@/components/ui/WindowCard";
@@ -8,7 +9,15 @@ import BookmarkButton from "@/components/BookmarkButton";
 import SEOMeta, { toSlug } from "@/components/SEOMeta";
 import { IconPaperSmall } from "@/components/Icons";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useProductBySlug, useVoteProduct, useInterestProduct, useComments, useCreateComment, useUpdateComment, useDeleteComment } from "@/hooks/queries/useProduct";
+import {
+  useProductBySlug,
+  useVoteProduct,
+  useInterestProduct,
+  useComments,
+  useCreateComment,
+  useUpdateComment,
+  useDeleteComment,
+} from "@/hooks/queries/useProduct";
 import type { ProductDetailOut, ProductComment } from "@/types/product";
 import { formatSubmittedDateTime } from "@/utils/lib";
 
@@ -21,17 +30,44 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
   // Always call hooks (React rules) — gated via enabled
   const { data: apiProduct, isLoading: apiLoading } = useProductBySlug(isApiProduct ? id : "");
-  const { mutate: vote } = useVoteProduct();
-  const { mutate: interest } = useInterestProduct();
+  const { mutate: vote, isPending: voting } = useVoteProduct();
+  const { mutate: interest, isPending: registeringInterest } = useInterestProduct();
   const apiProductId = apiProduct?.id ?? 0;
   const { data: comments = [] } = useComments(apiProductId);
   const { mutate: createComment, isPending: posting } = useCreateComment(apiProductId);
-  const { mutate: updateComment } = useUpdateComment(apiProductId);
-  const { mutate: deleteComment } = useDeleteComment(apiProductId);
+  const { mutate: updateComment, isPending: updatingComment } = useUpdateComment(apiProductId);
+  const { mutate: deleteComment, isPending: deletingComment } = useDeleteComment(apiProductId);
 
   // Seed-only vote state
   const [voted, setVoted] = useState(false);
   const [voteCount, setVoteCount] = useState(seedLaunch?.votes ?? 0);
+  const actionButtonStyle = { minHeight: 82, padding: "14px 22px" };
+
+  const shareLaunch = async (name: string, slug: string) => {
+    const shareUrl = `${window.location.origin}/launch/${slug}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: name,
+          text: `Check out ${name} on AthenaX`,
+          url: shareUrl,
+        });
+        return;
+      }
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        showToast("Link copied!", "success");
+        return;
+      }
+
+      showToast("Sharing is not supported on this device.", "info");
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      showToast("Could not share right now. Please try again.", "error");
+    }
+  };
 
   // ─── Seed product rendering (unchanged) ──────────────────────────────────────
 
@@ -40,8 +76,14 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     const linkedPapers = SEED_PAPERS.filter((p) => launch.papers.includes(p.title));
 
     const handleVote = () => {
-      if (!user) { showToast("Sign in to upvote.", "error"); return; }
-      if (voted) { showToast("Already upvoted.", "info"); return; }
+      if (!user) {
+        showToast("Sign in to upvote.", "error");
+        return;
+      }
+      if (voted) {
+        showToast("Already upvoted.", "info");
+        return;
+      }
       setVoted(true);
       setVoteCount((v) => v + 1);
       showToast(`Upvoted ${launch.name}!`, "success");
@@ -77,22 +119,19 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               </div>
               <p className="text-base leading-[1.6] text-muted">{launch.desc}</p>
             </div>
-            <div className="shrink-0 text-center">
+            <div className="shrink-0 text-center flex flex-col gap-2">
               <button
                 className={voted ? "btn btn-ghost" : "btn btn-outline"}
-                style={{ ...(voted ? { background: "#D4EDDA" } : {}), flexDirection: "column", padding: "14px 22px" }}
+                style={{ ...(voted ? { background: "#D4EDDA" } : {}), ...actionButtonStyle, flexDirection: "column" }}
                 onClick={handleVote}
               >
                 <div className="text-[22px] leading-none">▲</div>
                 <div className="mt-1 font-['Space_Mono',monospace] text-sm font-bold text-[#E8323C]">{voteCount.toLocaleString()}</div>
               </button>
               <button
-                className="btn btn-ghost btn-sm"
-                style={{ fontSize: 11, padding: "5px 10px" }}
-                onClick={() => {
-                  navigator.clipboard && navigator.clipboard.writeText(`${launch.name} | athenax.io/launch/${toSlug(launch.name)}`);
-                  showToast("Link copied!", "success");
-                }}
+                className="btn btn-ghost"
+                style={{ ...actionButtonStyle, fontSize: 12 }}
+                onClick={() => shareLaunch(launch.name, toSlug(launch.name))}
               >
                 ⬡ Share
               </button>
@@ -330,7 +369,28 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         <Link className="link-arrow" href="/launch" style={{ marginBottom: 20 }}>
           ← Back to Launch
         </Link>
-        <p className="text-[13px] text-muted">Loading…</p>
+        <div className="animate-pulse">
+          <div className="mb-5 flex flex-wrap items-start gap-5">
+            <div className="h-16 w-16 shrink-0 rounded-xl bg-[#E8E4DC]" />
+            <div className="flex-1">
+              <div className="mb-2 h-8 w-56 rounded bg-[#E8E4DC]" />
+              <div className="h-4 w-full rounded bg-[#E8E4DC]" />
+              <div className="mt-1 h-4 w-3/4 rounded bg-[#E8E4DC]" />
+            </div>
+            <div className="h-16 w-16 shrink-0 rounded bg-[#E8E4DC]" />
+          </div>
+          <hr className="divider" />
+          <div className="grid-2 gap-5.5">
+            <div className="space-y-5">
+              <div className="h-40 rounded-xl bg-[#E8E4DC]" />
+              <div className="h-32 rounded-xl bg-[#E8E4DC]" />
+            </div>
+            <div className="space-y-5">
+              <div className="h-32 rounded-xl bg-[#E8E4DC]" />
+              <div className="h-40 rounded-xl bg-[#E8E4DC]" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -353,20 +413,29 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const isAdmin = (user?.role as string) === "admin";
 
   const handleApiVote = () => {
-    if (!user) { showToast("Sign in to upvote.", "error"); return; }
-    if (p.voted) { showToast("Already upvoted.", "info"); return; }
+    if (!user) {
+      showToast("Sign in to upvote.", "error");
+      return;
+    }
+    const newVoted = !p.voted;
     vote(
-      { id: p.id, voted: true },
+      { id: p.id, voted: newVoted },
       {
-        onSuccess: () => showToast(`Upvoted ${p.name}!`, "success"),
+        onSuccess: () => showToast(newVoted ? `Upvoted ${p.name}!` : "Vote removed.", "success"),
         onError: () => showToast("Failed to vote. Please try again.", "error"),
       }
     );
   };
 
   const handleApiInterest = () => {
-    if (!user) { showToast("Sign in to register interest.", "error"); return; }
-    if (!isInvestor) { showToast("Investor access required.", "error"); return; }
+    if (!user) {
+      showToast("Sign in to register interest.", "error");
+      return;
+    }
+    if (!isInvestor) {
+      showToast("Investor access required.", "error");
+      return;
+    }
     const newInterested = !p.interested;
     interest(
       { id: p.id, interested: newInterested },
@@ -407,24 +476,19 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             </div>
             <p className="text-base leading-[1.6] text-muted">{p.description}</p>
           </div>
-          <div className="shrink-0 text-center">
+          <div className="shrink-0 flex items-center gap-2">
             <button
               className={p.voted ? "btn btn-ghost" : "btn btn-outline"}
-              style={{ ...(p.voted ? { background: "#D4EDDA" } : {}), flexDirection: "column", padding: "14px 22px" }}
+              style={{ ...(p.voted ? { background: "#D4EDDA" } : {}), padding: "8px 14px", gap: 6 }}
               onClick={handleApiVote}
+              disabled={voting}
             >
-              <div className="text-[22px] leading-none">▲</div>
-              <div className="mt-1 font-['Space_Mono',monospace] text-sm font-bold text-[#E8323C]">{p.voteCount.toLocaleString()}</div>
+              <span className="text-[16px] leading-none">{voting ? "…" : "▲"}</span>
+              <span className="font-['Space_Mono',monospace] text-xs font-bold text-[#E8323C]">{p.voteCount.toLocaleString()}</span>
             </button>
-            <button
-              className="btn btn-ghost btn-sm"
-              style={{ fontSize: 11, padding: "5px 10px" }}
-              onClick={() => {
-                navigator.clipboard && navigator.clipboard.writeText(`${p.name} | athenax.io/launch/${p.slug}`);
-                showToast("Link copied!", "success");
-              }}
-            >
-              ⬡ Share
+            <button className="btn btn-ghost btn-sm" style={{ fontSize: 12 }} onClick={() => shareLaunch(p.name, p.slug)}>
+              <Share2 size={14} />
+              Share
             </button>
           </div>
         </div>
@@ -526,8 +590,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     className={p.interested ? "btn btn-ghost justify-center" : "btn btn-primary justify-center"}
                     style={p.interested ? { background: "#D4EDDA" } : {}}
                     onClick={handleApiInterest}
+                    disabled={registeringInterest}
                   >
-                    ★ {p.interested ? "Interest Registered" : "Register Investor Interest"}
+                    ★ {registeringInterest ? "Registering…" : p.interested ? "Interest Registered" : "Register Investor Interest"}
                   </button>
                 )}
                 <BookmarkButton user={user} launch={p} showToast={showToast} size="sm" useApi initialBookmarked={p.bookmarked} />
@@ -582,8 +647,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   className={p.interested ? "btn btn-ghost btn-sm w-full justify-center" : "btn btn-primary btn-sm w-full justify-center"}
                   style={p.interested ? { background: "#D4EDDA" } : {}}
                   onClick={handleApiInterest}
+                  disabled={registeringInterest}
                 >
-                  ★ {p.interested ? "Interest Registered" : "Register Investor Interest"}
+                  ★ {registeringInterest ? "Registering…" : p.interested ? "Interest Registered" : "Register Investor Interest"}
                 </button>
               </WindowCard>
             )}
@@ -596,6 +662,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           isAdmin={isAdmin}
           comments={comments}
           posting={posting}
+          updatingComment={updatingComment}
+          deletingComment={deletingComment}
           createComment={createComment}
           updateComment={updateComment}
           deleteComment={deleteComment}
@@ -613,6 +681,8 @@ function DiscussionSection({
   isAdmin,
   comments,
   posting,
+  updatingComment,
+  deletingComment,
   createComment,
   updateComment,
   deleteComment,
@@ -624,6 +694,8 @@ function DiscussionSection({
   isAdmin: boolean;
   comments: ProductComment[];
   posting: boolean;
+  updatingComment: boolean;
+  deletingComment: boolean;
   createComment: (text: string, opts?: any) => void;
   updateComment: (args: { commentId: number; text: string }, opts?: any) => void;
   deleteComment: (commentId: number, opts?: any) => void;
@@ -633,23 +705,36 @@ function DiscussionSection({
   const [text, setText] = useState("");
   const [editId, setEditId] = useState<number | null>(null);
   const [editText, setEditText] = useState("");
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   const handlePost = () => {
     if (!text.trim()) return;
     createComment(text.trim(), {
-      onSuccess: () => { setText(""); showToast("Comment posted!", "success"); },
+      onSuccess: () => {
+        setText("");
+        showToast("Comment posted!", "success");
+      },
       onError: () => showToast("Failed to post comment.", "error"),
     });
   };
 
-  const handleEdit = (c: ProductComment) => { setEditId(c.id); setEditText(c.text); };
+  const handleEdit = (c: ProductComment) => {
+    setEditId(c.id);
+    setEditText(c.text);
+  };
 
   const handleUpdate = (commentId: number) => {
     if (!editText.trim()) return;
-    updateComment({ commentId, text: editText.trim() }, {
-      onSuccess: () => { setEditId(null); showToast("Comment updated.", "success"); },
-      onError: () => showToast("Failed to update comment.", "error"),
-    });
+    updateComment(
+      { commentId, text: editText.trim() },
+      {
+        onSuccess: () => {
+          setEditId(null);
+          showToast("Comment updated.", "success");
+        },
+        onError: () => showToast("Failed to update comment.", "error"),
+      }
+    );
   };
 
   const handleDelete = (commentId: number) => {
@@ -668,9 +753,7 @@ function DiscussionSection({
           {comments.length} COMMENT{comments.length !== 1 ? "S" : ""} — DEVELOPER & RESEARCHER DISCUSSION
         </div>
 
-        {comments.length === 0 && (
-          <p className="text-[13px] text-muted">No comments yet. Be the first to share your thoughts.</p>
-        )}
+        {comments.length === 0 && <p className="text-[13px] text-muted">No comments yet. Be the first to share your thoughts.</p>}
 
         {comments.map((c) => (
           <div key={c.id} className="flex gap-3 border-b border-b-[#D8D4CC] py-3">
@@ -691,18 +774,47 @@ function DiscussionSection({
                     onKeyDown={(e) => e.key === "Enter" && handleUpdate(c.id)}
                     autoFocus
                   />
-                  <button className="btn btn-primary btn-sm" onClick={() => handleUpdate(c.id)}>Save</button>
-                  <button className="btn btn-ghost btn-sm" onClick={() => setEditId(null)}>Cancel</button>
+                  <button className="btn btn-primary btn-sm" onClick={() => handleUpdate(c.id)} disabled={updatingComment}>
+                    {updatingComment ? "Saving…" : "Save"}
+                  </button>
+                  <button className="btn btn-ghost btn-sm" onClick={() => setEditId(null)} disabled={updatingComment}>
+                    Cancel
+                  </button>
                 </div>
               ) : (
                 <div className="flex items-start justify-between gap-2">
                   <div className="text-sm leading-[1.6] text-[#1C1C27]">{c.text}</div>
                   {canModify(c.userId) && (
-                    <div className="flex shrink-0 gap-1">
-                      {userId === c.userId && (
-                        <button className="btn btn-ghost btn-sm" style={{ fontSize: 11, padding: "2px 8px" }} onClick={() => handleEdit(c)}>Edit</button>
+                    <div className="relative shrink-0">
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        style={{ padding: "2px 6px" }}
+                        onClick={() => setOpenMenuId(openMenuId === c.id ? null : c.id)}
+                      >
+                        <MoreHorizontal size={15} />
+                      </button>
+                      {openMenuId === c.id && (
+                        <>
+                          <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
+                          <div className="absolute right-0 top-full z-20 mt-1 min-w-32.5 rounded-lg border-2 border-[#1C1C27] bg-white shadow-md" style={{ boxShadow: "2px 2px 0 #1C1C27" }}>
+                            <button
+                              className="flex w-full items-center gap-2 px-3 py-2 text-[13px] font-medium hover:bg-[#F5F3EE]"
+                              onClick={() => { handleEdit(c); setOpenMenuId(null); }}
+                            >
+                              <Pencil size={13} className="text-muted" />
+                              Edit
+                            </button>
+                            <button
+                              className="flex w-full items-center gap-2 px-3 py-2 text-[13px] font-medium text-[#E8323C] hover:bg-[#FFF0F0]"
+                              onClick={() => { handleDelete(c.id); setOpenMenuId(null); }}
+                              disabled={deletingComment}
+                            >
+                              <Trash2 size={13} />
+                              {deletingComment ? "Deleting…" : "Delete"}
+                            </button>
+                          </div>
+                        </>
                       )}
-                      <button className="btn btn-ghost btn-sm" style={{ fontSize: 11, padding: "2px 8px", color: "#E8323C" }} onClick={() => handleDelete(c.id)}>Delete</button>
                     </div>
                   )}
                 </div>

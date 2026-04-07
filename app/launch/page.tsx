@@ -8,15 +8,15 @@ import { useGlobal } from "@/components/GlobalProvider";
 import { useState } from "react";
 import Modal from "@/components/ui/Modal";
 import CategorySelector from "@/components/ui/CategorySelector";
-import { submitProduct } from "@/api/product";
 import { ProductStage, QualityBadge } from "@/enums";
 import { useCategories } from "@/hooks/queries/useReference";
-import { useProducts } from "@/hooks/queries/useProduct";
+import { useProducts, useSubmitProduct } from "@/hooks/queries/useProduct";
 
 export default function Page() {
   const { user, showToast } = useGlobal();
   const { data: categories = [] } = useCategories();
-  const { data: products = [] } = useProducts("approved");
+  const { data: products = [], isLoading: productsLoading } = useProducts("approved");
+  const { mutateAsync: submitProductMutation, isPending: submitting } = useSubmitProduct();
   const [filter, setFilter] = useState("All");
   const [sortBy, setSortBy] = useState("score");
   const [timeTab, setTimeTab] = useState("all");
@@ -51,7 +51,7 @@ export default function Page() {
       return;
     }
     try {
-      await submitProduct({
+      await submitProductMutation({
         name: submitForm.name,
         stage: submitForm.stage,
         funding: Number(submitForm.funding) || 0,
@@ -161,7 +161,35 @@ export default function Page() {
           ))}
         </div>
 
-        {filtered.map((product) => (
+        {productsLoading && (
+          <div className="space-y-0">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="mb-1 border-b-2 border-b-[#D8D4CC] py-5 animate-pulse">
+                <div className="flex flex-wrap gap-5">
+                  <div className="min-w-65 flex-1">
+                    <div className="mb-2 flex items-center gap-2">
+                      <div className="h-5 w-40 rounded bg-[#E8E4DC]" />
+                      <div className="h-4 w-16 rounded bg-[#E8E4DC]" />
+                    </div>
+                    <div className="mb-1 h-3.5 w-full rounded bg-[#E8E4DC]" />
+                    <div className="mb-2.5 h-3.5 w-3/4 rounded bg-[#E8E4DC]" />
+                    <div className="flex gap-2">
+                      <div className="h-3 w-12 rounded bg-[#E8E4DC]" />
+                      <div className="h-3 w-12 rounded bg-[#E8E4DC]" />
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 flex-col gap-1.5 w-30">
+                    <div className="h-6 w-full rounded bg-[#E8E4DC]" />
+                    <div className="h-7 w-full rounded bg-[#E8E4DC]" />
+                    <div className="h-7 w-full rounded bg-[#E8E4DC]" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!productsLoading && filtered.map((product) => (
           <div key={product.id} className="mb-1 border-b-2 border-b-[#D8D4CC] py-5">
             <div className="flex flex-wrap gap-5">
               <div className="min-w-65 flex-1">
@@ -358,8 +386,8 @@ export default function Page() {
               <CategorySelector onChangeIds={setSelectedCategoryIds} />
             </div>
             {/* <div className="mb-3.5 text-xs text-muted">Quality requirement: ARS-scored founder, indexed research paper, or cohort graduate.</div> */}
-            <button className="btn btn-primary w-full justify-center" onClick={submitLaunch}>
-              Submit Launch →
+            <button className="btn btn-primary w-full justify-center" onClick={submitLaunch} disabled={submitting}>
+              {submitting ? "Submitting…" : "Submit Launch →"}
             </button>
           </Modal>
         )}

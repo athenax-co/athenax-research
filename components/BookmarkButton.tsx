@@ -22,6 +22,7 @@ const BookmarkButton = ({
   initialBookmarked?: boolean | null;
 }) => {
   const queryClient = useQueryClient();
+  const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(() => {
     if (useApi && initialBookmarked != null) return initialBookmarked;
     return user ? bookmarkSvc.isBookmarked(user.id, launch.id) : false;
@@ -36,7 +37,7 @@ const BookmarkButton = ({
 
     if (useApi) {
       const next = !saved;
-
+      setLoading(true);
       try {
         await bookmarkProduct(launch.id, next);
         setSaved(next);
@@ -50,8 +51,9 @@ const BookmarkButton = ({
         showToast(next ? `Saved ${launch.name}` : `Removed ${launch.name}`, next ? "success" : "info");
       } catch {
         showToast("Failed to bookmark. Please try again.", "error");
+      } finally {
+        setLoading(false);
       }
-
       return;
     }
 
@@ -62,9 +64,13 @@ const BookmarkButton = ({
   };
 
   return (
-    <button className={`btn btn-${saved ? "ghost" : "outline"} btn-${size} justify-center ${saved ? "bg-yellow text-black" : "text-black"}`} onClick={toggle}>
-      {saved ? "★ Bookmarked" : "☆ Bookmark"}{" "}
-      {showCount && count > 0 && <span className="ml-1.5 font-['Space_Mono',monospace] text-[10px] opacity-70">{count}</span>}
+    <button
+      className={`btn btn-${saved ? "ghost" : "outline"} btn-${size} justify-center ${saved ? "bg-yellow text-black" : "text-black"}`}
+      onClick={toggle}
+      disabled={loading}
+    >
+      {loading ? "…" : saved ? "★ Bookmarked" : "☆ Bookmark"}{" "}
+      {!loading && showCount && count > 0 && <span className="ml-1.5 font-['Space_Mono',monospace] text-[10px] opacity-70">{count}</span>}
     </button>
   );
 };

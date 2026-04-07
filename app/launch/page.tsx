@@ -82,7 +82,7 @@ export default function Page() {
               {l} {k === "all" ? `(${products.length})` : ""}
             </button>
           ))}
-          <span className="ml-auto self-center font-['Space_Mono',monospace] text-xs text-muted">
+          <span className="ml-auto self-center font-['Space_Mono',monospace] text-xs text-muted sm:hidden inline-flex">
             {filtered.length} product{filtered.length !== 1 ? "s" : ""}
           </span>
         </div>

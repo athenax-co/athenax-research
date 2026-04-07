@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
+import ProductReviewRow from "@/components/ui/ProductReviewRow";
 import { useGlobal } from "@/components/GlobalProvider";
 import { SEED_LAUNCHES } from "@/data/seed";
-import { dbNow, dbRead, dbUid, dbWrite, bookmarkSvc } from "@/utils/lib";
-import { useProducts, useUpdateProductStatus } from "@/hooks/queries/useProduct";
+import { bookmarkSvc, dbNow, dbRead, dbUid, dbWrite, formatShortDate } from "@/utils/lib";
+import { useMyProducts, useProducts } from "@/hooks/queries/useProduct";
 
 const FOLLOW_KEYS = {
   FOLLOWS: "ax_follows_v1",
@@ -98,9 +99,57 @@ function LaunchMini({ launch, user, showToast }: { launch: any; user: any; showT
   );
 }
 
-function AdminPendingReview({ showToast }: { showToast: (text: string, type?: string) => void }) {
+const STATUS_STYLE: Record<string, string> = {
+  pending: "bg-yellow text-black",
+  approved: "bg-[#E8F5E9] text-[#2E7D32]",
+  rejected: "bg-[#FDECEA] text-[#E8323C]",
+};
+
+function FounderSubmissions() {
+  const { data: products, isLoading } = useMyProducts();
+
+  return (
+    <div className="mb-8">
+      <WindowCard label="MY_SUBMISSIONS.SYS">
+        {isLoading ? (
+          <p className="text-[13px] text-muted">Loading…</p>
+        ) : !products || products.length === 0 ? (
+          <div>
+            <p className="mb-3 text-[13px] text-muted">No submissions yet.</p>
+            <Link className="btn btn-outline btn-sm" href="/launch">
+              Submit a Product →
+            </Link>
+          </div>
+        ) : (
+          products.map((product) => (
+            <div key={product.id} className="flex items-start gap-3 border-b border-[#D8D4CC] py-3 last:border-b-0">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border-[1.5px] border-ink bg-paper text-[13px] font-bold">
+                {product.name.charAt(0)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[13px] font-semibold">{product.name}</div>
+                <p className="mt-0.5 line-clamp-1 text-[12px] text-muted">{product.description}</p>
+                <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                  <span className="font-mono text-[10px] text-muted">{product.stage}</span>
+                  {(product.categories ?? []).map((c) => (
+                    <span key={c.id} className="topic-pill text-[10px]">
+                      {c.name}
+                    </span>
+                  ))}
+                  <span className="font-mono text-[10px] text-muted">{formatShortDate(product.createdAt)}</span>
+                </div>
+              </div>
+              <span className={`ftag shrink-0 text-[10px] ${STATUS_STYLE[product.status] ?? ""}`}>{product.status}</span>
+            </div>
+          ))
+        )}
+      </WindowCard>
+    </div>
+  );
+}
+
+function AdminPendingReview() {
   const { data: products, isLoading } = useProducts("pending");
-  const { mutate: updateStatus, isPending } = useUpdateProductStatus();
 
   return (
     <div className="mb-8">
@@ -110,43 +159,14 @@ function AdminPendingReview({ showToast }: { showToast: (text: string, type?: st
         ) : !products || products.length === 0 ? (
           <p className="text-[13px] text-muted">No pending products.</p>
         ) : (
-          products.map((product) => (
-            <div key={product.id} className="flex items-start gap-3 border-b border-[#D8D4CC] py-3 last:border-b-0">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border-[1.5px] border-ink bg-paper text-[13px] font-bold">
-                {product.name.charAt(0)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-[13px] font-semibold">{product.name}</div>
-                <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-                  <span className="font-mono text-[11px] text-muted">{product.stage}</span>
-                  {product.categories.map((c) => (
-                    <span key={c.id} className="topic-pill text-[10px]">
-                      {c.name}
-                    </span>
-                  ))}
-                  <span className="font-mono text-[10px] text-muted">{new Date(product.createdAt).toLocaleDateString()}</span>
-                </div>
-              </div>
-              <div className="flex shrink-0 gap-1.5">
-                <button
-                  className="btn btn-primary btn-sm"
-                  disabled={isPending}
-                  onClick={() => updateStatus({ id: product.id, status: "approved" }, { onSuccess: () => showToast(`${product.name} approved`) })}
-                >
-                  Approve
-                </button>
-                <button
-                  className="btn btn-outline btn-sm"
-                  disabled={isPending}
-                  onClick={() => updateStatus({ id: product.id, status: "rejected" }, { onSuccess: () => showToast(`${product.name} rejected`) })}
-                >
-                  Reject
-                </button>
-              </div>
-            </div>
-          ))
+          products.map((product) => <ProductReviewRow key={product.id} product={product} />)
         )}
       </WindowCard>
+      <div className="mt-2.5 flex justify-end">
+        <Link href="/dashboard/review" className="btn btn-outline btn-sm">
+          Full Review Page →
+        </Link>
+      </div>
     </div>
   );
 }
@@ -196,7 +216,13 @@ export default function Page() {
       <p className="mb-0 text-[17px] text-muted">Your saves, votes, follows, and activity in one place.</p>
       <hr className="divider" />
 
-      {(user.role as string) === "admin" && <AdminPendingReview showToast={showToast} />}
+      {(user.role as string) === "admin" && (
+        <>
+          <AdminPendingReview />
+        </>
+      )}
+
+      {(user.role as string) === "founder" && <FounderSubmissions />}
 
       <div className="grid-4 mb-7 gap-3.5">
         {[
@@ -333,7 +359,7 @@ export default function Page() {
                     </span>
                     <div className="flex-1">
                       <div className="text-[13px] leading-normal text-ink">{n.text}</div>
-                      <div className="mt-0.5 font-mono text-[10px] text-muted">{new Date(n.createdAt).toLocaleDateString()}</div>
+                      <div className="mt-0.5 font-mono text-[10px] text-muted">{formatShortDate(n.createdAt)}</div>
                     </div>
                   </div>
                 </button>

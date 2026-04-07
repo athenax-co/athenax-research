@@ -159,7 +159,7 @@ export default function Page() {
                       {product.name}
                     </Link>
                   </h3>
-                  {product.categories.map((c) => (
+                  {(product.categories ?? []).map((c) => (
                     <span key={c.id} className="topic-pill">
                       {c.name}
                     </span>
@@ -182,7 +182,7 @@ export default function Page() {
                 <Link href={`/launch/${product.slug}`} className="btn btn-primary btn-sm justify-center no-underline">
                   View →
                 </Link>
-                <BookmarkButton user={user} launch={product} showToast={showToast} size="sm" useApi />
+                <BookmarkButton user={user} launch={product} showToast={showToast} size="sm" useApi initialBookmarked={product.bookmarked} />
               </div>
             </div>
           </div>

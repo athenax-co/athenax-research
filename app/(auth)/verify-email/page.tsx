@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useVerifyEmail, useResendVerification, AUTH_QUERY_KEYS } from "@/hooks/queries/useAuth";
 import { useCountdown, useRedirectCountdown } from "@/hooks/useCountdown";
+import Link from "next/link";
 
 /**
  * /verify-email
@@ -57,9 +58,9 @@ export default function VerifyEmailPage() {
           <div className="text-center">
             <div className="text-5xl mb-4">✅</div>
             <p className="text-sm text-[#1a1a2e] mb-5">Email verified successfully. You are now signed in.</p>
-            <button className="btn btn-primary w-full justify-center" onClick={() => startRedirect()}>
+            <Link href="/" className="btn btn-primary w-full justify-center">
               Continue to Home →
-            </button>
+            </Link>
             <p className="mt-3 text-xs text-muted">Redirecting in {redirectIn}s…</p>
           </div>
         ) : urlToken ? (

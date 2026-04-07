@@ -11,6 +11,7 @@ const BookmarkButton = ({
   size = "sm",
   showCount = true,
   useApi = false,
+  initialBookmarked,
 }: {
   user: any;
   launch: any;
@@ -18,9 +19,13 @@ const BookmarkButton = ({
   size?: string;
   showCount?: boolean;
   useApi?: boolean;
+  initialBookmarked?: boolean | null;
 }) => {
   const queryClient = useQueryClient();
-  const [saved, setSaved] = useState(() => (user ? bookmarkSvc.isBookmarked(user.id, launch.id) : false));
+  const [saved, setSaved] = useState(() => {
+    if (useApi && initialBookmarked != null) return initialBookmarked;
+    return user ? bookmarkSvc.isBookmarked(user.id, launch.id) : false;
+  });
   const [count, setCount] = useState(() => (useApi ? (launch.bookmarkCount ?? 0) : bookmarkSvc.count(launch.id)));
 
   const toggle = async () => {
@@ -57,7 +62,7 @@ const BookmarkButton = ({
   };
 
   return (
-    <button className={`btn btn-${saved ? "ghost" : "outline"} btn-${size} ${saved ? "bg-yellow text-black" : "text-black"}`} onClick={toggle}>
+    <button className={`btn btn-${saved ? "ghost" : "outline"} btn-${size} justify-center ${saved ? "bg-yellow text-black" : "text-black"}`} onClick={toggle}>
       {saved ? "★ Bookmarked" : "☆ Bookmark"}{" "}
       {showCount && count > 0 && <span className="ml-1.5 font-['Space_Mono',monospace] text-[10px] opacity-70">{count}</span>}
     </button>

@@ -1,9 +1,36 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-
 // ── Utility: Combine classnames ────────────────────────────
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+// ── Utility: Format dates like 12 Jan 2026 ──────────────────────────────────
+export function formatShortDate(value: string | number | Date) {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
+// ── Utility: Format submitted timestamps like 12 Jan 2026, 1:13 PM ─────────
+export function formatSubmittedDateTime(value: string | number | Date) {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
+// ── Utility: Resolve category IDs to { id, name } objects ──
+export function resolveCategories(ids: number[], allCategories: { id: number; name: string }[]): { id: number; name: string }[] {
+  return ids.flatMap((id) => {
+    const found = allCategories.find((c) => c.id === id);
+    return found ? [{ id: found.id, name: found.name }] : [];
+  });
 }
 
 // DB helpers first — everything else depends on these

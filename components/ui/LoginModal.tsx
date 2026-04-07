@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBody, DialogTrafficLights } from "@/components/ui/Dialog";
-import { useLogin } from "@/hooks/queries/useAuth";
+import { useLogin, useResendVerification } from "@/hooks/queries/useAuth";
 import { useGlobal } from "@/components/GlobalProvider";
 import Link from "next/link";
 
@@ -34,6 +34,9 @@ export default function LoginModal({ open, onOpenChange, onSuccess, showToast }:
       reset();
     },
   });
+
+  const isUnverified = !!error && /verif/i.test(error.message);
+  const { mutate: resend, isPending: isResending, isSuccess: resendSent } = useResendVerification();
 
   const submit = () => {
     if (!email || !pw) return;
@@ -78,23 +81,36 @@ export default function LoginModal({ open, onOpenChange, onSuccess, showToast }:
           <div className="text-right -mt-1 mb-1">
             <Link
               href="/forgot-password"
-              className="text-xs font-semibold text-[#1c1c27] hover:text-[#e8323c] transition-colors"
+              className="text-xs font-semibold text-ink hover:text-danger transition-colors"
               onClick={() => onOpenChange(false)}
             >
               Forgot password?
             </Link>
           </div>
 
-          {error && <div className="inp-error">{error.message}</div>}
+          {error && (
+            <div className="inp-error flex gap-2">
+              <span>{error.message}</span>
+              {isUnverified && (
+                <button
+                  className="text-ink cursor-pointer text-xs font-semibold hover:text-muted transition-colors"
+                  disabled={isResending || resendSent}
+                  onClick={() => resend({ email })}
+                >
+                  {resendSent ? "Sent!" : isResending ? <span className="spinner" /> : "(Resend email)"}
+                </button>
+              )}
+            </div>
+          )}
 
           <button className="btn btn-primary w-full justify-center mt-2" onClick={submit} disabled={isPending || !email || !pw}>
             {isPending ? <span className="spinner" /> : "Sign In →"}
           </button>
 
-          <p className="text-xs text-[#6B6B7A] text-center mt-5">
+          <p className="text-xs text-muted text-center mt-5">
             Don&apos;t have an account?{" "}
             <button
-              className="font-semibold text-[#1c1c27] hover:text-[#e8323c] transition-colors"
+              className="font-semibold text-ink hover:text-danger transition-colors"
               onClick={() => {
                 onOpenChange(false);
                 setTimeout(() => handleAuthClick("register"), 150);

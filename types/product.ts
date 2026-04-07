@@ -36,7 +36,27 @@ export interface ProductOut {
   voteCount: number;
   bookmarkCount: number;
   investorInterestCount: number;
+  /** Raw IDs from the API */
+  categoryIds: number[];
+  /** Resolved from categoryIds — populated by query hooks */
   categories: CategoryRef[];
+  bookmarked?: boolean | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProductDetailOut extends ProductOut {
+  papers?: Array<{ id: number; title: string; slug: string; publishedAt: string }>;
+  voted: boolean | null;
+  bookmarked: boolean | null;
+  interested: boolean | null;
+}
+
+export interface ProductComment {
+  id: number;
+  productId: number;
+  userId: number;
+  text: string;
   createdAt: string;
   updatedAt: string;
 }

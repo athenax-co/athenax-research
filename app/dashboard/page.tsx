@@ -4,11 +4,10 @@ import Link from "next/link";
 import { useState } from "react";
 import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
-import ProductReviewRow from "@/components/ui/ProductReviewRow";
 import { useGlobal } from "@/components/GlobalProvider";
 import { SEED_LAUNCHES } from "@/data/seed";
-import { bookmarkSvc, dbNow, dbRead, dbUid, dbWrite, formatShortDate } from "@/utils/lib";
-import { useMyProducts, useProducts } from "@/hooks/queries/useProduct";
+import { bookmarkSvc, dbNow, dbRead, dbUid, dbWrite, formatShortDate, notifSvc } from "@/utils/lib";
+import { useMyProducts } from "@/hooks/queries/useProduct";
 
 const FOLLOW_KEYS = {
   FOLLOWS: "ax_follows_v1",
@@ -25,15 +24,6 @@ type FollowItem = {
   targetId: string;
   targetName: string;
   followedAt: string;
-};
-
-type NotificationItem = {
-  id: string;
-  userId: string;
-  kind: string;
-  text: string;
-  createdAt: string;
-  read?: boolean;
 };
 
 const followSvc = {
@@ -60,21 +50,6 @@ const followSvc = {
       },
     ]);
     return { followed: true };
-  },
-};
-
-const notifSvc = {
-  getAll: (userId: string): NotificationItem[] =>
-    dbRead(FOLLOW_KEYS.NOTIFICATIONS, [])
-      .filter((n: NotificationItem) => n.userId === userId)
-      .sort((a: NotificationItem, b: NotificationItem) => +new Date(b.createdAt) - +new Date(a.createdAt)),
-  unread: (userId: string) => dbRead(FOLLOW_KEYS.NOTIFICATIONS, []).filter((n: NotificationItem) => n.userId === userId && !n.read).length,
-  markOne: (id: string) => {
-    const all: NotificationItem[] = dbRead(FOLLOW_KEYS.NOTIFICATIONS, []);
-    dbWrite(
-      FOLLOW_KEYS.NOTIFICATIONS,
-      all.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
   },
 };
 
@@ -148,32 +123,9 @@ function FounderSubmissions() {
   );
 }
 
-function AdminPendingReview() {
-  const { data: products, isLoading } = useProducts("pending");
-
-  return (
-    <div className="mb-8">
-      <WindowCard label="PENDING_REVIEW.SYS" bodyClass="window-body window-body-yellow">
-        {isLoading ? (
-          <p className="text-[13px] text-muted">Loading…</p>
-        ) : !products || products.length === 0 ? (
-          <p className="text-[13px] text-muted">No pending products.</p>
-        ) : (
-          products.map((product) => <ProductReviewRow key={product.id} product={product} />)
-        )}
-      </WindowCard>
-      <div className="mt-2.5 flex justify-end">
-        <Link href="/dashboard/review" className="btn btn-outline btn-sm">
-          Full Review Page →
-        </Link>
-      </div>
-    </div>
-  );
-}
-
 export default function Page() {
   const { user, showToast } = useGlobal();
-  const [tick, setTick] = useState(0);
+  const [, setTick] = useState(0);
 
   if (!user)
     return (
@@ -215,12 +167,6 @@ export default function Page() {
       </div>
       <p className="mb-0 text-[17px] text-muted">Your saves, votes, follows, and activity in one place.</p>
       <hr className="divider" />
-
-      {(user.role as string) === "admin" && (
-        <>
-          <AdminPendingReview />
-        </>
-      )}
 
       {(user.role as string) === "founder" && <FounderSubmissions />}
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/utils/lib";
 import { useGlobal } from "@/components/GlobalProvider";
+import NotificationBell from "@/components/layout/NotificationBell";
 
 // ═══════════════════════════════════════════════════════════
 const NAV_ITEMS = [
@@ -97,6 +98,12 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-2.5">
             {user ? (
               <>
+                <NotificationBell user={user} />
+                {user.role === "admin" && (
+                  <Link className="btn btn-ghost btn-sm px-2.5 text-[#E8323C]" href="/admin" title="Admin">
+                    ⚙
+                  </Link>
+                )}
                 {["sponsor", "admin"].includes(user.role) && (
                   <Link className="btn btn-ghost btn-sm" href="/sponsors/dashboard" title="Sponsor Dashboard">
                     ◈
@@ -130,11 +137,19 @@ const Navbar = () => {
           {/* Mobile: auth shortcut + hamburger */}
           <div className="flex md:hidden items-center gap-2">
             {user ? (
-              <Link className="btn btn-ghost btn-sm" href="/profile">
-                <span className="size-5 rounded-full bg-yellow border-[1.5px] border-ink inline-flex items-center justify-center text-[11px] font-bold">
-                  {user.avatar}
-                </span>
-              </Link>
+              <>
+                <NotificationBell user={user} />
+                {user.role === "admin" && (
+                  <Link className="btn btn-ghost btn-sm px-2.5 text-[#E8323C]" href="/admin" title="Admin">
+                    ⚙
+                  </Link>
+                )}
+                <Link className="btn btn-ghost btn-sm" href="/profile">
+                  <span className="size-5 rounded-full bg-yellow border-[1.5px] border-ink inline-flex items-center justify-center text-[11px] font-bold">
+                    {user.avatar}
+                  </span>
+                </Link>
+              </>
             ) : (
               <button className="btn btn-primary btn-sm" onClick={() => handleAuthClick("register")}>
                 Join →
@@ -178,6 +193,11 @@ const Navbar = () => {
                   <Link className="btn btn-ghost justify-center" href="/dashboard" onClick={() => setMenuOpen(false)}>
                     ⊞ Dashboard
                   </Link>
+                  {user.role === "admin" && (
+                    <Link className="btn btn-ghost justify-center text-[#E8323C]" href="/admin" onClick={() => setMenuOpen(false)}>
+                      ⚙ Admin
+                    </Link>
+                  )}
                   {["sponsor", "admin"].includes(user.role) && (
                     <Link className="btn btn-ghost justify-center" href="/sponsors/dashboard" onClick={() => setMenuOpen(false)}>
                       ◈ Sponsor Dashboard

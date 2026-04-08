@@ -1,50 +1,65 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import WindowCard from "@/components/ui/WindowCard";
+import CategorySelector from "@/components/ui/CategorySelector";
 import { useGlobal } from "@/components/GlobalProvider";
-
-const TOPICS = [
-  "ZK Proofs",
-  "DAO Governance",
-  "DeFi",
-  "Tokenomics",
-  "AI Agents",
-  "Protocol Economics",
-  "Security",
-  "Digital Nations",
-  "Consensus",
-  "Privacy",
-] as const;
+import { useSubmitPaper } from "@/hooks/queries/usePaper";
+import type { PaperSourceType } from "@/types/paper";
 
 export default function Page() {
   const { user, showToast } = useGlobal();
+  const router = useRouter();
+  const { mutateAsync: submitPaper, isPending: submitting } = useSubmitPaper();
+
+  const [sourceType, setSourceType] = useState<PaperSourceType>("link");
+  const [categoryIds, setCategoryIds] = useState<number[]>([]);
   const [form, setForm] = useState({
     title: "",
     abstract: "",
-    topic: "ZK Proofs",
-    coauthors: "",
-    university: user?.university || "",
-    lab: user?.lab || "",
-    year: new Date().getFullYear(),
-    file: "",
+    externalUrl: "",
+    content: "",
   });
 
-  const set = (key: keyof typeof form) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+  const set = (key: keyof typeof form) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((prev) => ({ ...prev, [key]: event.target.value }));
 
-  const submit = () => {
+  const submit = async () => {
     if (!user) {
       showToast("Sign in to submit a paper.", "error");
       return;
     }
 
-    if (!form.title || !form.abstract) {
-      showToast("Title and abstract are required.", "error");
+    if (!form.title) {
+      showToast("Paper title is required.", "error");
       return;
     }
 
-    showToast("Paper submitted for peer review! You'll hear back within 14 days.", "success");
+    if (!form.abstract) {
+      showToast("Abstract is required.", "error");
+      return;
+    }
+
+    if (sourceType === "link" && !form.externalUrl) {
+      showToast("External URL is required for linked papers.", "error");
+      return;
+    }
+
+    try {
+      await submitPaper({
+        title: form.title,
+        sourceType,
+        externalUrl: sourceType === "link" ? form.externalUrl || undefined : undefined,
+        abstract: form.abstract || undefined,
+        content: sourceType === "editor" ? form.content || undefined : undefined,
+        categoryIds,
+      });
+      showToast("Paper submitted! Pending admin review.", "success");
+      router.push("/archive");
+    } catch (err: any) {
+      showToast(err?.message ?? "Failed to submit paper.", "error");
+    }
   };
 
   if (!user) {
@@ -64,15 +79,39 @@ export default function Page() {
       <div className="page-wrap page-wrap-narrow-md section">
         <div className="path-badge">/root/paper/submit</div>
         <h1 className="mb-2 text-[42px]">Submit a Paper</h1>
-        <p className="mb-0 text-base text-muted">Open-access. Peer-reviewed. ARS-scored on acceptance.</p>
+        <p className="mb-0 text-base text-muted">Open-access. Community-voted. Reviewed by admins before publishing.</p>
 
         <hr className="divider" />
 
         <WindowCard label="PAPER_SUBMISSION.FORM">
           <div className="inp-group">
+            <label className="inp-label">Paper Type</label>
+            <select
+              className="inp"
+              value={sourceType}
+              onChange={(e) => setSourceType(e.target.value as PaperSourceType)}
+            >
+              <option value="link">Link / arXiv / DOI</option>
+              <option value="editor">Write on Platform</option>
+            </select>
+          </div>
+
+          <div className="inp-group">
             <label className="inp-label">Paper Title *</label>
             <input className="inp" value={form.title} onChange={set("title")} placeholder="A descriptive, full title" />
           </div>
+
+          {sourceType === "link" && (
+            <div className="inp-group">
+              <label className="inp-label">External URL *</label>
+              <input
+                className="inp"
+                value={form.externalUrl}
+                onChange={set("externalUrl")}
+                placeholder="https://arxiv.org/abs/… or DOI link"
+              />
+            </div>
+          )}
 
           <div className="inp-group">
             <label className="inp-label">Abstract *</label>
@@ -85,48 +124,30 @@ export default function Page() {
             />
           </div>
 
-          <div className="inp-group">
-            <label className="inp-label">Research Topic</label>
-            <select className="inp" value={form.topic} onChange={set("topic")}>
-              {TOPICS.map((topic) => (
-                <option key={topic}>{topic}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid-2 gap-4">
+          {sourceType === "editor" && (
             <div className="inp-group">
-              <label className="inp-label">University / Institution</label>
-              <input className="inp" value={form.university} onChange={set("university")} placeholder="MIT, Oxford…" />
+              <label className="inp-label">Paper Content (optional)</label>
+              <textarea
+                className="inp"
+                rows={10}
+                value={form.content}
+                onChange={set("content")}
+                placeholder="Full paper content"
+              />
             </div>
-            <div className="inp-group">
-              <label className="inp-label">Research Lab</label>
-              <input className="inp" value={form.lab} onChange={set("lab")} placeholder="Your lab or group" />
-            </div>
-          </div>
+          )}
 
           <div className="inp-group">
-            <label className="inp-label">Co-Authors (optional)</label>
-            <input className="inp" value={form.coauthors} onChange={set("coauthors")} placeholder="Full names, comma-separated" />
-          </div>
-
-          <div className="inp-group">
-            <label className="inp-label">Publication Year</label>
-            <input className="inp" type="number" value={form.year} onChange={set("year")} min="2020" max="2030" />
-          </div>
-
-          <div className="inp-group">
-            <label className="inp-label">Paper File (PDF link or arXiv URL)</label>
-            <input className="inp" value={form.file} onChange={set("file")} placeholder="https://arxiv.org/abs/…" />
+            <label className="inp-label">Categories (optional)</label>
+            <CategorySelector onChangeIds={setCategoryIds} />
           </div>
 
           <div className="mb-4 rounded-lg border border-[#D8D4CC] bg-cream px-3.5 py-3 text-[13px] leading-7 text-muted">
-            Submitted papers enter a 14-day blind peer review. Accepted papers are published open-access and immediately contribute to your ARS score.
-            All work is CC0.
+            Submitted papers enter an admin review queue. Once approved, they will appear publicly on the Papers page and contribute to community rankings.
           </div>
 
-          <button className="btn btn-primary flex w-full justify-center" onClick={submit}>
-            Submit for Review →
+          <button className="btn btn-primary flex w-full justify-center" onClick={submit} disabled={submitting}>
+            {submitting ? "Submitting…" : "Submit for Review →"}
           </button>
         </WindowCard>
       </div>

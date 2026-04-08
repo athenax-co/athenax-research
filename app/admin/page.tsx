@@ -6,7 +6,9 @@ import WindowCard from "@/components/ui/WindowCard";
 import Modal from "@/components/ui/Modal";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useProducts } from "@/hooks/queries/useProduct";
+import { usePapers, useUpdatePaperStatus } from "@/hooks/queries/usePaper";
 import { SEED_BOUNTIES, SEED_LAUNCHES, SEED_PAPERS, SEED_RESEARCHERS, SEED_SPONSORS, SEED_STARTUPS } from "@/data/seed";
+import { PaperStatus } from "@/enums";
 import { cn } from "@/utils/lib";
 
 type AdminTab = "launches" | "papers" | "cohorts" | "bounties" | "platform";
@@ -63,9 +65,13 @@ export default function Page() {
     meta?: { label: string; value: string }[];
     details?: { label: string; value: string }[];
     chips?: string[];
+    itemId?: number;
+    itemType?: "paper";
   } | null>(null);
 
   const { data: pendingProducts = [], isLoading: loadingPending } = useProducts("pending");
+  const { data: draftPapers = [], isLoading: loadingPapers } = usePapers(PaperStatus.DRAFT);
+  const { mutate: updatePaperStatus } = useUpdatePaperStatus();
 
   if (!user || (user.role as string) !== "admin") {
     return (
@@ -82,7 +88,6 @@ export default function Page() {
     );
   }
 
-  const pendingPapers = SEED_PAPERS.slice(0, 2).map((paper) => ({ ...paper, status: "pending_review" }));
   const pendingBounties = SEED_BOUNTIES.slice(0, 1).map((bounty) => ({ ...bounty, status: "pending_review" }));
   const pendingCohorts = [
     { id: "ca_1", name: "Dr. Sana Mirza", product: "NeuroBench", track: "AI Safety", ars: 7.2, submitted: "2025-03-13" },
@@ -91,7 +96,7 @@ export default function Page() {
 
   const tabs: { id: AdminTab; label: string; count: number }[] = [
     { id: "launches", label: "Launch Queue", count: pendingProducts.length },
-    { id: "papers", label: "Paper Queue", count: pendingPapers.length },
+    { id: "papers", label: "Paper Queue", count: draftPapers.length },
     { id: "cohorts", label: "Cohort Apps", count: pendingCohorts.length },
     { id: "bounties", label: "Bounty Review", count: pendingBounties.length },
     { id: "platform", label: "Platform Stats", count: 0 },
@@ -105,6 +110,8 @@ export default function Page() {
     meta?: { label: string; value: string }[];
     details?: { label: string; value: string }[];
     chips?: string[];
+    itemId?: number;
+    itemType?: "paper";
   }) => setReviewItem(item);
 
   return (
@@ -125,7 +132,7 @@ export default function Page() {
       <div className="mb-7 grid grid-cols-2 gap-3.5 sm:grid-cols-4">
         {[
           { label: "Pending Launches", value: pendingProducts.length, tone: "text-[#E8323C]" },
-          { label: "Pending Papers", value: pendingPapers.length, tone: "text-[#E8323C]" },
+          { label: "Pending Papers", value: draftPapers.length, tone: "text-[#E8323C]" },
           { label: "Cohort Apps", value: pendingCohorts.length, tone: "text-[#E8323C]" },
           { label: "Open Bounties", value: SEED_BOUNTIES.length, tone: "text-[#15803D]" },
         ].map((s) => (
@@ -192,33 +199,50 @@ export default function Page() {
       {tab === "papers" && (
         <WindowCard label="PAPER_REVIEW_QUEUE.SYS">
           <div className="mb-3.5 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">PENDING RESEARCH SUBMISSIONS</div>
-          {pendingPapers.map((paper) => (
-            <QueueRow
-              key={paper.id}
-              name={`${paper.title.slice(0, 60)}…`}
-              meta={`${paper.lab} · ${paper.topic} · ${paper.year}`}
-              chips={[paper.topic, paper.university]}
-              onApprove={() => handleApprove(paper.title.slice(0, 30))}
-              onReject={() => handleReject(paper.title.slice(0, 30))}
-              onReview={() =>
-                openReview({
-                  title: paper.title,
-                  description: paper.abstract,
-                  chips: [paper.topic, paper.university],
-                  meta: [
-                    { label: "Lab", value: paper.lab },
-                    { label: "Year", value: String(paper.year) },
-                    { label: "Votes", value: String(paper.votes) },
-                  ],
-                  details: [
-                    { label: "University", value: paper.university },
-                    { label: "Downloads", value: paper.downloads.toLocaleString() },
-                    { label: "Citations", value: paper.citations.toLocaleString() },
-                  ],
-                })
-              }
-            />
-          ))}
+          {loadingPapers ? (
+            <p className="text-[13px] text-muted">Loading…</p>
+          ) : draftPapers.length === 0 ? (
+            <p className="text-[13px] text-muted">No papers pending review.</p>
+          ) : (
+            draftPapers.map((paper) => (
+              <QueueRow
+                key={paper.id}
+                name={paper.title.length > 60 ? paper.title.slice(0, 60) + "…" : paper.title}
+                meta={`${paper.sourceType} · ${paper.categories.length} categories · Submitted ${new Date(paper.createdAt).toLocaleDateString("en-CA")}`}
+                chips={paper.categories.map((c) => c.name)}
+                onApprove={() => {
+                  updatePaperStatus(
+                    { id: paper.id, status: PaperStatus.PUBLISHED },
+                    { onSuccess: () => showToast(`Published: ${paper.title.slice(0, 30)}`, "success") }
+                  );
+                }}
+                onReject={() => {
+                  updatePaperStatus(
+                    { id: paper.id, status: PaperStatus.ARCHIVED },
+                    { onSuccess: () => showToast(`Archived: ${paper.title.slice(0, 30)}`, "info") }
+                  );
+                }}
+                onReview={() =>
+                  openReview({
+                    title: paper.title,
+                    description: paper.abstract ?? undefined,
+                    chips: paper.categories.map((c) => c.name),
+                    meta: [
+                      { label: "Source", value: paper.sourceType },
+                      { label: "Votes", value: String(paper.voteCount) },
+                      { label: "Submitted", value: new Date(paper.createdAt).toLocaleDateString("en-GB") },
+                    ],
+                    details: [
+                      { label: "External URL", value: paper.externalUrl ?? "None" },
+                      { label: "Status", value: paper.status },
+                    ],
+                    itemId: paper.id,
+                    itemType: "paper",
+                  })
+                }
+              />
+            ))
+          )}
         </WindowCard>
       )}
 
@@ -363,7 +387,14 @@ export default function Page() {
             <button
               className="btn btn-primary flex-1 justify-center"
               onClick={() => {
-                handleApprove(reviewItem.title);
+                if (reviewItem.itemType === "paper" && reviewItem.itemId != null) {
+                  updatePaperStatus(
+                    { id: reviewItem.itemId, status: PaperStatus.PUBLISHED },
+                    { onSuccess: () => showToast(`Published: ${reviewItem.title.slice(0, 30)}`, "success") }
+                  );
+                } else {
+                  handleApprove(reviewItem.title);
+                }
                 setReviewItem(null);
               }}
             >
@@ -372,7 +403,14 @@ export default function Page() {
             <button
               className="btn btn-outline flex-1 justify-center"
               onClick={() => {
-                handleReject(reviewItem.title);
+                if (reviewItem.itemType === "paper" && reviewItem.itemId != null) {
+                  updatePaperStatus(
+                    { id: reviewItem.itemId, status: PaperStatus.ARCHIVED },
+                    { onSuccess: () => showToast(`Archived: ${reviewItem.title.slice(0, 30)}`, "info") }
+                  );
+                } else {
+                  handleReject(reviewItem.title);
+                }
                 setReviewItem(null);
               }}
             >

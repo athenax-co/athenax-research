@@ -1,146 +1,199 @@
+"use client";
+
 // ═══════════════════════════════════════════════════════════
 // PAPER PAGE
 
 import Link from "next/link";
-import { SEED_PAPERS } from "@/data/seed";
 import WindowCard from "@/components/ui/WindowCard";
-import { MediaIcon } from "../Icons";
-import ArsBreakdown from "../ui/ArsBreakdown";
-import { useEffect, useState } from "react";
+import ArsBreakdown from "@/components/ui/ArsBreakdown";
+import { MediaIcon } from "@/components/Icons";
+import { useState } from "react";
+import { useVotePaper } from "@/hooks/queries/usePaper";
+import type { PaperOut } from "@/types/paper";
 
-// ═══════════════════════════════════════════════════════════
-const PaperPage = ({ paperId, user, showToast }: { paperId: string; user: any; showToast: Function }) => {
-  const paper = SEED_PAPERS.find((p) => p.id === paperId);
+// ── Mock data used when real data is unavailable ─────────────
+const MOCK_PRODUCTS = [
+  { id: 1, name: "NeuralDraft",  initial: "N", sector: "AI Writing",     stage: "Seed",      funding: "$1.2M", votes: 214 },
+  { id: 2, name: "ResearchOS",   initial: "R", sector: "Productivity",   stage: "Pre-Seed",  funding: "$400K", votes: 98  },
+  { id: 3, name: "VectorVault",  initial: "V", sector: "Infrastructure", stage: "Series A",  funding: "$4.5M", votes: 331 },
+];
+
+const MOCK_RELATED = [
+  { id: 1, slug: "#", title: "Attention Is All You Need",                                year: 2017, topic: "Transformers", lab: "Google Brain",   citations: 92400 },
+  { id: 2, slug: "#", title: "BERT: Pre-training of Deep Bidirectional Transformers",    year: 2018, topic: "NLP",          lab: "Google AI",      citations: 74100 },
+  { id: 3, slug: "#", title: "Language Models are Few-Shot Learners",                    year: 2020, topic: "LLMs",         lab: "OpenAI",         citations: 41200 },
+  { id: 4, slug: "#", title: "Scaling Laws for Neural Language Models",                  year: 2020, topic: "LLMs",         lab: "OpenAI",         citations: 8300  },
+];
+// ─────────────────────────────────────────────────────────────
+
+const PaperPage = ({ paper, user, showToast }: { paper: PaperOut; user: any; showToast: Function }) => {
+  const { mutate: vote, isPending: voting } = useVotePaper();
   const [voted, setVoted] = useState(false);
-  const [voteCount, setVoteCount] = useState(0);
-  useEffect(() => {
-    if (paper) setVoteCount(paper.votes);
-  }, [paperId]);
-  if (!paper)
-    return (
-      <div className="page-wrap section">
-        <p>Paper not found.</p>
-      </div>
-    );
+  const [voteCount, setVoteCount] = useState(paper.voteCount);
+
+  const publishedYear = paper.publishedAt ? new Date(paper.publishedAt).getFullYear() : null;
+
+  // Mock metric values — replace with real fields when API provides them
+  const citations   = 0;
+  const downloads   = 0;
+  const peerReviews = 0;
+  const reviewScore = "—";
 
   const handleVote = () => {
-    if (!user) {
-      showToast("Sign in to vote.", "error");
-      return;
-    }
-    if (voted) {
-      showToast("Already voted.", "info");
-      return;
-    }
+    if (!user) { showToast("Sign in to vote.", "error"); return; }
+    if (voted)  { showToast("Already voted.", "info");   return; }
     setVoted(true);
     setVoteCount((v) => v + 1);
     showToast("Vote recorded!", "success");
+    vote(
+      { id: paper.id, voted: true },
+      {
+        onError: () => {
+          setVoted(false);
+          setVoteCount((v) => v - 1);
+          showToast("Vote failed. Please try again.", "error");
+        },
+      }
+    );
   };
 
   return (
     <div>
       <div className="page-wrap section">
-        <Link href="/archive" className="link-arrow" style={{ marginBottom: 20, marginRight: 12 }}>
+        <Link href="/archive" className="link-arrow" style={{ marginBottom: 20 }}>
           ← Back to Archive
         </Link>
-        <div className="path-badge">/root/archive/{paper.id}</div>
+        <div className="path-badge">/root/paper/{paper.slug}</div>
         <h1 style={{ fontSize: 36, marginBottom: 16, letterSpacing: "-0.02em" }}>{paper.title}</h1>
+
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 28 }}>
-          <Link
-            href={`/terminal?query=topic:${paper.topic}`}
-            className="topic-pill"
-            style={{ cursor: "pointer", border: "none", fontFamily: "'Space Grotesk',sans-serif", textDecoration: "none" }}
-          >
-            {paper.topic}
-          </Link>
-          <span className="ftag">{paper.year}</span>
-          <span className="ftag">{paper.lab}</span>
-          <span className="ftag">{paper.university}</span>
+          {paper.categories.map((c) => (
+            <span key={c.id} className="topic-pill">{c.name}</span>
+          ))}
+          <span className="ftag">{paper.sourceType === "link" ? "External" : "Hosted"}</span>
+          {publishedYear && <span className="ftag">{publishedYear}</span>}
         </div>
+
+        {/* Row 1: Abstract + Metrics + ARS */}
         <div className="grid-2" style={{ gap: 22 }}>
           <WindowCard label="ABSTRACT.TXT">
-            <p style={{ fontSize: 15, lineHeight: 1.7, color: "#1C1C27" }}>{paper.abstract}</p>
+            <p style={{ fontSize: 15, lineHeight: 1.7, color: "#1C1C27" }}>
+              {paper.abstract ?? "No abstract provided."}
+            </p>
+            {paper.sourceType === "link" && paper.externalUrl && (
+              <>
+                <hr className="divider-sm" />
+                <a
+                  href={paper.externalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline btn-sm"
+                  style={{ display: "inline-flex" }}
+                >
+                  Read Paper →
+                </a>
+              </>
+            )}
+            {paper.sourceType === "editor" && paper.content && (
+              <>
+                <hr className="divider-sm" />
+                <div style={{ fontSize: 14, lineHeight: 1.8, color: "#1C1C27", whiteSpace: "pre-wrap" }}>
+                  {paper.content}
+                </div>
+              </>
+            )}
             <hr className="divider-sm" />
-            <div style={{ fontSize: 13, color: "#6B6B7A", marginBottom: 16 }}>Authors: {paper.authors.join(", ")}</div>
             <button
               className={voted ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}
               onClick={handleVote}
+              disabled={voting}
               style={voted ? { background: "#D4EDDA" } : {}}
             >
               {voted ? "✓ Voted" : "▲ Upvote"} &nbsp;·&nbsp; {voteCount.toLocaleString()}
             </button>
           </WindowCard>
+
           <div>
             <WindowCard label="METRICS.SYS" style={{ marginBottom: 20 }}>
               <div className="grid-2" style={{ gap: 12 }}>
                 <div className="stat-card">
                   <div className="stat-label">Citations</div>
-                  <div className="stat-value">{paper.citations}</div>
+                  <div className="stat-value">{citations || "—"}</div>
                 </div>
                 <div className="stat-card">
                   <div className="stat-label">Downloads</div>
-                  <div className="stat-value">{paper.downloads.toLocaleString()}</div>
+                  <div className="stat-value">{downloads > 0 ? downloads.toLocaleString() : "—"}</div>
                 </div>
                 <div className="stat-card">
                   <div className="stat-label">Peer Reviews</div>
-                  <div className="stat-value">{paper.peerReviews}</div>
+                  <div className="stat-value">{peerReviews || "—"}</div>
                 </div>
                 <div className="stat-card">
                   <div className="stat-label">Review Score</div>
-                  <div className="stat-value" style={{ color: "#E8323C" }}>
-                    {paper.reviewScore}
-                  </div>
+                  <div className="stat-value" style={{ color: "#E8323C" }}>{reviewScore}</div>
                 </div>
               </div>
             </WindowCard>
+
             <WindowCard label="ARS_SCORE.SYS" bodyClass="window-body window-body-yellow">
-              <ArsBreakdown
-                r={{
-                  citations: paper.citations,
-                  peerReviews: paper.peerReviews || 0,
-                  downloads: paper.downloads,
-                  votes: paper.votes,
-                  sponsorEndorsements: 2,
-                  bountyCompletions: 1,
-                }}
-              />
+              <ArsBreakdown r={{
+                citations,
+                peerReviews,
+                downloads,
+                votes:               voteCount,
+                sponsorEndorsements: 0,
+                bountyCompletions:   0,
+              }} />
             </WindowCard>
           </div>
         </div>
 
-        {/* Related research */}
-        {(() => {
-          const sameTopic = SEED_PAPERS.filter((p) => p.id !== paper.id && p.topic === paper.topic);
-          const sameLab = SEED_PAPERS.filter((p) => p.id !== paper.id && p.lab === paper.lab && p.topic !== paper.topic);
-          const related = [...sameTopic, ...sameLab].slice(0, 4);
-          if (related.length === 0) return null;
-          return (
-            <div style={{ marginTop: 36 }}>
-              <WindowCard label="RELATED_RESEARCH.SYS" bodyClass="window-body window-body-blue">
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, letterSpacing: "0.07em", color: "#6B6B7A", marginBottom: 14 }}>
-                  PAPERS ON SAME TOPIC OR FROM SAME LAB
-                </div>
-                {related.map((p) => (
-                  <Link key={p.id} href={`/paper/${p.id}`}>
-                    <div className="archive-row">
-                      <MediaIcon type="Essay" />
-                      <div style={{ flex: 1 }}>
-                        <div className="archive-title">{p.title}</div>
-                        <div className="archive-meta">
-                          {p.year} // {p.topic} // {p.lab}
-                        </div>
-                      </div>
-                      <div style={{ textAlign: "right", flexShrink: 0 }}>
-                        <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: "#E8323C" }}>{p.citations}</div>
-                        <div style={{ fontSize: 10, color: "#6B6B7A" }}>cites</div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </WindowCard>
+        {/* Products built on this paper — mock until real data exists */}
+        <div style={{ marginTop: 28 }}>
+          <WindowCard label="PRODUCTS_BUILT_ON_THIS.SYS" bodyClass="window-body window-body-blue">
+            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, letterSpacing: "0.07em", color: "#6B6B7A", marginBottom: 14 }}>
+              {MOCK_PRODUCTS.length} PRODUCTS LAUNCHED FROM THIS RESEARCH &nbsp;·&nbsp; MOCK DATA
             </div>
-          );
-        })()}
+            {MOCK_PRODUCTS.map((p) => (
+              <div key={p.id} className="archive-row" style={{ cursor: "pointer" }}>
+                <div style={{ width: 32, height: 32, borderRadius: 6, border: "1.5px solid #1C1C27", background: "#F9F5DC", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
+                  {p.initial}
+                </div>
+                <div style={{ flex: 1, marginLeft: 10 }}>
+                  <div className="archive-title" style={{ fontSize: 14 }}>{p.name}</div>
+                  <div className="archive-meta">{p.sector} · {p.stage} · {p.funding} · ▲ {p.votes}</div>
+                </div>
+                <span style={{ color: "#6B6B7A", fontSize: 14 }}>→</span>
+              </div>
+            ))}
+          </WindowCard>
+        </div>
+
+        {/* Related research — mock until real data exists */}
+        <div style={{ marginTop: 28 }}>
+          <WindowCard label="RELATED_RESEARCH.SYS" bodyClass="window-body window-body-blue">
+            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, letterSpacing: "0.07em", color: "#6B6B7A", marginBottom: 14 }}>
+              PAPERS ON SAME TOPIC OR FROM SAME LAB &nbsp;·&nbsp; MOCK DATA
+            </div>
+            {MOCK_RELATED.map((r) => (
+              <div key={r.id} className="archive-row">
+                <MediaIcon type="Essay" />
+                <div style={{ flex: 1 }}>
+                  <Link href={`/paper/${r.slug}`} className="archive-title" style={{ textDecoration: "none" }}>
+                    {r.title}
+                  </Link>
+                  <div className="archive-meta">{r.year} // {r.topic} // {r.lab}</div>
+                </div>
+                <div style={{ textAlign: "right", flexShrink: 0 }}>
+                  <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: "#E8323C" }}>
+                    {r.citations.toLocaleString()}
+                  </div>
+                  <div style={{ fontSize: 10, color: "#6B6B7A" }}>cites</div>
+                </div>
+              </div>
+            ))}
+          </WindowCard>
+        </div>
       </div>
     </div>
   );

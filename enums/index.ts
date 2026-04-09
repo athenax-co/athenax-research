@@ -31,3 +31,11 @@ export const PaperStatus = {
 } as const;
 
 export type PaperStatus = (typeof PaperStatus)[keyof typeof PaperStatus];
+
+export const PaperVerificationStatus = {
+    PENDING:  "pending",
+    APPROVED: "approved",
+    REJECTED: "rejected",
+} as const;
+
+export type PaperVerificationStatus = (typeof PaperVerificationStatus)[keyof typeof PaperVerificationStatus];

@@ -1,5 +1,5 @@
 import { BASE_URL, handleResponse } from "@/api/client";
-import type { PaperIn, PaperOut, PaperStatus } from "@/types/paper";
+import type { PaperIn, PaperOut, PaperUpdate, PaperVerificationStatus } from "@/types/paper";
 
 export async function submitPaper(data: PaperIn): Promise<void> {
   const res = await fetch(`${BASE_URL}/paper`, {
@@ -11,9 +11,8 @@ export async function submitPaper(data: PaperIn): Promise<void> {
   return handleResponse<void>(res);
 }
 
-export async function getPapers(status?: PaperStatus, limit = 50, offset = 0): Promise<PaperOut[]> {
+export async function getPapers(limit = 50, offset = 0): Promise<PaperOut[]> {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
-  if (status) params.set("status", status);
   const res = await fetch(`${BASE_URL}/paper?${params}`, { credentials: "include" });
   return handleResponse<PaperOut[]>(res);
 }
@@ -23,7 +22,13 @@ export async function getPaperBySlug(slug: string): Promise<PaperOut> {
   return handleResponse<PaperOut>(res);
 }
 
-export async function updatePaper(id: number, data: Partial<PaperIn>): Promise<PaperOut> {
+export async function getMyPapers(): Promise<PaperOut[]> {
+  const res = await fetch(`${BASE_URL}/paper/me`, { credentials: "include" });
+  return handleResponse<PaperOut[]>(res);
+}
+
+/** Owner or admin — can include `status` to change publication state */
+export async function updatePaper(id: number, data: PaperUpdate): Promise<PaperOut> {
   const res = await fetch(`${BASE_URL}/paper/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -33,11 +38,15 @@ export async function updatePaper(id: number, data: Partial<PaperIn>): Promise<P
   return handleResponse<PaperOut>(res);
 }
 
-export async function updatePaperStatus(id: number, status: PaperStatus): Promise<PaperOut> {
-  const res = await fetch(`${BASE_URL}/paper/${id}/status`, {
+/** Admin only */
+export async function updatePaperVerificationStatus(
+  id: number,
+  verificationStatus: PaperVerificationStatus
+): Promise<PaperOut> {
+  const res = await fetch(`${BASE_URL}/paper/${id}/verification-status`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ verificationStatus }),
     credentials: "include",
   });
   return handleResponse<PaperOut>(res);
@@ -59,10 +68,4 @@ export async function votePaper(id: number, voted: boolean): Promise<void> {
     credentials: "include",
   });
   return handleResponse<void>(res);
-}
-
-export async function getMyPapers(status?: PaperStatus): Promise<PaperOut[]> {
-  const url = status ? `${BASE_URL}/paper/me?status=${status}` : `${BASE_URL}/paper/me`;
-  const res = await fetch(url, { credentials: "include" });
-  return handleResponse<PaperOut[]>(res);
 }

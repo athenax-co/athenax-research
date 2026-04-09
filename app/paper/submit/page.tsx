@@ -7,6 +7,7 @@ import CategorySelector from "@/components/ui/CategorySelector";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useSubmitPaper } from "@/hooks/queries/usePaper";
 import type { PaperSourceType } from "@/types/paper";
+import { PaperStatus } from "@/enums";
 
 export default function Page() {
   const { user, showToast } = useGlobal();
@@ -25,38 +26,33 @@ export default function Page() {
   const set = (key: keyof typeof form) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((prev) => ({ ...prev, [key]: event.target.value }));
 
-  const submit = async () => {
-    if (!user) {
-      showToast("Sign in to submit a paper.", "error");
-      return;
-    }
+  const validate = () => {
+    if (!form.title) { showToast("Paper title is required.", "error"); return false; }
+    if (!form.abstract) { showToast("Abstract is required.", "error"); return false; }
+    if (sourceType === "link" && !form.externalUrl) { showToast("External URL is required for linked papers.", "error"); return false; }
+    return true;
+  };
 
-    if (!form.title) {
-      showToast("Paper title is required.", "error");
-      return;
-    }
-
-    if (!form.abstract) {
-      showToast("Abstract is required.", "error");
-      return;
-    }
-
-    if (sourceType === "link" && !form.externalUrl) {
-      showToast("External URL is required for linked papers.", "error");
-      return;
-    }
-
+  const submit = async (status: PaperStatus) => {
+    if (!user) { showToast("Sign in to submit a paper.", "error"); return; }
+    if (!validate()) return;
     try {
       await submitPaper({
         title: form.title,
         sourceType,
+        status,
         externalUrl: sourceType === "link" ? form.externalUrl || undefined : undefined,
         abstract: form.abstract || undefined,
         content: sourceType === "editor" ? form.content || undefined : undefined,
         categoryIds,
       });
-      showToast("Paper submitted! Pending admin review.", "success");
-      router.push("/archive");
+      if (status === PaperStatus.PUBLISHED) {
+        showToast("Paper submitted for review.", "success");
+        router.push("/archive");
+      } else {
+        showToast("Paper saved as draft.", "success");
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       showToast(err?.message ?? "Failed to submit paper.", "error");
     }
@@ -146,9 +142,22 @@ export default function Page() {
             Submitted papers enter an admin review queue. Once approved, they will appear publicly on the Papers page and contribute to community rankings.
           </div>
 
-          <button className="btn btn-primary flex w-full justify-center" onClick={submit} disabled={submitting}>
-            {submitting ? "Submitting…" : "Submit for Review →"}
-          </button>
+          <div className="flex gap-2">
+            <button
+              className="btn btn-outline flex-1 justify-center"
+              onClick={() => submit(PaperStatus.DRAFT)}
+              disabled={submitting}
+            >
+              Save as Draft
+            </button>
+            <button
+              className="btn btn-primary flex-1 justify-center"
+              onClick={() => submit(PaperStatus.PUBLISHED)}
+              disabled={submitting}
+            >
+              {submitting ? "Submitting…" : "Submit for Review →"}
+            </button>
+          </div>
         </WindowCard>
       </div>
     </div>

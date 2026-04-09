@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as paperApi from "@/api/paper";
-import type { PaperIn, PaperOut, PaperStatus } from "@/types/paper";
+import type { PaperIn, PaperOut, PaperUpdate, PaperVerificationStatus } from "@/types/paper";
 import type { CategoryOut } from "@/types/reference";
 import { resolveCategories } from "@/utils/lib";
 import { REFERENCE_QUERY_KEYS } from "./useReference";
@@ -9,6 +9,10 @@ import { REFERENCE_QUERY_KEYS } from "./useReference";
 
 function withCategories(papers: PaperOut[], allCategories: CategoryOut[]): PaperOut[] {
   return papers.map((p) => ({ ...p, categories: resolveCategories(p.categoryIds ?? [], allCategories) }));
+}
+
+function withCategory(paper: PaperOut, allCategories: CategoryOut[]): PaperOut {
+  return { ...paper, categories: resolveCategories(paper.categoryIds ?? [], allCategories) };
 }
 
 // ─── useSubmitPaper ───────────────────────────────────────────────────────────
@@ -25,11 +29,11 @@ export function useSubmitPaper() {
 
 // ─── usePapers ────────────────────────────────────────────────────────────────
 
-export function usePapers(status?: PaperStatus) {
+export function usePapers(limit = 50, offset = 0) {
   const queryClient = useQueryClient();
   return useQuery({
-    queryKey: ["papers", status ?? "all"],
-    queryFn: () => paperApi.getPapers(status),
+    queryKey: ["papers", limit, offset],
+    queryFn: () => paperApi.getPapers(limit, offset),
     select: (data) => {
       const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
       return withCategories(data, cats);
@@ -42,46 +46,23 @@ export function usePapers(status?: PaperStatus) {
 export function usePaperBySlug(slug: string) {
   const queryClient = useQueryClient();
   return useQuery<PaperOut>({
-    queryKey: ["paper", slug],
+    queryKey: ["paper", "slug", slug],
     queryFn: () => paperApi.getPaperBySlug(slug),
     enabled: !!slug,
     select: (data) => {
       const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
-      return { ...data, categories: resolveCategories(data.categoryIds ?? [], cats) };
-    },
-  });
-}
-
-// ─── useVotePaper ─────────────────────────────────────────────────────────────
-
-export function useVotePaper() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, voted }: { id: number; voted: boolean }) => paperApi.votePaper(id, voted),
-    onSuccess: (_data, { id, voted }) => {
-      // Update all single paper caches (keyed by slug — update any that match this id)
-      queryClient.setQueriesData({ queryKey: ["paper"] }, (old: PaperOut | undefined) => {
-        if (!old || old.id !== id) return old;
-        return { ...old, voteCount: Math.max(0, old.voteCount + (voted ? 1 : -1)) };
-      });
-      // Update list caches
-      queryClient.setQueriesData({ queryKey: ["papers"] }, (old: PaperOut[] | undefined) => {
-        if (!old) return old;
-        return old.map((p) =>
-          p.id === id ? { ...p, voteCount: Math.max(0, p.voteCount + (voted ? 1 : -1)) } : p
-        );
-      });
+      return withCategory(data, cats);
     },
   });
 }
 
 // ─── useMyPapers ──────────────────────────────────────────────────────────────
 
-export function useMyPapers(status?: PaperStatus) {
+export function useMyPapers() {
   const queryClient = useQueryClient();
   return useQuery({
-    queryKey: ["papers", "me", status],
-    queryFn: () => paperApi.getMyPapers(status),
+    queryKey: ["papers", "me"],
+    queryFn: () => paperApi.getMyPapers(),
     select: (data) => {
       const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
       return withCategories(data, cats);
@@ -89,14 +70,33 @@ export function useMyPapers(status?: PaperStatus) {
   });
 }
 
-// ─── useUpdatePaperStatus ─────────────────────────────────────────────────────
+// ─── useUpdatePaper ───────────────────────────────────────────────────────────
+// Owner or admin. Pass `status` in data to change publication state.
 
-export function useUpdatePaperStatus() {
+export function useUpdatePaper() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }: { id: number; status: PaperStatus }) => paperApi.updatePaperStatus(id, status),
-    onSuccess: () => {
+    mutationFn: ({ id, data }: { id: number; data: PaperUpdate }) => paperApi.updatePaper(id, data),
+    onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ["papers"] });
+      queryClient.invalidateQueries({ queryKey: ["paper", updated.id] });
+      queryClient.invalidateQueries({ queryKey: ["paper", "slug", updated.slug] });
+    },
+  });
+}
+
+// ─── useUpdatePaperVerificationStatus ────────────────────────────────────────
+// Admin only.
+
+export function useUpdatePaperVerificationStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, verificationStatus }: { id: number; verificationStatus: PaperVerificationStatus }) =>
+      paperApi.updatePaperVerificationStatus(id, verificationStatus),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: ["papers"] });
+      queryClient.invalidateQueries({ queryKey: ["paper", updated.id] });
+      queryClient.invalidateQueries({ queryKey: ["paper", "slug", updated.slug] });
     },
   });
 }
@@ -109,6 +109,26 @@ export function useDeletePaper() {
     mutationFn: (id: number) => paperApi.deletePaper(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["papers"] });
+    },
+  });
+}
+
+// ─── useVotePaper ─────────────────────────────────────────────────────────────
+
+export function useVotePaper() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, voted }: { id: number; voted: boolean }) => paperApi.votePaper(id, voted),
+    onSuccess: (_data, { id, voted }) => {
+      const delta = voted ? 1 : -1;
+      queryClient.setQueriesData({ queryKey: ["paper"] }, (old: PaperOut | undefined) => {
+        if (!old || old.id !== id) return old;
+        return { ...old, voteCount: Math.max(0, old.voteCount + delta) };
+      });
+      queryClient.setQueriesData({ queryKey: ["papers"] }, (old: PaperOut[] | undefined) => {
+        if (!old) return old;
+        return old.map((p) => (p.id === id ? { ...p, voteCount: Math.max(0, p.voteCount + delta) } : p));
+      });
     },
   });
 }

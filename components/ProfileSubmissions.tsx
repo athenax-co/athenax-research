@@ -4,7 +4,7 @@ import Link from "next/link";
 import WindowCard from "@/components/ui/WindowCard";
 import { IconArrowUpRight, IconFileTextSmall, IconPackageSmall, IconPaperSmall } from "@/components/Icons";
 import { useMyProducts } from "@/hooks/queries/useProduct";
-import { authSvc } from "@/lib/db-helper";
+import { useMyPapers } from "@/hooks/queries/usePaper";
 import type { SessionUser } from "@/types/auth";
 import SubmitProductButton from "@/components/SubmitProductModal";
 
@@ -58,36 +58,51 @@ function ProductsList() {
   );
 }
 
-function PapersList({ userId }: { userId: number }) {
-  const papers = authSvc.getPapersByUser(String(userId));
+function PapersList() {
+  const { data: papers = [], isLoading } = useMyPapers();
 
-  if (papers.length === 0) {
+  if (isLoading) {
     return (
-      <div>
-        <p className="mb-3.5 text-sm text-muted">No papers submitted yet.</p>
-        <Link href="/paper/submit" className="btn btn-primary btn-sm">
-          Submit a Paper →
-        </Link>
+      <div className="animate-pulse space-y-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="h-12 rounded-lg bg-[#E8E4DC]" />
+        ))}
       </div>
     );
   }
 
   return (
     <div>
+      {papers.length === 0 && <p className="mb-3.5 text-sm text-muted">No papers submitted yet.</p>}
       {papers.map((p) => (
-        <Link key={p.id} href={`/paper/${p.id}`} className="archive-row mb-2 cursor-pointer text-inherit no-underline">
-          <div className="archive-icon bg-paper">
+        <Link key={p.id} href={`/paper/${p.slug}`} className="archive-row mb-2 cursor-pointer text-inherit no-underline">
+          <div className="archive-icon bg-paper flex items-center justify-center">
             <IconPaperSmall />
           </div>
           <div className="flex-1">
             <div className="archive-title text-sm">{p.title.length > 55 ? p.title.slice(0, 55) + "…" : p.title}</div>
             <div className="archive-meta">
-              {p.year} · {p.topic} · {p.citations} cites
+              {new Date(p.createdAt).toLocaleDateString()} · {p.categories.map((c) => c.name).join(", ") || "Uncategorized"}
             </div>
           </div>
-          <span className="ftag text-[10px] bg-success">{p.status}</span>
+          <span
+            className={`ftag text-[10px] ${
+              p.verificationStatus === "approved"
+                ? "bg-success"
+                : p.verificationStatus === "rejected"
+                  ? "bg-red-100"
+                  : "bg-amber-100"
+            }`}
+          >
+            {p.verificationStatus}
+          </span>
         </Link>
       ))}
+      <div className="mt-3">
+        <Link href="/paper/submit" className="btn btn-primary btn-sm flex items-center gap-1.5 w-fit">
+          {papers.length === 0 ? "Submit a Paper" : "Submit Another Paper"} <IconArrowUpRight />
+        </Link>
+      </div>
     </div>
   );
 }
@@ -117,7 +132,7 @@ export default function ProfileSubmissions({ user }: { user: SessionUser }) {
             <IconFileTextSmall />
             SUBMITTED PAPERS
           </div>
-          <PapersList userId={user.id} />
+          <PapersList />
         </WindowCard>
       )}
     </>

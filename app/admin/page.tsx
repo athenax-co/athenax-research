@@ -6,9 +6,9 @@ import WindowCard from "@/components/ui/WindowCard";
 import Modal from "@/components/ui/Modal";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useProducts } from "@/hooks/queries/useProduct";
-import { usePapers, useUpdatePaperStatus } from "@/hooks/queries/usePaper";
+import { usePapers, useUpdatePaperVerificationStatus } from "@/hooks/queries/usePaper";
 import { SEED_BOUNTIES, SEED_LAUNCHES, SEED_PAPERS, SEED_RESEARCHERS, SEED_SPONSORS, SEED_STARTUPS } from "@/data/seed";
-import { PaperStatus } from "@/enums";
+import { PaperVerificationStatus } from "@/enums";
 import { cn } from "@/utils/lib";
 
 type AdminTab = "launches" | "papers" | "cohorts" | "bounties" | "platform";
@@ -70,8 +70,9 @@ export default function Page() {
   } | null>(null);
 
   const { data: pendingProducts = [], isLoading: loadingPending } = useProducts("pending");
-  const { data: draftPapers = [], isLoading: loadingPapers } = usePapers(PaperStatus.DRAFT);
-  const { mutate: updatePaperStatus } = useUpdatePaperStatus();
+  const { data: allPapers = [], isLoading: loadingPapers } = usePapers();
+  const pendingPapers = allPapers.filter((p) => p.verificationStatus === PaperVerificationStatus.PENDING);
+  const { mutate: updatePaperVerificationStatus } = useUpdatePaperVerificationStatus();
 
   if (!user || (user.role as string) !== "admin") {
     return (
@@ -96,7 +97,7 @@ export default function Page() {
 
   const tabs: { id: AdminTab; label: string; count: number }[] = [
     { id: "launches", label: "Launch Queue", count: pendingProducts.length },
-    { id: "papers", label: "Paper Queue", count: draftPapers.length },
+    { id: "papers", label: "Paper Queue", count: pendingPapers.length },
     { id: "cohorts", label: "Cohort Apps", count: pendingCohorts.length },
     { id: "bounties", label: "Bounty Review", count: pendingBounties.length },
     { id: "platform", label: "Platform Stats", count: 0 },
@@ -132,7 +133,7 @@ export default function Page() {
       <div className="mb-7 grid grid-cols-2 gap-3.5 sm:grid-cols-4">
         {[
           { label: "Pending Launches", value: pendingProducts.length, tone: "text-[#E8323C]" },
-          { label: "Pending Papers", value: draftPapers.length, tone: "text-[#E8323C]" },
+          { label: "Pending Papers", value: pendingPapers.length, tone: "text-[#E8323C]" },
           { label: "Cohort Apps", value: pendingCohorts.length, tone: "text-[#E8323C]" },
           { label: "Open Bounties", value: SEED_BOUNTIES.length, tone: "text-[#15803D]" },
         ].map((s) => (
@@ -201,25 +202,25 @@ export default function Page() {
           <div className="mb-3.5 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">PENDING RESEARCH SUBMISSIONS</div>
           {loadingPapers ? (
             <p className="text-[13px] text-muted">Loading…</p>
-          ) : draftPapers.length === 0 ? (
+          ) : pendingPapers.length === 0 ? (
             <p className="text-[13px] text-muted">No papers pending review.</p>
           ) : (
-            draftPapers.map((paper) => (
+            pendingPapers.map((paper) => (
               <QueueRow
                 key={paper.id}
                 name={paper.title.length > 60 ? paper.title.slice(0, 60) + "…" : paper.title}
                 meta={`${paper.sourceType} · ${paper.categories.length} categories · Submitted ${new Date(paper.createdAt).toLocaleDateString("en-CA")}`}
                 chips={paper.categories.map((c) => c.name)}
                 onApprove={() => {
-                  updatePaperStatus(
-                    { id: paper.id, status: PaperStatus.PUBLISHED },
-                    { onSuccess: () => showToast(`Published: ${paper.title.slice(0, 30)}`, "success") }
+                  updatePaperVerificationStatus(
+                    { id: paper.id, verificationStatus: PaperVerificationStatus.APPROVED },
+                    { onSuccess: () => showToast(`Approved: ${paper.title.slice(0, 30)}`, "success") }
                   );
                 }}
                 onReject={() => {
-                  updatePaperStatus(
-                    { id: paper.id, status: PaperStatus.ARCHIVED },
-                    { onSuccess: () => showToast(`Archived: ${paper.title.slice(0, 30)}`, "info") }
+                  updatePaperVerificationStatus(
+                    { id: paper.id, verificationStatus: PaperVerificationStatus.REJECTED },
+                    { onSuccess: () => showToast(`Rejected: ${paper.title.slice(0, 30)}`, "info") }
                   );
                 }}
                 onReview={() =>
@@ -230,11 +231,12 @@ export default function Page() {
                     meta: [
                       { label: "Source", value: paper.sourceType },
                       { label: "Votes", value: String(paper.voteCount) },
-                      { label: "Submitted", value: new Date(paper.createdAt).toLocaleDateString("en-GB") },
+                      { label: "Submitted", value: new Date(paper.createdAt).toLocaleDateString("en-CA") },
                     ],
                     details: [
                       { label: "External URL", value: paper.externalUrl ?? "None" },
                       { label: "Status", value: paper.status },
+                      { label: "Verification", value: paper.verificationStatus },
                     ],
                     itemId: paper.id,
                     itemType: "paper",
@@ -388,9 +390,9 @@ export default function Page() {
               className="btn btn-primary flex-1 justify-center"
               onClick={() => {
                 if (reviewItem.itemType === "paper" && reviewItem.itemId != null) {
-                  updatePaperStatus(
-                    { id: reviewItem.itemId, status: PaperStatus.PUBLISHED },
-                    { onSuccess: () => showToast(`Published: ${reviewItem.title.slice(0, 30)}`, "success") }
+                  updatePaperVerificationStatus(
+                    { id: reviewItem.itemId, verificationStatus: PaperVerificationStatus.APPROVED },
+                    { onSuccess: () => showToast(`Approved: ${reviewItem.title.slice(0, 30)}`, "success") }
                   );
                 } else {
                   handleApprove(reviewItem.title);
@@ -404,9 +406,9 @@ export default function Page() {
               className="btn btn-outline flex-1 justify-center"
               onClick={() => {
                 if (reviewItem.itemType === "paper" && reviewItem.itemId != null) {
-                  updatePaperStatus(
-                    { id: reviewItem.itemId, status: PaperStatus.ARCHIVED },
-                    { onSuccess: () => showToast(`Archived: ${reviewItem.title.slice(0, 30)}`, "info") }
+                  updatePaperVerificationStatus(
+                    { id: reviewItem.itemId, verificationStatus: PaperVerificationStatus.REJECTED },
+                    { onSuccess: () => showToast(`Rejected: ${reviewItem.title.slice(0, 30)}`, "info") }
                   );
                 } else {
                   handleReject(reviewItem.title);

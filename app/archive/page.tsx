@@ -7,7 +7,6 @@ import { getArticles, getResearch, normalizeTag, sortByPublishedAtDesc } from "@
 import WindowCard from "@/components/ui/WindowCard";
 import { useCategories } from "@/hooks/queries/useReference";
 import { usePapers } from "@/hooks/queries/usePaper";
-import { PaperStatus } from "@/enums";
 
 const ArchivePage = () => {
   const [tab, setTab] = useState("articles");
@@ -19,7 +18,7 @@ const ArchivePage = () => {
   const [paperFilter, setPaperFilter] = useState("All");
   const [paperSort, setPaperSort] = useState<"votes" | "new">("votes");
   const { data: categories = [] } = useCategories();
-  const { data: papers = [], isLoading: papersLoading } = usePapers(PaperStatus.PUBLISHED);
+  const { data: papers = [], isLoading: papersLoading } = usePapers();
 
   useEffect(() => {
     let isMounted = true;

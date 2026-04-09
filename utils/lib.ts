@@ -113,3 +113,34 @@ export const bookmarkSvc = {
     return { saved: true };
   },
 };
+
+export type NotificationItem = {
+  id: string;
+  userId: string;
+  kind: string;
+  text: string;
+  createdAt: string;
+  read?: boolean;
+};
+
+export const notifSvc = {
+  getAll: (userId: string): NotificationItem[] =>
+    dbRead(FOLLOW_KEYS.NOTIFICATIONS, [])
+      .filter((n: NotificationItem) => n.userId === userId)
+      .sort((a: NotificationItem, b: NotificationItem) => +new Date(b.createdAt) - +new Date(a.createdAt)),
+  unread: (userId: string) => dbRead(FOLLOW_KEYS.NOTIFICATIONS, []).filter((n: NotificationItem) => n.userId === userId && !n.read).length,
+  markOne: (id: string) => {
+    const all: NotificationItem[] = dbRead(FOLLOW_KEYS.NOTIFICATIONS, []);
+    dbWrite(
+      FOLLOW_KEYS.NOTIFICATIONS,
+      all.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
+  },
+  markRead: (userId: string) => {
+    const all: NotificationItem[] = dbRead(FOLLOW_KEYS.NOTIFICATIONS, []);
+    dbWrite(
+      FOLLOW_KEYS.NOTIFICATIONS,
+      all.map((n) => (n.userId === userId ? { ...n, read: true } : n))
+    );
+  },
+};

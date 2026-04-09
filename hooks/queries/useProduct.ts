@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as productApi from "@/api/product";
-import type { ProductComment, ProductDetailOut, ProductIn, ProductOut, ProductStatus } from "@/types/product";
+import type { ProductComment, ProductDetailOut, ProductIn, ProductOut, ProductStatus, ProductSummary } from "@/types/product";
 import type { CategoryOut } from "@/types/reference";
 import { resolveCategories } from "@/utils/lib";
 import { REFERENCE_QUERY_KEYS } from "./useReference";
@@ -78,6 +78,24 @@ export function useMyProducts(status?: ProductStatus) {
       const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
       return withCategories(data, cats);
     },
+  });
+}
+
+// ─── useMyVotedProducts ───────────────────────────────────────────────────────
+
+export function useMyVotedProducts() {
+  return useQuery<ProductSummary[]>({
+    queryKey: ["products", "me", "voted"],
+    queryFn: () => productApi.getMyVotedProducts(),
+  });
+}
+
+// ─── useMyBookmarkedProducts ──────────────────────────────────────────────────
+
+export function useMyBookmarkedProducts() {
+  return useQuery<ProductSummary[]>({
+    queryKey: ["products", "me", "bookmarked"],
+    queryFn: () => productApi.getMyBookmarkedProducts(),
   });
 }
 

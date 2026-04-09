@@ -1,5 +1,5 @@
 import { BASE_URL, handleResponse } from "@/api/client";
-import type { ProductIn, ProductOut, ProductDetailOut, ProductStatus, ProductComment } from "@/types/product";
+import type { ProductIn, ProductOut, ProductDetailOut, ProductStatus, ProductComment, ProductSummary } from "@/types/product";
 
 export async function submitProduct(data: ProductIn): Promise<void> {
   const res = await fetch(`${BASE_URL}/product`, {
@@ -46,6 +46,16 @@ export async function getMyProducts(status?: ProductStatus): Promise<ProductOut[
   const url = status ? `${BASE_URL}/product/me?status=${status}` : `${BASE_URL}/product/me`;
   const res = await fetch(url, { credentials: "include" });
   return handleResponse<ProductOut[]>(res);
+}
+
+export async function getMyVotedProducts(limit = 50, offset = 0): Promise<ProductSummary[]> {
+  const res = await fetch(`${BASE_URL}/product/me/voted?limit=${limit}&offset=${offset}`, { credentials: "include" });
+  return handleResponse<ProductSummary[]>(res);
+}
+
+export async function getMyBookmarkedProducts(limit = 50, offset = 0): Promise<ProductSummary[]> {
+  const res = await fetch(`${BASE_URL}/product/me/bookmarked?limit=${limit}&offset=${offset}`, { credentials: "include" });
+  return handleResponse<ProductSummary[]>(res);
 }
 
 export async function updateProductStatus(id: number, status: ProductStatus): Promise<ProductOut> {

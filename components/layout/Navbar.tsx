@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/utils/lib";
 import { useGlobal } from "@/components/GlobalProvider";
+import NotificationBell from "@/components/layout/NotificationBell";
+import { IconAdmin, IconDashboardGrid, IconSponsorDashboard } from "@/components/Icons";
 
 // ═══════════════════════════════════════════════════════════
 const NAV_ITEMS = [
@@ -56,6 +58,8 @@ const HamburgerIcon = ({ open }: { open: boolean }) => (
   </div>
 );
 
+const NAV_ICON_BUTTON_CLASS = "btn btn-ghost btn-sm size-10 shrink-0 justify-center px-0";
+
 const Navbar = () => {
   const { user, handleAuthClick } = useGlobal();
   const pathname = usePathname();
@@ -97,32 +101,38 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-2.5">
             {user ? (
               <>
-                {["sponsor", "admin"].includes(user.role) && (
-                  <Link className="btn btn-ghost btn-sm" href="/sponsors/dashboard" title="Sponsor Dashboard">
-                    ◈
+                <NotificationBell user={user} />
+                {user.role === "admin" && (
+                  <Link className={`${NAV_ICON_BUTTON_CLASS} text-[#E8323C]`} href="/admin" title="Admin">
+                    <IconAdmin size={18} />
                   </Link>
                 )}
-                <Link className="btn btn-ghost btn-sm" href="/dashboard" title="Dashboard">
-                  ⊞
+                {["sponsor", "admin"].includes(user.role) && (
+                  <Link className={NAV_ICON_BUTTON_CLASS} href="/sponsors/dashboard" title="Sponsor Dashboard">
+                    <IconSponsorDashboard size={18} />
+                  </Link>
+                )}
+                <Link className={NAV_ICON_BUTTON_CLASS} href="/dashboard" title="Dashboard">
+                  <IconDashboardGrid size={18} />
                 </Link>
-                <Link className="btn btn-ghost btn-sm" href="/profile">
+                <Link className="btn btn-ghost btn-sm h-10 no-underline" href="/profile">
                   <span className="size-5 rounded-full bg-yellow border-[1.5px] border-ink inline-flex items-center justify-center text-[11px] font-bold">
                     {user.avatar}
                   </span>
                   {user.name.split(" ")[0]}
                 </Link>
-                <button className="btn btn-outline btn-sm" onClick={() => handleAuthClick("logout")}>
+                <button className="btn btn-outline btn-sm h-10" onClick={() => handleAuthClick("logout")}>
                   Out
                 </button>
               </>
             ) : (
               <>
-                <button className="btn btn-primary btn-sm" onClick={() => handleAuthClick("register")}>
-                  Join Network →
-                </button>
                 <button className="btn btn-ghost btn-sm" onClick={() => handleAuthClick("login")}>
                   Sign In
                 </button>
+                <Link className="btn btn-primary btn-sm no-underline" href="/cohort/apply">
+                  Apply →
+                </Link>
               </>
             )}
           </div>
@@ -130,15 +140,23 @@ const Navbar = () => {
           {/* Mobile: auth shortcut + hamburger */}
           <div className="flex md:hidden items-center gap-2">
             {user ? (
-              <Link className="btn btn-ghost btn-sm" href="/profile">
-                <span className="size-5 rounded-full bg-yellow border-[1.5px] border-ink inline-flex items-center justify-center text-[11px] font-bold">
-                  {user.avatar}
-                </span>
-              </Link>
+              <>
+                <NotificationBell user={user} />
+                {user.role === "admin" && (
+                  <Link className={`${NAV_ICON_BUTTON_CLASS} text-[#E8323C]`} href="/admin" title="Admin">
+                    <IconAdmin size={18} />
+                  </Link>
+                )}
+                <Link className={NAV_ICON_BUTTON_CLASS} href="/profile">
+                  <span className="size-5 rounded-full bg-yellow border-[1.5px] border-ink inline-flex items-center justify-center text-[11px] font-bold">
+                    {user.avatar}
+                  </span>
+                </Link>
+              </>
             ) : (
-              <button className="btn btn-primary btn-sm" onClick={() => handleAuthClick("register")}>
-                Join →
-              </button>
+              <Link className="btn btn-primary btn-sm no-underline" href="/cohort/apply">
+                Apply →
+              </Link>
             )}
             <button
               className="btn btn-ghost btn-sm px-2.5"
@@ -176,11 +194,16 @@ const Navbar = () => {
               {user ? (
                 <>
                   <Link className="btn btn-ghost justify-center" href="/dashboard" onClick={() => setMenuOpen(false)}>
-                    ⊞ Dashboard
+                    <IconDashboardGrid size={18} /> Dashboard
                   </Link>
+                  {user.role === "admin" && (
+                    <Link className="btn btn-ghost justify-center text-[#E8323C]" href="/admin" onClick={() => setMenuOpen(false)}>
+                      <IconAdmin size={18} /> Admin
+                    </Link>
+                  )}
                   {["sponsor", "admin"].includes(user.role) && (
                     <Link className="btn btn-ghost justify-center" href="/sponsors/dashboard" onClick={() => setMenuOpen(false)}>
-                      ◈ Sponsor Dashboard
+                      <IconSponsorDashboard size={18} /> Sponsor Dashboard
                     </Link>
                   )}
                   <button
@@ -196,15 +219,6 @@ const Navbar = () => {
               ) : (
                 <>
                   <button
-                    className="btn btn-primary justify-center"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      handleAuthClick("register");
-                    }}
-                  >
-                    Join Network →
-                  </button>
-                  <button
                     className="btn btn-ghost justify-center"
                     onClick={() => {
                       setMenuOpen(false);
@@ -213,6 +227,9 @@ const Navbar = () => {
                   >
                     Sign In
                   </button>
+                  <Link className="btn btn-primary justify-center no-underline" href="/cohort/apply" onClick={() => setMenuOpen(false)}>
+                    Apply →
+                  </Link>
                 </>
               )}
             </div>

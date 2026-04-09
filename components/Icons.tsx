@@ -172,6 +172,103 @@ const IconBriefcaseSmall = ({ color = "#1C1C27" }) => (
   </svg>
 );
 
+const IconNotification = ({ size = 18, color = "#1C1C27" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+  </svg>
+);
+
+const IconAdmin = ({ size = 18, color = "#E8323C" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M12 3v2" />
+    <path d="M12 19v2" />
+    <path d="M3 12h2" />
+    <path d="M19 12h2" />
+    <path d="m5.64 5.64 1.41 1.41" />
+    <path d="m16.95 16.95 1.41 1.41" />
+    <path d="m5.64 18.36 1.41-1.41" />
+    <path d="m16.95 7.05 1.41-1.41" />
+  </svg>
+);
+
+const IconSponsorDashboard = ({ size = 18, color = "#1C1C27" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 4 18 10 12 16 6 10 12 4Z" />
+    <path d="M12 8.5 13.5 10 12 11.5 10.5 10 12 8.5Z" />
+  </svg>
+);
+
+const IconDashboardGrid = ({ size = 18, color = "#1C1C27" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="5" y="5" width="6" height="6" />
+    <rect x="13" y="5" width="6" height="6" />
+    <rect x="5" y="13" width="6" height="6" />
+    <rect x="13" y="13" width="6" height="6" />
+  </svg>
+);
+
+const IconShare = ({ size = 16, color = "#1C1C27" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="18" cy="5" r="3" />
+    <circle cx="6" cy="12" r="3" />
+    <circle cx="18" cy="19" r="3" />
+    <path d="M8.6 13.5 15.4 17.5" />
+    <path d="M15.4 6.5 8.6 10.5" />
+  </svg>
+);
+
+const IconMore = ({ size = 15, color = "#1C1C27" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <circle cx="5" cy="12" r="1.75" />
+    <circle cx="12" cy="12" r="1.75" />
+    <circle cx="19" cy="12" r="1.75" />
+  </svg>
+);
+
+const IconEdit = ({ size = 13, color = "#6B6B7A" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 20h9" />
+    <path d="m16.5 3.5 4 4L7 21l-4 1 1-4 12.5-14.5Z" />
+  </svg>
+);
+
+const IconTrash = ({ size = 13, color = "#E8323C" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 6h18" />
+    <path d="M8 6V4h8v2" />
+    <path d="M19 6v14H5V6" />
+    <path d="M10 11v6" />
+    <path d="M14 11v6" />
+  </svg>
+);
+
+const IconPackageSmall = ({ size = 14, color = "#6B6B7A" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m12 2 8 4v12l-8 4-8-4V6l8-4Z" />
+    <path d="m4 6 8 4 8-4" />
+    <path d="M12 10v12" />
+  </svg>
+);
+
+const IconArrowUpRight = ({ size = 12, color = "#1C1C27" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M7 17 17 7" />
+    <path d="M8 7h9v9" />
+  </svg>
+);
+
+const IconFileTextSmall = ({ size = 11, color = "#6B6B7A" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <path d="M14 2v6h6" />
+    <path d="M8 13h8" />
+    <path d="M8 17h8" />
+    <path d="M8 9h2" />
+  </svg>
+);
+
 interface IconProps {
   name: string;
   size?: number;
@@ -285,6 +382,17 @@ export {
   IconTalentSmall,
   IconPaperSmall,
   IconBriefcaseSmall,
+  IconNotification,
+  IconAdmin,
+  IconSponsorDashboard,
+  IconDashboardGrid,
+  IconShare,
+  IconMore,
+  IconEdit,
+  IconTrash,
+  IconPackageSmall,
+  IconArrowUpRight,
+  IconFileTextSmall,
   MediaIcon,
   ContentIcon,
   AthenaXMark,

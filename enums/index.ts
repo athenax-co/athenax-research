@@ -23,3 +23,19 @@ export const QualityBadge = {
 } as const;
 
 export type QualityBadge = (typeof QualityBadge)[keyof typeof QualityBadge];
+
+export const PaperStatus = {
+    DRAFT:     "draft",
+    PUBLISHED: "published",
+    ARCHIVED:  "archived",
+} as const;
+
+export type PaperStatus = (typeof PaperStatus)[keyof typeof PaperStatus];
+
+export const PaperVerificationStatus = {
+    PENDING:  "pending",
+    APPROVED: "approved",
+    REJECTED: "rejected",
+} as const;
+
+export type PaperVerificationStatus = (typeof PaperVerificationStatus)[keyof typeof PaperVerificationStatus];

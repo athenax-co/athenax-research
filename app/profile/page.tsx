@@ -6,8 +6,8 @@ import { NEWSLETTERS } from "@/data/seed";
 import WindowCard from "@/components/ui/WindowCard";
 import ArsBreakdown from "@/components/ui/ArsBreakdown";
 import { authSvc, calcARS } from "@/lib/db-helper";
-import { IconPaperSmall } from "@/components/Icons";
 import NewsletterCard from "@/components/ui/NewsletterCard";
+import ProfileSubmissions from "@/components/ProfileSubmissions";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useResendVerification } from "@/hooks/queries/useAuth";
 
@@ -40,7 +40,6 @@ export default function Page() {
   }, [resendTimer]);
 
   const researcher = user?.role === "researcher" ? authSvc.getResearcher(user.id) : null;
-  const papers = user ? authSvc.getPapersByUser(user.id) : [];
   const applications: Application[] = user ? authSvc.getApplications(user.id) : [];
   const ars = researcher ? calcARS(researcher) : 0;
 
@@ -126,11 +125,11 @@ export default function Page() {
                     >
                       Edit Profile
                     </button>
-                    {user.role === "researcher" && (
+                    {/* {user.role === "researcher" && (
                       <Link href="/paper/submit" className="btn btn-primary btn-sm">
                         Submit a Paper →
                       </Link>
-                    )}
+                    )} */}
                   </div>
                 </>
               ) : (
@@ -201,25 +200,7 @@ export default function Page() {
           </div>
 
           <div>
-            {papers.length > 0 && (
-              <WindowCard label="MY_PAPERS.SYS" className="mb-5">
-                {papers.map((p) => (
-                  <Link key={p.id} href={`/paper/${p.id}`}>
-                    <div className="archive-row">
-                      <div className="archive-icon bg-paper">
-                        <IconPaperSmall />
-                      </div>
-                      <div className="flex-1">
-                        <div className="archive-title text-sm">{p.title.slice(0, 50)}…</div>
-                        <div className="archive-meta">
-                          {p.year} // {p.topic}
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </WindowCard>
-            )}
+            <ProfileSubmissions user={user} />
             <WindowCard label="APPLICATIONS.SYS" bodyClass="window-body window-body-cream">
               {applications.length === 0 ? (
                 <div>

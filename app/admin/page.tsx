@@ -5,10 +5,10 @@ import { useState } from "react";
 import WindowCard from "@/components/ui/WindowCard";
 import Modal from "@/components/ui/Modal";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useProducts } from "@/hooks/queries/useProduct";
+import { useProducts, useUpdateProductStatus } from "@/hooks/queries/useProduct";
 import { usePapers, useUpdatePaperVerificationStatus } from "@/hooks/queries/usePaper";
 import { SEED_BOUNTIES, SEED_LAUNCHES, SEED_PAPERS, SEED_RESEARCHERS, SEED_SPONSORS, SEED_STARTUPS } from "@/data/seed";
-import { PaperVerificationStatus } from "@/enums";
+import { PaperVerificationStatus, ProductStatus } from "@/enums";
 import { cn } from "@/utils/lib";
 
 type AdminTab = "launches" | "papers" | "cohorts" | "bounties" | "platform";
@@ -75,6 +75,7 @@ export default function Page() {
   const { data: allPapers = [], isLoading: loadingPapers } = usePapers();
   const pendingPapers = allPapers.filter((p) => p.verificationStatus === PaperVerificationStatus.PENDING);
   const { mutate: updateVerification } = useUpdatePaperVerificationStatus();
+  const { mutate: updateProductStatus } = useUpdateProductStatus();
 
   if (!user || (user.role as string) !== "admin") {
     return (
@@ -146,11 +147,7 @@ export default function Page() {
 
       <div className="mb-5 flex flex-wrap gap-2">
         {tabs.map(({ id, label, count }) => (
-          <button
-            key={id}
-            className={cn("btn btn-sm", tab === id ? "btn-ghost bg-yellow" : "btn-outline")}
-            onClick={() => setTab(id)}
-          >
+          <button key={id} className={cn("btn btn-sm", tab === id ? "btn-ghost bg-yellow" : "btn-outline")} onClick={() => setTab(id)}>
             {label}
             {count > 0 && <span className="ml-1 font-['Space_Mono',monospace] text-[10px] font-bold text-[#E8323C]">({count})</span>}
           </button>
@@ -159,11 +156,11 @@ export default function Page() {
 
       {tab === "launches" && (
         <WindowCard label="LAUNCH_MODERATION.SYS">
-          <div className="mb-3.5 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">PENDING LAUNCH SUBMISSIONS</div>
+          <div className="mb-3 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">PENDING LAUNCH SUBMISSIONS</div>
           {loadingPending ? (
-            <p className="text-[13px] text-muted">Loading…</p>
+            <p className="text-sm text-muted">Loading…</p>
           ) : pendingProducts.length === 0 ? (
-            <p className="text-[13px] text-muted">No pending launches.</p>
+            <p className="text-sm text-muted">No pending launches.</p>
           ) : (
             pendingProducts.map((product) => (
               <QueueRow
@@ -171,8 +168,18 @@ export default function Page() {
                 name={product.name}
                 meta={`${product.stage} · Funding $${product.funding.toLocaleString()} · Founded ${product.founded} · Submitted ${new Date(product.createdAt).toLocaleDateString("en-CA")}`}
                 chips={(product.categories ?? []).map((category) => category.name)}
-                onApprove={() => handleApprove(product.name)}
-                onReject={() => handleReject(product.name)}
+                onApprove={() =>
+                  updateProductStatus(
+                    { id: product.id, status: ProductStatus.APPROVED },
+                    { onSuccess: () => showToast(`Approved: ${product.name}`, "success"), onError: () => showToast("Action failed.", "error") }
+                  )
+                }
+                onReject={() =>
+                  updateProductStatus(
+                    { id: product.id, status: ProductStatus.REJECTED },
+                    { onSuccess: () => showToast(`Rejected: ${product.name}`, "info"), onError: () => showToast("Action failed.", "error") }
+                  )
+                }
                 onReview={() =>
                   openReview({
                     title: product.name,
@@ -370,20 +377,25 @@ export default function Page() {
           <div className="flex gap-2 border-t border-[#D8D4CC] pt-3">
             <button
               className="btn btn-primary flex-1 justify-center"
-              onClick={() => { handleApprove(reviewItem.title); setReviewItem(null); }}
+              onClick={() => {
+                handleApprove(reviewItem.title);
+                setReviewItem(null);
+              }}
             >
               ✓ Approve
             </button>
             <button
               className="btn btn-outline flex-1 justify-center"
-              onClick={() => { handleReject(reviewItem.title); setReviewItem(null); }}
+              onClick={() => {
+                handleReject(reviewItem.title);
+                setReviewItem(null);
+              }}
             >
               ✗ Reject
             </button>
           </div>
         </Modal>
       )}
-
     </div>
   );
 }

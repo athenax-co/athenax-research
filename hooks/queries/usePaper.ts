@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as paperApi from "@/api/paper";
-import type { PaperIn, PaperOut, PaperUpdate, PaperVerificationStatus } from "@/types/paper";
+import type { PaperIn, PaperOut, PaperUpdate } from "@/types/paper";
+import { PaperVerificationStatus } from "@/enums";
 import type { CategoryOut } from "@/types/reference";
 import { resolveCategories } from "@/utils/lib";
 import { REFERENCE_QUERY_KEYS } from "./useReference";
@@ -29,11 +30,11 @@ export function useSubmitPaper() {
 
 // ─── usePapers ────────────────────────────────────────────────────────────────
 
-export function usePapers(limit = 50, offset = 0) {
+export function usePapers(limit = 50, offset = 0, verificationStatus?: PaperVerificationStatus) {
   const queryClient = useQueryClient();
   return useQuery({
-    queryKey: ["papers", limit, offset],
-    queryFn: () => paperApi.getPapers(limit, offset),
+    queryKey: ["papers", limit, offset, verificationStatus],
+    queryFn: () => paperApi.getPapers(limit, offset, verificationStatus),
     select: (data) => {
       const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
       return withCategories(data, cats);
@@ -109,6 +110,21 @@ export function useDeletePaper() {
     mutationFn: (id: number) => paperApi.deletePaper(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["papers"] });
+    },
+  });
+}
+
+// ─── useRelatedPapers ─────────────────────────────────────────────────────────
+
+export function useRelatedPapers(id: number | undefined, limit = 5) {
+  const queryClient = useQueryClient();
+  return useQuery({
+    queryKey: ["paper", id, "related", limit],
+    queryFn: () => paperApi.getRelatedPapers(id!, limit),
+    enabled: !!id,
+    select: (data) => {
+      const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
+      return withCategories(data, cats);
     },
   });
 }

@@ -3,22 +3,21 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ContentListState, ContentRow } from "@/components/Content";
-import { getArticles, getResearch, normalizeTag, sortByPublishedAtDesc } from "@/lib/api";
-import WindowCard from "@/components/ui/WindowCard";
+import { ContentIcon } from "@/components/Icons";
+import { getArticles, sortByPublishedAtDesc } from "@/lib/api";
 import { useCategories } from "@/hooks/queries/useReference";
 import { usePapers } from "@/hooks/queries/usePaper";
+import { PaperVerificationStatus } from "@/enums";
 
 const ArchivePage = () => {
   const [tab, setTab] = useState("articles");
-  const [researchFilter, setResearchFilter] = useState("all");
   const [articles, setArticles] = useState<any[]>([]);
-  const [research, setResearch] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [paperFilter, setPaperFilter] = useState("All");
   const [paperSort, setPaperSort] = useState<"votes" | "new">("votes");
   const { data: categories = [] } = useCategories();
-  const { data: papers = [], isLoading: papersLoading } = usePapers();
+  const { data: papers = [], isLoading: papersLoading } = usePapers(50, 0, PaperVerificationStatus.APPROVED);
 
   useEffect(() => {
     let isMounted = true;
@@ -28,12 +27,9 @@ const ArchivePage = () => {
       setError("");
 
       try {
-        const [articleItems, researchItems] = await Promise.all([getArticles(), getResearch()]);
-
+        const articleItems = await getArticles();
         if (!isMounted) return;
-
         setArticles(sortByPublishedAtDesc(articleItems as any));
-        setResearch(sortByPublishedAtDesc(researchItems as any));
       } catch {
         if (!isMounted) return;
         setError("Could not load archive content right now.");
@@ -53,11 +49,9 @@ const ArchivePage = () => {
     setTab("articles");
   }, []);
 
-  const filteredResearch = researchFilter === "all" ? research : research.filter((item) => normalizeTag(item.tag) === researchFilter);
-
   const filteredPapers = papers
     .filter((p) => paperFilter === "All" || p.categories.some((c) => c.name === paperFilter))
-    .sort((a, b) => paperSort === "votes" ? b.voteCount - a.voteCount : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    .sort((a, b) => (paperSort === "votes" ? b.voteCount - a.voteCount : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
 
   return (
     <div>
@@ -71,14 +65,8 @@ const ArchivePage = () => {
           {[
             ["articles", "Articles"],
             ["research", "Research"],
-            ["papers", "Papers"],
           ].map(([id, label]) => (
-            <button
-              key={id}
-              className={tab === id ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}
-              style={tab === id ? { background: "#F5D94E" } : {}}
-              onClick={() => setTab(id)}
-            >
+            <button key={id} className={tab === id ? "btn btn-ghost btn-sm bg-yellow" : "btn btn-outline btn-sm"} onClick={() => setTab(id)}>
               {label}
             </button>
           ))}
@@ -98,15 +86,14 @@ const ArchivePage = () => {
           </div>
         )}
 
-        {tab === "papers" && (
+        {tab === "research" && (
           <div>
             <div className="mb-4 flex flex-wrap items-center gap-2">
               <div className="flex gap-2">
                 {[{ id: 0, name: "All" }, ...categories].map((c) => (
                   <button
                     key={c.id}
-                    className={`shrink-0 ${paperFilter === c.name ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}`}
-                    style={paperFilter === c.name ? { background: "#F5D94E" } : {}}
+                    className={`shrink-0 ${paperFilter === c.name ? "btn btn-ghost btn-sm bg-yellow" : "btn btn-outline btn-sm"}`}
                     onClick={() => setPaperFilter(c.name)}
                   >
                     {c.name}
@@ -117,8 +104,7 @@ const ArchivePage = () => {
                 {(["votes", "new"] as const).map((s) => (
                   <button
                     key={s}
-                    className={paperSort === s ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}
-                    style={paperSort === s ? { background: "#F5D94E" } : {}}
+                    className={paperSort === s ? "btn btn-ghost btn-sm bg-yellow" : "btn btn-outline btn-sm"}
                     onClick={() => setPaperSort(s)}
                   >
                     {s === "votes" ? "Most Voted" : "Newest"}
@@ -127,90 +113,49 @@ const ArchivePage = () => {
               </div>
             </div>
             {papersLoading ? (
-              <WindowCard label="PAPERS.SYS">
+              <div>
                 {[...Array(5)].map((_, i) => (
-                  <div key={i} className="animate-pulse border-b border-[#D8D4CC] py-4 last:border-b-0">
-                    <div className="mb-2 h-5 w-3/4 rounded bg-[#E8E4DC]" />
-                    <div className="h-3 w-1/2 rounded bg-[#E8E4DC]" />
+                  <div key={i} className="archive-row animate-pulse">
+                    <div className="archive-icon" />
+                    <div className="flex-1">
+                      <div className="mb-2 h-4 w-3/4 rounded bg-[#E8E4DC]" />
+                      <div className="h-3 w-1/3 rounded bg-[#E8E4DC]" />
+                    </div>
                   </div>
                 ))}
-              </WindowCard>
+              </div>
             ) : filteredPapers.length === 0 ? (
-              <WindowCard label="PAPERS.SYS">
-                <p className="text-[13px] text-muted">No papers found.</p>
-              </WindowCard>
+              <p className="text-[13px] text-muted">No papers found.</p>
             ) : (
-              <WindowCard label="PAPERS.SYS">
+              <div>
                 {filteredPapers.map((paper) => (
-                  <div key={paper.id} className="flex flex-wrap items-start gap-3 border-b border-[#D8D4CC] py-4 last:border-b-0">
-                    <div className="min-w-0 flex-1">
-                      <Link
-                        href={`/paper/${paper.slug}`}
-                        className="mb-1 block text-[15px] font-semibold text-ink no-underline hover:underline"
-                      >
-                        {paper.title}
-                      </Link>
-                      {paper.categories.length > 0 && (
-                        <div className="mb-2 flex flex-wrap gap-1.5">
-                          {paper.categories.map((c) => (
-                            <span key={c.id} className="topic-pill text-[10px]">{c.name}</span>
-                          ))}
-                          <span className="ftag text-[10px]">{paper.sourceType === "link" ? "External" : "Hosted"}</span>
+                  <Link key={paper.id} href={`/paper/${paper.slug}`} className="no-underline">
+                    <div className="archive-row">
+                      <ContentIcon kind="paper" />
+                      <div className="min-w-0 flex-1">
+                        <div className="archive-title">{paper.title}</div>
+                        <div className="archive-meta">
+                          {paper.createdAt
+                            ? new Date(paper.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                            : ""}
+                          {paper.categories.length > 0 && `  //  ${paper.categories.map((c) => c.name).join(", ")}`}
                         </div>
-                      )}
-                      {paper.abstract && (
-                        <p className="mb-0 text-[13px] leading-relaxed text-muted">
-                          {paper.abstract.length > 140 ? paper.abstract.slice(0, 140) + "…" : paper.abstract}
-                        </p>
-                      )}
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <div className="font-['Space_Mono',monospace] text-[12px] font-bold text-danger">▲ {paper.voteCount.toLocaleString()}</div>
+                        <div className="text-[10px] text-muted">votes</div>
+                      </div>
+                      <span className="text-[18px] text-muted">→</span>
                     </div>
-                    <div className="flex shrink-0 flex-col items-end gap-2">
-                      <span className="font-['Space_Mono',monospace] text-xs font-bold text-[#E8323C]">
-                        ▲ {paper.voteCount.toLocaleString()}
-                      </span>
-                      <Link href={`/paper/${paper.slug}`} className="btn btn-outline btn-sm">Read →</Link>
-                    </div>
-                  </div>
+                  </Link>
                 ))}
-              </WindowCard>
+              </div>
             )}
             <div className="mt-4">
-              <Link href="/paper/submit" className="btn btn-primary">+ Submit Paper</Link>
+              <Link href="/paper/submit" className="btn btn-primary">
+                + Submit Paper
+              </Link>
             </div>
-          </div>
-        )}
-
-        {tab === "research" && (
-          <div>
-            <div className="mb-6 flex flex-wrap gap-2">
-              {[
-                ["all", "All"],
-                ["governance", "Governance"],
-                ["treasury", "Treasury"],
-              ].map(([id, label]) => (
-                <button
-                  key={id}
-                  className={researchFilter === id ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}
-                  style={researchFilter === id ? { background: "#F5D94E" } : {}}
-                  onClick={() => setResearchFilter(id)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            {filteredResearch.length > 0 ? (
-              filteredResearch.map((item) => (
-                <Link key={item.slug} href={`/archive/${item.slug}`}>
-                  <ContentRow item={item} kind="research" onClick={() => {}} />
-                </Link>
-              ))
-            ) : (
-              <ContentListState
-                loading={loading}
-                error={error}
-                emptyText={researchFilter === "all" ? "No published research available yet." : `No ${researchFilter} research available right now.`}
-              />
-            )}
           </div>
         )}
       </div>

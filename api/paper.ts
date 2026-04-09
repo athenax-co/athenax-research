@@ -11,8 +11,9 @@ export async function submitPaper(data: PaperIn): Promise<void> {
   return handleResponse<void>(res);
 }
 
-export async function getPapers(limit = 50, offset = 0): Promise<PaperOut[]> {
+export async function getPapers(limit = 50, offset = 0, verificationStatus?: PaperVerificationStatus): Promise<PaperOut[]> {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+  if (verificationStatus) params.set("verification_status", verificationStatus);
   const res = await fetch(`${BASE_URL}/paper?${params}`, { credentials: "include" });
   return handleResponse<PaperOut[]>(res);
 }
@@ -58,6 +59,11 @@ export async function deletePaper(id: number): Promise<void> {
     credentials: "include",
   });
   return handleResponse<void>(res);
+}
+
+export async function getRelatedPapers(id: number, limit = 5): Promise<PaperOut[]> {
+  const res = await fetch(`${BASE_URL}/paper/${id}/related?limit=${limit}`, { credentials: "include" });
+  return handleResponse<PaperOut[]>(res);
 }
 
 export async function votePaper(id: number, voted: boolean): Promise<void> {

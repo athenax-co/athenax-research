@@ -125,11 +125,11 @@ export default function Page() {
                     >
                       Edit Profile
                     </button>
-                    {user.role === "researcher" && (
+                    {/* {user.role === "researcher" && (
                       <Link href="/paper/submit" className="btn btn-primary btn-sm">
                         Submit a Paper →
                       </Link>
-                    )}
+                    )} */}
                   </div>
                 </>
               ) : (

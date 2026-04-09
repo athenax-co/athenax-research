@@ -17,15 +17,13 @@ type QueueRowProps = {
   name: string;
   meta: string;
   chips?: string[];
-  reviewTitle?: string;
-  reviewDescription?: string;
-  reviewMeta?: { label: string; value: string }[];
   onApprove: () => void;
   onReject: () => void;
-  onReview: () => void;
+  reviewHref?: string;
+  onReview?: () => void;
 };
 
-function QueueRow({ name, meta, chips = [], onApprove, onReject, onReview }: QueueRowProps) {
+function QueueRow({ name, meta, chips = [], onApprove, onReject, reviewHref, onReview }: QueueRowProps) {
   return (
     <div className="flex flex-wrap items-center gap-3 border-b border-[#D8D4CC] py-3 last:border-b-0">
       <div className="min-w-0 flex-1">
@@ -48,9 +46,15 @@ function QueueRow({ name, meta, chips = [], onApprove, onReject, onReview }: Que
         <button className="btn btn-ghost btn-sm" onClick={onReject}>
           ✗ Reject
         </button>
-        <button className="btn btn-outline btn-sm" onClick={onReview}>
-          Review →
-        </button>
+        {reviewHref ? (
+          <Link href={reviewHref} className="btn btn-outline btn-sm">
+            Review →
+          </Link>
+        ) : onReview ? (
+          <button className="btn btn-outline btn-sm" onClick={onReview}>
+            Review →
+          </button>
+        ) : null}
       </div>
     </div>
   );
@@ -65,14 +69,12 @@ export default function Page() {
     meta?: { label: string; value: string }[];
     details?: { label: string; value: string }[];
     chips?: string[];
-    itemId?: number;
-    itemType?: "paper";
   } | null>(null);
 
   const { data: pendingProducts = [], isLoading: loadingPending } = useProducts("pending");
   const { data: allPapers = [], isLoading: loadingPapers } = usePapers();
   const pendingPapers = allPapers.filter((p) => p.verificationStatus === PaperVerificationStatus.PENDING);
-  const { mutate: updatePaperVerificationStatus } = useUpdatePaperVerificationStatus();
+  const { mutate: updateVerification } = useUpdatePaperVerificationStatus();
 
   if (!user || (user.role as string) !== "admin") {
     return (
@@ -111,8 +113,6 @@ export default function Page() {
     meta?: { label: string; value: string }[];
     details?: { label: string; value: string }[];
     chips?: string[];
-    itemId?: number;
-    itemType?: "paper";
   }) => setReviewItem(item);
 
   return (
@@ -211,37 +211,19 @@ export default function Page() {
                 name={paper.title.length > 60 ? paper.title.slice(0, 60) + "…" : paper.title}
                 meta={`${paper.sourceType} · ${paper.categories.length} categories · Submitted ${new Date(paper.createdAt).toLocaleDateString("en-CA")}`}
                 chips={paper.categories.map((c) => c.name)}
-                onApprove={() => {
-                  updatePaperVerificationStatus(
+                onApprove={() =>
+                  updateVerification(
                     { id: paper.id, verificationStatus: PaperVerificationStatus.APPROVED },
-                    { onSuccess: () => showToast(`Approved: ${paper.title.slice(0, 30)}`, "success") }
-                  );
-                }}
-                onReject={() => {
-                  updatePaperVerificationStatus(
-                    { id: paper.id, verificationStatus: PaperVerificationStatus.REJECTED },
-                    { onSuccess: () => showToast(`Rejected: ${paper.title.slice(0, 30)}`, "info") }
-                  );
-                }}
-                onReview={() =>
-                  openReview({
-                    title: paper.title,
-                    description: paper.abstract ?? undefined,
-                    chips: paper.categories.map((c) => c.name),
-                    meta: [
-                      { label: "Source", value: paper.sourceType },
-                      { label: "Votes", value: String(paper.voteCount) },
-                      { label: "Submitted", value: new Date(paper.createdAt).toLocaleDateString("en-CA") },
-                    ],
-                    details: [
-                      { label: "External URL", value: paper.externalUrl ?? "None" },
-                      { label: "Status", value: paper.status },
-                      { label: "Verification", value: paper.verificationStatus },
-                    ],
-                    itemId: paper.id,
-                    itemType: "paper",
-                  })
+                    { onSuccess: () => showToast(`Approved: ${paper.title.slice(0, 40)}`, "success") }
+                  )
                 }
+                onReject={() =>
+                  updateVerification(
+                    { id: paper.id, verificationStatus: PaperVerificationStatus.REJECTED },
+                    { onSuccess: () => showToast(`Rejected: ${paper.title.slice(0, 40)}`, "info") }
+                  )
+                }
+                reviewHref={`/paper/${paper.slug}`}
               />
             ))
           )}
@@ -388,39 +370,20 @@ export default function Page() {
           <div className="flex gap-2 border-t border-[#D8D4CC] pt-3">
             <button
               className="btn btn-primary flex-1 justify-center"
-              onClick={() => {
-                if (reviewItem.itemType === "paper" && reviewItem.itemId != null) {
-                  updatePaperVerificationStatus(
-                    { id: reviewItem.itemId, verificationStatus: PaperVerificationStatus.APPROVED },
-                    { onSuccess: () => showToast(`Approved: ${reviewItem.title.slice(0, 30)}`, "success") }
-                  );
-                } else {
-                  handleApprove(reviewItem.title);
-                }
-                setReviewItem(null);
-              }}
+              onClick={() => { handleApprove(reviewItem.title); setReviewItem(null); }}
             >
               ✓ Approve
             </button>
             <button
               className="btn btn-outline flex-1 justify-center"
-              onClick={() => {
-                if (reviewItem.itemType === "paper" && reviewItem.itemId != null) {
-                  updatePaperVerificationStatus(
-                    { id: reviewItem.itemId, verificationStatus: PaperVerificationStatus.REJECTED },
-                    { onSuccess: () => showToast(`Rejected: ${reviewItem.title.slice(0, 30)}`, "info") }
-                  );
-                } else {
-                  handleReject(reviewItem.title);
-                }
-                setReviewItem(null);
-              }}
+              onClick={() => { handleReject(reviewItem.title); setReviewItem(null); }}
             >
               ✗ Reject
             </button>
           </div>
         </Modal>
       )}
+
     </div>
   );
 }

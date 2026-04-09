@@ -13,10 +13,10 @@ const NAV_ITEMS = [
   { id: "home", label: "Home", description: "Platform overview & latest research", href: "/" },
   { id: "launch", label: "Launch", description: "Research-backed products across frontier tech", href: "/launch" },
   { id: "archive", label: "Research", description: "Papers, essays, and knowledge archive", href: "/archive" },
-  { id: "researchers", label: "Researchers", description: "ARS-scored researcher directory", href: "/researchers" },
-  { id: "network", label: "Companies", description: "Labs, universities, and researchers", href: "/companies" },
+  // { id: "researchers", label: "Researchers", description: "ARS-scored researcher directory", href: "/researchers" },
+  // { id: "network", label: "Companies", description: "Labs, universities, and researchers", href: "/companies" },
   // { id: "funding", label: "Funding", description: "Bounties, sponsors, and cohorts", href: "/funding" },
-  { id: "terminal", label: "Terminal", description: "Research intelligence platform", href: "/terminal" },
+  // { id: "terminal", label: "Terminal", description: "Research intelligence platform", href: "/terminal" },
   { id: "docs", label: "Docs", description: "Guides and protocol documentation", href: "/docs" },
 ];
 

@@ -7,34 +7,27 @@ import { _globalShowToast } from "@/components/GlobalProvider";
 
 const NAV_COLS = [
   {
-    label: "Research",
+    label: "Discover",
     links: [
-      { href: "/archive", text: "Archive" },
-      { href: "/leaderboard", text: "Leaderboard" },
+      { href: "/launch", text: "Launch Feed" },
+      { href: "/archive", text: "Research Archive" },
+      { href: "/archive?tab=articles", text: "Leaderboard" },
+      { href: "/roadmap", text: "Roadmap" },
+    ],
+  },
+  {
+    label: "Submit",
+    links: [
+      { href: "/launch", text: "Submit Product" },
       { href: "/paper/submit", text: "Submit a Paper" },
-      { href: "/funding/bounties", text: "Bounties" },
-      { href: "/funding/cohorts", text: "Cohorts" },
-      { href: "/launch", text: "Launch" },
     ],
   },
   {
-    label: "Network",
+    label: "Company",
     links: [
-      { href: "/researchers", text: "Researchers" },
-      { href: "/labs", text: "Labs" },
-      { href: "/network/universities", text: "Universities" },
-      { href: "/sponsors", text: "Sponsors" },
-      { href: "/startups", text: "Companies" },
-    ],
-  },
-  {
-    label: "Resources",
-    links: [
-      { href: "/docs", text: "Docs" },
-      { href: "/digest", text: "Newsletter" },
-      { href: "/how-it-works", text: "How It Works" },
       { href: "/about", text: "About" },
-      { href: "/business-model", text: "Business Model" },
+      { href: "/how-it-works", text: "How It Works" },
+      { href: "/digest", text: "Newsletter" },
     ],
   },
 ];

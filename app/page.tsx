@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { SEED_LAUNCHES, SEED_PAPERS } from "@/data/seed";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useCategories } from "@/hooks/queries/useReference";
+import { useProducts, useProductStats, getProductStatsLabel } from "@/hooks/queries/useProduct";
 import { IconBounties, IconBuilders, IconLabs, IconPaperSmall, IconTerminal } from "@/components/Icons";
 import WindowCard from "@/components/ui/WindowCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type FeedSignal = {
   id: string;
@@ -110,13 +112,20 @@ export default function Page() {
   const router = useRouter();
   const { user, showToast, handleAuthClick } = useGlobal();
   const { data: categories = [] } = useCategories();
+  const { data: apiProducts = [] } = useProducts("approved");
+  const { data: productStats } = useProductStats();
+  const statsLabel = getProductStatsLabel(productStats);
+
+  const latestProducts = [...apiProducts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 3);
 
   const todayLaunches = SEED_LAUNCHES.filter((launch) => launch.launchedToday);
-  const showLaunches = todayLaunches.length > 0 ? todayLaunches : SEED_LAUNCHES.slice(0, 5);
+  const showLaunches = latestProducts.length > 0 ? latestProducts : todayLaunches.length > 0 ? todayLaunches : SEED_LAUNCHES.slice(0, 5);
   const selectedCategoryNames =
     user?.categories?.map((entry: { categoryId: number }) => categories.find((category) => category.id === entry.categoryId)?.name).filter(Boolean) ??
     [];
   const feedSignals = getFeedSignals(user, selectedCategoryNames);
+
+  const isMobile = useIsMobile();
 
   return (
     <div>
@@ -125,11 +134,7 @@ export default function Page() {
           <div className="mb-13 max-w-160">
             <div className="status-badge mb-5">
               <div className="status-dot" />
-              <span>
-                {todayLaunches.length > 0
-                  ? `${todayLaunches.length} product${todayLaunches.length !== 1 ? "s" : ""} launched today`
-                  : `${SEED_LAUNCHES.length} live launches`}
-              </span>
+              <span>{statsLabel || `${SEED_LAUNCHES.length} live launches`}</span>
             </div>
             <h1 className="mb-5.5 text-[clamp(42px,6vw,70px)] leading-none">
               Where New
@@ -137,7 +142,8 @@ export default function Page() {
               Products <span className="text-danger">Begin.</span>
             </h1>
             <p className="mb-8 max-w-125 text-[17px] leading-[1.65] text-[#1C1C27]">
-              Discover research-backed products across frontier technology. Every founder is ARS-scored. Every product is grounded in real research.
+              {/* Discover research-backed products across frontier technology. Every founder is ARS-scored. Every product is grounded in real research. */}
+              Discover early-stage products across frontier technology.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link href="/launch" className="btn btn-primary px-7 py-3.25 text-base no-underline">
@@ -161,16 +167,18 @@ export default function Page() {
 
           <div className="mb-13">
             <WindowCard label="NETWORK_ACTIVITY.SYS">
-              <div className="grid grid-cols-2 sm:grid-cols-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3">
                 {[
-                  { value: `${SEED_LAUNCHES.length}`, label: "launches this month" },
-                  { value: `$${totalRaised.toFixed(1)}M`, label: "raised by AthenaX startups" },
-                  { value: averageFounderArs, label: "average founder ARS" },
-                  { value: `${SEED_LAUNCHES.reduce((sum, launch) => sum + launch.investorRegs, 0)}`, label: "investor introductions" },
+                  { value: `${productStats?.releases.total}`, label: "products live" },
+                  { value: `Active`, label: "Community" },
+                  { value: `Open`, label: "Submissions" },
+                  // { value: `$${totalRaised.toFixed(1)}M`, label: "raised by AthenaX startups" },
+                  // { value: averageFounderArs, label: "average founder ARS" },
+                  // { value: `${SEED_LAUNCHES.reduce((sum, launch) => sum + launch.investorRegs, 0)}`, label: "investor introductions" },
                 ].map((metric, index) => (
                   <div
                     key={metric.label}
-                    className={`px-5 py-4 sm:px-6 sm:py-5 ${index % 2 === 0 ? "border-r-[1.5px] border-r-[#D8D4CC]" : ""} ${index < 2 ? "border-b-[1.5px] border-b-[#D8D4CC] sm:border-b-0" : ""} sm:not-last:border-r-[1.5px] sm:border-r-[#D8D4CC]`}
+                    className={`px-5 py-4 sm:px-6 sm:py-5 ${index % 3 === 0 ? "border-r-[1.5px] border-r-[#D8D4CC]" : ""} ${index < 2 ? "border-b-[1.5px] border-b-[#D8D4CC] sm:border-b-0" : ""} sm:not-last:border-r-[1.5px] sm:border-r-[#D8D4CC]`}
                   >
                     <div className="mb-1.5 font-['Space_Mono',monospace] text-[22px] sm:text-[26px] font-bold leading-none text-danger">{metric.value}</div>
                     <div className="font-['Space_Mono',monospace] text-xs tracking-[0.03em] text-muted">{metric.label}</div>
@@ -209,40 +217,58 @@ export default function Page() {
 
           <div className="mb-13">
             <div className="mb-2 flex items-baseline justify-between">
-              <h2 className="text-[28px]">{todayLaunches.length > 0 ? "Today's Launches" : "Top Launches"}</h2>
+              <h2 className="text-[28px]">Latest Launches</h2>
               <Link href="/launch" className="link-arrow no-underline">
                 See All →
               </Link>
             </div>
             <hr className="divider" />
-            {showLaunches.map((launch) => (
-              <Link key={launch.id} href={`/launch/${launch.id}`} className="archive-row cursor-pointer text-inherit no-underline">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-[1.5px] border-[#1C1C27] bg-paper text-base font-bold">
-                  {launch.name.charAt(0)}
-                </div>
-                <div className="flex-1">
-                  <div className="mb-0.5 flex flex-wrap items-center gap-2">
-                    <div className="archive-title">{launch.name}</div>
-                    {launch.launchedToday && <span className="ftag bg-success text-[10px] font-bold">Today</span>}
-                    <span className="topic-pill px-2 py-0.5 text-[10px]">{launch.sector}</span>
+            {showLaunches.map((launch: any) => {
+              const isReal = "slug" in launch;
+              const href = isReal ? `/launch/${launch.slug}` : `/launch/${launch.id}`;
+              const sector = isReal ? (launch.categories?.[0]?.name ?? launch.stage) : launch.sector;
+              const desc = isReal ? launch.description : launch.desc;
+              const votes = isReal ? launch.voteCount : launch.votes;
+              const isToday = !isReal && launch.launchedToday;
+              return (
+                <Link key={launch.id} href={href} className="archive-row cursor-pointer text-inherit no-underline">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-[1.5px] border-[#1C1C27] bg-paper text-base font-bold">
+                    {launch.name.charAt(0)}
                   </div>
-                  <div className="archive-meta">
-                    {launch.founders.map((founder) => founder.name.split(" ").pop()).join(", ")}
-                    &nbsp;·&nbsp;ARS {launch.founders.map((founder) => founder.ars).join(" / ")}
+                  <div className="flex-1">
+                    <div className="mb-0.5 flex flex-wrap items-center gap-2">
+                      <div className="archive-title">{launch.name}</div>
+                      {isToday && <span className="ftag bg-success text-[10px] font-bold">Today</span>}
+                      {sector && <span className="topic-pill px-2 py-0.5 text-[10px]">{sector}</span>}
+                    </div>
+                    {!isReal && (
+                      <div className="archive-meta">
+                        {launch.founders.map((founder: any) => founder.name.split(" ").pop()).join(", ")}
+                        &nbsp;·&nbsp;ARS {launch.founders.map((founder: any) => founder.ars).join(" / ")}
+                      </div>
+                    )}
+                    <div className="mt-0.75 text-xs leading-normal text-muted">{desc.slice(0, 110)}…</div>
                   </div>
-                  <div className="mt-0.75 text-xs leading-normal text-muted">{launch.desc.slice(0, 110)}…</div>
-                </div>
-                <div className="min-w-16 shrink-0 text-right">
-                  <div className="font-['Space_Mono',monospace] text-[15px] font-bold text-danger">▲ {launch.votes.toLocaleString()}</div>
-                  <div className="mt-0.75 text-[11px] text-muted">💬 {launch.comments.length}</div>
-                </div>
-              </Link>
-            ))}
-            <div className="mt-4.5 flex flex-wrap gap-3">
-              <Link href="/launch" className="btn btn-primary no-underline">
+                  <div className="min-w-16 shrink-0 text-right">
+                    <div className="font-['Space_Mono',monospace] text-[15px] font-bold text-danger">▲ {votes.toLocaleString()}</div>
+                    <div className="mt-0.75 text-[11px] text-muted">
+                      {isReal ? `★ ${launch.bookmarkCount}` : `💬 ${launch.comments.length}`}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+            <div className="mt-4.5 flex flex-wrap items-center gap-2.5 sm:gap-3">
+              <Link
+                href="/launch"
+                className={`btn btn-primary no-underline ${isMobile ? "btn-sm" : ""}` }
+              >
                 View All Launches →
               </Link>
-              <Link href="/archive" className="btn btn-outline no-underline">
+              <Link
+                href="/archive"
+                className={`btn btn-outline no-underline ${isMobile ? "btn-sm" : ""}` }
+              >
                 Research Archive
               </Link>
             </div>
@@ -252,10 +278,10 @@ export default function Page() {
             <div className="mb-4.5 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">EXPLORE ATHENAX</div>
             <div className="grid-4">
               {[
-                { icon: <IconLabs />, label: "Research", sub: "Papers & archive", bgClass: "bg-[#EAF0F6]", href: "/archive" },
-                { icon: <IconTerminal />, label: "Terminal", sub: "Investor intelligence", bgClass: "bg-[#F9F5DC]", href: "/terminal" },
-                { icon: <IconBounties />, label: "Bounties", sub: "Funded challenges", bgClass: "bg-[#F2EFE9]", href: "/funding/bounties" },
-                { icon: <IconBuilders />, label: "Cohorts", sub: "Get funded · 5–8% equity", bgClass: "bg-[#F2EFE9]", href: "/funding/cohorts" },
+                { icon: <IconLabs />, label: "Research", sub: "Papers & archive", bgClass: "bg-[#EAF0F6]", href: "/archive", comingSoon: false },
+                { icon: <IconTerminal />, label: "Terminal", sub: "Coming soon", bgClass: "bg-[#F9F5DC]", href: "/roadmap", comingSoon: true },
+                { icon: <IconBounties />, label: "Bounties", sub: "Coming soon", bgClass: "bg-[#F2EFE9]", href: "/roadmap", comingSoon: true },
+                { icon: <IconBuilders />, label: "Cohorts", sub: "Coming soon", bgClass: "bg-[#F2EFE9]", href: "/roadmap", comingSoon: true },
               ].map((item) => (
                 <Link
                   key={item.label}

@@ -59,7 +59,7 @@ export default function NotificationBell({ user }: NotificationBellProps) {
   return (
     <div className="relative" ref={panelRef}>
       <button
-        className="btn btn-ghost btn-sm relative size-10 shrink-0 justify-center px-0"
+        className="btn btn-ghost btn-sm relative size-8.5 shrink-0 justify-center px-0"
         onClick={togglePanel}
         aria-label="Notifications"
         aria-expanded={open}

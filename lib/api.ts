@@ -30,6 +30,20 @@ export const fetchFromAPI = async (url: string) => {
   }
 };
 
+export const fetchObjectFromAPI = async (url: string) => {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Failed to fetch from ${url}`);
+    const data = await res.json();
+    if (data && typeof data === "object" && !Array.isArray(data)) return data;
+    console.error("Unexpected object API response structure:", data);
+    return null;
+  } catch (error) {
+    console.error(`Error fetching from ${url}:`, error);
+    return null;
+  }
+};
+
 export const getArticles = () =>
   fetchFromAPI(
     buildContentUrl("/articles", {
@@ -47,6 +61,25 @@ export const getResearch = () =>
       "select[tag]": "true",
       "select[publishedAt]": "true",
     })
+  );
+
+export const getBroadcasts = () =>
+  fetchFromAPI(
+    buildContentUrl("/videos", {
+      "select[id]": "true",
+      "select[title]": "true",
+      "select[videoType]": "true",
+      "select[originDate]": "true",
+      "select[embedUrl]": "true",
+      "select[thumbnailUrl]": "true",
+      "select[description]": "true",
+    })
+  ).then((items) =>
+    (items as any[]).map((item) => ({
+      ...item,
+      type: "Video",
+      publishedAt: item.originDate || item.publishedAt,
+    }))
   );
 
 export const getArticleBySlug = async (slug: string) => {
@@ -67,11 +100,29 @@ export const getResearchBySlug = async (slug: string) => {
   return items[0] ?? null;
 };
 
-export const sortByPublishedAtDesc = (items = []) =>
+export const getBroadcastBySlug = async (slug: string) => {
+  const items = await fetchFromAPI(
+    buildContentUrl("/videos", {
+      "where[slug][equals]": slug,
+    })
+  );
+  return items[0] ?? null;
+};
+
+export const getBroadcastById = async (id: string) => {
+  const item = await fetchObjectFromAPI(`${API_BASE_URL}/videos/${id}`);
+  if (!item) return null;
+  return {
+    ...item,
+    type: "Video",
+    publishedAt: item.originDate || item.publishedAt,
+    body: item.description || item.body,
+  };
+};
+
+export const sortByPublishedAtDesc = (items: any[] = []) =>
   [...items].sort(
-    (a: { publishedAt?: string }, b: { publishedAt?: string }) =>
-      new Date(b?.publishedAt || 0).getTime() -
-      new Date(a?.publishedAt || 0).getTime()
+    (a: { publishedAt?: string }, b: { publishedAt?: string }) => new Date(b?.publishedAt || 0).getTime() - new Date(a?.publishedAt || 0).getTime()
   );
 
 export const formatContentDate = (value: string | number | Date) => {
@@ -105,10 +156,4 @@ export const extractContentText = (value: any): string[] => {
   return [];
 };
 
-export const isLexicalContent = (value: any) =>
-  Boolean(
-    value &&
-    typeof value === "object" &&
-    value.root &&
-    typeof value.root === "object"
-  );
+export const isLexicalContent = (value: any) => Boolean(value && typeof value === "object" && value.root && typeof value.root === "object");

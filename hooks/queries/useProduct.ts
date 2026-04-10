@@ -1,5 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as productApi from "@/api/product";
+import type { ProductFilters, ProductStats } from "@/api/product";
 import type { ProductComment, ProductDetailOut, ProductIn, ProductOut, ProductStatus, ProductSummary } from "@/types/product";
 import type { CategoryOut } from "@/types/reference";
 import { resolveCategories } from "@/utils/lib";
@@ -13,6 +14,29 @@ function withCategories(products: ProductOut[], allCategories: CategoryOut[]): P
 
 function withCategoriesOne(p: ProductDetailOut, allCategories: CategoryOut[]): ProductDetailOut {
   return { ...p, categories: resolveCategories(p.categoryIds ?? [], allCategories) };
+}
+
+// ──  Helper: generate product stats label ────────────────────────────────────────
+
+const MIN_TODAY = 2;
+const MIN_THIS_WEEK = 3;
+
+export function getProductStatsLabel(stats: ProductStats | undefined): string {
+  if (!stats) return "";
+  const { today, thisWeek, thisMonth } = stats.releases;
+  if (today > MIN_TODAY) return `${today} products launched today`;
+  if (thisWeek > MIN_THIS_WEEK) return `${thisWeek} products launched this week`;
+  return `${thisMonth} products launched this month`;
+}
+
+// ─── useProductStats ─────────────────────────────────────────────────────────
+
+export function useProductStats() {
+  return useQuery<ProductStats>({
+    queryKey: ["product", "stats"],
+    queryFn: () => productApi.getProductStats(),
+    staleTime: 30 * 60 * 1000,
+  });
 }
 
 // ─── useSubmitProduct ─────────────────────────────────────────────────────────
@@ -29,10 +53,47 @@ export function useProducts(status: ProductStatus) {
   const queryClient = useQueryClient();
   return useQuery({
     queryKey: ["products", status],
-    queryFn: () => productApi.getProducts(status),
+    queryFn: () => productApi.getProducts({ status }),
     select: (data) => {
       const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
       return withCategories(data, cats);
+    },
+  });
+}
+
+// ─── useInfiniteProducts ──────────────────────────────────────────────────────
+
+const PAGE_SIZE = 50;
+
+export type ProductQueryFilters = {
+  categoryId?: number;
+  dateFilter?: ProductFilters["date_filter"];
+  sortBy?: ProductFilters["sort_by"];
+};
+
+export function useInfiniteProducts(status: ProductStatus, filters: ProductQueryFilters = {}) {
+  const queryClient = useQueryClient();
+  const { categoryId, dateFilter, sortBy } = filters;
+  return useInfiniteQuery({
+    queryKey: ["products", "infinite", status, categoryId, dateFilter, sortBy],
+    queryFn: ({ pageParam = 0 }) =>
+      productApi.getProducts({
+        status,
+        category_id: categoryId,
+        date_filter: dateFilter,
+        sort_by: sortBy,
+        limit: PAGE_SIZE,
+        offset: pageParam as number,
+      }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length === PAGE_SIZE ? allPages.length * PAGE_SIZE : undefined,
+    select: (data) => {
+      const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
+      return {
+        ...data,
+        pages: data.pages.map((page) => withCategories(page, cats)),
+      };
     },
   });
 }

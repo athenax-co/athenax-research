@@ -80,7 +80,7 @@ export default function ProductReviewRow({ product }: ProductReviewRowProps) {
             <div className="mb-3 grid grid-cols-3 gap-2.5">
               {[
                 { label: "Stage", value: product.stage },
-                { label: "Funding", value: `$${product.funding.toLocaleString()}` },
+                { label: "Funding", value: product.funding != null ? `$${product.funding.toLocaleString()}` : "—" },
                 { label: "Founded", value: product.founded },
               ].map((s) => (
                 <div key={s.label} className="stat-card">

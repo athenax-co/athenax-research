@@ -5,11 +5,12 @@ import { useEffect, useState } from "react";
 import { NEWSLETTERS } from "@/data/seed";
 import WindowCard from "@/components/ui/WindowCard";
 import ArsBreakdown from "@/components/ui/ArsBreakdown";
-import { authSvc, calcARS } from "@/lib/db-helper";
+import { authSvc } from "@/lib/db-helper";
 import NewsletterCard from "@/components/ui/NewsletterCard";
 import ProfileSubmissions from "@/components/ProfileSubmissions";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useResendVerification } from "@/hooks/queries/useAuth";
+import { useUpdateProfile } from "@/hooks/queries/useProfile";
 
 type EditForm = {
   name: string;
@@ -27,11 +28,12 @@ type Application = {
 };
 
 export default function Page() {
-  const { user, setUser, showToast } = useGlobal();
+  const { user, showToast } = useGlobal();
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState<EditForm | null>(null);
   const [resendTimer, setResendTimer] = useState(0);
   const { mutate: resend, isPending: resending, isSuccess: resent } = useResendVerification();
+  const { mutate: updateProfile, isPending: saving } = useUpdateProfile(user?.id ?? 0);
 
   useEffect(() => {
     if (resendTimer <= 0) return;
@@ -41,7 +43,6 @@ export default function Page() {
 
   const researcher = user?.role === "researcher" ? authSvc.getResearcher(user.id) : null;
   const applications: Application[] = user ? authSvc.getApplications(user.id) : [];
-  const ars = researcher ? calcARS(researcher) : 0;
 
   const startEdit = () =>
     setEditForm({
@@ -56,12 +57,18 @@ export default function Page() {
     setEditForm(null);
   };
   const saveEdit = () => {
-    if (!editForm) return;
-    const updated = authSvc.updateProfile(user.id, editForm);
-    setUser(updated);
-    setEditing(false);
-    setEditForm(null);
-    showToast("Profile updated.", "success");
+    if (!editForm || !user) return;
+    updateProfile(
+      { name: editForm.name },
+      {
+        onSuccess: () => {
+          setEditing(false);
+          setEditForm(null);
+          showToast("Profile updated.", "success");
+        },
+        onError: () => showToast("Failed to update profile.", "error"),
+      }
+    );
   };
 
   if (!user)
@@ -138,29 +145,9 @@ export default function Page() {
                     <label className="inp-label">Name</label>
                     <input className="inp" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
                   </div>
-                  {researcher && (
-                    <>
-                      <div className="inp-group">
-                        <label className="inp-label">Bio</label>
-                        <textarea className="inp" rows={3} value={editForm.bio} onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })} />
-                      </div>
-                      <div className="inp-group">
-                        <label className="inp-label">University</label>
-                        <input
-                          className="inp"
-                          value={editForm.university}
-                          onChange={(e) => setEditForm({ ...editForm, university: e.target.value })}
-                        />
-                      </div>
-                      <div className="inp-group">
-                        <label className="inp-label">Lab</label>
-                        <input className="inp" value={editForm.lab} onChange={(e) => setEditForm({ ...editForm, lab: e.target.value })} />
-                      </div>
-                    </>
-                  )}
                   <div className="flex gap-2.5">
-                    <button className="btn btn-primary btn-sm" onClick={saveEdit}>
-                      Save
+                    <button className="btn btn-primary btn-sm" onClick={saveEdit} disabled={saving}>
+                      {saving ? <span className="spinner" /> : "Save"}
                     </button>
                     <button className="btn btn-ghost btn-sm" onClick={cancelEdit}>
                       Cancel

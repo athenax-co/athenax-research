@@ -14,6 +14,8 @@ import type {
   ResetPasswordPayload,
   ResetPasswordResponse,
   LogoutResponse,
+  UpdateProfilePayload,
+  UpdateProfileResponse,
 } from "@/types/auth";
 
 const AUTH_BASE = `${BASE_URL}/user`;
@@ -109,6 +111,20 @@ export async function resetPassword(payload: ResetPasswordPayload): Promise<Rese
   });
   return handleResponse<ResetPasswordResponse>(res);
 }
+
+/**
+ * PATCH /api/v1/user/{user_id} — update name
+ */
+export async function updateProfile(userId: number, payload: UpdateProfilePayload): Promise<UpdateProfileResponse> {
+  const res = await fetch(`${AUTH_BASE}/${userId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    credentials: "include",
+  });
+  return handleResponse<UpdateProfileResponse>(res);
+}
+
 
 /**
  * POST /api/v1/user/logout

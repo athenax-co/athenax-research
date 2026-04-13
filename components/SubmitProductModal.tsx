@@ -1,11 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { z } from "zod";
 import Modal from "@/components/ui/Modal";
 import CategorySelector from "@/components/ui/CategorySelector";
 import { ProductStage, QualityBadge } from "@/enums";
 import { useSubmitProduct } from "@/hooks/queries/useProduct";
 import { useGlobal } from "@/components/GlobalProvider";
+
+const submitProductSchema = z.object({
+  name: z.string().min(1, "Product name is required"),
+  url: z.url("Invalid URL").min(1, "Product URL is required"),
+  description: z.string().min(1, "Description is required"),
+});
 
 const DEFAULT_FORM = {
   name: "",
@@ -23,12 +30,24 @@ function SubmitProductModal({ onClose }: { onClose: () => void }) {
   const { mutateAsync: submitProductMutation, isPending: submitting } = useSubmitProduct();
   const [submitForm, setSubmitForm] = useState(DEFAULT_FORM);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
+  const [errors, setErrors] = useState<Partial<Record<"name" | "url" | "description", string>>>({});
 
   const handleSubmit = async () => {
-    if (!submitForm.name || !submitForm.url) {
-      showToast("Product name and URL are required.", "error");
+    const result = submitProductSchema.safeParse({
+      name: submitForm.name,
+      url: submitForm.url,
+      description: submitForm.description,
+    });
+    if (!result.success) {
+      const fieldErrors: typeof errors = {};
+      for (const issue of result.error.issues) {
+        const field = issue.path[0] as keyof typeof errors;
+        if (!fieldErrors[field]) fieldErrors[field] = issue.message;
+      }
+      setErrors(fieldErrors);
       return;
     }
+    setErrors({});
     try {
       await submitProductMutation({
         name: submitForm.name,
@@ -51,22 +70,28 @@ function SubmitProductModal({ onClose }: { onClose: () => void }) {
   return (
     <Modal title="SUBMIT_LAUNCH.SYS" onClose={onClose}>
       <div className="inp-group">
-        <label className="inp-label">Product Name</label>
+        <label className="inp-label">
+          Product Name <span className="text-red-500">*</span>
+        </label>
         <input
-          className="inp"
+          className={`inp ${errors.name ? "border-red-400" : ""}`}
           value={submitForm.name}
           onChange={(e) => setSubmitForm((f) => ({ ...f, name: e.target.value }))}
           placeholder="e.g. AxonOS"
         />
+        {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
       </div>
       <div className="inp-group">
-        <label className="inp-label">Product URL / Demo</label>
+        <label className="inp-label">
+          Product URL / Demo <span className="text-red-500">*</span>
+        </label>
         <input
-          className="inp"
+          className={`inp ${errors.url ? "border-red-400" : ""}`}
           value={submitForm.url}
           onChange={(e) => setSubmitForm((f) => ({ ...f, url: e.target.value }))}
           placeholder="https://yourproduct.com"
         />
+        {errors.url && <p className="mt-1 text-xs text-red-500">{errors.url}</p>}
       </div>
       <div className="inp-group">
         <label className="inp-label">GitHub Repository</label>
@@ -121,13 +146,16 @@ function SubmitProductModal({ onClose }: { onClose: () => void }) {
         </div>
       </div>
       <div className="inp-group">
-        <label className="inp-label">One-line Description</label>
+        <label className="inp-label">
+          One-line Description <span className="text-red-500">*</span>
+        </label>
         <input
-          className="inp"
+          className={`inp ${errors.description ? "border-red-400" : ""}`}
           value={submitForm.description}
           onChange={(e) => setSubmitForm((f) => ({ ...f, description: e.target.value }))}
           placeholder="What does your product do?"
         />
+        {errors.description && <p className="mt-1 text-xs text-red-500">{errors.description}</p>}
       </div>
       <div className="inp-group">
         <label className="inp-label">Categories</label>

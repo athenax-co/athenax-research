@@ -92,9 +92,11 @@ export default function Page() {
                   {user.avatar}
                 </div>
                 <div>
-                  <div className="text-xl font-bold">{user.name}</div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-xl font-bold">{user.name}</div>
+                    <span className="ftag inline-block">{user.role}</span>
+                  </div>
                   <div className="text-[13px] text-muted">{user.email}</div>
-                  <span className="ftag mt-1 inline-block">{user.role}</span>
                 </div>
               </div>
 

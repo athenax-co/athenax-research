@@ -128,7 +128,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       <div className="page-wrap section">
         <SEOMeta
           title={`${p.name} — ${primaryCategory} | AthenaX Launch`}
-          description={`${p.name} launched on AthenaX. ${p.description.slice(0, 120)}`}
+          description={`${p.name} launched on AthenaX.${p.description ? ` ${p.description.slice(0, 120)}` : ""}`}
           type="product"
         />
         <Link className="link-arrow" href="/launch" style={{ marginBottom: 20 }}>

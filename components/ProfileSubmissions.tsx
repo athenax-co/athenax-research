@@ -80,7 +80,7 @@ function PapersList() {
             <IconPaperSmall />
           </div>
           <div className="flex-1">
-            <div className="archive-title text-sm">{p.title.length > 55 ? p.title.slice(0, 55) + "…" : p.title}</div>
+            <div className="archive-title text-sm">{(p.title?.length ?? 0) > 55 ? p.title!.slice(0, 55) + "…" : (p.title ?? "Untitled")}</div>
             <div className="archive-meta">
               {new Date(p.createdAt).toLocaleDateString()} · {p.categories.map((c) => c.name).join(", ") || "Uncategorized"}
             </div>

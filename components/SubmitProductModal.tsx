@@ -12,6 +12,8 @@ const submitProductSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   url: z.url("Invalid URL").min(1, "Product URL is required"),
   description: z.string().min(1, "Description is required"),
+  email: z.union([z.email("Must be a valid email"), z.literal("")]).optional(),
+  twitter: z.string().regex(/^(@?[A-Za-z0-9_]{1,15})?$/, "Must be a valid Twitter handle").optional(),
 });
 
 const DEFAULT_FORM = {
@@ -20,6 +22,8 @@ const DEFAULT_FORM = {
   stage: ProductStage.SEED as string,
   description: "",
   github: "",
+  email: "",
+  twitter: "",
   funding: "",
   founded: String(new Date().getFullYear()),
   qualityBadge: QualityBadge.RESEARCH_BASED as string,
@@ -30,13 +34,15 @@ function SubmitProductModal({ onClose }: { onClose: () => void }) {
   const { mutateAsync: submitProductMutation, isPending: submitting } = useSubmitProduct();
   const [submitForm, setSubmitForm] = useState(DEFAULT_FORM);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
-  const [errors, setErrors] = useState<Partial<Record<"name" | "url" | "description", string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<"name" | "url" | "description" | "email" | "twitter", string>>>({});
 
   const handleSubmit = async () => {
     const result = submitProductSchema.safeParse({
       name: submitForm.name,
       url: submitForm.url,
       description: submitForm.description,
+      email: submitForm.email,
+      twitter: submitForm.twitter,
     });
     if (!result.success) {
       const fieldErrors: typeof errors = {};
@@ -58,6 +64,8 @@ function SubmitProductModal({ onClose }: { onClose: () => void }) {
         qualityBadge: submitForm.qualityBadge,
         github: submitForm.github || undefined,
         demo: submitForm.url,
+        email: submitForm.email || undefined,
+        twitter: submitForm.twitter || undefined,
         categoryIds: selectedCategoryIds,
       });
       showToast(`${submitForm.name} launch submitted! We'll review within 48 hours.`, "success");
@@ -101,6 +109,29 @@ function SubmitProductModal({ onClose }: { onClose: () => void }) {
           onChange={(e) => setSubmitForm((f) => ({ ...f, github: e.target.value }))}
           placeholder="github.com/you/repo"
         />
+      </div>
+      <div className="flex gap-3">
+        <div className="inp-group flex-1">
+          <label className="inp-label">Email</label>
+          <input
+            className={`inp ${errors.email ? "border-red-400" : ""}`}
+            type="email"
+            value={submitForm.email}
+            onChange={(e) => setSubmitForm((f) => ({ ...f, email: e.target.value }))}
+            placeholder="founder@yourproduct.com"
+          />
+          {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+        </div>
+        <div className="inp-group flex-1">
+          <label className="inp-label">Twitter / X</label>
+          <input
+            className={`inp ${errors.twitter ? "border-red-400" : ""}`}
+            value={submitForm.twitter}
+            onChange={(e) => setSubmitForm((f) => ({ ...f, twitter: e.target.value }))}
+            placeholder="@yourhandle"
+          />
+          {errors.twitter && <p className="mt-1 text-xs text-red-500">{errors.twitter}</p>}
+        </div>
       </div>
       <div className="flex gap-3">
         <div className="inp-group flex-1">

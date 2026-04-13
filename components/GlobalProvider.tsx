@@ -15,7 +15,9 @@ import { useRouter } from "next/navigation";
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { refetchOnWindowFocus: false },
+    queries: { refetchOnWindowFocus: false,
+       staleTime: 5 * 60 * 1000  // 5 minutes cache for all queries by default
+    },
   },
 });
 
@@ -67,7 +69,7 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
       queryFn: getCategories,
       staleTime: 10 * 60 * 1000,
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── session ──────────────────────────────────────────────────────────────
@@ -82,7 +84,7 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
     if (sessionUser?.verified && sessionUser?.categories?.length === 0) {
       setShowCategoryPicker(true);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionUser?.id, sessionUser?.verified]);
 
   // ── logout mutation ───────────────────────────────────────────────────────
@@ -111,14 +113,22 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
     _globalShowToast = showToast;
   }, [toasts]);
 
-  const removeToast = (id: string) =>
-    setToasts((t) => t.filter((x) => x.id !== id));
+  const removeToast = (id: string) => setToasts((t) => t.filter((x) => x.id !== id));
 
   // ── auth click dispatcher ─────────────────────────────────────────────────
   const handleAuthClick = (action: string) => {
-    if (action === "login") { setShowLogin(true); return; }
-    if (action === "register") { setShowRegister(true); return; }
-    if (action === "logout") { logoutMutate(); return; }
+    if (action === "login") {
+      setShowLogin(true);
+      return;
+    }
+    if (action === "register") {
+      setShowRegister(true);
+      return;
+    }
+    if (action === "logout") {
+      logoutMutate();
+      return;
+    }
   };
 
   // Called by modals when login/signup succeeds so the UI updates instantly
@@ -137,35 +147,22 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
         setSelectedLab,
       }}
     >
-      <div style={{ minHeight: "100vh", background: "#F2EFE9" }}>
-        {children}
-      </div>
+      <div style={{ minHeight: "100vh", background: "#F2EFE9" }}>{children}</div>
       <div className="toast-wrap">
         {toasts.map((t) => (
           <Toast key={t.id} msg={t} onClose={() => removeToast(t.id)} />
         ))}
       </div>
-      {showLogin && (
-        <LoginModal
-          open={showLogin}
-          onOpenChange={setShowLogin}
-          onSuccess={handleAuthSuccess}
-          showToast={showToast}
-        />
-      )}
-      {showRegister && (
-        <RegisterModal
-          open={showRegister}
-          onOpenChange={setShowRegister}
-          onSuccess={handleAuthSuccess}
-          showToast={showToast}
-        />
-      )}
+      {showLogin && <LoginModal open={showLogin} onOpenChange={setShowLogin} onSuccess={handleAuthSuccess} showToast={showToast} />}
+      {showRegister && <RegisterModal open={showRegister} onOpenChange={setShowRegister} onSuccess={handleAuthSuccess} showToast={showToast} />}
       {showCategoryPicker && sessionUser?.id && (
         <CategoryPickerModal
           open={showCategoryPicker}
           userId={sessionUser.id}
-          onDone={() => { setShowCategoryPicker(false); router.push("/"); }}
+          onDone={() => {
+            setShowCategoryPicker(false);
+            router.push("/");
+          }}
         />
       )}
     </GlobalContext.Provider>
@@ -174,11 +171,7 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
 
 // ─── public export ────────────────────────────────────────────────────────────
 
-export default function GlobalProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function GlobalProvider({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <InnerProvider>{children}</InnerProvider>

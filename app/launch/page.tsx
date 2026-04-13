@@ -5,30 +5,51 @@ import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
 import SEOMeta from "@/components/SEOMeta";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useState } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useCategories } from "@/hooks/queries/useReference";
-import { useProducts } from "@/hooks/queries/useProduct";
+import { useInfiniteProducts, useProductStats, type ProductQueryFilters } from "@/hooks/queries/useProduct";
 import SubmitProductButton from "@/components/SubmitProductModal";
+
+type DateFilter = ProductQueryFilters["dateFilter"];
+
+const TIME_TABS: { key: DateFilter; label: string; statsKey: "total" | "today" | "thisWeek" | "thisMonth" }[] = [
+  { key: undefined,      label: "All",        statsKey: "total" },
+  { key: "this_week",    label: "This Week",  statsKey: "thisWeek" },
+  { key: "this_month",   label: "This Month", statsKey: "thisMonth" },
+];
 
 export default function Page() {
   const { user, showToast } = useGlobal();
   const { data: categories = [] } = useCategories();
-  const { data: products = [], isLoading: productsLoading } = useProducts("approved");
-  const [filter, setFilter] = useState("All");
-  const [sortBy, setSortBy] = useState("score");
-  const [timeTab, setTimeTab] = useState("all");
+  const { data: productStats } = useProductStats();
 
-  const TIME_TABS = [
-    ["all", "All"],
-    ["week", "This Week"],
-    ["month", "This Month"],
-  ];
+  const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
+  const [dateFilter, setDateFilter] = useState<DateFilter>(undefined);
 
-  const filtered = (filter === "All" ? products : products.filter((p) => p.categories.some((c) => c.name === filter))).sort((a, b) => {
-    if (sortBy === "votes") return b.voteCount - a.voteCount;
-    if (sortBy === "new") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    return b.voteCount - a.voteCount;
-  });
+  const {
+    data,
+    isLoading: productsLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteProducts("approved", { categoryId, dateFilter });
+
+  const products = useMemo(() => {
+    const flat = data?.pages.flat() ?? [];
+    return [...new Map(flat.map((p) => [p.id, p])).values()];
+  }, [data]);
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) fetchNextPage(); },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div>
@@ -44,25 +65,29 @@ export default function Page() {
             <h1 className="mb-1 text-[48px]">AthenaX Launch</h1>
             <span className="status-badge mb-0">
               <div className="status-dot" />
-              {products.length} Products Listed
+              {productStats
+                ? `${productStats.releases.today} Launched Today · ${productStats.releases.thisMonth} This Month`
+                : `${products.length} Products Listed`}
             </span>
           </div>
           <SubmitProductButton label="+ Submit Your Product" className="btn btn-primary self-start hidden sm:inline-flex" />
         </div>
 
         <p className="mb-0 text-[17px] text-muted">
-          Research-backed products launching across AI, robotics, biotech, crypto, developer tools, infrastructure, and climate. Every founder is
-          ARS-scored. Every product is grounded in indexed research.
+          {/* Research-backed products launching across AI, robotics, biotech, crypto, developer tools, infrastructure, and climate. Every founder is
+          ARS-scored. Every product is grounded in indexed research. */}
+          Early-stage products across AI, robotics, biotech, crypto, developer tools, infrastructure, and climate.
         </p>
         <SubmitProductButton label="+ Submit Your Product" className="btn btn-primary w-full justify-center mt-4 sm:hidden" />
         <hr className="divider" />
 
         <div className="mb-7 grid grid-cols-2 sm:grid-cols-4 gap-3.5">
           {[
-            { label: "Launches This Month", value: products.length },
-            { label: "Total Funding Raised", value: "$18.4M" },
-            { label: "Avg. Founder ARS", value: "7.3" },
+            { label: "Launches This Month", value: productStats?.releases.thisMonth ?? products.length },
             { label: "Investor Intros Made", value: "142" },
+            // { label: "Total Funding Raised", value: "$18.4M" },
+            // { label: "Avg. Founder ARS", value: "7.3" },
+            // { label: "Investor Intros Made", value: "142" },
           ].map((s) => (
             <div key={s.label} className="stat-card">
               <div className="stat-label">{s.label}</div>
@@ -72,28 +97,35 @@ export default function Page() {
         </div>
 
         <div className="mb-5 flex gap-2 border-b-2 border-b-[#1C1C27] pb-2.5">
-          {TIME_TABS.map(([k, l]) => (
+          {TIME_TABS.map((tab) => (
             <button
-              key={k}
-              className={timeTab === k ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}
-              style={timeTab === k ? { background: "#F5D94E" } : {}}
-              onClick={() => setTimeTab(k)}
+              key={tab.label}
+              className={dateFilter === tab.key ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}
+              style={dateFilter === tab.key ? { background: "#F5D94E" } : {}}
+              onClick={() => setDateFilter(tab.key)}
             >
-              {l} {k === "all" ? `(${products.length})` : ""}
+              {tab.label}
+              {productStats != null && tab.key == null && (
+                <span className="ml-1 font-['Space_Mono',monospace] text-[10px] opacity-60">
+                  ({productStats.releases[tab.statsKey]})
+                </span>
+              )}
+              {productStats != null && tab.key != null && (
+                <span className="ml-1 font-['Space_Mono',monospace] text-[10px] opacity-60 hidden sm:inline">
+                  ({productStats.releases[tab.statsKey]})
+                </span>
+              )}
             </button>
           ))}
-          <span className="ml-auto self-center font-['Space_Mono',monospace] text-xs text-muted sm:hidden inline-flex">
-            {filtered.length} product{filtered.length !== 1 ? "s" : ""}
-          </span>
         </div>
 
         <div className="mb-2.5 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
           {[{ id: 0, name: "All" }, ...categories].map((c) => (
             <button
               key={c.id}
-              className={`shrink-0 ${filter === c.name ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}`}
-              style={filter === c.name ? { background: "#F5D94E" } : {}}
-              onClick={() => setFilter(c.name)}
+              className={`shrink-0 ${categoryId === (c.id || undefined) ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}`}
+              style={categoryId === (c.id || undefined) ? { background: "#F5D94E" } : {}}
+              onClick={() => setCategoryId(c.id === 0 ? undefined : c.id)}
             >
               {c.name}
             </button>
@@ -129,7 +161,7 @@ export default function Page() {
         )}
 
         {!productsLoading &&
-          filtered.map((product) => (
+          products.map((product) => (
             <div key={product.id} className="mb-1 border-b-2 border-b-[#D8D4CC] py-5">
               <div className="flex flex-wrap gap-5">
                 <div className="min-w-65 flex-1">
@@ -151,14 +183,16 @@ export default function Page() {
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
                     <span className="font-['Space_Mono',monospace] text-xs font-bold text-[#E8323C]">▲ {product.voteCount.toLocaleString()}</span>
                     <span className="text-xs text-muted">★ {product.bookmarkCount}</span>
-                    <span className="text-xs text-muted">Founded {product.founded}</span>
+                    {product.founded != null && <span className="text-xs text-muted">Founded {product.founded}</span>}
                   </div>
                 </div>
 
                 <div className="flex shrink-0 flex-col justify-start gap-1.5 w-full sm:min-w-30 sm:w-auto">
-                  <span className="ftag bg-[#EAF0F6] text-center text-[11px]">
-                    {product.stage} · ${product.funding.toLocaleString()}
-                  </span>
+                  {(product.stage != null || product.funding != null) && (
+                    <span className="ftag bg-[#EAF0F6] text-center text-[11px]">
+                      {[product.stage, product.funding != null ? `$${product.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
+                    </span>
+                  )}
                   <div className="flex gap-1.5 sm:flex-col">
                     <Link href={`/launch/${product.slug}`} className="btn btn-primary btn-sm flex-1 justify-center no-underline">
                       View →
@@ -169,6 +203,10 @@ export default function Page() {
               </div>
             </div>
           ))}
+
+        <div ref={sentinelRef} className="py-4 text-center">
+          {isFetchingNextPage && <span className="text-xs text-muted">Loading more…</span>}
+        </div>
 
         <WindowCard label="LAUNCH_TIERS.SYS" className="mt-7">
           <div className="mb-4 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">LAUNCH PROMOTION TIERS</div>

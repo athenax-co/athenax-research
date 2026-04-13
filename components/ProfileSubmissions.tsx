@@ -40,7 +40,7 @@ function ProductsList() {
           <div className="flex-1">
             <div className="archive-title text-sm">{p.name}</div>
             <div className="archive-meta">
-              {p.stage} · ${p.funding.toLocaleString()} · ▲ {p.voteCount}
+              {p.stage ?? "—"} · {p.funding != null ? `$${p.funding.toLocaleString()}` : "—"} · ▲ {p.voteCount}
             </div>
           </div>
           <span className={`ftag text-[10px] ${p.status === "approved" ? "bg-success" : p.status === "pending" ? "bg-amber-100" : "bg-[#EAF0F6]"}`}>
@@ -48,11 +48,11 @@ function ProductsList() {
           </span>
         </Link>
       ))}
-      <div className="mt-3 flex items-center gap-2">
-        <Link href="/launch" className="btn btn-ghost btn-sm flex items-center gap-1.5">
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+        <Link href="/launch" className="btn btn-ghost btn-sm flex items-center justify-center gap-1.5">
           View All on Launch <IconArrowUpRight />
         </Link>
-        <SubmitProductButton />
+        <SubmitProductButton className="btn btn-primary btn-sm justify-center" />
       </div>
     </div>
   );

@@ -113,7 +113,7 @@ const PaperPage = ({ paper, user, showToast }: { paper: PaperOut; user: any; sho
 
       <div className="page-wrap section">
         <div className="flex items-center gap-3 text-sm">
-          <Link href="/archive" className="link-arrow">
+          <Link href="/archive?tab=articles" className="link-arrow">
             ← Back to Archive
           </Link>
           <div className="path-badge">/root/paper/{paper.slug}</div>

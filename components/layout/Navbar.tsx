@@ -4,20 +4,19 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/utils/lib";
-import { useGlobal } from "@/components/GlobalProvider";
-import NotificationBell from "@/components/layout/NotificationBell";
-import { IconAdmin, IconDashboardGrid, IconSponsorDashboard } from "@/components/Icons";
+import { NavAuthDesktop, NavAuthMobile, NavAuthMobileShortcut } from "@/components/layout/NavAuthButtons";
 
 // ═══════════════════════════════════════════════════════════
 const NAV_ITEMS = [
   { id: "home", label: "Home", description: "Platform overview & latest research", href: "/" },
   { id: "launch", label: "Launch", description: "Research-backed products across frontier tech", href: "/launch" },
   { id: "archive", label: "Research", description: "Papers, essays, and knowledge archive", href: "/archive" },
+  { id: "roadmap", label: "Roadmap", description: "What AthenaX is building now and next", href: "/roadmap" },
   // { id: "researchers", label: "Researchers", description: "ARS-scored researcher directory", href: "/researchers" },
   // { id: "network", label: "Companies", description: "Labs, universities, and researchers", href: "/companies" },
   // { id: "funding", label: "Funding", description: "Bounties, sponsors, and cohorts", href: "/funding" },
   // { id: "terminal", label: "Terminal", description: "Research intelligence platform", href: "/terminal" },
-  { id: "docs", label: "Docs", description: "Guides and protocol documentation", href: "/docs" },
+  // { id: "docs", label: "Docs", description: "Guides and protocol documentation", href: "/docs" },
 ];
 
 const getPageKeyFromPathname = (pathname: string): string => {
@@ -58,10 +57,7 @@ const HamburgerIcon = ({ open }: { open: boolean }) => (
   </div>
 );
 
-const NAV_ICON_BUTTON_CLASS = "btn btn-ghost btn-sm size-10 shrink-0 justify-center px-0";
-
 const Navbar = () => {
-  const { user, handleAuthClick } = useGlobal();
   const pathname = usePathname();
   const activeNav = getActiveNav(pathname);
   const [hovered, setHovered] = useState<string | null>(null);
@@ -98,72 +94,12 @@ const Navbar = () => {
           </div>
 
           {/* Desktop auth */}
-          <div className="hidden md:flex items-center gap-2.5">
-            {user ? (
-              <>
-                <NotificationBell user={user} />
-                {user.role === "admin" && (
-                  <Link className={`${NAV_ICON_BUTTON_CLASS} text-[#E8323C]`} href="/admin" title="Admin">
-                    <IconAdmin size={18} />
-                  </Link>
-                )}
-                {["sponsor", "admin"].includes(user.role) && (
-                  <Link className={NAV_ICON_BUTTON_CLASS} href="/sponsors/dashboard" title="Sponsor Dashboard">
-                    <IconSponsorDashboard size={18} />
-                  </Link>
-                )}
-                <Link className={NAV_ICON_BUTTON_CLASS} href="/dashboard" title="Dashboard">
-                  <IconDashboardGrid size={18} />
-                </Link>
-                <Link className="btn btn-ghost btn-sm h-10 no-underline" href="/profile">
-                  <span className="size-5 rounded-full bg-yellow border-[1.5px] border-ink inline-flex items-center justify-center text-[11px] font-bold">
-                    {user.avatar}
-                  </span>
-                  {user.name.split(" ")[0]}
-                </Link>
-                <button className="btn btn-outline btn-sm h-10" onClick={() => handleAuthClick("logout")}>
-                  Out
-                </button>
-              </>
-            ) : (
-              <>
-                <button className="btn btn-ghost btn-sm" onClick={() => handleAuthClick("login")}>
-                  Sign In
-                </button>
-                <Link className="btn btn-primary btn-sm no-underline" href="/cohort/apply">
-                  Apply →
-                </Link>
-              </>
-            )}
-          </div>
+          <NavAuthDesktop />
 
           {/* Mobile: auth shortcut + hamburger */}
           <div className="flex md:hidden items-center gap-2">
-            {user ? (
-              <>
-                <NotificationBell user={user} />
-                {user.role === "admin" && (
-                  <Link className={`${NAV_ICON_BUTTON_CLASS} text-[#E8323C]`} href="/admin" title="Admin">
-                    <IconAdmin size={18} />
-                  </Link>
-                )}
-                <Link className={NAV_ICON_BUTTON_CLASS} href="/profile">
-                  <span className="size-5 rounded-full bg-yellow border-[1.5px] border-ink inline-flex items-center justify-center text-[11px] font-bold">
-                    {user.avatar}
-                  </span>
-                </Link>
-              </>
-            ) : (
-              <Link className="btn btn-primary btn-sm no-underline" href="/cohort/apply">
-                Apply →
-              </Link>
-            )}
-            <button
-              className="btn btn-ghost btn-sm px-2.5"
-              onClick={() => setMenuOpen((v) => !v)}
-              aria-label="Toggle menu"
-              aria-expanded={menuOpen}
-            >
+            <NavAuthMobileShortcut />
+            <button className="btn btn-ghost btn-sm px-2.5" onClick={() => setMenuOpen((v) => !v)} aria-label="Toggle menu" aria-expanded={menuOpen}>
               <HamburgerIcon open={menuOpen} />
             </button>
           </div>
@@ -181,58 +117,14 @@ const Navbar = () => {
                 onClick={() => setMenuOpen(false)}
                 className={cn(
                   "flex flex-col px-4 py-3.5 rounded-xl border-2 transition-all duration-100 no-underline",
-                  activeNav === n.id
-                    ? "bg-yellow border-ink shadow-[3px_3px_0_#1C1C27]"
-                    : "border-transparent hover:border-ink/20 hover:bg-ink/5"
+                  activeNav === n.id ? "bg-yellow border-ink shadow-[3px_3px_0_#1C1C27]" : "border-transparent hover:border-ink/20 hover:bg-ink/5"
                 )}
               >
                 <span className="text-[16px] font-semibold text-ink">{n.label}</span>
               </Link>
             ))}
 
-            <div className="mt-4 pt-4 border-t-2 border-[#D8D4CC] flex flex-col gap-2">
-              {user ? (
-                <>
-                  <Link className="btn btn-ghost justify-center" href="/dashboard" onClick={() => setMenuOpen(false)}>
-                    <IconDashboardGrid size={18} /> Dashboard
-                  </Link>
-                  {user.role === "admin" && (
-                    <Link className="btn btn-ghost justify-center text-[#E8323C]" href="/admin" onClick={() => setMenuOpen(false)}>
-                      <IconAdmin size={18} /> Admin
-                    </Link>
-                  )}
-                  {["sponsor", "admin"].includes(user.role) && (
-                    <Link className="btn btn-ghost justify-center" href="/sponsors/dashboard" onClick={() => setMenuOpen(false)}>
-                      <IconSponsorDashboard size={18} /> Sponsor Dashboard
-                    </Link>
-                  )}
-                  <button
-                    className="btn btn-outline justify-center"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      handleAuthClick("logout");
-                    }}
-                  >
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    className="btn btn-ghost justify-center"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      handleAuthClick("login");
-                    }}
-                  >
-                    Sign In
-                  </button>
-                  <Link className="btn btn-primary justify-center no-underline" href="/cohort/apply" onClick={() => setMenuOpen(false)}>
-                    Apply →
-                  </Link>
-                </>
-              )}
-            </div>
+            <NavAuthMobile onCloseAction={() => setMenuOpen(false)} />
           </div>
         </div>
       )}

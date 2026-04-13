@@ -166,7 +166,7 @@ export default function Page() {
               <QueueRow
                 key={product.id}
                 name={product.name}
-                meta={`${product.stage} · Funding $${product.funding.toLocaleString()} · Founded ${product.founded} · Submitted ${new Date(product.createdAt).toLocaleDateString("en-CA")}`}
+                meta={`${product.stage ?? "—"} · Funding ${product.funding != null ? `$${product.funding.toLocaleString()}` : "—"} · Founded ${product.founded ?? "—"} · Submitted ${new Date(product.createdAt).toLocaleDateString("en-CA")}`}
                 chips={(product.categories ?? []).map((category) => category.name)}
                 onApprove={() =>
                   updateProductStatus(
@@ -187,8 +187,8 @@ export default function Page() {
                     chips: (product.categories ?? []).map((category) => category.name),
                     meta: [
                       { label: "Stage", value: product.stage },
-                      { label: "Funding", value: `$${product.funding.toLocaleString()}` },
-                      { label: "Founded", value: String(product.founded) },
+                      { label: "Funding", value: product.funding != null ? `$${product.funding.toLocaleString()}` : "—" },
+                      { label: "Founded", value: product.founded != null ? String(product.founded) : "—" },
                     ],
                     details: [
                       { label: "GitHub", value: product.github || "Not provided" },

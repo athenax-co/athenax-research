@@ -12,6 +12,7 @@ export interface PaperIn {
   abstract?: string;
   content?: string;
   categoryIds: number[];
+  productId?: number;
 }
 
 export interface CategoryRef {
@@ -48,4 +49,5 @@ export interface PaperUpdate {
   externalUrl?: string;
   categoryIds?: number[];
   status?: PaperStatus;
+  productId?: number | null;
 }

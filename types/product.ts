@@ -45,8 +45,16 @@ export interface ProductOut {
   updatedAt: string;
 }
 
+export interface ProductFounder {
+  id: number;
+  name: string;
+  labName?: string | null;
+  universityName?: string | null;
+}
+
 export interface ProductDetailOut extends ProductOut {
   papers?: Array<{ id: number; title: string; slug: string; publishedAt: string }>;
+  founder?: ProductFounder | null;
   voted: boolean | null;
   bookmarked: boolean | null;
   interested: boolean | null;

@@ -159,13 +159,11 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           </div>
           <div className="shrink-0 flex w-full items-center gap-2 sm:w-auto">
             <button
-              className="btn btn-outline flex-1 justify-center sm:flex-none"
-              style={{ background: p.voted ? "#D4EDDA" : "", padding: "8px 14px", gap: 6 }}
+              className={p.voted ? "btn btn-ghost btn-sm bg-success flex-1 justify-center sm:flex-none" : "btn btn-outline btn-sm flex-1 justify-center sm:flex-none"}
               onClick={handleApiVote}
               disabled={voting}
             >
-              <span className="text-[16px] leading-none">{voting ? "…" : "▲"}</span>
-              <span className="font-['Space_Mono',monospace] text-xs font-bold text-[#E8323C]">{p.voteCount.toLocaleString()}</span>
+              {voting ? "…" : p.voted ? "✓ Voted" : "▲ Upvote"}&nbsp;·&nbsp;{p.voteCount.toLocaleString()}
             </button>
             <button
               className="btn btn-ghost btn-sm flex-1 justify-center sm:flex-none"

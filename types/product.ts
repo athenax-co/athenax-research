@@ -12,6 +12,8 @@ export interface ProductIn {
   qualityBadge: string;
   github?: string;
   demo?: string;
+  email?: string;
+  twitter?: string;
   categoryIds: number[];
 }
 

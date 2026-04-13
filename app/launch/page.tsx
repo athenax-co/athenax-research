@@ -215,7 +215,7 @@ export default function Page() {
               {
                 tier: "Standard",
                 price: "Free",
-                highlight: false,
+                highlight: true,
                 perks: ["Public listing", "ARS badge", "Archive indexing", "Research lineage display"],
               },
               {
@@ -227,7 +227,7 @@ export default function Page() {
               {
                 tier: "Premier",
                 price: "$7,500",
-                highlight: true,
+                highlight: false,
                 perks: ["Everything in Verified", "Investor intro email blast", "Terminal featured slot", "Cohort alumni spotlight"],
               },
               {

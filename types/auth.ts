@@ -76,6 +76,20 @@ export interface SessionUser {
   categories?: { categoryId: number }[];
 }
 
+export interface UpdateProfilePayload {
+  name: string;
+}
+
+export interface UpdateProfileResponse {
+  id: number;
+  name: string;
+  email: string;
+  role: UserRole;
+  verified: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ForgotPasswordPayload {
   email: string;
 }

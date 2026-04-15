@@ -1,23 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryState, parseAsString } from "nuqs";
 import { ContentListState, ContentRow } from "@/components/Content";
 import { useArticles, useBroadcasts } from "@/hooks/queries/useContent";
 
 const ArchivePage = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const tab = searchParams.get("tab") ?? "articles";
+  const [tab, setTab] = useQueryState("tab", parseAsString.withDefault("articles"));
 
   const { data: articles = [], isLoading: articlesLoading, isError: articlesError } = useArticles();
   const { data: broadcasts = [], isLoading: broadcastsLoading, isError: broadcastsError } = useBroadcasts();
-
-  const setTab = (id: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("tab", id);
-    router.push(`?${params.toString()}`, { scroll: false });
-  };
 
   return (
     <div>

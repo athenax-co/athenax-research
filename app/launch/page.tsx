@@ -5,7 +5,8 @@ import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
 import SEOMeta from "@/components/SEOMeta";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo } from "react";
+import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
 import { useCategories } from "@/hooks/queries/useReference";
 import { useInfiniteProducts, useProductStats, type ProductQueryFilters } from "@/hooks/queries/useProduct";
 import SubmitProductButton from "@/components/SubmitProductModal";
@@ -25,8 +26,8 @@ export default function Page() {
   const { data: categories = [] } = useCategories();
   const { data: productStats } = useProductStats();
 
-  const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
-  const [dateFilter, setDateFilter] = useState<DateFilter>(undefined);
+  const [categoryId, setCategoryId] = useQueryState("category", parseAsInteger);
+  const [dateFilter, setDateFilter] = useQueryState("date", parseAsString);
 
   const {
     data,
@@ -34,7 +35,10 @@ export default function Page() {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = useInfiniteProducts("approved", { categoryId, dateFilter });
+  } = useInfiniteProducts("approved", {
+    categoryId: categoryId ?? undefined,
+    dateFilter: (dateFilter || undefined) as DateFilter,
+  });
 
   const products = useMemo(() => {
     const flat = data?.pages.flat() ?? [];
@@ -102,10 +106,10 @@ export default function Page() {
           {TIME_TABS.map((tab) => (
             <Button
               key={tab.label}
-              variant={dateFilter === tab.key ? "ghost" : "outline"}
+              variant={(dateFilter || null) === (tab.key || null) ? "ghost" : "outline"}
               size="sm"
-              className={dateFilter === tab.key ? "bg-yellow" : ""}
-              onClick={() => setDateFilter(tab.key)}
+              className={(dateFilter || null) === (tab.key || null) ? "bg-yellow" : ""}
+              onClick={() => setDateFilter(tab.key ?? null)}
             >
               {tab.label}
               {productStats != null && tab.key == null && (
@@ -126,10 +130,10 @@ export default function Page() {
           {[{ id: 0, name: "All" }, ...categories].map((c) => (
             <Button
               key={c.id}
-              variant={categoryId === (c.id || undefined) ? "ghost" : "outline"}
+              variant={(categoryId ?? null) === (c.id || null) ? "ghost" : "outline"}
               size="sm"
-              className={`shrink-0 ${categoryId === (c.id || undefined) ? "bg-yellow" : ""}`}
-              onClick={() => setCategoryId(c.id === 0 ? undefined : c.id)}
+              className={`shrink-0 ${(categoryId ?? null) === (c.id || null) ? "bg-yellow" : ""}`}
+              onClick={() => setCategoryId(c.id === 0 ? null : c.id)}
             >
               {c.name}
             </Button>

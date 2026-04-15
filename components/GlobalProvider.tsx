@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 import { AUTH_QUERY_KEYS, useLogout, useSession } from "@/hooks/queries/useAuth";
 import Toast from "./ui/Toast";
 import LoginModal from "./ui/LoginModal";
@@ -9,15 +9,7 @@ import RegisterModal from "./ui/RegisterModal";
 import CategoryPickerModal from "./ui/CategoryPickerModal";
 import { useRouter } from "next/navigation";
 
-// ─── singleton QueryClient ────────────────────────────────────────────────────
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: { refetchOnWindowFocus: false,
-       staleTime: 5 * 60 * 1000  // 5 minutes cache for all queries by default
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 // ─── context ──────────────────────────────────────────────────────────────────
 
@@ -161,8 +153,6 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
 
 export default function GlobalProvider({ children }: { children: React.ReactNode }) {
   return (
-    <QueryClientProvider client={queryClient}>
       <InnerProvider>{children}</InnerProvider>
-    </QueryClientProvider>
   );
 }

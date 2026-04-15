@@ -34,13 +34,12 @@ export const metadata: Metadata = {
   title: "AthenaX Research",
 };
 
-import GlobalProvider from "@/components/GlobalProvider";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { cn } from "@/lib/utils";
+import Providers from "./providers";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export default function RootLayout({
   children,
@@ -53,11 +52,11 @@ export default function RootLayout({
         className={`${spaceGrotesk.variable} ${londrinaSolid.variable} ${vt323.variable} ${inter.variable} antialiased`}
         style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
       >
-        <GlobalProvider>
+        <Providers>
           <Navbar />
           {children}
           <Footer />
-        </GlobalProvider>
+        </Providers>
       </body>
     </html>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SEED_LAUNCHES, SEED_PAPERS } from "@/data/seed";
+import { SEED_PAPERS } from "@/data/seed";
 import { useProductStats } from "@/hooks/queries/useProduct";
 import { cn } from "@/utils/lib";
 
@@ -363,14 +363,14 @@ export default function RoadmapPage() {
 
       <div className="mb-10 grid overflow-hidden rounded-xl border-2 border-ink bg-white shadow-[4px_4px_0_#1C1C27] md:grid-cols-4">
         {[
-          { label: "Products live", val: (productStats?.releases.total ?? SEED_LAUNCHES.length).toString() },
-          { label: "Research papers", val: SEED_PAPERS.length.toString() },
-          { label: "Sectors", val: "7" },
+          { label: "Products live", val: (productStats?.releases.total ?? null) },
+          { label: "Research papers", val: null },
+          { label: "Sectors", val: null },
           { label: "Submissions", val: "Open" },
         ].map((stat, index, array) => (
           <div key={stat.label} className={cn("px-5 py-4", "border-[#D8D4CC]", index < array.length - 1 && "border-b md:border-b-0 md:border-r")}>
             <div className="mb-1.25 font-['Space_Mono',monospace] text-[9px] uppercase tracking-widest text-muted">{stat.label}</div>
-            <div className="text-[22px] font-bold text-ink">{stat.val}</div>
+            <div className="text-[22px] font-bold text-ink">{stat.val ?? "-"}</div>
           </div>
         ))}
       </div>

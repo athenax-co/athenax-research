@@ -11,7 +11,7 @@ const buttonVariants = cva("btn", {
       secondary: "btn-outline bg-yellow",
       ghost: "btn-ghost",
       destructive: "btn-primary",
-      link: "border-0 bg-transparent p-0 min-h-0 text-danger shadow-none hover:translate-x-0 hover:translate-y-0 hover:underline",
+      link: "border-0 bg-transparent p-0 min-h-0 text-danger shadow-none hover:translate-x-0 hover:translate-y-0 hover:shadow-none hover:underline",
     },
     size: {
       default: "",

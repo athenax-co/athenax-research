@@ -89,15 +89,15 @@ export default function Page() {
 
         <div className="mb-7 grid grid-cols-2 sm:grid-cols-4 gap-3.5">
           {[
-            { label: "Launches This Month", value: productStats?.releases.thisMonth ?? products.length },
-            { label: "Investor Intros Made", value: "142" },
+            { label: "Launches This Month", value: productStats?.releases.thisMonth ?? null },
+            { label: "Investor Intros Made", value: null },
             // { label: "Total Funding Raised", value: "$18.4M" },
             // { label: "Avg. Founder ARS", value: "7.3" },
             // { label: "Investor Intros Made", value: "142" },
           ].map((s) => (
             <div key={s.label} className="stat-card">
               <div className="stat-label">{s.label}</div>
-              <div className="stat-value text-[20px]">{s.value}</div>
+              <div className="stat-value text-[20px]">{s.value ?? "-"}</div>
             </div>
           ))}
         </div>

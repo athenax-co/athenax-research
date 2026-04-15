@@ -15,7 +15,7 @@ const Toast = ({ msg, onClose }: { msg: any; onClose: () => void }) => {
 
   return (
     <div className="toast-slide-in flex items-center gap-3 bg-ink text-white rounded-[10px] px-4.5 py-3.25 text-sm font-medium shadow-[4px_4px_0_rgba(0,0,0,0.2)]">
-      <span className={cn(dotColor[msg.type as keyof typeof dotColor] ?? "text-[#f5d94e]")}>●</span>
+      <span className={cn(dotColor[msg.type as keyof typeof dotColor] ?? "text-yellow")}>●</span>
       <span>{msg.text}</span>
       <button
         onClick={onClose}

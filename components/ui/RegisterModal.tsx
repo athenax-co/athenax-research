@@ -144,7 +144,7 @@ export default function RegisterModal({ open, onOpenChange, showToast }: Registe
                           key={i}
                           variant="ghost"
                           onClick={() => setForm((f) => ({ ...f, role: opt.role, selectedCardIndex: i }))}
-                          className="h-auto p-3 border-2 rounded-xl text-left transition-all duration-100 justify-start flex-col items-start"
+                          className="h-auto p-3 border-2 rounded-xl text-left transition-all duration-100 justify-start flex-col items-start whitespace-normal"
                           style={{
                             background: selected ? "#FEF3C7" : "#fff",
                             borderColor: selected ? "#1C1C27" : "rgba(28,28,39,0.2)",

@@ -69,6 +69,7 @@ function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
   const { mutateAsync: submitProductMutation, isPending: submitting } = useSubmitProduct();
 
   const [step, setStep] = useState<1 | 2>(1);
+  const [resetKey, setResetKey] = useState(0);
 
   const draft = loadDraft();
   const [submitForm, setSubmitForm] = useState(draft?.form ?? DEFAULT_FORM);
@@ -125,6 +126,9 @@ function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
         categoryIds: selectedCategoryIds,
       });
       clearDraft();
+      setSubmitForm(DEFAULT_FORM);
+      setSelectedCategoryIds([]);
+      setResetKey((k) => k + 1);
       showToast(`${submitForm.name} launch submitted! We'll review within 48 hours.`, "success");
       handleClose();
     } catch (err) {
@@ -268,7 +272,7 @@ function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
 
               <div className="inp-group">
                 <label className="inp-label">Categories</label>
-                <CategorySelector onChangeIds={setSelectedCategoryIds} />
+                <CategorySelector key={resetKey} onChangeIds={setSelectedCategoryIds} />
               </div>
 
               <div className="flex gap-2.5">

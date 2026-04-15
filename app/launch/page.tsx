@@ -171,7 +171,7 @@ export default function Page() {
                 <div className="min-w-65 flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
                     <h3 className="mb-0 text-[21px]">
-                      <Link href={`/launch/${product.slug}`} className="cursor-pointer text-inherit no-underline">
+                      <Link href={`/launch/${product.slug}`} className="cursor-pointer text-inherit no-underline" prefetch={false}>
                         {product.name}
                       </Link>
                     </h3>
@@ -198,7 +198,7 @@ export default function Page() {
                     </span>
                   )}
                   <div className="flex gap-1.5 sm:flex-col">
-                    <Link href={`/launch/${product.slug}`} className={cn(buttonVariants({ size: "sm" }), "flex-1 no-underline")}>
+                    <Link href={`/launch/${product.slug}`} className={cn(buttonVariants({ size: "sm" }), "flex-1 no-underline")} prefetch={false}>
                       View →
                     </Link>
                     <BookmarkButton user={user} launch={product} showToast={showToast} size="sm" useApi initialBookmarked={product.bookmarked} />

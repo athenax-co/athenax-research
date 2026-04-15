@@ -234,7 +234,7 @@ export default function Page() {
               const votes = isReal ? launch.voteCount : launch.votes;
               const isToday = !isReal && launch.launchedToday;
               return (
-                <Link key={launch.id} href={href} className="archive-row cursor-pointer text-inherit no-underline">
+                <Link key={launch.id} href={href} className="archive-row cursor-pointer text-inherit no-underline" prefetch={false}>
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-[1.5px] border-[#1C1C27] bg-paper text-base font-bold">
                     {launch.name.charAt(0)}
                   </div>

@@ -3,8 +3,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AUTH_QUERY_KEYS, useLogout, useSession } from "@/hooks/queries/useAuth";
-import { REFERENCE_QUERY_KEYS } from "@/hooks/queries/useReference";
-import { getCategories } from "@/api/reference";
 import Toast from "./ui/Toast";
 import LoginModal from "./ui/LoginModal";
 import RegisterModal from "./ui/RegisterModal";
@@ -61,16 +59,6 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
   const [selectedLab, setSelectedLab] = useState<any>(null);
 
   const router = useRouter();
-
-  // ── prefetch reference data ───────────────────────────────────────────────
-  useEffect(() => {
-    queryClient.prefetchQuery({
-      queryKey: REFERENCE_QUERY_KEYS.categories,
-      queryFn: getCategories,
-      staleTime: 10 * 60 * 1000,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // ── session ──────────────────────────────────────────────────────────────
   const { data: sessionUser } = useSession();

@@ -9,6 +9,8 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useCategories } from "@/hooks/queries/useReference";
 import { useInfiniteProducts, useProductStats, type ProductQueryFilters } from "@/hooks/queries/useProduct";
 import SubmitProductButton from "@/components/SubmitProductModal";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type DateFilter = ProductQueryFilters["dateFilter"];
 
@@ -70,7 +72,7 @@ export default function Page() {
                 : `${products.length} Products Listed`}
             </span>
           </div>
-          <SubmitProductButton label="+ Submit Your Product" className="btn btn-primary self-start hidden sm:inline-flex" />
+          <SubmitProductButton label="+ Submit Your Product" className="self-start hidden sm:inline-flex" />
         </div>
 
         <p className="mb-0 text-[17px] text-muted">
@@ -78,7 +80,7 @@ export default function Page() {
           ARS-scored. Every product is grounded in indexed research. */}
           Early-stage products across AI, robotics, biotech, crypto, developer tools, infrastructure, and climate.
         </p>
-        <SubmitProductButton label="+ Submit Your Product" className="btn btn-primary w-full justify-center mt-4 sm:hidden" />
+        <SubmitProductButton label="+ Submit Your Product" className="mt-4 w-full sm:hidden" />
         <hr className="divider" />
 
         <div className="mb-7 grid grid-cols-2 sm:grid-cols-4 gap-3.5">
@@ -98,10 +100,11 @@ export default function Page() {
 
         <div className="mb-5 flex gap-2 border-b-2 border-b-[#1C1C27] pb-2.5">
           {TIME_TABS.map((tab) => (
-            <button
+            <Button
               key={tab.label}
-              className={dateFilter === tab.key ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}
-              style={dateFilter === tab.key ? { background: "#F5D94E" } : {}}
+              variant={dateFilter === tab.key ? "ghost" : "outline"}
+              size="sm"
+              className={dateFilter === tab.key ? "bg-yellow" : ""}
               onClick={() => setDateFilter(tab.key)}
             >
               {tab.label}
@@ -115,20 +118,21 @@ export default function Page() {
                   ({productStats.releases[tab.statsKey]})
                 </span>
               )}
-            </button>
+            </Button>
           ))}
         </div>
 
         <div className="mb-2.5 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
           {[{ id: 0, name: "All" }, ...categories].map((c) => (
-            <button
+            <Button
               key={c.id}
-              className={`shrink-0 ${categoryId === (c.id || undefined) ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}`}
-              style={categoryId === (c.id || undefined) ? { background: "#F5D94E" } : {}}
+              variant={categoryId === (c.id || undefined) ? "ghost" : "outline"}
+              size="sm"
+              className={`shrink-0 ${categoryId === (c.id || undefined) ? "bg-yellow" : ""}`}
               onClick={() => setCategoryId(c.id === 0 ? undefined : c.id)}
             >
               {c.name}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -194,7 +198,7 @@ export default function Page() {
                     </span>
                   )}
                   <div className="flex gap-1.5 sm:flex-col">
-                    <Link href={`/launch/${product.slug}`} className="btn btn-primary btn-sm flex-1 justify-center no-underline">
+                    <Link href={`/launch/${product.slug}`} className={cn(buttonVariants({ size: "sm" }), "flex-1 no-underline")}>
                       View →
                     </Link>
                     <BookmarkButton user={user} launch={product} showToast={showToast} size="sm" useApi initialBookmarked={product.bookmarked} />
@@ -259,7 +263,7 @@ export default function Page() {
             ))}
           </div>
           <div className="flex justify-center md:justify-end">
-            <SubmitProductButton label="Submit Your Launch →" className="btn btn-primary" />
+            <SubmitProductButton label="Submit Your Launch →" />
           </div>
         </WindowCard>
       </div>

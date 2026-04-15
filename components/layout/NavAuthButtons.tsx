@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useGlobal } from "@/components/GlobalProvider";
 import NotificationBell from "@/components/layout/NotificationBell";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export const NavAuthDesktop = () => {
   const { user, handleAuthClick } = useGlobal();
@@ -13,33 +15,33 @@ export const NavAuthDesktop = () => {
         <>
           <NotificationBell user={user} />
           {user.role === "admin" && (
-            <Link className="btn btn-ghost btn-sm text-[#E8323C] no-underline" href="/admin">
+            <Link className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "text-[#E8323C] no-underline")} href="/admin">
               Admin
             </Link>
           )}
           {["sponsor", "admin"].includes(user.role) && (
-            <Link className="btn btn-ghost btn-sm no-underline" href="/sponsors/dashboard">
+            <Link className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "no-underline")} href="/sponsors/dashboard">
               Sponsor
             </Link>
           )}
-          <Link className="btn btn-ghost btn-sm no-underline" href="/dashboard">
+          <Link className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "no-underline")} href="/dashboard">
             Dashboard
           </Link>
-          <Link className="btn btn-ghost btn-sm no-underline" href="/profile">
+          <Link className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "no-underline")} href="/profile">
             <span className="size-5.5 rounded-full bg-yellow border-[1.5px] border-ink inline-flex items-center justify-center text-[11px] font-bold shrink-0">
               {user.avatar}
             </span>
             {user.name.split(" ")[0]}
           </Link>
-          <button className="btn btn-outline btn-sm" onClick={() => handleAuthClick("logout")}>
+          <Button variant="outline" size="sm" onClick={() => handleAuthClick("logout")}>
             Out
-          </button>
+          </Button>
         </>
       ) : (
         <>
-          <button className="btn btn-primary btn-sm" onClick={() => handleAuthClick("login")}>
+          <Button size="sm" onClick={() => handleAuthClick("login")}>
             Sign In
-          </button>
+          </Button>
         </>
       )}
     </div>
@@ -96,27 +98,27 @@ export const NavAuthMobile = ({ onCloseAction }: { onCloseAction: () => void }) 
               <span className="text-[16px] font-semibold text-ink">Sponsor Dashboard</span>
             </Link>
           )}
-          <button
-            className="btn btn-outline justify-center mt-2"
+          <Button
+            variant="outline"
+            className="mt-2"
             onClick={() => {
               onCloseAction();
               handleAuthClick("logout");
             }}
           >
             Sign Out
-          </button>
+          </Button>
         </>
       ) : (
         <>
-          <button
-            className="btn btn-primary justify-center"
+          <Button
             onClick={() => {
               onCloseAction();
               handleAuthClick("login");
             }}
           >
             Sign In
-          </button>
+          </Button>
         </>
       )}
     </div>
@@ -133,9 +135,9 @@ export const NavAuthMobileShortcut = () => {
           <NotificationBell user={user} />
         </>
       ) : (
-        <button className="btn btn-primary btn-sm" onClick={() => handleAuthClick("login")}>
+        <Button size="sm" onClick={() => handleAuthClick("login")}>
           Sign In
-        </button>
+        </Button>
       )}
     </>
   );

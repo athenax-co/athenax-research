@@ -7,8 +7,10 @@ import { useGlobal } from "@/components/GlobalProvider";
 import { useCategories } from "@/hooks/queries/useReference";
 import { useProducts, useProductStats, getProductStatsLabel } from "@/hooks/queries/useProduct";
 import { IconBounties, IconBuilders, IconLabs, IconPaperSmall, IconTerminal } from "@/components/Icons";
+import { Button, buttonVariants } from "@/components/ui/button";
 import WindowCard from "@/components/ui/WindowCard";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 type FeedSignal = {
   id: string;
@@ -146,11 +148,12 @@ export default function Page() {
               Discover early-stage products across frontier technology.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link href="/launch" className="btn btn-primary px-7 py-3.25 text-base no-underline">
+              <Link href="/launch" className={cn(buttonVariants({ size: "lg" }), "no-underline")}>
                 Explore Launches →
               </Link>
-              <button
-                className="btn btn-outline px-7 py-3.25 text-base"
+              <Button
+                variant="outline"
+                size="lg"
                 onClick={() => {
                   if (!user) {
                     showToast("Sign in to submit a launch.", "error");
@@ -161,7 +164,7 @@ export default function Page() {
                 }}
               >
                 Submit Your Product
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -261,13 +264,13 @@ export default function Page() {
             <div className="mt-4.5 flex flex-wrap items-center gap-2.5 sm:gap-3">
               <Link
                 href="/launch"
-                className={`btn btn-primary no-underline ${isMobile ? "btn-sm" : ""}` }
+                className={cn(buttonVariants({ size: isMobile ? "sm" : "default" }), "no-underline")}
               >
                 View All Launches →
               </Link>
               <Link
                 href="/archive"
-                className={`btn btn-outline no-underline ${isMobile ? "btn-sm" : ""}` }
+                className={cn(buttonVariants({ variant: "outline", size: isMobile ? "sm" : "default" }), "no-underline")}
               >
                 Research Archive
               </Link>

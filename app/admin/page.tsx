@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import WindowCard from "@/components/ui/WindowCard";
-import Modal from "@/components/ui/Modal";
+import { Dialog, DialogBody, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrafficLights } from "@/components/ui/Dialog";
+import { Button } from "@/components/ui/button";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useProducts, useUpdateProductStatus } from "@/hooks/queries/useProduct";
 import { usePapers, useUpdatePaperVerificationStatus } from "@/hooks/queries/usePaper";
@@ -40,20 +41,20 @@ function QueueRow({ name, meta, chips = [], onApprove, onReject, reviewHref, onR
         )}
       </div>
       <div className="flex shrink-0 flex-wrap gap-2">
-        <button className="btn btn-primary btn-sm" onClick={onApprove}>
+        <Button size="sm" onClick={onApprove}>
           ✓ Approve
-        </button>
-        <button className="btn btn-ghost btn-sm" onClick={onReject}>
+        </Button>
+        <Button variant="ghost" size="sm" onClick={onReject}>
           ✗ Reject
-        </button>
+        </Button>
         {reviewHref ? (
           <Link href={reviewHref} className="btn btn-outline btn-sm">
             Review →
           </Link>
         ) : onReview ? (
-          <button className="btn btn-outline btn-sm" onClick={onReview}>
+          <Button variant="outline" size="sm" onClick={onReview}>
             Review →
-          </button>
+          </Button>
         ) : null}
       </div>
     </div>
@@ -147,10 +148,16 @@ export default function Page() {
 
       <div className="mb-5 flex flex-wrap gap-2">
         {tabs.map(({ id, label, count }) => (
-          <button key={id} className={cn("btn btn-sm", tab === id ? "btn-ghost bg-yellow" : "btn-outline")} onClick={() => setTab(id)}>
+          <Button
+            key={id}
+            size="sm"
+            variant={tab === id ? "ghost" : "outline"}
+            className={tab === id ? "bg-yellow" : undefined}
+            onClick={() => setTab(id)}
+          >
             {label}
             {count > 0 && <span className="ml-1 font-['Space_Mono',monospace] text-[10px] font-bold text-[#E8323C]">({count})</span>}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -328,74 +335,84 @@ export default function Page() {
         </div>
       )}
 
-      {reviewItem && (
-        <Modal title="REVIEW_QUEUE_ITEM.SYS" onClose={() => setReviewItem(null)}>
-          <div className="mb-4">
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <h2 className="mb-0 text-[22px]">{reviewItem.title}</h2>
-              {(reviewItem.chips ?? []).map((chip) => (
-                <span key={chip} className="topic-pill">
-                  {chip}
-                </span>
-              ))}
+      <Dialog open={!!reviewItem} onOpenChange={(open) => !open && setReviewItem(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="window-titlebar" style={{ border: "none", padding: 0, background: "none", flex: 1 }}>
+              <DialogTrafficLights />
+              <DialogTitle className="titlebar-label ml-2">REVIEW_QUEUE_ITEM.SYS</DialogTitle>
             </div>
+            <DialogClose className="modal-close">×</DialogClose>
+          </DialogHeader>
+          <DialogBody>
+            <div className="mb-4">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                <h2 className="mb-0 text-[22px]">{reviewItem?.title}</h2>
+                {(reviewItem?.chips ?? []).map((chip) => (
+                  <span key={chip} className="topic-pill">
+                    {chip}
+                  </span>
+                ))}
+              </div>
 
-            {reviewItem.description && <p className="mb-4 text-[13px] leading-[1.6] text-muted">{reviewItem.description}</p>}
+              {reviewItem?.description && <p className="mb-4 text-[13px] leading-[1.6] text-muted">{reviewItem.description}</p>}
 
-            {(reviewItem.meta ?? []).length > 0 && (
-              <>
-                <div className="mb-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-                  {(reviewItem.meta ?? []).slice(0, 3).map((item) => (
-                    <div key={item.label} className="stat-card">
-                      <div className="stat-label">{item.label}</div>
-                      <div className="stat-value text-[15px]">{item.value}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {(reviewItem.meta ?? []).slice(3).length > 0 && (
-                  <div>
-                    {(reviewItem.meta ?? []).slice(3).map((item) => (
-                      <div key={item.label} className="mb-1.5 flex items-center justify-between border-b border-[#D8D4CC] py-1.5">
-                        <span className="text-[12px] font-semibold text-muted">{item.label}</span>
-                        <span className="font-['Space_Mono',monospace] text-[11px]">{item.value}</span>
+              {(reviewItem?.meta ?? []).length > 0 && (
+                <>
+                  <div className="mb-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+                    {(reviewItem?.meta ?? []).slice(0, 3).map((item) => (
+                      <div key={item.label} className="stat-card">
+                        <div className="stat-label">{item.label}</div>
+                        <div className="stat-value text-[15px]">{item.value}</div>
                       </div>
                     ))}
                   </div>
-                )}
 
-                {(reviewItem.details ?? []).map((item) => (
-                  <div key={item.label} className="mb-1.5 flex items-center justify-between border-b border-[#D8D4CC] py-1.5">
-                    <span className="text-[12px] font-semibold text-muted">{item.label}</span>
-                    <span className="font-['Space_Mono',monospace] text-[11px]">{item.value}</span>
-                  </div>
-                ))}
-              </>
-            )}
-          </div>
+                  {(reviewItem?.meta ?? []).slice(3).length > 0 && (
+                    <div>
+                      {(reviewItem?.meta ?? []).slice(3).map((item) => (
+                        <div key={item.label} className="mb-1.5 flex items-center justify-between border-b border-[#D8D4CC] py-1.5">
+                          <span className="text-[12px] font-semibold text-muted">{item.label}</span>
+                          <span className="font-['Space_Mono',monospace] text-[11px]">{item.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-          <div className="flex gap-2 border-t border-[#D8D4CC] pt-3">
-            <button
-              className="btn btn-primary flex-1 justify-center"
-              onClick={() => {
-                handleApprove(reviewItem.title);
-                setReviewItem(null);
-              }}
-            >
-              ✓ Approve
-            </button>
-            <button
-              className="btn btn-outline flex-1 justify-center"
-              onClick={() => {
-                handleReject(reviewItem.title);
-                setReviewItem(null);
-              }}
-            >
-              ✗ Reject
-            </button>
-          </div>
-        </Modal>
-      )}
+                  {(reviewItem?.details ?? []).map((item) => (
+                    <div key={item.label} className="mb-1.5 flex items-center justify-between border-b border-[#D8D4CC] py-1.5">
+                      <span className="text-[12px] font-semibold text-muted">{item.label}</span>
+                      <span className="font-['Space_Mono',monospace] text-[11px]">{item.value}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+
+            <div className="flex gap-2 border-t border-[#D8D4CC] pt-3">
+              <Button
+                className="flex-1 justify-center"
+                onClick={() => {
+                  handleApprove(reviewItem?.title ?? "");
+                  setReviewItem(null);
+                }}
+              >
+                ✓ Approve
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 justify-center"
+                onClick={() => {
+                  handleReject(reviewItem?.title ?? "");
+                  setReviewItem(null);
+                }}
+              >
+                ✗ Reject
+              </Button>
+            </div>
+          </DialogBody>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

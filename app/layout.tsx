@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Londrina_Solid, Space_Grotesk, VT323 } from "next/font/google";
+import { Inter, Londrina_Solid, Space_Grotesk, VT323, Geist } from "next/font/google";
 import "./globals.css";
 import "./styles.css";
 
@@ -34,9 +34,12 @@ export const metadata: Metadata = {
   title: "AthenaX Research",
 };
 
-import GlobalProvider from "@/components/GlobalProvider";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { cn } from "@/lib/utils";
+import Providers from "./providers";
+
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export default function RootLayout({
   children,
@@ -44,16 +47,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={cn("font-sans", geist.variable)}>
       <body
         className={`${spaceGrotesk.variable} ${londrinaSolid.variable} ${vt323.variable} ${inter.variable} antialiased`}
         style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
       >
-        <GlobalProvider>
+        <Providers>
           <Navbar />
           {children}
           <Footer />
-        </GlobalProvider>
+        </Providers>
       </body>
     </html>
   );

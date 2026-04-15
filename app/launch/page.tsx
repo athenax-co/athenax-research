@@ -5,10 +5,13 @@ import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
 import SEOMeta from "@/components/SEOMeta";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo } from "react";
+import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
 import { useCategories } from "@/hooks/queries/useReference";
 import { useInfiniteProducts, useProductStats, type ProductQueryFilters } from "@/hooks/queries/useProduct";
 import SubmitProductButton from "@/components/SubmitProductModal";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type DateFilter = ProductQueryFilters["dateFilter"];
 
@@ -23,8 +26,8 @@ export default function Page() {
   const { data: categories = [] } = useCategories();
   const { data: productStats } = useProductStats();
 
-  const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
-  const [dateFilter, setDateFilter] = useState<DateFilter>(undefined);
+  const [categoryId, setCategoryId] = useQueryState("category", parseAsInteger);
+  const [dateFilter, setDateFilter] = useQueryState("date", parseAsString);
 
   const {
     data,
@@ -32,7 +35,10 @@ export default function Page() {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = useInfiniteProducts("approved", { categoryId, dateFilter });
+  } = useInfiniteProducts("approved", {
+    categoryId: categoryId ?? undefined,
+    dateFilter: (dateFilter || undefined) as DateFilter,
+  });
 
   const products = useMemo(() => {
     const flat = data?.pages.flat() ?? [];
@@ -70,7 +76,7 @@ export default function Page() {
                 : `${products.length} Products Listed`}
             </span>
           </div>
-          <SubmitProductButton label="+ Submit Your Product" className="btn btn-primary self-start hidden sm:inline-flex" />
+          <SubmitProductButton label="+ Submit Your Product" className="self-start hidden sm:inline-flex" />
         </div>
 
         <p className="mb-0 text-[17px] text-muted">
@@ -78,31 +84,32 @@ export default function Page() {
           ARS-scored. Every product is grounded in indexed research. */}
           Early-stage products across AI, robotics, biotech, crypto, developer tools, infrastructure, and climate.
         </p>
-        <SubmitProductButton label="+ Submit Your Product" className="btn btn-primary w-full justify-center mt-4 sm:hidden" />
+        <SubmitProductButton label="+ Submit Your Product" className="mt-4 w-full sm:hidden" />
         <hr className="divider" />
 
         <div className="mb-7 grid grid-cols-2 sm:grid-cols-4 gap-3.5">
           {[
-            { label: "Launches This Month", value: productStats?.releases.thisMonth ?? products.length },
-            { label: "Investor Intros Made", value: "142" },
+            { label: "Launches This Month", value: productStats?.releases.thisMonth ?? null },
+            { label: "Investor Intros Made", value: null },
             // { label: "Total Funding Raised", value: "$18.4M" },
             // { label: "Avg. Founder ARS", value: "7.3" },
             // { label: "Investor Intros Made", value: "142" },
           ].map((s) => (
             <div key={s.label} className="stat-card">
               <div className="stat-label">{s.label}</div>
-              <div className="stat-value text-[20px]">{s.value}</div>
+              <div className="stat-value text-[20px]">{s.value ?? "-"}</div>
             </div>
           ))}
         </div>
 
         <div className="mb-5 flex gap-2 border-b-2 border-b-[#1C1C27] pb-2.5">
           {TIME_TABS.map((tab) => (
-            <button
+            <Button
               key={tab.label}
-              className={dateFilter === tab.key ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}
-              style={dateFilter === tab.key ? { background: "#F5D94E" } : {}}
-              onClick={() => setDateFilter(tab.key)}
+              variant={(dateFilter || null) === (tab.key || null) ? "ghost" : "outline"}
+              size="sm"
+              className={(dateFilter || null) === (tab.key || null) ? "bg-yellow" : ""}
+              onClick={() => setDateFilter(tab.key ?? null)}
             >
               {tab.label}
               {productStats != null && tab.key == null && (
@@ -115,20 +122,21 @@ export default function Page() {
                   ({productStats.releases[tab.statsKey]})
                 </span>
               )}
-            </button>
+            </Button>
           ))}
         </div>
 
         <div className="mb-2.5 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
           {[{ id: 0, name: "All" }, ...categories].map((c) => (
-            <button
+            <Button
               key={c.id}
-              className={`shrink-0 ${categoryId === (c.id || undefined) ? "btn btn-ghost btn-sm" : "btn btn-outline btn-sm"}`}
-              style={categoryId === (c.id || undefined) ? { background: "#F5D94E" } : {}}
-              onClick={() => setCategoryId(c.id === 0 ? undefined : c.id)}
+              variant={(categoryId ?? null) === (c.id || null) ? "ghost" : "outline"}
+              size="sm"
+              className={`shrink-0 ${(categoryId ?? null) === (c.id || null) ? "bg-yellow" : ""}`}
+              onClick={() => setCategoryId(c.id === 0 ? null : c.id)}
             >
               {c.name}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -167,7 +175,7 @@ export default function Page() {
                 <div className="min-w-65 flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
                     <h3 className="mb-0 text-[21px]">
-                      <Link href={`/launch/${product.slug}`} className="cursor-pointer text-inherit no-underline">
+                      <Link href={`/launch/${product.slug}`} className="cursor-pointer text-inherit no-underline" prefetch={false}>
                         {product.name}
                       </Link>
                     </h3>
@@ -194,7 +202,7 @@ export default function Page() {
                     </span>
                   )}
                   <div className="flex gap-1.5 sm:flex-col">
-                    <Link href={`/launch/${product.slug}`} className="btn btn-primary btn-sm flex-1 justify-center no-underline">
+                    <Link href={`/launch/${product.slug}`} className={cn(buttonVariants({ size: "sm" }), "flex-1 no-underline")} prefetch={false}>
                       View →
                     </Link>
                     <BookmarkButton user={user} launch={product} showToast={showToast} size="sm" useApi initialBookmarked={product.bookmarked} />
@@ -259,7 +267,7 @@ export default function Page() {
             ))}
           </div>
           <div className="flex justify-center md:justify-end">
-            <SubmitProductButton label="Submit Your Launch →" className="btn btn-primary" />
+            <SubmitProductButton label="Submit Your Launch →" />
           </div>
         </WindowCard>
       </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBody, DialogTrafficLights } from "@/components/ui/Dialog";
 import { useLogin, useResendVerification } from "@/hooks/queries/useAuth";
 import { useGlobal } from "@/components/GlobalProvider";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 interface LoginDialogProps {
@@ -92,32 +93,36 @@ export default function LoginModal({ open, onOpenChange, onSuccess, showToast }:
             <div className="inp-error flex gap-2">
               <span>{error.message}</span>
               {isUnverified && (
-                <button
-                  className="text-ink cursor-pointer text-xs font-semibold hover:text-muted transition-colors"
+                <Button
+                  variant="link"
+                  size="xs"
+                  className="text-ink hover:text-muted"
                   disabled={isResending || resendSent}
                   onClick={() => resend({ email })}
                 >
                   {resendSent ? "Sent!" : isResending ? <span className="spinner" /> : "(Resend email)"}
-                </button>
+                </Button>
               )}
             </div>
           )}
 
-          <button className="btn btn-primary w-full justify-center mt-2" onClick={submit} disabled={isPending || !email || !pw}>
+          <Button className="mt-2 w-full" onClick={submit} disabled={isPending || !email || !pw}>
             {isPending ? <span className="spinner" /> : "Sign In →"}
-          </button>
+          </Button>
 
           <p className="text-xs text-muted text-center mt-5">
             Don&apos;t have an account?{" "}
-            <button
-              className="font-semibold text-ink hover:text-danger transition-colors"
+            <Button
+              variant="link"
+              size="xs"
+              className="font-semibold text-ink hover:text-danger"
               onClick={() => {
                 onOpenChange(false);
                 setTimeout(() => handleAuthClick("register"), 150);
               }}
             >
               Sign up →
-            </button>
+            </Button>
           </p>
         </DialogBody>
       </DialogContent>

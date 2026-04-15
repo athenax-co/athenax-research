@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { IconBriefcaseSmall } from "@/components/Icons";
-import Modal from "@/components/ui/Modal";
+import { Dialog, DialogBody, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrafficLights } from "@/components/ui/Dialog";
 import WindowCard from "@/components/ui/WindowCard";
 import { useGlobal } from "@/components/GlobalProvider";
+import { Button } from "@/components/ui/button";
 
 type Role = {
   id: string;
@@ -112,22 +113,24 @@ export default function Page() {
               <h3 className="mb-1 text-[17px]">Open to Opportunities</h3>
               <p className="text-sm text-muted">When enabled, protocol teams can see your profile in talent searches.</p>
             </div>
-            <button className={openToWork ? "btn btn-primary btn-sm" : "btn btn-ghost btn-sm"} onClick={toggleOpenToWork}>
+            <Button variant={openToWork ? "default" : "ghost"} size="sm" onClick={toggleOpenToWork}>
               {openToWork ? "✓ Available — Turn Off" : "Set as Available →"}
-            </button>
+            </Button>
           </div>
         </WindowCard>
       )}
 
       <div className="mb-7 flex flex-wrap gap-2">
         {TYPES.map((type) => (
-          <button
+          <Button
             key={type}
-            className={filter === type ? "btn btn-ghost btn-sm bg-yellow" : "btn btn-outline btn-sm"}
+            variant={filter === type ? "ghost" : "outline"}
+            size="sm"
+            className={filter === type ? "bg-yellow" : undefined}
             onClick={() => setFilter(type)}
           >
             {type}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -147,8 +150,8 @@ export default function Page() {
               </div>
               <div className="shrink-0 text-right">
                 <div className="mb-2 text-[15px] font-bold text-[#15803D]">{role.stipend}</div>
-                <button
-                  className="btn btn-primary btn-sm"
+                <Button
+                  size="sm"
                   onClick={() => {
                     if (!user) {
                       showToast("Sign in to apply.", "error");
@@ -158,7 +161,7 @@ export default function Page() {
                   }}
                 >
                   Apply →
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -179,42 +182,53 @@ export default function Page() {
         </WindowCard>
       </div>
 
-      {applying && (
-        <Modal
-          title={`APPLY: ${applying.title.toUpperCase()}`}
-          onClose={() => {
+      <Dialog
+        open={!!applying}
+        onOpenChange={(open) => {
+          if (!open) {
             setApplying(null);
             setApplyNote("");
-          }}
-        >
-          <div className="mb-4">
-            <div className="mb-1 text-[15px] font-semibold">{applying.title}</div>
-            <div className="mb-3 text-[13px] text-muted">
-              {applying.org} · {applying.type} · {applying.stipend}
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <div className="window-titlebar" style={{ border: "none", padding: 0, background: "none", flex: 1 }}>
+              <DialogTrafficLights />
+              <DialogTitle className="titlebar-label ml-2">{`APPLY: ${(applying?.title ?? "").toUpperCase()}`}</DialogTitle>
             </div>
-            <p className="text-sm leading-6 text-muted">{applying.desc}</p>
-          </div>
+            <DialogClose className="modal-close">×</DialogClose>
+          </DialogHeader>
+          <DialogBody>
+            <div className="mb-4">
+              <div className="mb-1 text-[15px] font-semibold">{applying?.title}</div>
+              <div className="mb-3 text-[13px] text-muted">
+                {applying?.org} · {applying?.type} · {applying?.stipend}
+              </div>
+              <p className="text-sm leading-6 text-muted">{applying?.desc}</p>
+            </div>
 
-          <hr className="divider-sm" />
+            <hr className="divider-sm" />
 
-          <div className="inp-group">
-            <label className="inp-label">Cover Note</label>
-            <textarea
-              className="inp"
-              rows={4}
-              value={applyNote}
-              onChange={(event) => setApplyNote(event.target.value)}
-              placeholder="Briefly describe your research background and why you're a fit…"
-            />
-          </div>
+            <div className="inp-group">
+              <label className="inp-label">Cover Note</label>
+              <textarea
+                className="inp"
+                rows={4}
+                value={applyNote}
+                onChange={(event) => setApplyNote(event.target.value)}
+                placeholder="Briefly describe your research background and why you're a fit…"
+              />
+            </div>
 
-          <div className="mb-3.5 text-xs text-muted">Your ARS score and published papers will be shared automatically with {applying.org}.</div>
+            <div className="mb-3.5 text-xs text-muted">Your ARS score and published papers will be shared automatically with {applying?.org}.</div>
 
-          <button className="btn btn-primary flex w-full justify-center" onClick={submitApply}>
-            Submit Application →
-          </button>
-        </Modal>
-      )}
+            <Button className="flex w-full justify-center" onClick={submitApply}>
+              Submit Application →
+            </Button>
+          </DialogBody>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

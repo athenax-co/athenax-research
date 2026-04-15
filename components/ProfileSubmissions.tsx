@@ -7,6 +7,8 @@ import { useMyProducts } from "@/hooks/queries/useProduct";
 import { useMyPapers } from "@/hooks/queries/usePaper";
 import type { SessionUser } from "@/types/auth";
 import SubmitProductButton from "@/components/SubmitProductModal";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 function ProductsList() {
   const { data: products = [], isLoading } = useMyProducts();
@@ -49,10 +51,10 @@ function ProductsList() {
         </Link>
       ))}
       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
-        <Link href="/launch" className="btn btn-ghost btn-sm flex items-center justify-center gap-1.5">
+        <Link href="/launch" className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "no-underline")}>
           View All on Launch <IconArrowUpRight />
         </Link>
-        <SubmitProductButton className="btn btn-primary btn-sm justify-center" />
+        <SubmitProductButton />
       </div>
     </div>
   );
@@ -99,7 +101,7 @@ function PapersList() {
         </Link>
       ))}
       <div className="mt-3">
-        <Link href="/paper/submit" className="btn btn-primary btn-sm flex items-center gap-1.5 w-fit">
+        <Link href="/paper/submit" className={cn(buttonVariants({ size: "sm" }), "w-fit no-underline")}>
           {papers.length === 0 ? "Submit a Paper" : "Submit Another Paper"} <IconArrowUpRight />
         </Link>
       </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBody, DialogTrafficLights } from "@/components/ui/Dialog";
 import { useSignup, useResendVerification } from "@/hooks/queries/useAuth";
 import { useGlobal } from "@/components/GlobalProvider";
+import { Button } from "@/components/ui/button";
 import type { UserRole } from "@/types/auth";
 
 interface RegisterDialogProps {
@@ -14,12 +15,12 @@ interface RegisterDialogProps {
 }
 
 const ROLE_OPTIONS: { role: UserRole; label: string; sub: string }[] = [
-  { role: "researcher", label: "Researcher",  sub: "Publish research, join the network" },
-  { role: "founder",    label: "Founder",     sub: "Launch your product, attract users and investors" },
-  { role: "investor",   label: "Investor",    sub: "Access Terminal, discover founders early" },
-  { role: "user",       label: "Company",     sub: "Post roles, sponsor research, list products" },
-  { role: "user",       label: "Developer",   sub: "Browse launches, bookmark products, follow topics" },
-  { role: "user",       label: "User",        sub: "Explore research, follow topics, stay informed" },
+  { role: "researcher", label: "Researcher", sub: "Publish research, join the network" },
+  { role: "founder", label: "Founder", sub: "Launch your product, attract users and investors" },
+  { role: "investor", label: "Investor", sub: "Access Terminal, discover founders early" },
+  { role: "user", label: "Company", sub: "Post roles, sponsor research, list products" },
+  { role: "user", label: "Developer", sub: "Browse launches, bookmark products, follow topics" },
+  { role: "user", label: "User", sub: "Explore research, follow topics, stay informed" },
 ];
 
 export default function RegisterModal({ open, onOpenChange, showToast }: RegisterDialogProps) {
@@ -43,8 +44,7 @@ export default function RegisterModal({ open, onOpenChange, showToast }: Registe
     return () => clearInterval(id);
   }, [resendTimer]);
 
-  const set = (k: string) => (e: { target: { value: any } }) =>
-    setForm((f) => ({ ...f, [k]: e.target.value }));
+  const set = (k: string) => (e: { target: { value: any } }) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const step2Error = (): string | null => {
     if (!form.name.trim()) return "Name is required.";
@@ -113,16 +113,21 @@ export default function RegisterModal({ open, onOpenChange, showToast }: Registe
               {resendError && <div className="inp-error mt-3">{resendError.message}</div>}
               {resent && <div className="text-green-600 text-xs mt-3">Email resent!</div>}
 
-              <button
-                className="btn btn-ghost btn-sm w-full justify-center mt-4"
-                onClick={() => { resend({ email: form.email.trim() }); setResendTimer(60); }}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-4 w-full"
+                onClick={() => {
+                  resend({ email: form.email.trim() });
+                  setResendTimer(60);
+                }}
                 disabled={resending || resendTimer > 0}
               >
                 {resending ? <span className="spinner" /> : resendTimer > 0 ? `Resend code (${resendTimer}s)` : "Resend verification email"}
-              </button>
-              <button className="btn btn-primary w-full justify-center mt-2.5" onClick={handleClose}>
+              </Button>
+              <Button className="mt-2.5 w-full" onClick={handleClose}>
                 Done →
-              </button>
+              </Button>
             </div>
           ) : (
             <>
@@ -135,10 +140,11 @@ export default function RegisterModal({ open, onOpenChange, showToast }: Registe
                     {ROLE_OPTIONS.map((opt, i) => {
                       const selected = form.selectedCardIndex === i;
                       return (
-                        <button
+                        <Button
                           key={i}
+                          variant="ghost"
                           onClick={() => setForm((f) => ({ ...f, role: opt.role, selectedCardIndex: i }))}
-                          className="p-3 border-2 rounded-xl text-left transition-all duration-100 cursor-pointer"
+                          className="h-auto p-3 border-2 rounded-xl text-left transition-all duration-100 justify-start flex-col items-start whitespace-normal"
                           style={{
                             background: selected ? "#FEF3C7" : "#fff",
                             borderColor: selected ? "#1C1C27" : "rgba(28,28,39,0.2)",
@@ -147,21 +153,26 @@ export default function RegisterModal({ open, onOpenChange, showToast }: Registe
                         >
                           <div className="text-[13px] font-bold text-ink mb-0.5">{opt.label}</div>
                           <div className="text-[11px] text-muted leading-snug">{opt.sub}</div>
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>
-                  <button className="btn btn-primary w-full justify-center" onClick={() => setStep(2)}>
+                  <Button className="w-full" onClick={() => setStep(2)}>
                     Next →
-                  </button>
+                  </Button>
                   <p className="text-xs text-muted text-center mt-5">
                     Already have an account?{" "}
-                    <button
-                      className="font-semibold text-ink hover:text-danger transition-colors"
-                      onClick={() => { handleClose(); setTimeout(() => handleAuthClick("login"), 150); }}
+                    <Button
+                      variant="link"
+                      size="xs"
+                      className="font-semibold text-ink hover:text-danger"
+                      onClick={() => {
+                        handleClose();
+                        setTimeout(() => handleAuthClick("login"), 150);
+                      }}
                     >
                       Sign in →
-                    </button>
+                    </Button>
                   </p>
                 </>
               ) : (
@@ -193,22 +204,33 @@ export default function RegisterModal({ open, onOpenChange, showToast }: Registe
                   {signupError && <div className="inp-error">{signupError.message}</div>}
 
                   <div className="flex gap-2.5 mt-1">
-                    <button className="btn btn-ghost" onClick={() => { setStep(1); resetSignup(); }}>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setStep(1);
+                        resetSignup();
+                      }}
+                    >
                       ← Back
-                    </button>
-                    <button className="btn btn-primary flex-1 justify-center" onClick={handleNext} disabled={signingUp}>
+                    </Button>
+                    <Button className="flex-1" onClick={handleNext} disabled={signingUp}>
                       {signingUp ? <span className="spinner" /> : "Join Network →"}
-                    </button>
+                    </Button>
                   </div>
 
                   <p className="text-xs text-muted text-center mt-5">
                     Already have an account?{" "}
-                    <button
-                      className="font-semibold text-ink hover:text-danger transition-colors"
-                      onClick={() => { handleClose(); setTimeout(() => handleAuthClick("login"), 150); }}
+                    <Button
+                      variant="link"
+                      size="xs"
+                      className="font-semibold text-ink hover:text-danger"
+                      onClick={() => {
+                        handleClose();
+                        setTimeout(() => handleAuthClick("login"), 150);
+                      }}
                     >
                       Sign in →
-                    </button>
+                    </Button>
                   </p>
                 </>
               )}

@@ -4,6 +4,7 @@ import { subscriberSvc } from "@/utils/lib";
 import { useState } from "react";
 import Link from "next/link";
 import { _globalShowToast } from "@/components/GlobalProvider";
+import { Button } from "@/components/ui/button";
 
 const NAV_COLS = [
   {
@@ -68,9 +69,9 @@ export const FooterSubscribe = () => {
               placeholder="your@email.com"
               onKeyDown={(e) => e.key === "Enter" && submit()}
             />
-            <button className="btn btn-primary btn-sm w-full sm:w-auto" onClick={submit}>
+            <Button size="sm" className="w-full sm:w-auto" onClick={submit}>
               Subscribe →
-            </button>
+            </Button>
           </div>
         )}
       </div>

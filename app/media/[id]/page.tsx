@@ -1,41 +1,49 @@
 import Link from "next/link";
-import { SEED_MEDIA } from "@/data/seed";
 import WindowCard from "@/components/ui/WindowCard";
 import { MediaIcon } from "@/components/Icons";
 import { extractContentText, formatContentDate, getBroadcastById } from "@/lib/api";
 
 const toEmbedUrl = (value?: string) => {
   if (!value) return "";
+
   try {
     const url = new URL(value);
+
+    const build = (id: string) => {
+      const embed = new URL(`https://www.youtube.com/embed/${id}`);
+      embed.searchParams.set("vq", "hd1080");
+      embed.searchParams.set("rel", "0");
+      embed.searchParams.set("modestbranding", "1");
+      return embed.toString();
+    };
+
     if (url.hostname.includes("youtu.be")) {
-      const id = url.pathname.replace("/", "");
-      return id ? `https://www.youtube.com/embed/${id}` : value;
+      return build(url.pathname.slice(1));
     }
+
     if (url.hostname.includes("youtube.com")) {
       if (url.pathname.includes("/embed/")) return value;
       const id = url.searchParams.get("v");
-      return id ? `https://www.youtube.com/embed/${id}` : value;
+      return id ? build(id) : value;
     }
+
     return value;
   } catch {
     return value;
   }
 };
 
-const formatVideoType = (value?: string) => {
-  if (!value) return "Broadcast";
-  return value
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-};
+const formatVideoType = (value?: string) =>
+  value
+    ? value
+        .split("_")
+        .map((w) => w[0].toUpperCase() + w.slice(1))
+        .join(" ")
+    : "Broadcast";
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const apiItem = await getBroadcastById(id);
-  const seedItem = SEED_MEDIA.find((m) => m.id === id);
-  const item = apiItem || seedItem;
+  const item = await getBroadcastById(id);
 
   if (!item) {
     return (
@@ -45,11 +53,11 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     );
   }
 
-  const itemType = item.type || "Video";
-  const displayVideoType = formatVideoType(item.videoType);
-  const itemDate = item.originDate || item.publishedAt || item.date;
-  const contentBlocks = extractContentText(item.content || item.description || item.body);
-  const embedUrl = toEmbedUrl(item.embedUrl);
+  const { type = "Video", videoType, originDate, publishedAt, date, content, description, body, embedUrl: rawEmbedUrl, title, slug } = item;
+
+  const itemDate = originDate || publishedAt || date;
+  const contentBlocks = extractContentText(content || description || body);
+  const embedUrl = toEmbedUrl(rawEmbedUrl);
 
   return (
     <div className="w-full">
@@ -58,45 +66,36 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           ← Back to Broadcast
         </Link>
 
-        <div className="path-badge">/root/archive/{item.slug || id}</div>
+        <div className="path-badge">/root/archive/{slug || id}</div>
 
         <div className="mb-3 flex items-center gap-3">
-          <MediaIcon type={itemType} />
-          <span className="topic-pill">{displayVideoType}</span>
+          <MediaIcon type={type} />
+          <span className="topic-pill">{formatVideoType(videoType)}</span>
           <span className="font-['Space_Mono',monospace] text-[13px] text-muted">{String(formatContentDate(itemDate))}</span>
         </div>
 
-        <h1 className="mb-7 text-[42px] font-bold tracking-[-0.02em] text-ink">{item.title}</h1>
+        <h1 className="mb-7 text-[42px] font-bold tracking-[-0.02em] text-ink">{title}</h1>
 
-        {itemType === "Video" && (
+        {type === "Video" && (
           <div className="mb-7 overflow-hidden rounded-[14px] border-2 border-ink bg-ink shadow-[5px_5px_0_#1C1C27]">
             {embedUrl ? (
               <iframe
                 className="aspect-video w-full"
                 src={embedUrl}
-                title={item.title}
+                title={title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
             ) : (
-              <div className="flex aspect-video cursor-default items-center justify-center">
-                <div className="text-center">
-                  <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/40 bg-white/15">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <polygon points="8,5 20,12 8,19" fill="white" />
-                    </svg>
-                  </div>
-                  <div className="font-['Space_Mono',monospace] text-[11px] tracking-[0.06em] text-white/50">VIDEO PREVIEW UNAVAILABLE</div>
-                </div>
-              </div>
+              <div className="flex aspect-video items-center justify-center text-white/50">VIDEO PREVIEW UNAVAILABLE</div>
             )}
           </div>
         )}
 
-        <WindowCard label={`${itemType.toUpperCase()}_CONTENT.TXT`}>
-          {contentBlocks.length > 0 ? (
-            contentBlocks.map((block, index) => (
-              <p key={index} className={`text-base leading-[1.8] text-ink ${index === contentBlocks.length - 1 ? "mb-0" : "mb-4.5"}`}>
+        <WindowCard label={`${type.toUpperCase()}_CONTENT.TXT`}>
+          {contentBlocks.length ? (
+            contentBlocks.map((block, i) => (
+              <p key={i} className={`text-base leading-[1.8] text-ink ${i === contentBlocks.length - 1 ? "mb-0" : "mb-4.5"}`}>
                 {block}
               </p>
             ))

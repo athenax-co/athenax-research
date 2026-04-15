@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBody, DialogTrafficLights } from "@/components/ui/Dialog";
 import CategorySelector from "@/components/ui/CategorySelector";
+import { Button } from "@/components/ui/button";
 import { ProductStage, QualityBadge } from "@/enums";
 import { useSubmitProduct } from "@/hooks/queries/useProduct";
 import { useGlobal } from "@/components/GlobalProvider";
@@ -68,6 +69,7 @@ function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
   const { mutateAsync: submitProductMutation, isPending: submitting } = useSubmitProduct();
 
   const [step, setStep] = useState<1 | 2>(1);
+  const [resetKey, setResetKey] = useState(0);
 
   const draft = loadDraft();
   const [submitForm, setSubmitForm] = useState(draft?.form ?? DEFAULT_FORM);
@@ -124,6 +126,9 @@ function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
         categoryIds: selectedCategoryIds,
       });
       clearDraft();
+      setSubmitForm(DEFAULT_FORM);
+      setSelectedCategoryIds([]);
+      setResetKey((k) => k + 1);
       showToast(`${submitForm.name} launch submitted! We'll review within 48 hours.`, "success");
       handleClose();
     } catch (err) {
@@ -221,9 +226,9 @@ function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
                 </div>
               </div>
 
-              <button className="btn btn-primary w-full justify-center" onClick={handleNext}>
+              <Button className="w-full" onClick={handleNext}>
                 Next →
-              </button>
+              </Button>
             </>
           ) : (
             <>
@@ -267,16 +272,16 @@ function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
 
               <div className="inp-group">
                 <label className="inp-label">Categories</label>
-                <CategorySelector onChangeIds={setSelectedCategoryIds} />
+                <CategorySelector key={resetKey} onChangeIds={setSelectedCategoryIds} />
               </div>
 
               <div className="flex gap-2.5">
-                <button className="btn btn-ghost" onClick={() => setStep(1)}>
+                <Button variant="ghost" onClick={() => setStep(1)}>
                   ← Back
-                </button>
-                <button className="btn btn-primary flex-1 justify-center" onClick={handleSubmit} disabled={submitting}>
+                </Button>
+                <Button className="flex-1" onClick={handleSubmit} disabled={submitting}>
                   {submitting ? <span className="spinner" /> : "Submit Launch →"}
-                </button>
+                </Button>
               </div>
             </>
           )}
@@ -288,7 +293,7 @@ function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
 
 export default function SubmitProductButton({
   label = "Submit Your Launch →",
-  className = "btn btn-primary btn-sm",
+  className,
 }: {
   label?: string;
   className?: string;
@@ -306,9 +311,9 @@ export default function SubmitProductButton({
 
   return (
     <>
-      <button className={className} onClick={handleClick}>
+      <Button size="sm" className={className} onClick={handleClick}>
         {label}
-      </button>
+      </Button>
       <SubmitProductModal open={open} onOpenChange={setOpen} />
     </>
   );

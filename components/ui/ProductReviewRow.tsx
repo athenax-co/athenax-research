@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Modal from "@/components/ui/Modal";
+import { Dialog, DialogBody, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrafficLights } from "@/components/ui/Dialog";
+import { Button } from "@/components/ui/button";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useUpdateProductStatus } from "@/hooks/queries/useProduct";
 import type { ProductOut } from "@/types/product";
@@ -51,76 +52,86 @@ export default function ProductReviewRow({ product }: ProductReviewRowProps) {
           </div>
         </div>
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
-          <button className="btn btn-primary btn-sm" disabled={isBusy} onClick={() => handleStatusAction("approved")}>
+          <Button size="sm" disabled={isBusy} onClick={() => handleStatusAction("approved")}>
             Approve
-          </button>
-          <button className="btn btn-outline btn-sm" disabled={isBusy} onClick={() => handleStatusAction("rejected")}>
+          </Button>
+          <Button variant="outline" size="sm" disabled={isBusy} onClick={() => handleStatusAction("rejected")}>
             Reject
-          </button>
-          <button className="btn btn-ghost btn-sm" onClick={() => setIsOpen(true)}>
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setIsOpen(true)}>
             Review →
-          </button>
+          </Button>
         </div>
       </div>
 
-      {isOpen && (
-        <Modal title="REVIEW_PRODUCT.SYS" onClose={close}>
-          <div className="mb-4">
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <h2 className="mb-0 text-[22px]">{product.name}</h2>
-              {(product.categories ?? []).map((c) => (
-                <span key={c.id} className="topic-pill">
-                  {c.name}
-                </span>
-              ))}
-              {product.qualityBadge && <span className="ftag bg-[#EAF0F6] text-[10px]">{product.qualityBadge}</span>}
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="window-titlebar" style={{ border: "none", padding: 0, background: "none", flex: 1 }}>
+              <DialogTrafficLights />
+              <DialogTitle className="titlebar-label ml-2">REVIEW_PRODUCT.SYS</DialogTitle>
             </div>
-            <p className="mb-3 text-[13px] leading-[1.6] text-muted">{product.description}</p>
+            <DialogClose className="modal-close">×</DialogClose>
+          </DialogHeader>
+          <DialogBody>
+            <div className="mb-4">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                <h2 className="mb-0 text-[22px]">{product.name}</h2>
+                {(product.categories ?? []).map((c) => (
+                  <span key={c.id} className="topic-pill">
+                    {c.name}
+                  </span>
+                ))}
+                {product.qualityBadge && <span className="ftag bg-[#EAF0F6] text-[10px]">{product.qualityBadge}</span>}
+              </div>
+              <p className="mb-3 text-[13px] leading-[1.6] text-muted">{product.description}</p>
 
-            <div className="mb-3 grid grid-cols-3 gap-2.5">
+              <div className="mb-3 grid grid-cols-3 gap-2.5">
+                {[
+                  { label: "Stage", value: product.stage },
+                  { label: "Funding", value: product.funding != null ? `$${product.funding.toLocaleString()}` : "—" },
+                  { label: "Founded", value: product.founded },
+                ].map((s) => (
+                  <div key={s.label} className="stat-card">
+                    <div className="stat-label">{s.label}</div>
+                    <div className="stat-value text-[15px]">{s.value}</div>
+                  </div>
+                ))}
+              </div>
+
               {[
-                { label: "Stage", value: product.stage },
-                { label: "Funding", value: product.funding != null ? `$${product.funding.toLocaleString()}` : "—" },
-                { label: "Founded", value: product.founded },
-              ].map((s) => (
-                <div key={s.label} className="stat-card">
-                  <div className="stat-label">{s.label}</div>
-                  <div className="stat-value text-[15px]">{s.value}</div>
-                </div>
-              ))}
+                { label: "GitHub", value: product.github },
+                { label: "Demo", value: product.demo },
+              ]
+                .filter((l) => l.value)
+                .map((l) => (
+                  <div key={l.label} className="mb-1.5 flex items-center justify-between border-b border-[#D8D4CC] py-1.5">
+                    <span className="text-[12px] font-semibold text-muted">{l.label}</span>
+                    <span className="font-['Space_Mono',monospace] text-[11px]">{l.value}</span>
+                  </div>
+                ))}
+
+              <div className="mt-2 flex flex-wrap gap-3">
+                <span className="font-['Space_Mono',monospace] text-[10px] text-muted">Submitted: {formatSubmittedDateTime(product.createdAt)}</span>
+              </div>
             </div>
 
-            {[
-              { label: "GitHub", value: product.github },
-              { label: "Demo", value: product.demo },
-            ]
-              .filter((l) => l.value)
-              .map((l) => (
-                <div key={l.label} className="mb-1.5 flex items-center justify-between border-b border-[#D8D4CC] py-1.5">
-                  <span className="text-[12px] font-semibold text-muted">{l.label}</span>
-                  <span className="font-['Space_Mono',monospace] text-[11px]">{l.value}</span>
-                </div>
-              ))}
-
-            <div className="mt-2 flex flex-wrap gap-3">
-              <span className="font-['Space_Mono',monospace] text-[10px] text-muted">Submitted: {formatSubmittedDateTime(product.createdAt)}</span>
+            <div className="flex gap-2 border-t border-[#D8D4CC] pt-3">
+              <Button className="flex-1 justify-center" disabled={isBusy} onClick={() => handleStatusAction("approved")}>
+                Approve
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 justify-center"
+                disabled={isBusy || product.status !== "pending"}
+                onClick={() => handleStatusAction("rejected")}
+              >
+                Reject
+              </Button>
             </div>
-          </div>
-
-          <div className="flex gap-2 border-t border-[#D8D4CC] pt-3">
-            <button className="btn btn-primary flex-1 justify-center" disabled={isBusy} onClick={() => handleStatusAction("approved")}>
-              Approve
-            </button>
-            <button
-              className="btn btn-outline flex-1 justify-center"
-              disabled={isBusy || product.status !== "pending"}
-              onClick={() => handleStatusAction("rejected")}
-            >
-              Reject
-            </button>
-          </div>
-        </Modal>
-      )}
+          </DialogBody>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

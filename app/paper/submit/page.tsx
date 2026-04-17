@@ -9,6 +9,7 @@ import { useSubmitPaper } from "@/hooks/queries/usePaper";
 import { useProducts } from "@/hooks/queries/useProduct";
 import type { PaperSourceType } from "@/types/paper";
 import { PaperStatus } from "@/enums";
+import { FullScreenEditorDialog } from "@/components/editor/FullScreenEditorDialog";
 
 export default function Page() {
   const { user, showToast } = useGlobal();
@@ -19,6 +20,7 @@ export default function Page() {
   const [sourceType, setSourceType] = useState<PaperSourceType>("link");
   const [categoryIds, setCategoryIds] = useState<number[]>([]);
   const [productId, setProductId] = useState<number | undefined>(undefined);
+  const [editorOpen, setEditorOpen] = useState(false);
   const [form, setForm] = useState({
     title: "",
     abstract: "",
@@ -143,8 +145,23 @@ export default function Page() {
 
           {sourceType === "editor" && (
             <div className="inp-group">
-              <label className="inp-label">Paper Content (optional)</label>
-              <textarea className="inp" rows={10} value={form.content} onChange={set("content")} placeholder="Full paper content" />
+              <div className="flex items-center justify-between">
+                <label className="inp-label mb-0">Paper Content (optional)</label>
+                {form.content && <span className="text-xs text-muted">Content added</span>}
+              </div>
+              <button
+                type="button"
+                className="btn btn-outline w-full justify-center mt-1.5"
+                onClick={() => setEditorOpen(true)}
+              >
+                {form.content ? "Edit Content →" : "Open Editor →"}
+              </button>
+              <FullScreenEditorDialog
+                open={editorOpen}
+                onOpenChange={setEditorOpen}
+                value={form.content}
+                onChange={(json) => setForm((prev) => ({ ...prev, content: json }))}
+              />
             </div>
           )}
 

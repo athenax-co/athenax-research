@@ -1,12 +1,13 @@
 "use client";
 
-import { useCreateBlockNote, BlockNoteViewRaw, SideMenuController, SideMenu, DragHandleMenu, RemoveBlockItem } from "@blocknote/react";
+import { useCreateBlockNote, BlockNoteViewRaw, SideMenuController, SideMenu, DragHandleMenu, RemoveBlockItem, FormattingToolbarController, SuggestionMenuController, getDefaultReactSlashMenuItems } from "@blocknote/react";
 import "@blocknote/react/style.css";
-import { useState } from "react";
-import WindowCard from "@/components/ui/WindowCard";
 import { BlockNoteComponentsProvider } from "./BlockNoteComponents";
-import { Button } from "@/components/ui/button";
-import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
+
+interface PaperEditorProps {
+  onChange?: (json: string) => void;
+  initialContent?: string;
+}
 
 const CustomDragHandleMenu = (props: any) => (
   <DragHandleMenu {...props}>
@@ -16,7 +17,6 @@ const CustomDragHandleMenu = (props: any) => (
 
 const CustomSideMenu = (props: any) => <SideMenu {...props} dragHandleMenu={CustomDragHandleMenu} />;
 
-// Map site design tokens to BlockNote's CSS variables
 const editorVars: React.CSSProperties & Record<string, string> = {
   "--bn-colors-editor-text": "#1c1c27",
   "--bn-colors-editor-background": "#ffffff",
@@ -37,45 +37,47 @@ const editorVars: React.CSSProperties & Record<string, string> = {
   "--bn-border-radius": "4px",
 };
 
-const PaperEditor = () => {
-  const editor = useCreateBlockNote();
-  const [isDirty, setIsDirty] = useState(false);
+const PaperEditor = ({ onChange = () => {}, initialContent }: PaperEditorProps) => {
+  const parsed = (() => {
+    if (!initialContent) return undefined;
+    try {
+      return JSON.parse(initialContent);
+    } catch {
+      return undefined;
+    }
+  })();
 
-  useUnsavedChangesGuard(isDirty);
-
-  const handleSubmit = () => {
-    const blocks = editor.document;
-    console.log("=== BlockNote raw output ===");
-    console.log(JSON.stringify(blocks, null, 2));
-    setIsDirty(false);
-  };
+  const editor = useCreateBlockNote({ initialContent: parsed });
+  const floatingUIOptions = { elementProps: { style: { zIndex: 300 } } };
 
   return (
-    <WindowCard label="PAPER_EDITOR.SYS">
-      <div
-        style={{
-          border: "2px solid #1c1c27",
-          borderRadius: 6,
-          minHeight: 480,
-          overflow: "hidden",
-          ...editorVars,
-        }}
-      >
-        <style>
-          {`.bn-editor a { color: #0b6e99; text-decoration: underline; cursor: pointer; }
-          .bn-editor a:hover { color: #0a5a7a; }
-          .bn-editor { padding-top: 16px; padding-bottom: 16px; }`}
-        </style>
-        <BlockNoteComponentsProvider>
-          <BlockNoteViewRaw editor={editor} theme="light" sideMenu={false} onChange={() => setIsDirty(true)}>
-            <SideMenuController sideMenu={CustomSideMenu} />
-          </BlockNoteViewRaw>
-        </BlockNoteComponentsProvider>
-      </div>
-      <div className="flex justify-end mt-3">
-        <Button onClick={handleSubmit}>Submit</Button>
-      </div>
-    </WindowCard>
+    <div style={editorVars} className="w-full">
+      <style>{`
+        .bn-editor a { color: #0b6e99; text-decoration: underline; cursor: pointer; }
+        .bn-editor a:hover { color: #0a5a7a; }
+        .bn-editor { padding: 16px 0; }
+      `}</style>
+      <BlockNoteComponentsProvider>
+        <BlockNoteViewRaw
+          editor={editor}
+          theme="light"
+          sideMenu={false}
+          onChange={() => onChange(JSON.stringify(editor.document))}
+        >
+          <FormattingToolbarController floatingUIOptions={floatingUIOptions} />
+          <SuggestionMenuController
+            triggerCharacter="/"
+            floatingUIOptions={floatingUIOptions}
+            getItems={async (query) =>
+              getDefaultReactSlashMenuItems(editor).filter((item) =>
+                item.title.toLowerCase().includes(query.toLowerCase())
+              )
+            }
+          />
+          <SideMenuController sideMenu={CustomSideMenu} />
+        </BlockNoteViewRaw>
+      </BlockNoteComponentsProvider>
+    </div>
   );
 };
 

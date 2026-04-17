@@ -38,7 +38,7 @@ const getActiveNav = (current: string) => {
   return page;
 };
 
-const Logo = () => (
+export const Logo = () => (
   <Link className="flex items-center gap-2.5 font-bold text-[18px] text-ink no-underline" href="/" aria-label="Go to AthenaX home">
     <div className="size-8 bg-gray-900 rounded text-white flex items-center justify-center text-lg shadow-sm p-1">
       <img src="https://athenax.mypinx.store/Logo_Icon_White.png" alt="AthenaX Logo" width={200} height={100} className="size-7 object-contain" />

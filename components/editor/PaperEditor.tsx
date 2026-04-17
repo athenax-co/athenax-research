@@ -1,9 +1,20 @@
 "use client";
 
-import { useCreateBlockNote, BlockNoteViewRaw } from "@blocknote/react";
+import { useCreateBlockNote, BlockNoteViewRaw, SideMenuController, SideMenu, DragHandleMenu, RemoveBlockItem } from "@blocknote/react";
 import "@blocknote/react/style.css";
+import { useState } from "react";
 import WindowCard from "@/components/ui/WindowCard";
 import { BlockNoteComponentsProvider } from "./BlockNoteComponents";
+import { Button } from "@/components/ui/button";
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
+
+const CustomDragHandleMenu = (props: any) => (
+  <DragHandleMenu {...props}>
+    <RemoveBlockItem {...props}>Delete</RemoveBlockItem>
+  </DragHandleMenu>
+);
+
+const CustomSideMenu = (props: any) => <SideMenu {...props} dragHandleMenu={CustomDragHandleMenu} />;
 
 // Map site design tokens to BlockNote's CSS variables
 const editorVars: React.CSSProperties & Record<string, string> = {
@@ -28,11 +39,15 @@ const editorVars: React.CSSProperties & Record<string, string> = {
 
 const PaperEditor = () => {
   const editor = useCreateBlockNote();
+  const [isDirty, setIsDirty] = useState(false);
+
+  useUnsavedChangesGuard(isDirty);
 
   const handleSubmit = () => {
     const blocks = editor.document;
     console.log("=== BlockNote raw output ===");
     console.log(JSON.stringify(blocks, null, 2));
+    setIsDirty(false);
   };
 
   return (
@@ -46,20 +61,19 @@ const PaperEditor = () => {
           ...editorVars,
         }}
       >
-        <style>{`.bn-editor a { color: #0b6e99; text-decoration: underline; cursor: pointer; }
-          .bn-editor a:hover { color: #0a5a7a; }`}
+        <style>
+          {`.bn-editor a { color: #0b6e99; text-decoration: underline; cursor: pointer; }
+          .bn-editor a:hover { color: #0a5a7a; }
+          .bn-editor { padding-top: 16px; padding-bottom: 16px; }`}
         </style>
         <BlockNoteComponentsProvider>
-          <BlockNoteViewRaw editor={editor} theme="light" />
+          <BlockNoteViewRaw editor={editor} theme="light" sideMenu={false} onChange={() => setIsDirty(true)}>
+            <SideMenuController sideMenu={CustomSideMenu} />
+          </BlockNoteViewRaw>
         </BlockNoteComponentsProvider>
       </div>
       <div className="flex justify-end mt-3">
-        <button
-          onClick={handleSubmit}
-          className="px-4 py-2 bg-ink text-cream text-[13px] font-medium border-2 border-ink rounded hover:bg-transparent hover:text-ink transition-colors cursor-pointer"
-        >
-          Submit
-        </button>
+        <Button onClick={handleSubmit}>Submit</Button>
       </div>
     </WindowCard>
   );

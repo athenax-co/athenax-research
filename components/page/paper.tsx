@@ -4,6 +4,7 @@
 // PAPER PAGE
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import WindowCard from "@/components/ui/WindowCard";
 import ArsBreakdown from "@/components/ui/ArsBreakdown";
@@ -12,6 +13,14 @@ import { useState } from "react";
 import { useVotePaper, useUpdatePaperVerificationStatus, useRelatedPapers } from "@/hooks/queries/usePaper";
 import { PaperVerificationStatus } from "@/enums";
 import type { PaperOut } from "@/types/paper";
+
+const BlockNoteViewer = dynamic(() => import("@/components/editor/BlockNoteViewer"), { ssr: false });
+
+type PaperPageUser = {
+  role?: string;
+} | null;
+
+type ShowToast = (text: string, type?: string) => void;
 
 // ── Mock data used when real data is unavailable ─────────────
 const MOCK_PRODUCTS = [
@@ -22,7 +31,7 @@ const MOCK_PRODUCTS = [
 
 // ─────────────────────────────────────────────────────────────
 
-const PaperPage = ({ paper, user, showToast }: { paper: PaperOut; user: any; showToast: Function }) => {
+const PaperPage = ({ paper, user, showToast }: { paper: PaperOut; user: PaperPageUser; showToast: ShowToast }) => {
   const router = useRouter();
   const { mutate: vote, isPending: voting } = useVotePaper();
   const { mutate: updateVerification, isPending: verifying } = useUpdatePaperVerificationStatus();
@@ -145,7 +154,7 @@ const PaperPage = ({ paper, user, showToast }: { paper: PaperOut; user: any; sho
             {paper.sourceType === "editor" && paper.content && (
               <>
                 <hr className="divider-sm" />
-                <div className="whitespace-pre-wrap text-[14px] leading-[1.8] text-[#1C1C27]">{paper.content}</div>
+                <BlockNoteViewer content={paper.content} className="text-[15px] leading-[1.8]" />
               </>
             )}
             <hr className="divider-sm" />
@@ -229,7 +238,7 @@ const PaperPage = ({ paper, user, showToast }: { paper: PaperOut; user: any; sho
                     </Link>
                     <div className="archive-meta">
                       {r.publishedAt ? new Date(r.publishedAt).getFullYear() : null}
-                      {r.categories.length > 0 && <> // {r.categories.map((c) => c.name).join(", ")}</>}
+                      {r.categories.length > 0 && <> {" // "} {r.categories.map((c) => c.name).join(", ")}</>}
                     </div>
                   </div>
                   <div className="shrink-0 text-right">

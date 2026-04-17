@@ -50,7 +50,7 @@ const ToolbarButton = ({
     onMouseDown={(e) => e.preventDefault()}
     onClick={onClick}
     className={cn(
-      "flex items-center gap-1 px-1.5 py-0.5 rounded text-[13px] text-ink [font-family:var(--font-space-grotesk)] transition-colors border",
+      "flex items-center gap-1 px-1.5 py-0.5 rounded text-[13px] text-ink font-sans transition-colors border",
       isSelected
         ? "bg-yellow border-ink"
         : "bg-transparent border-transparent hover:bg-yellow/40",
@@ -133,7 +133,7 @@ const SuggestionMenuItem = ({ item, isSelected, onClick, id, className }: any) =
   <div
     id={id}
     className={cn(
-      "flex items-center gap-2.5 px-3 py-1.5 cursor-pointer text-[14px] text-ink [font-family:var(--font-space-grotesk)] transition-colors",
+      "flex items-center gap-2.5 px-3 py-1.5 cursor-pointer text-[14px] text-ink font-sans transition-colors",
       isSelected ? "bg-yellow" : "hover:bg-yellow/40",
       className
     )}
@@ -150,13 +150,13 @@ const SuggestionMenuItem = ({ item, isSelected, onClick, id, className }: any) =
 );
 
 const SuggestionMenuLabel = ({ children, className }: any) => (
-  <div className={cn("px-3 pt-1 pb-0.5 text-[11px] font-semibold tracking-widest uppercase text-ink/60 [font-family:var(--font-space-grotesk)]", className)}>
+  <div className={cn("px-3 pt-1 pb-0.5 text-[11px] font-semibold tracking-widest uppercase text-ink/60 font-sans", className)}>
     {children}
   </div>
 );
 
 const SuggestionMenuEmpty = ({ children, className }: any) => (
-  <div className={cn("px-3 py-2 text-[13px] text-ink/40 italic [font-family:var(--font-space-grotesk)]", className)}>
+  <div className={cn("px-3 py-2 text-[13px] text-ink/40 italic font-sans", className)}>
     {children ?? "No results"}
   </div>
 );

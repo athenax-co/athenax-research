@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as paperApi from "./api";
 import type { PaperIn, PaperOut, PaperUpdate } from "./types";
-import { PaperVerificationStatus } from "@/enums";
+import { PaperVerificationStatus, PaperStatus } from "@/enums";
 import type { CategoryOut } from "@/types/reference";
 import { resolveCategories } from "@/utils/lib";
 import { REFERENCE_QUERY_KEYS } from "@/hooks/queries/useReference";
+import { useGlobal } from "@/components/GlobalProvider";
 
 // ── Helper: enrich a paper list with resolved categories ─────────────────────
 
@@ -59,11 +60,13 @@ export function usePaperBySlug(slug: string) {
 
 // ─── useMyPapers ──────────────────────────────────────────────────────────────
 
-export function useMyPapers() {
+export function useMyPapers(status?: PaperStatus, options?: { enabled?: boolean }) {
+  const { user } = useGlobal();
   const queryClient = useQueryClient();
   return useQuery({
-    queryKey: ["papers", "me"],
-    queryFn: () => paperApi.getMyPapers(),
+    queryKey: ["papers", "me", status],
+    queryFn: () => paperApi.getMyPapers(status),
+    enabled: user?.role === "researcher" && (options?.enabled ?? true),
     select: (data) => {
       const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
       return withCategories(data, cats);

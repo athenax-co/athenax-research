@@ -1,5 +1,5 @@
 import { http } from "@/api/client";
-import type { PaperIn, PaperOut, PaperUpdate, PaperVerificationStatus } from "./types";
+import type { PaperIn, PaperOut, PaperStatus, PaperUpdate, PaperVerificationStatus } from "./types";
 
 export function submitPaper(data: PaperIn): Promise<void> {
   return http.post<void>("/paper", data, { auth: true });
@@ -15,8 +15,9 @@ export function getPaperBySlug(slug: string): Promise<PaperOut> {
   return http.get<PaperOut>(`/paper/slug/${slug}`);
 }
 
-export function getMyPapers(): Promise<PaperOut[]> {
-  return http.get<PaperOut[]>("/paper/me", { auth: true });
+export function getMyPapers(status?: PaperStatus): Promise<PaperOut[]> {
+  const params = status ? `?status=${status}` : "";
+  return http.get<PaperOut[]>(`/paper/me${params}`, { auth: true });
 }
 
 export function updatePaper(id: number, data: PaperUpdate): Promise<PaperOut> {

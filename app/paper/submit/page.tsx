@@ -13,6 +13,7 @@ import { useMyPapers, useSubmitPaper, useUpdatePaper, FullScreenEditorDialog } f
 import type { PaperOut, PaperSourceType } from "@/features/papers";
 import { useProducts } from "@/features/products";
 import { PaperStatus } from "@/enums";
+import { Button } from "@/components/ui/button";
 
 const BlockNoteViewer = dynamic(() => import("@/components/editor/BlockNoteViewer"), { ssr: false });
 
@@ -76,13 +77,62 @@ function paperStatusClass(status: string) {
   return "bg-amber-100 text-ink";
 }
 
-function MyPapersCompact({ papers, isLoading }: { papers: PaperOut[]; isLoading: boolean }) {
-  const recentPapers = papers.slice(0, 5);
+function PaperRow({ paper }: { paper: PaperOut }) {
+  const status = getPaperDisplayStatus(paper);
+  const href = status === PaperStatus.DRAFT ? `/paper/submit?draftId=${paper.id}` : `/paper/${paper.slug}`;
+  return (
+    <Link href={href} className="archive-row mb-2 cursor-pointer text-inherit no-underline">
+      <div className="min-w-0 flex-1">
+        <div className="archive-title text-sm">{(paper.title?.length ?? 0) > 58 ? `${paper.title.slice(0, 58)}...` : paper.title || "Untitled"}</div>
+        <div className="archive-meta">
+          {paper.sourceType === "editor" ? "Created on AthenaX" : "External paper"} · {new Date(paper.updatedAt).toLocaleDateString()}
+        </div>
+      </div>
+      <span className={`ftag shrink-0 text-[10px] ${paperStatusClass(status)}`}>{status}</span>
+    </Link>
+  );
+}
+
+type PapersTab = "all" | "draft" | "published";
+
+function MyPapersCompact() {
+  const { user } = useGlobal();
+  const isResearcher = user?.role === "researcher";
+
+  const [tab, setTab] = useState<PapersTab>("all");
+  const [fetched, setFetched] = useState<Set<PapersTab>>(new Set(["all"]));
+
+  const handleTab = (t: PapersTab) => {
+    setTab(t);
+    setFetched((prev) => new Set([...prev, t]));
+  };
+
+  const { data: all = [], isLoading: loadingAll } = useMyPapers(undefined, { enabled: fetched.has("all") });
+  const { data: drafts = [], isLoading: loadingDrafts } = useMyPapers("draft", { enabled: fetched.has("draft") });
+  const { data: published = [], isLoading: loadingPublished } = useMyPapers("published", { enabled: fetched.has("published") });
+
+  const isLoading = tab === "all" ? loadingAll : tab === "draft" ? loadingDrafts : loadingPublished;
+  const papers = (tab === "all" ? all : tab === "draft" ? drafts : published).slice(0, 5);
+
+
+  if (!isResearcher) {
+    return (
+      <WindowCard label="YOUR_PAPERS.SYS">
+        <p className="mb-0 text-sm text-muted">Researcher role required to view your papers.</p>
+      </WindowCard>
+    );
+  }
 
   return (
     <WindowCard label="YOUR_PAPERS.SYS">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <div className="font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">DRAFTS AND SUBMISSIONS</div>
+        <div className="flex gap-2 mb-2">
+          {(["all", "draft", "published"] as const).map((t) => (
+            <Button key={t} onClick={() => handleTab(t)} size="sm" variant={tab === t ? "secondary" : "outline"} className="h-6 text-[10px]">
+              {t.toUpperCase()}
+            </Button>
+          ))}
+        </div>
         <Link href="/dashboard" className="font-mono text-[11px] text-muted no-underline hover:underline">
           View dashboard →
         </Link>
@@ -94,27 +144,16 @@ function MyPapersCompact({ papers, isLoading }: { papers: PaperOut[]; isLoading:
             <div key={i} className="h-12 rounded-lg bg-[#E8E4DC]" />
           ))}
         </div>
-      ) : recentPapers.length === 0 ? (
-        <p className="mb-0 text-sm text-muted">No papers yet. Choose a submission path to start one.</p>
+      ) : papers.length === 0 ? (
+        <p className="mb-0 text-sm text-muted">
+          {tab === "draft"
+            ? "No drafts yet. Choose a submission path to start one."
+            : tab === "published"
+              ? "No published papers yet."
+              : "No papers yet. Choose a submission path to start one."}
+        </p>
       ) : (
-        recentPapers.map((paper) => {
-          const status = getPaperDisplayStatus(paper);
-          const href = status === PaperStatus.DRAFT ? `/paper/submit?draftId=${paper.id}` : `/paper/${paper.slug}`;
-
-          return (
-            <Link key={paper.id} href={href} className="archive-row mb-2 cursor-pointer text-inherit no-underline">
-              <div className="min-w-0 flex-1">
-                <div className="archive-title text-sm">
-                  {(paper.title?.length ?? 0) > 58 ? `${paper.title.slice(0, 58)}...` : paper.title || "Untitled"}
-                </div>
-                <div className="archive-meta">
-                  {paper.sourceType === "editor" ? "Created on AthenaX" : "External paper"} · {new Date(paper.updatedAt).toLocaleDateString()}
-                </div>
-              </div>
-              <span className={`ftag shrink-0 text-[10px] ${paperStatusClass(status)}`}>{status}</span>
-            </Link>
-          );
-        })
+        papers.map((paper) => <PaperRow key={paper.id} paper={paper} />)
       )}
     </WindowCard>
   );
@@ -320,7 +359,7 @@ export default function Page() {
               </div>
             </WindowCard>
 
-            <MyPapersCompact papers={myPapers} isLoading={loadingMyPapers} />
+            <MyPapersCompact />
           </div>
         ) : (
           <WindowCard label="PAPER_SUBMISSION.FORM">

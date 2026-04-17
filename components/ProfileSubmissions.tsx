@@ -6,9 +6,11 @@ import { IconArrowUpRight, IconFileTextSmall, IconPackageSmall, IconPaperSmall }
 import { useMyProducts } from "@/hooks/queries/useProduct";
 import { useMyPapers } from "@/hooks/queries/usePaper";
 import type { SessionUser } from "@/types/auth";
+import type { PaperOut } from "@/types/paper";
 import SubmitProductButton from "@/components/SubmitProductModal";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { PaperStatus } from "@/enums";
 
 function ProductsList() {
   const { data: products = [], isLoading } = useMyProducts();
@@ -76,30 +78,25 @@ function PapersList() {
   return (
     <div>
       {papers.length === 0 && <p className="mb-3.5 text-sm text-muted">No papers submitted yet.</p>}
-      {papers.map((p) => (
-        <Link key={p.id} href={`/paper/${p.slug}`} className="archive-row mb-2 cursor-pointer text-inherit no-underline">
-          <div className="archive-icon bg-paper flex items-center justify-center">
-            <IconPaperSmall />
-          </div>
-          <div className="flex-1">
-            <div className="archive-title text-sm">{(p.title?.length ?? 0) > 55 ? p.title!.slice(0, 55) + "…" : (p.title ?? "Untitled")}</div>
-            <div className="archive-meta">
-              {new Date(p.createdAt).toLocaleDateString()} · {p.categories.map((c) => c.name).join(", ") || "Uncategorized"}
+      {papers.map((p) => {
+        const status = getPaperDisplayStatus(p);
+        const href = status === PaperStatus.DRAFT ? `/paper/submit?draftId=${p.id}` : `/paper/${p.slug}`;
+
+        return (
+          <Link key={p.id} href={href} className="archive-row mb-2 cursor-pointer text-inherit no-underline">
+            <div className="archive-icon bg-paper flex items-center justify-center">
+              <IconPaperSmall />
             </div>
-          </div>
-          <span
-            className={`ftag text-[10px] ${
-              p.verificationStatus === "approved"
-                ? "bg-success"
-                : p.verificationStatus === "rejected"
-                  ? "bg-red-100"
-                  : "bg-amber-100"
-            }`}
-          >
-            {p.verificationStatus}
-          </span>
-        </Link>
-      ))}
+            <div className="flex-1">
+              <div className="archive-title text-sm">{(p.title?.length ?? 0) > 55 ? p.title!.slice(0, 55) + "…" : (p.title ?? "Untitled")}</div>
+              <div className="archive-meta">
+                {new Date(p.createdAt).toLocaleDateString()} · {p.categories.map((c) => c.name).join(", ") || "Uncategorized"}
+              </div>
+            </div>
+            <span className={`ftag text-[10px] ${paperStatusClass(status)}`}>{status}</span>
+          </Link>
+        );
+      })}
       <div className="mt-3">
         <Link href="/paper/submit" className={cn(buttonVariants({ size: "sm" }), "w-fit no-underline")}>
           {papers.length === 0 ? "Submit a Paper" : "Submit Another Paper"} <IconArrowUpRight />
@@ -107,6 +104,17 @@ function PapersList() {
       </div>
     </div>
   );
+}
+
+function getPaperDisplayStatus(paper: PaperOut) {
+  return paper.status === PaperStatus.DRAFT ? PaperStatus.DRAFT : paper.verificationStatus;
+}
+
+function paperStatusClass(status: string) {
+  if (status === "draft") return "bg-[#EAF0F6] text-ink";
+  if (status === "approved") return "bg-success";
+  if (status === "rejected") return "bg-red-100 text-[#E8323C]";
+  return "bg-amber-100 text-ink";
 }
 
 export default function ProfileSubmissions({ user }: { user: SessionUser }) {

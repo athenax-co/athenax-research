@@ -5,17 +5,19 @@ import { useCategories } from "@/hooks/queries/useReference";
 
 interface CategorySelectorProps {
   onChangeIds: (ids: number[]) => void;
+  selectedIds?: number[];
 }
 
-export default function CategorySelector({ onChangeIds }: CategorySelectorProps) {
+export default function CategorySelector({ onChangeIds, selectedIds: controlledSelectedIds }: CategorySelectorProps) {
   const { data: categories = [] } = useCategories();
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [internalSelectedIds, setInternalSelectedIds] = useState<number[]>([]);
+  const selectedIds = controlledSelectedIds ?? internalSelectedIds;
 
   const toggle = (id: number) => {
     const next = selectedIds.includes(id)
       ? selectedIds.filter((x) => x !== id)
       : [...selectedIds, id];
-    setSelectedIds(next);
+    if (!controlledSelectedIds) setInternalSelectedIds(next);
     onChangeIds(next);
   };
 

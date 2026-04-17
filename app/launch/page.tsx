@@ -8,7 +8,7 @@ import { useGlobal } from "@/components/GlobalProvider";
 import { useEffect, useRef, useMemo } from "react";
 import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
 import { useCategories } from "@/hooks/queries/useReference";
-import { useInfiniteProducts, useProductStats, type ProductQueryFilters } from "@/hooks/queries/useProduct";
+import { useInfiniteProducts, useProductStats, type ProductQueryFilters } from "@/features/products";
 import SubmitProductButton from "@/components/SubmitProductModal";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

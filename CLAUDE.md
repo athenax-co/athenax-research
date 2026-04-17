@@ -16,18 +16,51 @@ No test suite exists in this project.
 
 ## Architecture
 
-### 3-Layer API Structure
+### Feature Structure (canonical — follow this for all new domain work)
 
-Code is organized into three distinct layers — types, API, hooks:
+New features go in `features/<name>/` and are fully self-contained:
 
-- **`types/`** — TypeScript interfaces only. No logic. `auth.ts` holds all auth-related types; `reference.ts` holds `CategoryOut`, `UniversityOut`, `LabOut`, `CategoryRef`.
-- **`api/`** — Fetch functions only. Import types from `types/`, use `handleResponse` and `BASE_URL` from `api/client.ts`. No React.
-  - `api/client.ts` — `BASE_URL` (from `NEXT_PUBLIC_API_BASE_URL` env) and shared `handleResponse<T>` helper
-  - `api/auth.ts` — auth endpoints (`/user/*`)
-  - `api/reference.ts` — reference data endpoints (`/category`, `/university`, `/lab`)
-- **`hooks/queries/`** — React Query wrappers around `api/` functions. Import types directly from `types/`, never re-exported from `api/`. All query hooks live here (`useAuth.ts`, `useReference.ts`). Non-query hooks (e.g. `useCountdown.ts`) stay at `hooks/` root.
+```
+features/papers/
+  index.ts          ← public barrel — only import from here externally
+  types.ts          ← TypeScript interfaces only, no logic
+  api.ts            ← fetch functions using http helpers from api/client.ts
+  hooks.ts          ← React Query wrappers around api.ts
+  components/
+    PaperPage.tsx
+    PaperEditor.tsx
+    FullScreenEditorDialog.tsx
+```
 
-`lib/api.ts` is a separate concern — it handles the Payload CMS content API (`https://admin.athenax.co/api`) for articles and research. It is **not** part of the 3-layer structure above.
+**Rules:**
+- External code always imports from `@/features/<name>` (the barrel), never from deep paths like `@/features/<name>/hooks`.
+- Internal files within the feature use relative imports (`../hooks`, `../types`) to avoid circular barrel imports.
+- `index.ts` exports types with `export type`, hooks with `export *`, and components as named exports.
+- `api.ts` uses `http` from `@/api/client` — use `{ auth: true }` for protected endpoints, omit for public.
+- `components/` holds only feature-specific components. Shared/reusable components stay in `components/`.
+
+### API Client (`api/client.ts`)
+
+`api/client.ts` exports `BASE_URL`, `handleResponse<T>`, and the `http` helper:
+
+```ts
+http.get<T>(path)                        // public — no credentials
+http.get<T>(path, { auth: true })        // protected — sends cookie
+http.post<T>(path, body, { auth: true })
+http.patch<T>(path, body, { auth: true })
+http.put<T>(path, body, { auth: true })
+http.del<T>(path, { auth: true })
+```
+
+**Never use raw `fetch` in feature api files.** Always use `http`.
+
+### Legacy Structure (existing non-feature code — do not extend)
+
+- **`types/`** — shared types not owned by a feature (`auth.ts`, `reference.ts`, `product.ts`)
+- **`api/`** — legacy fetch files (`auth.ts`, `reference.ts`, `product.ts`) still use raw fetch. Migrate to `http` when touching.
+- **`hooks/queries/`** — legacy React Query hooks (`useAuth.ts`, `useReference.ts`, `useProduct.ts`). Non-query hooks stay at `hooks/` root.
+
+`lib/api.ts` handles the Payload CMS content API (`https://admin.athenax.co/api`) for articles and research — separate concern, not part of the feature structure.
 
 ### Global State
 

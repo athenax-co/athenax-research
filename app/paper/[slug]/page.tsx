@@ -2,8 +2,7 @@
 
 import { use } from "react";
 import { useGlobal } from "@/components/GlobalProvider";
-import { usePaperBySlug } from "@/hooks/queries/usePaper";
-import PaperPage from "@/components/page/paper";
+import { usePaperBySlug, PaperPage } from "@/features/papers";
 
 export default function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { user, showToast } = useGlobal();

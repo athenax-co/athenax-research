@@ -3,10 +3,10 @@
 import Link from "next/link";
 import WindowCard from "@/components/ui/WindowCard";
 import { IconArrowUpRight, IconFileTextSmall, IconPackageSmall, IconPaperSmall } from "@/components/Icons";
-import { useMyProducts } from "@/hooks/queries/useProduct";
-import { useMyPapers } from "@/hooks/queries/usePaper";
+import { useMyProducts } from "@/features/products";
+import { useMyPapers } from "@/features/papers";
 import type { SessionUser } from "@/types/auth";
-import type { PaperOut } from "@/types/paper";
+import type { PaperOut } from "@/features/papers";
 import SubmitProductButton from "@/components/SubmitProductModal";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

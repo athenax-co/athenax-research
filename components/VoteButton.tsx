@@ -1,5 +1,5 @@
-import { voteProduct } from "@/api/product";
-import type { ProductOut } from "@/types/product";
+import { voteProduct } from "@/features/products/api";
+import type { ProductOut } from "@/features/products";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 

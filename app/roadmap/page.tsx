@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { SEED_PAPERS } from "@/data/seed";
-import { useProductStats } from "@/hooks/queries/useProduct";
+import { useProductStats } from "@/features/products";
 import { cn } from "@/utils/lib";
 
 type ItemTone = "live" | "coming" | "building" | "data" | "network" | "vision";

@@ -2,7 +2,7 @@
 
 import { useCreateBlockNote, BlockNoteViewRaw, SideMenuController, SideMenu, DragHandleMenu, RemoveBlockItem, FormattingToolbarController, SuggestionMenuController, getDefaultReactSlashMenuItems } from "@blocknote/react";
 import "@blocknote/react/style.css";
-import { BlockNoteComponentsProvider } from "./BlockNoteComponents";
+import { BlockNoteComponentsProvider } from "@/components/editor/BlockNoteComponents";
 
 interface PaperEditorProps {
   onChange?: (json: string) => void;

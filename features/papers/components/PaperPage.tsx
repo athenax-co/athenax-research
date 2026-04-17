@@ -1,8 +1,5 @@
 "use client";
 
-// ═══════════════════════════════════════════════════════════
-// PAPER PAGE
-
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -10,9 +7,9 @@ import WindowCard from "@/components/ui/WindowCard";
 import ArsBreakdown from "@/components/ui/ArsBreakdown";
 import { MediaIcon } from "@/components/Icons";
 import { useState } from "react";
-import { useVotePaper, useUpdatePaperVerificationStatus, useRelatedPapers } from "@/hooks/queries/usePaper";
+import { useVotePaper, useUpdatePaperVerificationStatus, useRelatedPapers } from "@/features/papers/hooks";
 import { PaperVerificationStatus } from "@/enums";
-import type { PaperOut } from "@/types/paper";
+import type { PaperOut } from "@/features/papers/types";
 
 const BlockNoteViewer = dynamic(() => import("@/components/editor/BlockNoteViewer"), { ssr: false });
 
@@ -22,14 +19,11 @@ type PaperPageUser = {
 
 type ShowToast = (text: string, type?: string) => void;
 
-// ── Mock data used when real data is unavailable ─────────────
 const MOCK_PRODUCTS = [
   { id: 1, name: "NeuralDraft", initial: "N", sector: "AI Writing", stage: "Seed", funding: "$1.2M", votes: 214 },
   { id: 2, name: "ResearchOS", initial: "R", sector: "Productivity", stage: "Pre-Seed", funding: "$400K", votes: 98 },
   { id: 3, name: "VectorVault", initial: "V", sector: "Infrastructure", stage: "Series A", funding: "$4.5M", votes: 331 },
 ];
-
-// ─────────────────────────────────────────────────────────────
 
 const PaperPage = ({ paper, user, showToast }: { paper: PaperOut; user: PaperPageUser; showToast: ShowToast }) => {
   const router = useRouter();
@@ -61,7 +55,6 @@ const PaperPage = ({ paper, user, showToast }: { paper: PaperOut; user: PaperPag
 
   const publishedYear = paper.publishedAt ? new Date(paper.publishedAt).getFullYear() : null;
 
-  // Mock metric values — replace with real fields when API provides them
   const citations = 0;
   const downloads = 0;
   const peerReviews = 0;
@@ -89,7 +82,6 @@ const PaperPage = ({ paper, user, showToast }: { paper: PaperOut; user: PaperPag
 
   return (
     <div>
-      {/* ── Researcher pending alert ─────────────────────────── */}
       {isPending && isResearcher && (
         <div className="sticky top-17 z-40 flex items-center gap-3 border-b border-[#D4A017]/30 bg-[#FFFBEB] px-5 py-3">
           <span className="font-['Space_Mono',monospace] text-[10px] font-bold tracking-widest text-[#B45309]">PENDING_REVIEW.SYS</span>
@@ -100,7 +92,6 @@ const PaperPage = ({ paper, user, showToast }: { paper: PaperOut; user: PaperPag
         </div>
       )}
 
-      {/* ── Admin review action bar ───────────────────────────── */}
       {isPending && isAdmin && (
         <div className="sticky top-17 z-40 flex flex-wrap items-center gap-3 border-b border-[#D8D4CC] bg-paper px-5 py-3">
           <span className="font-['Space_Mono',monospace] text-[10px] font-bold tracking-widest text-[#E8323C]">PAPER_REVIEW_QUEUE.SYS</span>
@@ -139,7 +130,6 @@ const PaperPage = ({ paper, user, showToast }: { paper: PaperOut; user: PaperPag
           {publishedYear && <span className="ftag">{publishedYear}</span>}
         </div>
 
-        {/* Row 1: Abstract + Metrics + ARS */}
         <div className="grid-2 gap-5.5">
           <WindowCard label="ABSTRACT.TXT">
             <p className="text-[15px] leading-[1.7] text-[#1C1C27]">{paper.abstract ?? "No abstract provided."}</p>
@@ -200,7 +190,6 @@ const PaperPage = ({ paper, user, showToast }: { paper: PaperOut; user: PaperPag
           </div>
         </div>
 
-        {/* Products built on this paper — mock until real data exists */}
         <div className="mt-7">
           <WindowCard label="PRODUCTS_BUILT_ON_THIS.SYS" bodyClass="window-body window-body-blue">
             <div className="mb-3.5 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">

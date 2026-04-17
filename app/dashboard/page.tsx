@@ -5,8 +5,8 @@ import { useState } from "react";
 import WindowCard from "@/components/ui/WindowCard";
 import { useGlobal } from "@/components/GlobalProvider";
 import { dbNow, dbRead, dbUid, dbWrite, formatShortDate, notifSvc } from "@/utils/lib";
-import { useMyProducts, useMyVotedProducts, useMyBookmarkedProducts } from "@/hooks/queries/useProduct";
-import type { ProductSummary } from "@/types/product";
+import { useMyProducts, useMyVotedProducts, useMyBookmarkedProducts } from "@/features/products";
+import type { ProductSummary } from "@/features/products";
 
 const FOLLOW_KEYS = {
   FOLLOWS: "ax_follows_v1",

@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import * as paperApi from "@/api/paper";
-import type { PaperIn, PaperOut, PaperUpdate } from "@/types/paper";
+import * as paperApi from "./api";
+import type { PaperIn, PaperOut, PaperUpdate } from "./types";
 import { PaperVerificationStatus } from "@/enums";
 import type { CategoryOut } from "@/types/reference";
 import { resolveCategories } from "@/utils/lib";
-import { REFERENCE_QUERY_KEYS } from "./useReference";
+import { REFERENCE_QUERY_KEYS } from "@/hooks/queries/useReference";
 
 // ── Helper: enrich a paper list with resolved categories ─────────────────────
 
@@ -72,7 +72,6 @@ export function useMyPapers() {
 }
 
 // ─── useUpdatePaper ───────────────────────────────────────────────────────────
-// Owner or admin. Pass `status` in data to change publication state.
 
 export function useUpdatePaper() {
   const queryClient = useQueryClient();
@@ -87,7 +86,6 @@ export function useUpdatePaper() {
 }
 
 // ─── useUpdatePaperVerificationStatus ────────────────────────────────────────
-// Admin only.
 
 export function useUpdatePaperVerificationStatus() {
   const queryClient = useQueryClient();

@@ -1,6 +1,6 @@
-import { bookmarkProduct } from "@/api/product";
+import { bookmarkProduct } from "@/features/products/api";
 import { bookmarkSvc } from "@/utils/lib";
-import type { ProductOut } from "@/types/product";
+import type { ProductOut } from "@/features/products";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 

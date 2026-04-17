@@ -1,12 +1,10 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import * as productApi from "@/api/product";
-import type { ProductFilters, ProductStats } from "@/api/product";
-import type { ProductComment, ProductDetailOut, ProductIn, ProductOut, ProductStatus, ProductSummary } from "@/types/product";
+import * as productApi from "./api";
+import type { ProductFilters, ProductStats } from "./api";
+import type { ProductComment, ProductDetailOut, ProductIn, ProductOut, ProductStatus, ProductSummary } from "./types";
 import type { CategoryOut } from "@/types/reference";
 import { resolveCategories } from "@/utils/lib";
-import { REFERENCE_QUERY_KEYS } from "./useReference";
-
-// ── Helper: enrich a product list with resolved categories ───────────────────
+import { REFERENCE_QUERY_KEYS } from "@/hooks/queries/useReference";
 
 function withCategories(products: ProductOut[], allCategories: CategoryOut[]): ProductOut[] {
   return products.map((p) => ({ ...p, categories: resolveCategories(p.categoryIds ?? [], allCategories) }));
@@ -15,8 +13,6 @@ function withCategories(products: ProductOut[], allCategories: CategoryOut[]): P
 function withCategoriesOne(p: ProductDetailOut, allCategories: CategoryOut[]): ProductDetailOut {
   return { ...p, categories: resolveCategories(p.categoryIds ?? [], allCategories) };
 }
-
-// ──  Helper: generate product stats label ────────────────────────────────────────
 
 const MIN_TODAY = 2;
 const MIN_THIS_WEEK = 3;
@@ -29,8 +25,6 @@ export function getProductStatsLabel(stats: ProductStats | undefined): string {
   return `${thisMonth} products launched this month`;
 }
 
-// ─── useProductStats ─────────────────────────────────────────────────────────
-
 export function useProductStats() {
   return useQuery<ProductStats>({
     queryKey: ["product", "stats"],
@@ -39,15 +33,11 @@ export function useProductStats() {
   });
 }
 
-// ─── useSubmitProduct ─────────────────────────────────────────────────────────
-
 export function useSubmitProduct() {
   return useMutation({
     mutationFn: (data: ProductIn) => productApi.submitProduct(data),
   });
 }
-
-// ─── useProducts ──────────────────────────────────────────────────────────────
 
 export function useProducts(status: ProductStatus) {
   const queryClient = useQueryClient();
@@ -60,8 +50,6 @@ export function useProducts(status: ProductStatus) {
     },
   });
 }
-
-// ─── useInfiniteProducts ──────────────────────────────────────────────────────
 
 const PAGE_SIZE = 50;
 
@@ -98,8 +86,6 @@ export function useInfiniteProducts(status: ProductStatus, filters: ProductQuery
   });
 }
 
-// ─── useProductBySlug ─────────────────────────────────────────────────────────
-
 export function useProductBySlug(slug: string) {
   const queryClient = useQueryClient();
   return useQuery<ProductDetailOut>({
@@ -112,8 +98,6 @@ export function useProductBySlug(slug: string) {
     },
   });
 }
-
-// ─── useVoteProduct ───────────────────────────────────────────────────────────
 
 export function useVoteProduct() {
   const queryClient = useQueryClient();
@@ -128,8 +112,6 @@ export function useVoteProduct() {
   });
 }
 
-// ─── useMyProducts ────────────────────────────────────────────────────────────
-
 export function useMyProducts(status?: ProductStatus) {
   const queryClient = useQueryClient();
   return useQuery({
@@ -142,8 +124,6 @@ export function useMyProducts(status?: ProductStatus) {
   });
 }
 
-// ─── useMyVotedProducts ───────────────────────────────────────────────────────
-
 export function useMyVotedProducts() {
   return useQuery<ProductSummary[]>({
     queryKey: ["products", "me", "voted"],
@@ -151,16 +131,12 @@ export function useMyVotedProducts() {
   });
 }
 
-// ─── useMyBookmarkedProducts ──────────────────────────────────────────────────
-
 export function useMyBookmarkedProducts() {
   return useQuery<ProductSummary[]>({
     queryKey: ["products", "me", "bookmarked"],
     queryFn: () => productApi.getMyBookmarkedProducts(),
   });
 }
-
-// ─── useUpdateProductStatus ───────────────────────────────────────────────────
 
 export function useUpdateProductStatus() {
   const queryClient = useQueryClient();
@@ -172,8 +148,6 @@ export function useUpdateProductStatus() {
   });
 }
 
-// ─── useComments ──────────────────────────────────────────────────────────────
-
 export function useComments(productId: number) {
   return useQuery<ProductComment[]>({
     queryKey: ["comments", productId],
@@ -181,8 +155,6 @@ export function useComments(productId: number) {
     enabled: productId > 0,
   });
 }
-
-// ─── useCreateComment ─────────────────────────────────────────────────────────
 
 export function useCreateComment(productId: number) {
   const queryClient = useQueryClient();
@@ -193,8 +165,6 @@ export function useCreateComment(productId: number) {
     },
   });
 }
-
-// ─── useUpdateComment ─────────────────────────────────────────────────────────
 
 export function useUpdateComment(productId: number) {
   const queryClient = useQueryClient();
@@ -208,8 +178,6 @@ export function useUpdateComment(productId: number) {
   });
 }
 
-// ─── useDeleteComment ─────────────────────────────────────────────────────────
-
 export function useDeleteComment(productId: number) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -219,8 +187,6 @@ export function useDeleteComment(productId: number) {
     },
   });
 }
-
-// ─── useInterestProduct ───────────────────────────────────────────────────────
 
 export function useInterestProduct() {
   const queryClient = useQueryClient();
@@ -236,5 +202,11 @@ export function useInterestProduct() {
         };
       });
     },
+  });
+}
+
+export function useBookmarkProduct() {
+  return useMutation({
+    mutationFn: ({ id, bookmarked }: { id: number; bookmarked: boolean }) => productApi.bookmarkProduct(id, bookmarked),
   });
 }

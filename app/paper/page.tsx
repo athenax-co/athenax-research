@@ -3,8 +3,7 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useGlobal } from "@/components/GlobalProvider";
-import { usePaperBySlug } from "@/hooks/queries/usePaper";
-import PaperPage from "@/components/page/paper";
+import { usePaperBySlug, PaperPage } from "@/features/papers";
 
 function PaperPageContent() {
   const searchParams = useSearchParams();

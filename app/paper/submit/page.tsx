@@ -9,11 +9,10 @@ import { useQueryState, parseAsStringLiteral } from "nuqs";
 import WindowCard from "@/components/ui/WindowCard";
 import CategorySelector from "@/components/ui/CategorySelector";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useMyPapers, useSubmitPaper, useUpdatePaper } from "@/hooks/queries/usePaper";
-import { useProducts } from "@/hooks/queries/useProduct";
-import type { PaperOut, PaperSourceType } from "@/types/paper";
+import { useMyPapers, useSubmitPaper, useUpdatePaper, FullScreenEditorDialog } from "@/features/papers";
+import type { PaperOut, PaperSourceType } from "@/features/papers";
+import { useProducts } from "@/features/products";
 import { PaperStatus } from "@/enums";
-import { FullScreenEditorDialog } from "@/components/editor/FullScreenEditorDialog";
 
 const BlockNoteViewer = dynamic(() => import("@/components/editor/BlockNoteViewer"), { ssr: false });
 

@@ -2,7 +2,6 @@ import type { ProductStatus } from "@/enums";
 
 export type { ProductStatus };
 
-
 export interface ProductIn {
   name: string;
   stage: string;

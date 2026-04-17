@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { SEED_LAUNCHES, SEED_PAPERS } from "@/data/seed";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useCategories } from "@/hooks/queries/useReference";
-import { useProducts, useProductStats, getProductStatsLabel } from "@/hooks/queries/useProduct";
+import { useProducts, useProductStats, getProductStatsLabel } from "@/features/products";
 import { IconBounties, IconBuilders, IconLabs, IconPaperSmall, IconTerminal } from "@/components/Icons";
 import { Button, buttonVariants } from "@/components/ui/button";
 import WindowCard from "@/components/ui/WindowCard";

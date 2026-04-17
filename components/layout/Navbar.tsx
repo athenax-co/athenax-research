@@ -46,6 +46,7 @@ const Logo = () => (
     <span className="text-[32px] leading-none tracking-[-0.02em] text-ink" style={{ fontFamily: "var(--font-londrina), cursive" }}>
       AthenaX
     </span>
+    <span className="text-[8px] font-semibold tracking-wider uppercase text-white bg-gray-900 rounded px-1.5 py-0.5 self-start">beta</span>
   </Link>
 );
 

@@ -27,8 +27,9 @@ const getPageKeyFromPathname = (pathname: string): string => {
 const getActiveNav = (current: string) => {
   const page = current.startsWith("/") ? getPageKeyFromPathname(current) : current;
 
-  if (["home", "how-it-works", "business-model", "about", "dashboard", "sponsor"].includes(page)) return "home";
+  if (["home", "business-model", "about", "dashboard", "sponsor"].includes(page)) return "home";
   if (["archive", "paper", "leaderboard", "reports", "roundtables", "digest"].includes(page)) return "archive";
+  if (["roadmap", "how-it-works"].includes(page)) return "roadmap";
   if (["researchers"].includes(page)) return "researchers";
   if (["network", "companies", "labs", "lab-profile", "universities", "sponsors", "talent", "investors", "founders", "technology"].includes(page))
     return "network";

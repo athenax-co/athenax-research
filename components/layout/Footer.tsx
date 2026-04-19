@@ -12,7 +12,7 @@ const NAV_COLS = [
     links: [
       { href: "/launch", text: "Launch Feed" },
       { href: "/archive", text: "Research Archive" },
-      { href: "/archive?tab=articles", text: "Leaderboard" },
+      { href: "/leaderboard", text: "Leaderboard", disabled: true },
       { href: "/roadmap", text: "Roadmap" },
     ],
   },
@@ -94,11 +94,17 @@ const Footer = () => {
           {NAV_COLS.map((col) => (
             <div key={col.label}>
               <div className="text-[10px] font-bold tracking-widest uppercase text-ink mb-3.5">{col.label}</div>
-              {col.links.map((link) => (
-                <Link key={link.href} href={link.href} className="block text-sm text-ink mb-2.25 hover:text-danger">
-                  {link.text}
-                </Link>
-              ))}
+              {col.links.map((link) =>
+                link.disabled ? (
+                  <span key={link.href} className="block text-sm text-muted mb-2.25 cursor-not-allowed" aria-disabled="true">
+                    {link.text}
+                  </span>
+                ) : (
+                  <Link key={link.href} href={link.href} className="block text-sm text-ink mb-2.25 hover:text-danger">
+                    {link.text}
+                  </Link>
+                )
+              )}
             </div>
           ))}
         </div>

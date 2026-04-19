@@ -28,7 +28,7 @@ const NAV_COLS = [
     links: [
       { href: "/about", text: "About" },
       { href: "/how-it-works", text: "How It Works" },
-      { href: "/digest", text: "Newsletter" },
+      { href: "/digest", text: "Research Digest" },
     ],
   },
 ];

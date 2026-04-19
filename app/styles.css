@@ -181,6 +181,8 @@ h4 {
 
 /* ── Window Cards ── */
 .window-card {
+  display: flex;
+  flex-direction: column;
   border: 2px solid #1c1c27;
   border-radius: 14px;
   overflow: hidden;
@@ -220,6 +222,7 @@ h4 {
   margin-left: 6px;
 }
 .window-body {
+  flex: 1;
   background: #fff;
   padding: 28px 30px;
 }

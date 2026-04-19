@@ -55,7 +55,7 @@ export const FooterSubscribe = () => {
     <div className="border-b border-[#D8D4CC] pb-10 mb-10">
       <div className="max-w-7xl mx-auto px-10 flex items-center justify-between gap-8 flex-wrap">
         <div>
-          <div className="font-bold text-[17px] mb-1">Weekly Research Digest</div>
+          <div className="font-bold text-[17px] mb-1">Weekly Newsletter</div>
           <div className="text-sm text-muted">Top AI papers, bounties, and cohort news — every Monday.</div>
         </div>
         {done ? (

@@ -41,15 +41,15 @@ function loadDraft() {
   try {
     const raw = localStorage.getItem(DRAFT_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as { form: typeof DEFAULT_FORM; categoryIds: number[] };
+    return JSON.parse(raw) as { form: typeof DEFAULT_FORM; categoryIds: number[]; founders: string[] };
   } catch {
     return null;
   }
 }
 
-function saveDraft(form: typeof DEFAULT_FORM, categoryIds: number[]) {
+function saveDraft(form: typeof DEFAULT_FORM, categoryIds: number[], founders: string[]) {
   try {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, categoryIds }));
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, categoryIds, founders }));
   } catch {}
 }
 
@@ -74,11 +74,12 @@ function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
   const draft = loadDraft();
   const [submitForm, setSubmitForm] = useState(draft?.form ?? DEFAULT_FORM);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>(draft?.categoryIds ?? []);
+  const [founders, setFounders] = useState<string[]>(draft?.founders ?? []);
   const [errors, setErrors] = useState<Partial<Record<"name" | "url" | "description" | "email" | "twitter" | "github", string>>>({});
 
   useEffect(() => {
-    saveDraft(submitForm, selectedCategoryIds);
-  }, [submitForm, selectedCategoryIds]);
+    saveDraft(submitForm, selectedCategoryIds, founders);
+  }, [submitForm, selectedCategoryIds, founders]);
 
   const handleClose = () => {
     onOpenChange(false);
@@ -124,10 +125,12 @@ function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
         email: submitForm.email || undefined,
         twitter: submitForm.twitter || undefined,
         categoryIds: selectedCategoryIds,
+        founders,
       });
       clearDraft();
       setSubmitForm(DEFAULT_FORM);
       setSelectedCategoryIds([]);
+      setFounders([]);
       setResetKey((k) => k + 1);
       showToast(`${submitForm.name} launch submitted! We'll review within 48 hours.`, "success");
       handleClose();
@@ -273,6 +276,34 @@ function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
               <div className="inp-group">
                 <label className="inp-label">Categories</label>
                 <CategorySelector key={resetKey} onChangeIds={setSelectedCategoryIds} />
+              </div>
+
+              <div className="inp-group">
+                <label className="inp-label">Founders</label>
+                {founders.map((name, i) => (
+                  <div key={i} className="flex items-center gap-2 mb-1.5">
+                    <input
+                      className="inp flex-1"
+                      value={name}
+                      onChange={(e) => setFounders((f) => f.map((v, j) => (j === i ? e.target.value : v)))}
+                      placeholder="Founder name"
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm px-2 text-muted"
+                      onClick={() => setFounders((f) => f.filter((_, j) => j !== i))}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm mt-1"
+                  onClick={() => setFounders((f) => [...f, ""])}
+                >
+                  + Add Founder
+                </button>
               </div>
 
               <div className="flex gap-2.5">

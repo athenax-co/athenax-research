@@ -11,6 +11,7 @@ import ProfileSubmissions from "@/components/ProfileSubmissions";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useResendVerification } from "@/hooks/queries/useAuth";
 import { useUpdateProfile } from "@/hooks/queries/useProfile";
+import { Button } from "@/components/ui/button";
 
 type EditForm = {
   name: string;
@@ -28,7 +29,7 @@ type Application = {
 };
 
 export default function Page() {
-  const { user, showToast } = useGlobal();
+  const { user, showToast, handleAuthClick } = useGlobal();
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState<EditForm | null>(null);
   const [resendTimer, setResendTimer] = useState(0);
@@ -74,7 +75,12 @@ export default function Page() {
   if (!user)
     return (
       <div className="page-wrap section">
-        <p>Please sign in.</p>
+        <WindowCard label="SIGN_IN_REQUIRED.SYS" bodyClass="window-body window-body-yellow">
+          <p className="mb-4 text-[15px]">Sign in to access your profile.</p>
+          <Button size="lg" onClick={() => handleAuthClick("login")}>
+            Sign In to Continue
+          </Button>
+        </WindowCard>
       </div>
     );
 

@@ -117,6 +117,7 @@ export default function Page() {
   const { data: apiProducts = [] } = useProducts("approved");
   const { data: productStats } = useProductStats();
   const statsLabel = getProductStatsLabel(productStats);
+  const liveProductsValue = productStats?.releases.total != null ? String(productStats.releases.total) : "-";
 
   const latestProducts = [...apiProducts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 3);
 
@@ -172,7 +173,7 @@ export default function Page() {
             <WindowCard label="NETWORK_ACTIVITY.SYS">
               <div className="grid grid-cols-2 sm:grid-cols-3">
                 {[
-                  { value: `${productStats?.releases.total}`, label: "products live" },
+                  { value: liveProductsValue, label: "products live" },
                   { value: `Active`, label: "Community" },
                   { value: `Open`, label: "Submissions" },
                   // { value: `$${totalRaised.toFixed(1)}M`, label: "raised by AthenaX startups" },
@@ -183,7 +184,9 @@ export default function Page() {
                     key={metric.label}
                     className={`px-5 py-4 sm:px-6 sm:py-5 ${index % 3 === 0 ? "border-r-[1.5px] border-r-[#D8D4CC]" : ""} ${index < 2 ? "border-b-[1.5px] border-b-[#D8D4CC] sm:border-b-0" : ""} sm:not-last:border-r-[1.5px] sm:border-r-[#D8D4CC]`}
                   >
-                    <div className="mb-1.5 font-['Space_Mono',monospace] text-[22px] sm:text-[26px] font-bold leading-none text-danger">{metric.value}</div>
+                    <div className="mb-1.5 font-['Space_Mono',monospace] text-[22px] sm:text-[26px] font-bold leading-none text-danger">
+                      {metric.value}
+                    </div>
                     <div className="font-['Space_Mono',monospace] text-xs tracking-[0.03em] text-muted">{metric.label}</div>
                   </div>
                 ))}
@@ -254,24 +257,16 @@ export default function Page() {
                   </div>
                   <div className="min-w-16 shrink-0 text-right">
                     <div className="font-['Space_Mono',monospace] text-[15px] font-bold text-danger">▲ {votes.toLocaleString()}</div>
-                    <div className="mt-0.75 text-[11px] text-muted">
-                      {isReal ? `★ ${launch.bookmarkCount}` : `💬 ${launch.comments.length}`}
-                    </div>
+                    <div className="mt-0.75 text-[11px] text-muted">{isReal ? `★ ${launch.bookmarkCount}` : `💬 ${launch.comments.length}`}</div>
                   </div>
                 </Link>
               );
             })}
             <div className="mt-4.5 flex flex-wrap items-center gap-2.5 sm:gap-3">
-              <Link
-                href="/launch"
-                className={cn(buttonVariants({ size: isMobile ? "sm" : "default" }), "no-underline")}
-              >
+              <Link href="/launch" className={cn(buttonVariants({ size: isMobile ? "sm" : "default" }), "no-underline")}>
                 View All Launches →
               </Link>
-              <Link
-                href="/archive"
-                className={cn(buttonVariants({ variant: "outline", size: isMobile ? "sm" : "default" }), "no-underline")}
-              >
+              <Link href="/archive" className={cn(buttonVariants({ variant: "outline", size: isMobile ? "sm" : "default" }), "no-underline")}>
                 Research Archive
               </Link>
             </div>

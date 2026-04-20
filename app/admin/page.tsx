@@ -86,7 +86,7 @@ export default function Page() {
         <WindowCard label="ACCESS_DENIED.SYS" bodyClass="window-body window-body-yellow">
           <p className="mb-4 text-[15px]">Admin access required. Sign in as an admin account.</p>
           <div className="flex flex-wrap gap-2.5">
-            <Button size="lg" onClick={() => handleAuthClick("login")}>
+            <Button onClick={() => handleAuthClick("login")}>
               Sign In to Continue
             </Button>
             <Link className="btn btn-outline" href="/dashboard">

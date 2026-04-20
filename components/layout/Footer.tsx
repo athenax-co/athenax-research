@@ -19,7 +19,7 @@ const NAV_COLS = [
   {
     label: "Submit",
     links: [
-      { href: "/launch", text: "Submit Product" },
+      { href: "/launch?submit", text: "Submit Product" },
       { href: "/paper/submit", text: "Submit a Paper" },
     ],
   },

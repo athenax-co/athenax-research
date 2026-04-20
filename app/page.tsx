@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { SEED_LAUNCHES, SEED_PAPERS } from "@/data/seed";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useCategories } from "@/hooks/queries/useReference";
 import { useProducts, useProductStats, getProductStatsLabel } from "@/hooks/queries/useProduct";
 import { IconBounties, IconBuilders, IconLabs, IconPaperSmall, IconTerminal } from "@/components/Icons";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import WindowCard from "@/components/ui/WindowCard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -111,8 +110,7 @@ function getFeedSignals(user: UserWithCategories, categoryNames: string[]): Feed
 }
 
 export default function Page() {
-  const router = useRouter();
-  const { user, showToast, handleAuthClick } = useGlobal();
+  const { user } = useGlobal();
   const { data: categories = [] } = useCategories();
   const { data: apiProducts = [] } = useProducts("approved");
   const { data: productStats } = useProductStats();
@@ -152,20 +150,9 @@ export default function Page() {
               <Link href="/launch" className={cn(buttonVariants({ size: "lg" }), "no-underline")}>
                 Explore Launches →
               </Link>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => {
-                  if (!user) {
-                    showToast("Sign in to submit a launch.", "error");
-                    handleAuthClick("login");
-                    return;
-                  }
-                  router.push("/launch");
-                }}
-              >
+              <Link href="/launch?submit" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "no-underline")}>
                 Submit Your Product
-              </Button>
+              </Link>
             </div>
           </div>
 

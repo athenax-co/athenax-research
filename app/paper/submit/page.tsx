@@ -82,7 +82,7 @@ export default function Page() {
           <div className="path-badge">/root/paper/submit</div>
           <h1 className="mb-4 text-[42px]">Submit a Paper</h1>
           <p className="mb-6 text-[17px] text-muted">You need to be signed in as a researcher to submit.</p>
-          <Button size="lg" onClick={() => handleAuthClick("login")}>
+          <Button size="sm" onClick={() => handleAuthClick("login")}>
             Sign In to Continue
           </Button>
         </div>

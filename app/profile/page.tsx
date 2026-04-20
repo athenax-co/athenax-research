@@ -77,7 +77,7 @@ export default function Page() {
       <div className="page-wrap section">
         <WindowCard label="SIGN_IN_REQUIRED.SYS" bodyClass="window-body window-body-yellow">
           <p className="mb-4 text-[15px]">Sign in to access your profile.</p>
-          <Button size="lg" onClick={() => handleAuthClick("login")}>
+          <Button size="sm" onClick={() => handleAuthClick("login")}>
             Sign In to Continue
           </Button>
         </WindowCard>

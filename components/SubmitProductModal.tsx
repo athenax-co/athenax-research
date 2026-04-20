@@ -283,26 +283,34 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
 
               <div className="inp-group">
                 <label className="inp-label">Founders</label>
-                {founders.map((name, i) => (
-                  <div key={i} className="flex items-center gap-2 mb-1.5">
-                    <input
-                      className="inp flex-1"
-                      value={name}
-                      onChange={(e) => setFounders((f) => f.map((v, j) => (j === i ? e.target.value : v)))}
-                      placeholder="Founder name"
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm px-2 text-muted"
-                      onClick={() => setFounders((f) => f.filter((_, j) => j !== i))}
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-                <button type="button" className="btn btn-ghost btn-sm mt-1" onClick={() => setFounders((f) => [...f, ""])}>
-                  + Add Founder
-                </button>
+                <div className="inp flex flex-wrap gap-1.5 min-h-10 cursor-text" onClick={(e) => (e.currentTarget.querySelector("input") as HTMLInputElement)?.focus()}>
+                  {founders.map((name, i) => (
+                    <span key={i} className="inline-flex items-center gap-1 rounded bg-[#F0EDE8] px-2 py-0.5 text-sm font-medium">
+                      {name}
+                      <button
+                        type="button"
+                        className="text-muted hover:text-foreground leading-none"
+                        onClick={() => setFounders((f) => f.filter((_, j) => j !== i))}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                  <input
+                    className="flex-1 min-w-32 bg-transparent outline-none text-sm placeholder:text-muted"
+                    placeholder={founders.length === 0 ? "Type a name, press Enter" : "Add another…"}
+                    onKeyDown={(e) => {
+                      const val = e.currentTarget.value.trim();
+                      if ((e.key === "Enter" || e.key === ",") && val) {
+                        e.preventDefault();
+                        setFounders((f) => [...f, val]);
+                        e.currentTarget.value = "";
+                      } else if (e.key === "Backspace" && !e.currentTarget.value && founders.length > 0) {
+                        setFounders((f) => f.slice(0, -1));
+                      }
+                    }}
+                  />
+                </div>
               </div>
 
               <div className="flex gap-2.5">

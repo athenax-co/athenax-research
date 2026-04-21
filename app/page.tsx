@@ -118,17 +118,29 @@ export default function Page() {
                 { icon: <IconTerminal />, label: "Terminal", sub: "Coming soon", bgClass: "bg-[#F9F5DC]", href: "/roadmap", comingSoon: true },
                 { icon: <IconBounties />, label: "Bounties", sub: "Coming soon", bgClass: "bg-[#F2EFE9]", href: "/roadmap", comingSoon: true },
                 { icon: <IconBuilders />, label: "Cohorts", sub: "Coming soon", bgClass: "bg-[#F2EFE9]", href: "/roadmap", comingSoon: true },
-              ].map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className={`block cursor-pointer rounded-[10px] border-2 border-[#1C1C27] p-[16px_18px] text-left text-inherit no-underline shadow-[3px_3px_0_#1C1C27] ${item.bgClass}`}
-                >
-                  <div className="mb-2.5">{item.icon}</div>
-                  <div className="mb-0.75 text-[15px] font-bold">{item.label}</div>
-                  <div className="text-xs text-muted">{item.sub}</div>
-                </Link>
-              ))}
+              ].map((item) =>
+                item.comingSoon ? (
+                  <div
+                    key={item.label}
+                    aria-disabled="true"
+                    className={`block rounded-[10px] border-2 border-[#1C1C27] p-[16px_18px] text-left text-inherit no-underline opacity-70 shadow-[3px_3px_0_#1C1C27] ${item.bgClass}`}
+                  >
+                    <div className="mb-2.5">{item.icon}</div>
+                    <div className="mb-0.75 text-[15px] font-bold">{item.label}</div>
+                    <div className="text-xs text-muted">{item.sub}</div>
+                  </div>
+                ) : (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className={`block cursor-pointer rounded-[10px] border-2 border-[#1C1C27] p-[16px_18px] text-left text-inherit no-underline shadow-[3px_3px_0_#1C1C27] ${item.bgClass}`}
+                  >
+                    <div className="mb-2.5">{item.icon}</div>
+                    <div className="mb-0.75 text-[15px] font-bold">{item.label}</div>
+                    <div className="text-xs text-muted">{item.sub}</div>
+                  </Link>
+                )
+              )}
             </div>
           </div>
         </>

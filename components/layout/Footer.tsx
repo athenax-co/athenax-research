@@ -5,6 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { _globalShowToast } from "@/components/GlobalProvider";
 import { Button } from "@/components/ui/button";
+import BrandLogo from "@/components/layout/BrandLogo";
 
 const NAV_COLS = [
   {
@@ -87,7 +88,7 @@ const Footer = () => {
       </div>
       <div className="max-w-7xl mx-auto px-10 flex justify-between items-start gap-10 flex-wrap">
         <div>
-          <div className="text-[26px] font-bold text-ink mb-2">AthenaX</div>
+          <BrandLogo className="mb-2" wordmarkClassName="text-[26px]" />
           <div className="text-sm text-ink leading-relaxed">Where New Products Begin.</div>
         </div>
         <div className="flex gap-14 flex-wrap">

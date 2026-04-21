@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/utils/lib";
 import { NavAuthDesktop, NavAuthMobile, NavAuthMobileShortcut } from "@/components/layout/NavAuthButtons";
+import BrandLogo from "@/components/layout/BrandLogo";
 
 // ═══════════════════════════════════════════════════════════
 const NAV_ITEMS = [
@@ -39,18 +40,6 @@ const getActiveNav = (current: string) => {
   return page;
 };
 
-const Logo = () => (
-  <Link className="flex items-center gap-2.5 font-bold text-[18px] text-ink no-underline" href="/" aria-label="Go to AthenaX home">
-    <div className="size-8 bg-gray-900 rounded text-white flex items-center justify-center text-lg shadow-sm p-1">
-      <img src="https://athenax.mypinx.store/Logo_Icon_White.png" alt="AthenaX Logo" width={200} height={100} className="size-7 object-contain" />
-    </div>
-    <span className="text-[32px] leading-none tracking-[-0.02em] text-ink" style={{ fontFamily: "var(--font-londrina), cursive" }}>
-      AthenaX
-    </span>
-    <span className="text-[8px] font-semibold tracking-wider uppercase text-white bg-gray-900 rounded px-1.5 py-0.5 self-start">beta</span>
-  </Link>
-);
-
 const HamburgerIcon = ({ open }: { open: boolean }) => (
   <div className="flex flex-col justify-center items-center w-5 h-5 gap-2">
     <span className={cn("block h-1 w-5 bg-ink rounded transition-all duration-200", open && "translate-y-2 rotate-45")} />
@@ -69,7 +58,7 @@ const Navbar = () => {
     <>
       <nav className="sticky top-0 z-100 bg-cream border-b-2 border-ink h-17 flex items-center">
         <div className="flex items-center justify-between w-full max-w-7xl mx-auto px-5 md:px-10">
-          <Logo />
+          <BrandLogo badge="beta" />
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-2">

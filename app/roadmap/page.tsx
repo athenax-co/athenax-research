@@ -364,8 +364,8 @@ export default function RoadmapPage() {
       <div className="mb-10 grid overflow-hidden rounded-xl border-2 border-ink bg-white shadow-[4px_4px_0_#1C1C27] md:grid-cols-4">
         {[
           { label: "Products live", val: (productStats?.releases.total ?? null) },
-          { label: "Research papers", val: null },
-          { label: "Sectors", val: null },
+          { label: "Research papers", val: 18 },
+          { label: "Sectors", val: 8 },
           { label: "Submissions", val: "Open" },
         ].map((stat, index, array) => (
           <div key={stat.label} className={cn("px-5 py-4", "border-[#D8D4CC]", index < array.length - 1 && "border-b md:border-b-0 md:border-r")}>

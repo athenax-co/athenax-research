@@ -83,7 +83,7 @@ export default function Page() {
             <span className="status-badge mb-0">
               <div className="status-dot" />
               {productStats
-                ? `${productStats.releases.today} Launched Today · ${productStats.releases.thisMonth} This Month`
+                ? `${productStats.releases.thisMonth} This Month`
                 : `${products.length} Products Listed`}
             </span>
           </div>
@@ -101,7 +101,7 @@ export default function Page() {
         <div className="mb-7 grid grid-cols-2 sm:grid-cols-4 gap-3.5">
           {[
             { label: "Launches This Month", value: productStats?.releases.thisMonth ?? null },
-            { label: "Investor Intros Made", value: null },
+            { label: "Investor Intros Made", value: 8 },
             // { label: "Total Funding Raised", value: "$18.4M" },
             // { label: "Avg. Founder ARS", value: "7.3" },
             // { label: "Investor Intros Made", value: "142" },

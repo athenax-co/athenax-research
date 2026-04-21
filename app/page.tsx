@@ -253,9 +253,6 @@ export default function Page() {
               <Link href="/launch" className={cn(buttonVariants({ size: isMobile ? "sm" : "default" }), "no-underline")}>
                 View All Launches →
               </Link>
-              <Link href="/archive" className={cn(buttonVariants({ variant: "outline", size: isMobile ? "sm" : "default" }), "no-underline")}>
-                Research Archive
-              </Link>
             </div>
           </div>
 

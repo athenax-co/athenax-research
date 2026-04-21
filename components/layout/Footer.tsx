@@ -6,6 +6,7 @@ import Link from "next/link";
 import { _globalShowToast } from "@/components/GlobalProvider";
 import { Button } from "@/components/ui/button";
 import BrandLogo from "@/components/layout/BrandLogo";
+import { IconDiscord, IconLinkedIn, IconX, IconYouTube } from "../Icons";
 
 const NAV_COLS = [
   {
@@ -80,6 +81,13 @@ export const FooterSubscribe = () => {
   );
 };
 
+const SOCIAL_LINKS = [
+  { href: "https://x.com/athenax_co", label: "X", Icon: IconX },
+  { href: "https://discord.com/invite/RURu4tTjHZ", label: "Discord", Icon: IconDiscord },
+  { href: "https://www.youtube.com/@AthenaX_co", label: "YouTube", Icon: IconYouTube },
+  { href: "https://www.linkedin.com/company/athenaxco/", label: "LinkedIn", Icon: IconLinkedIn },
+];
+
 const Footer = () => {
   return (
     <footer className="bg-cream border-t-2 border-ink pt-0 pb-7 mt-25">
@@ -90,6 +98,23 @@ const Footer = () => {
         <div>
           <BrandLogo className="mb-2" wordmarkClassName="text-[26px]" />
           <div className="text-sm text-ink leading-relaxed">Where New Products Begin.</div>
+          <div className="flex gap-3 mt-4">
+            {SOCIAL_LINKS.map((social) => {
+              const IconComponent = social.Icon;
+              return (
+                <Link
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-ink hover:text-danger transition-colors"
+                  aria-label={social.label}
+                >
+                  <IconComponent size={20} />
+                </Link>
+              );
+            })}
+          </div>
         </div>
         <div className="flex gap-14 flex-wrap">
           {NAV_COLS.map((col) => (

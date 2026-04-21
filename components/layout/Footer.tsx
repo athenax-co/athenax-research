@@ -5,6 +5,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { _globalShowToast } from "@/components/GlobalProvider";
 import { Button } from "@/components/ui/button";
+import BrandLogo from "@/components/layout/BrandLogo";
+import { IconDiscord, IconLinkedIn, IconX, IconYouTube } from "../Icons";
 
 const NAV_COLS = [
   {
@@ -12,14 +14,14 @@ const NAV_COLS = [
     links: [
       { href: "/launch", text: "Launch Feed" },
       { href: "/archive", text: "Research Archive" },
-      { href: "/archive?tab=articles", text: "Leaderboard" },
+      { href: "/leaderboard", text: "Leaderboard", disabled: true },
       { href: "/roadmap", text: "Roadmap" },
     ],
   },
   {
     label: "Submit",
     links: [
-      { href: "/launch", text: "Submit Product" },
+      { href: "/launch?submit", text: "Submit Product" },
       { href: "/paper/submit", text: "Submit a Paper" },
     ],
   },
@@ -28,7 +30,7 @@ const NAV_COLS = [
     links: [
       { href: "/about", text: "About" },
       { href: "/how-it-works", text: "How It Works" },
-      { href: "/digest", text: "Newsletter" },
+      { href: "/digest", text: "Research Digest" },
     ],
   },
 ];
@@ -55,7 +57,7 @@ export const FooterSubscribe = () => {
     <div className="border-b border-[#D8D4CC] pb-10 mb-10">
       <div className="max-w-7xl mx-auto px-10 flex items-center justify-between gap-8 flex-wrap">
         <div>
-          <div className="font-bold text-[17px] mb-1">Weekly Research Digest</div>
+          <div className="font-bold text-[17px] mb-1">Weekly Newsletter</div>
           <div className="text-sm text-muted">Top AI papers, bounties, and cohort news — every Monday.</div>
         </div>
         {done ? (
@@ -79,6 +81,13 @@ export const FooterSubscribe = () => {
   );
 };
 
+const SOCIAL_LINKS = [
+  { href: "https://x.com/athenax_co", label: "X", Icon: IconX },
+  { href: "https://discord.com/invite/RURu4tTjHZ", label: "Discord", Icon: IconDiscord },
+  { href: "https://www.youtube.com/@AthenaX_co", label: "YouTube", Icon: IconYouTube },
+  { href: "https://www.linkedin.com/company/athenaxco/", label: "LinkedIn", Icon: IconLinkedIn },
+];
+
 const Footer = () => {
   return (
     <footer className="bg-cream border-t-2 border-ink pt-0 pb-7 mt-25">
@@ -87,18 +96,41 @@ const Footer = () => {
       </div>
       <div className="max-w-7xl mx-auto px-10 flex justify-between items-start gap-10 flex-wrap">
         <div>
-          <div className="text-[26px] font-bold text-ink mb-2">AthenaX</div>
+          <BrandLogo className="mb-2" wordmarkClassName="text-[26px]" />
           <div className="text-sm text-ink leading-relaxed">Where New Products Begin.</div>
+          <div className="flex gap-3 mt-4">
+            {SOCIAL_LINKS.map((social) => {
+              const IconComponent = social.Icon;
+              return (
+                <Link
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-ink hover:text-danger transition-colors"
+                  aria-label={social.label}
+                >
+                  <IconComponent size={20} />
+                </Link>
+              );
+            })}
+          </div>
         </div>
         <div className="flex gap-14 flex-wrap">
           {NAV_COLS.map((col) => (
             <div key={col.label}>
               <div className="text-[10px] font-bold tracking-widest uppercase text-ink mb-3.5">{col.label}</div>
-              {col.links.map((link) => (
-                <Link key={link.href} href={link.href} className="block text-sm text-ink mb-2.25 hover:text-danger">
-                  {link.text}
-                </Link>
-              ))}
+              {col.links.map((link) =>
+                link.disabled ? (
+                  <span key={link.href} className="block text-sm text-muted mb-2.25 cursor-not-allowed" aria-disabled="true">
+                    {link.text}
+                  </span>
+                ) : (
+                  <Link key={link.href} href={link.href} className="block text-sm text-ink mb-2.25 hover:text-danger">
+                    {link.text}
+                  </Link>
+                )
+              )}
             </div>
           ))}
         </div>

@@ -5,11 +5,12 @@ import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
 import SEOMeta from "@/components/SEOMeta";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
 import { useCategories } from "@/hooks/queries/useReference";
 import { useInfiniteProducts, useProductStats, type ProductQueryFilters } from "@/hooks/queries/useProduct";
-import SubmitProductButton from "@/components/SubmitProductModal";
+import SubmitProductButton, { SubmitProductModal } from "@/components/SubmitProductModal";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +26,16 @@ export default function Page() {
   const { user, showToast } = useGlobal();
   const { data: categories = [] } = useCategories();
   const { data: productStats } = useProductStats();
+  const [submitOpen, setSubmitOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (searchParams.get("submit") !== null) {
+      setSubmitOpen(true);
+      router.replace("/launch", { scroll: false });
+    }
+  }, [searchParams, router]);
 
   const [categoryId, setCategoryId] = useQueryState("category", parseAsInteger);
   const [dateFilter, setDateFilter] = useQueryState("date", parseAsString);
@@ -72,7 +83,7 @@ export default function Page() {
             <span className="status-badge mb-0">
               <div className="status-dot" />
               {productStats
-                ? `${productStats.releases.today} Launched Today · ${productStats.releases.thisMonth} This Month`
+                ? `${productStats.releases.thisMonth} This Month`
                 : `${products.length} Products Listed`}
             </span>
           </div>
@@ -90,7 +101,7 @@ export default function Page() {
         <div className="mb-7 grid grid-cols-2 sm:grid-cols-4 gap-3.5">
           {[
             { label: "Launches This Month", value: productStats?.releases.thisMonth ?? null },
-            { label: "Investor Intros Made", value: null },
+            { label: "Investor Intros Made", value: 8 },
             // { label: "Total Funding Raised", value: "$18.4M" },
             // { label: "Avg. Founder ARS", value: "7.3" },
             // { label: "Investor Intros Made", value: "142" },
@@ -271,6 +282,7 @@ export default function Page() {
           </div>
         </WindowCard>
       </div>
+      <SubmitProductModal open={submitOpen} onOpenChange={setSubmitOpen} />
     </div>
   );
 }

@@ -309,12 +309,12 @@ const RoadmapSectionCard = ({
   onToggle: (id: string) => void;
 }) => {
   return (
-    <div className="window-card mb-4">
+    <div className="window-card">
       <div className="window-titlebar">
         <div className="dot dot-r" />
         <div className="dot dot-y" />
         <div className="dot dot-g" />
-        <span className="titlebar-label">{section.sysLabel}</span>
+        <span className="titlebar-label opacity-40">{section.sysLabel}</span>
         <span
           className={cn(
             "ml-auto inline-block rounded-md border-[1.5px] px-2.25 py-0.5 font-['Space_Mono',monospace] text-[10px] font-semibold uppercase tracking-[0.05em]",
@@ -325,7 +325,7 @@ const RoadmapSectionCard = ({
         </span>
       </div>
       <div className={section.bodyClassName ?? "window-body"}>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4">
           {section.items.map((item) => (
             <RoadmapItemCard key={item.id} item={item} isOpen={Boolean(open[item.id])} onToggle={() => onToggle(item.id)} />
           ))}
@@ -363,9 +363,9 @@ export default function RoadmapPage() {
 
       <div className="mb-10 grid overflow-hidden rounded-xl border-2 border-ink bg-white shadow-[4px_4px_0_#1C1C27] md:grid-cols-4">
         {[
-          { label: "Products live", val: (productStats?.releases.total ?? null) },
-          { label: "Research papers", val: null },
-          { label: "Sectors", val: null },
+          { label: "Products live", val: productStats?.releases.total ?? null },
+          { label: "Research papers", val: 18 },
+          { label: "Sectors", val: 8 },
           { label: "Submissions", val: "Open" },
         ].map((stat, index, array) => (
           <div key={stat.label} className={cn("px-5 py-4", "border-[#D8D4CC]", index < array.length - 1 && "border-b md:border-b-0 md:border-r")}>
@@ -375,9 +375,11 @@ export default function RoadmapPage() {
         ))}
       </div>
 
-      {sections.map((section) => (
-        <RoadmapSectionCard key={section.sysLabel} section={section} open={open} onToggle={toggle} />
-      ))}
+      <div className="flex flex-col gap-10">
+        {sections.map((section) => (
+          <RoadmapSectionCard key={section.sysLabel} section={section} open={open} onToggle={toggle} />
+        ))}
+      </div>
     </div>
   );
 }

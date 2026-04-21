@@ -39,7 +39,7 @@ export default function Page() {
           </WindowCard>
         </div>
 
-        <div className="mb-11">
+        {/* <div className="mb-11">
           <h2 className="mb-1.5 text-[32px]">The Team</h2>
           <p className="mb-7 text-[15px] text-muted">AthenaX is built by a small, focused team.</p>
           <WindowCard label="TEAM.SYS" bodyClass="window-body window-body-cream">
@@ -54,7 +54,7 @@ export default function Page() {
               ))}
             </div>
           </WindowCard>
-        </div>
+        </div> */}
 
         <WindowCard label="CONTACT.SYS" bodyClass="window-body window-body-blue">
           <h3 className="mb-3 text-[22px]">Get in Touch</h3>

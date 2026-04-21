@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import WindowCard from "@/components/ui/WindowCard";
+import { Button } from "@/components/ui/button";
 import { useGlobal } from "@/components/GlobalProvider";
 import { dbNow, dbRead, dbUid, dbWrite, formatShortDate, notifSvc } from "@/utils/lib";
 import { useMyProducts, useMyVotedProducts, useMyBookmarkedProducts } from "@/hooks/queries/useProduct";
@@ -60,7 +61,9 @@ function ProductMini({ product }: { product: ProductSummary }) {
       </div>
       <div className="ml-2.5 flex-1">
         <div className="archive-title text-sm">{product.name}</div>
-        <div className="archive-meta">{product.stage} · ▲ {product.voteCount}</div>
+        <div className="archive-meta">
+          {product.stage} · ▲ {product.voteCount}
+        </div>
       </div>
       <span className="ftag shrink-0 bg-yellow text-[11px] font-semibold">★ {product.bookmarkCount}</span>
     </Link>
@@ -117,7 +120,7 @@ function FounderSubmissions() {
 }
 
 export default function Page() {
-  const { user } = useGlobal();
+  const { user, handleAuthClick } = useGlobal();
   const [, setTick] = useState(0);
   const { data: bookmarkedProducts, isLoading: bookmarksLoading } = useMyBookmarkedProducts();
   const { data: votedProducts, isLoading: votesLoading } = useMyVotedProducts();
@@ -129,9 +132,14 @@ export default function Page() {
         <h1 className="mb-3 text-5xl">Dashboard</h1>
         <WindowCard label="SIGN_IN_REQUIRED.SYS" bodyClass="window-body window-body-yellow">
           <p className="mb-4 text-[15px]">Sign in to access your personal dashboard.</p>
-          <Link className="btn btn-primary" href="/">
-            Back to Home
-          </Link>
+          <div className="flex flex-wrap gap-2.5">
+            <Button onClick={() => handleAuthClick("login")}>
+              Sign In to Continue
+            </Button>
+            <Link className="btn btn-outline" href="/">
+              Back to Home
+            </Link>
+          </div>
         </WindowCard>
       </div>
     );

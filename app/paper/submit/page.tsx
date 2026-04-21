@@ -9,9 +9,10 @@ import { useSubmitPaper } from "@/hooks/queries/usePaper";
 import { useProducts } from "@/hooks/queries/useProduct";
 import type { PaperSourceType } from "@/types/paper";
 import { PaperStatus } from "@/enums";
+import { Button } from "@/components/ui/button";
 
 export default function Page() {
-  const { user, showToast } = useGlobal();
+  const { user, showToast, handleAuthClick } = useGlobal();
   const router = useRouter();
   const { mutateAsync: submitPaper, isPending: submitting } = useSubmitPaper();
   const { data: products } = useProducts("approved");
@@ -81,6 +82,9 @@ export default function Page() {
           <div className="path-badge">/root/paper/submit</div>
           <h1 className="mb-4 text-[42px]">Submit a Paper</h1>
           <p className="mb-6 text-[17px] text-muted">You need to be signed in as a researcher to submit.</p>
+          <Button size="sm" onClick={() => handleAuthClick("login")}>
+            Sign In to Continue
+          </Button>
         </div>
       </div>
     );

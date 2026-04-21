@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBody, DialogTrafficLights } from "@/components/ui/Dialog";
 import CategorySelector from "@/components/ui/CategorySelector";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { ProductStage, QualityBadge } from "@/enums";
 import { useSubmitProduct } from "@/hooks/queries/useProduct";
 import { useGlobal } from "@/components/GlobalProvider";
+import { cn } from "@/lib/utils";
 
 const DRAFT_KEY = "ax_submit_product_draft";
 
@@ -16,7 +18,10 @@ const step1Schema = z.object({
   url: z.url("Invalid URL").min(1, "Product URL is required"),
   description: z.string().min(1, "Description is required"),
   email: z.union([z.email("Must be a valid email"), z.literal("")]).optional(),
-  twitter: z.string().regex(/^(@?[A-Za-z0-9_]{1,15})?$/, "Must be a valid Twitter handle").optional(),
+  twitter: z
+    .string()
+    .regex(/^(@?[A-Za-z0-9_]{1,15})?$/, "Must be a valid Twitter handle")
+    .optional(),
   github: z
     .url()
     .regex(/^(https?:\/\/)?(www\.)?github\.com\/[A-Za-z0-9_.-]+(\/[A-Za-z0-9_.-]+)?$/, "Must be a valid GitHub URL")
@@ -41,15 +46,15 @@ function loadDraft() {
   try {
     const raw = localStorage.getItem(DRAFT_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as { form: typeof DEFAULT_FORM; categoryIds: number[] };
+    return JSON.parse(raw) as { form: typeof DEFAULT_FORM; categoryIds: number[]; founders: string[] };
   } catch {
     return null;
   }
 }
 
-function saveDraft(form: typeof DEFAULT_FORM, categoryIds: number[]) {
+function saveDraft(form: typeof DEFAULT_FORM, categoryIds: number[], founders: string[]) {
   try {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, categoryIds }));
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, categoryIds, founders }));
   } catch {}
 }
 
@@ -64,7 +69,7 @@ interface SubmitProductModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
+export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
   const { showToast } = useGlobal();
   const { mutateAsync: submitProductMutation, isPending: submitting } = useSubmitProduct();
 
@@ -74,11 +79,12 @@ function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
   const draft = loadDraft();
   const [submitForm, setSubmitForm] = useState(draft?.form ?? DEFAULT_FORM);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>(draft?.categoryIds ?? []);
+  const [founders, setFounders] = useState<string[]>(draft?.founders ?? []);
   const [errors, setErrors] = useState<Partial<Record<"name" | "url" | "description" | "email" | "twitter" | "github", string>>>({});
 
   useEffect(() => {
-    saveDraft(submitForm, selectedCategoryIds);
-  }, [submitForm, selectedCategoryIds]);
+    saveDraft(submitForm, selectedCategoryIds, founders);
+  }, [submitForm, selectedCategoryIds, founders]);
 
   const handleClose = () => {
     onOpenChange(false);
@@ -124,10 +130,12 @@ function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
         email: submitForm.email || undefined,
         twitter: submitForm.twitter || undefined,
         categoryIds: selectedCategoryIds,
+        founders,
       });
       clearDraft();
       setSubmitForm(DEFAULT_FORM);
       setSelectedCategoryIds([]);
+      setFounders([]);
       setResetKey((k) => k + 1);
       showToast(`${submitForm.name} launch submitted! We'll review within 48 hours.`, "success");
       handleClose();
@@ -258,13 +266,11 @@ function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
                 </div>
                 <div className="inp-group flex-1">
                   <label className="inp-label">Founded (Year)</label>
-                  <select
-                    className="inp"
-                    value={submitForm.founded}
-                    onChange={set("founded")}
-                  >
+                  <select className="inp" value={submitForm.founded} onChange={set("founded")}>
                     {Array.from({ length: new Date().getFullYear() - 2009 + 1 }, (_, i) => new Date().getFullYear() - i).map((y) => (
-                      <option key={y} value={y}>{y}</option>
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -273,6 +279,38 @@ function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
               <div className="inp-group">
                 <label className="inp-label">Categories</label>
                 <CategorySelector key={resetKey} onChangeIds={setSelectedCategoryIds} />
+              </div>
+
+              <div className="inp-group">
+                <label className="inp-label">Founders</label>
+                <div className="inp flex flex-wrap gap-1.5 min-h-10 cursor-text" onClick={(e) => (e.currentTarget.querySelector("input") as HTMLInputElement)?.focus()}>
+                  {founders.map((name, i) => (
+                    <span key={i} className="inline-flex items-center gap-1 rounded bg-[#F0EDE8] px-2 py-0.5 text-sm font-medium">
+                      {name}
+                      <button
+                        type="button"
+                        className="text-muted hover:text-foreground leading-none"
+                        onClick={() => setFounders((f) => f.filter((_, j) => j !== i))}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                  <input
+                    className="flex-1 min-w-32 bg-transparent outline-none text-sm placeholder:text-muted"
+                    placeholder={founders.length === 0 ? "Type a name, press Enter" : "Add another…"}
+                    onKeyDown={(e) => {
+                      const val = e.currentTarget.value.trim();
+                      if ((e.key === "Enter" || e.key === ",") && val) {
+                        e.preventDefault();
+                        setFounders((f) => [...f, val]);
+                        e.currentTarget.value = "";
+                      } else if (e.key === "Backspace" && !e.currentTarget.value && founders.length > 0) {
+                        setFounders((f) => f.slice(0, -1));
+                      }
+                    }}
+                  />
+                </div>
               </div>
 
               <div className="flex gap-2.5">
@@ -294,27 +332,15 @@ function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
 export default function SubmitProductButton({
   label = "Submit Your Launch →",
   className,
+  size = "sm",
 }: {
   label?: string;
   className?: string;
+  size?: "sm" | "default" | "lg";
 }) {
-  const { user, showToast } = useGlobal();
-  const [open, setOpen] = useState(false);
-
-  const handleClick = () => {
-    if (!user) {
-      showToast("Sign in to submit a launch.", "error");
-      return;
-    }
-    setOpen(true);
-  };
-
   return (
-    <>
-      <Button size="sm" className={className} onClick={handleClick}>
-        {label}
-      </Button>
-      <SubmitProductModal open={open} onOpenChange={setOpen} />
-    </>
+    <Link href="/launch?submit" className={cn(buttonVariants({ size }), "no-underline", className)}>
+      {label}
+    </Link>
   );
 }

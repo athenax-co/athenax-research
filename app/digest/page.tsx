@@ -36,8 +36,8 @@ export default function Page() {
         </div>
 
         <div className="section-stack-md">
-          <div className="section-heading-tight">
-            <h2 className="mb-0 text-[28px]">Past Issues</h2>
+          <div className="section-heading-tight mb-5">
+            <h2 className="mb-0 text-[28px]">The Archive</h2>
             <p className="mb-0 text-[15px] text-muted">The archive. Everything is CC0.</p>
           </div>
 

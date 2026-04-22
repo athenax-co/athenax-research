@@ -43,7 +43,7 @@ const BookmarkButton = ({
         setSaved(next);
         setCount((currentCount: number) => (next ? currentCount + 1 : Math.max(0, currentCount - 1)));
         queryClient.setQueriesData({ queryKey: ["products"] }, (products: ProductOut[] | undefined) => {
-          if (!products) return products;
+          if (!Array.isArray(products)) return products;
           return products.map((product) =>
             product.id === launch.id ? { ...product, bookmarkCount: Math.max(0, product.bookmarkCount + (next ? 1 : -1)) } : product
           );

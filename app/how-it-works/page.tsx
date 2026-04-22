@@ -6,13 +6,13 @@ export default function Page() {
       <div className="mx-auto w-full max-w-7xl px-5 py-14 md:px-7 lg:px-10">
         <div className="path-badge">/root/how-it-works</div>
         <h1 className="mb-3 text-5xl font-bold tracking-[-0.02em] text-ink">How AthenaX Works</h1>
-        <p className="mb-0 max-w-160 text-lg leading-[1.6] text-muted">
+        <p className="mb-0 max-w-4xl text-lg leading-[1.6] text-muted">
           AthenaX is the coordination layer between academic research and protocol ecosystem development. Ideas enter as papers and exit as protocols,
           products, and companies.
         </p>
         <hr className="divider" />
 
-        <div className="mb-11 grid gap-5.5 lg:grid-cols-2">
+        <div className="mb-11 grid gap-7 lg:grid-cols-2">
           {[
             {
               step: "01",
@@ -51,7 +51,7 @@ export default function Page() {
               desc: "New protocols become sponsors. Researchers get reputation. The network compounds. Every cycle makes the next one stronger.",
             },
           ].map((s) => (
-            <WindowCard key={s.step} label={`>_ STEP_${s.step}: ${s.label}`}>
+            <WindowCard key={s.step} label={`>_ STEP_${s.step}: ${s.label}`} titlebarLabelClassName="text-[10px]! opacity-40">
               <h3 className="mb-2.5 text-xl font-bold tracking-[-0.02em] text-ink">{s.title}</h3>
               <p className="text-[15px] leading-[1.6] text-muted">{s.desc}</p>
             </WindowCard>

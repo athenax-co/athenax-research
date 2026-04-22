@@ -220,19 +220,17 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
           <div>
             <WindowCard label="FOUNDERS.SYS" className="mb-5.5">
-              <div className="mb-3.5 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">FOUNDER</div>
-              {p.founder ? (
-                <div className="lb-row py-3">
-                  <div className="lb-avatar h-10 w-10 text-[15px]">{p.founder.name.charAt(0)}</div>
-                  <div className="flex-1">
-                    <div className="lb-name">{p.founder.name}</div>
-                    <div className="lb-meta">
-                      {[p.founder.labName, p.founder.universityName].filter(Boolean).join(" · ")}
+              {p.founders && p.founders.length > 0 ? (
+                p.founders.map((name, i) => (
+                  <div key={i} className="lb-row py-3">
+                    <div className="lb-avatar h-10 w-10 text-[15px]">{name.charAt(0)}</div>
+                    <div className="flex-1">
+                      <div className="lb-name">{name}</div>
                     </div>
                   </div>
-                </div>
+                ))
               ) : (
-                <p className="text-[13px] text-muted">Founder data not available for this product.</p>
+                <p className="text-[13px] text-muted">No founders listed.</p>
               )}
             </WindowCard>
 

@@ -62,7 +62,7 @@ function QueueRow({ name, meta, chips = [], onApprove, onReject, reviewHref, onR
 }
 
 export default function Page() {
-  const { user, showToast } = useGlobal();
+  const { user, showToast, handleAuthClick } = useGlobal();
   const [tab, setTab] = useState<AdminTab>("launches");
   const [reviewItem, setReviewItem] = useState<{
     title: string;
@@ -85,9 +85,14 @@ export default function Page() {
         <h1 className="mb-3 text-5xl">Admin</h1>
         <WindowCard label="ACCESS_DENIED.SYS" bodyClass="window-body window-body-yellow">
           <p className="mb-4 text-[15px]">Admin access required. Sign in as an admin account.</p>
-          <Link className="btn btn-primary" href="/dashboard">
-            Back to Dashboard
-          </Link>
+          <div className="flex flex-wrap gap-2.5">
+            <Button onClick={() => handleAuthClick("login")}>
+              Sign In to Continue
+            </Button>
+            <Link className="btn btn-outline" href="/dashboard">
+              Back to Dashboard
+            </Link>
+          </div>
         </WindowCard>
       </div>
     );

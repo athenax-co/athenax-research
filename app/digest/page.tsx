@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useGlobal } from "@/components/GlobalProvider";
-import { NEWSLETTERS, SEED_MEDIA } from "@/data/seed";
+import { NEWSLETTERS } from "@/data/seed";
 import NewsletterCard from "@/components/ui/NewsletterCard";
-import { MediaIcon } from "@/components/Icons";
+import { ContentListState, ContentRow } from "@/components/Content";
+import { useArticles } from "@/hooks/queries/useContent";
 
 export default function Page() {
   const { user } = useGlobal();
-  const pastIssues = SEED_MEDIA.filter((m) => m.type === "Essay" || m.type === "Log").slice(0, 4);
+  const { data: articles = [], isLoading: articlesLoading, isError: articlesError } = useArticles();
+  const pastIssues = articles.slice(0, 5);
 
   return (
     <div>
@@ -34,23 +36,24 @@ export default function Page() {
         </div>
 
         <div className="section-stack-md">
-          <div className="section-heading-tight">
-            <h2 className="mb-0 text-[28px]">Past Issues</h2>
+          <div className="section-heading-tight mb-5">
+            <h2 className="mb-0 text-[28px]">The Archive</h2>
             <p className="mb-0 text-[15px] text-muted">The archive. Everything is CC0.</p>
           </div>
 
-          {pastIssues.map((item) => (
-            <Link key={item.id} href={`/media/${item.id}`} className="archive-row text-inherit no-underline">
-              <MediaIcon type={item.type} />
-              <div className="flex-1">
-                <div className="archive-title">{item.title}</div>
-                <div className="archive-meta">
-                  {item.date} &nbsp;//&nbsp; {item.type}
-                </div>
-              </div>
-              <span className="text-[18px] text-muted">→</span>
-            </Link>
-          ))}
+          {pastIssues.length > 0 ? (
+            pastIssues.map((item) => (
+              <Link key={item.slug} href={`/archive/${item.slug}`} className="text-inherit no-underline">
+                <ContentRow item={item} kind="article" onClick={() => {}} />
+              </Link>
+            ))
+          ) : (
+            <ContentListState
+              loading={articlesLoading}
+              error={articlesError ? "Could not load past issues right now." : null}
+              emptyText="No published articles available yet."
+            />
+          )}
 
           <div className="mt-4">
             <Link href="/archive" className="link-arrow inline-block">

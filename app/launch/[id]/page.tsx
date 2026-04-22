@@ -14,8 +14,8 @@ import {
   useComments,
   useCreateComment,
   useDeleteComment,
-} from "@/hooks/queries/useProduct";
-import type { ProductDetailOut, ProductComment } from "@/types/product";
+} from "@/features/products";
+import type { ProductDetailOut, ProductComment } from "@/features/products";
 import { formatSubmittedDateTime } from "@/utils/lib";
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {

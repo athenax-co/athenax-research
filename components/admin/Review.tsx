@@ -1,9 +1,9 @@
 import { Dialog, DialogBody, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrafficLights } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/button";
-import { useUpdatePaperVerificationStatus } from "@/hooks/queries/usePaper";
+import { useUpdatePaperVerificationStatus } from "@/features/papers";
 import { useGlobal } from "@/components/GlobalProvider";
 import { PaperVerificationStatus } from "@/enums";
-import type { PaperOut } from "@/types/paper";
+import type { PaperOut } from "@/features/papers";
 
 type Props = {
   paper: PaperOut;

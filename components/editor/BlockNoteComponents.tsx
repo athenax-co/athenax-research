@@ -50,7 +50,7 @@ const ToolbarButton = ({
     onMouseDown={(e) => e.preventDefault()}
     onClick={onClick}
     className={cn(
-      "flex items-center gap-1 px-1.5 py-0.5 rounded text-[13px] text-ink [font-family:var(--font-space-grotesk)] transition-colors border",
+      "flex items-center gap-1 px-1.5 py-0.5 rounded text-[13px] text-ink font-sans transition-colors border",
       isSelected
         ? "bg-yellow border-ink"
         : "bg-transparent border-transparent hover:bg-yellow/40",
@@ -62,19 +62,23 @@ const ToolbarButton = ({
 );
 
 const ToolbarSelect = ({ items, isDisabled }: any) => {
-  const selectedIndex = items?.findIndex((item: any) => item.isSelected) ?? 0;
+  const selectedItem = items?.find((item: any) => item.isSelected);
+  const selectedText = selectedItem?.text ?? items?.[0]?.text ?? "";
   return (
     <select
       disabled={isDisabled}
-      value={selectedIndex < 0 ? 0 : selectedIndex}
-      onChange={(e) => items[Number(e.target.value)]?.onClick()}
+      value={selectedText}
+      onChange={(e) => {
+        const clicked = items?.find((item: any) => item.text === e.target.value);
+        clicked?.onClick();
+      }}
       className={cn(
         "px-1.5 py-0.5 bg-cream border border-ink rounded text-[13px] text-ink",
         isDisabled ? "cursor-not-allowed opacity-40" : "cursor-pointer"
       )}
     >
-      {items?.map((item: any, i: number) => (
-        <option key={i} value={i}>
+      {items?.map((item: any) => (
+        <option key={item.text} value={item.text}>
           {item.text}
         </option>
       ))}
@@ -129,7 +133,7 @@ const SuggestionMenuItem = ({ item, isSelected, onClick, id, className }: any) =
   <div
     id={id}
     className={cn(
-      "flex items-center gap-2.5 px-3 py-1.5 cursor-pointer text-[14px] text-ink [font-family:var(--font-space-grotesk)] transition-colors",
+      "flex items-center gap-2.5 px-3 py-1.5 cursor-pointer text-[14px] text-ink font-sans transition-colors",
       isSelected ? "bg-yellow" : "hover:bg-yellow/40",
       className
     )}
@@ -146,13 +150,13 @@ const SuggestionMenuItem = ({ item, isSelected, onClick, id, className }: any) =
 );
 
 const SuggestionMenuLabel = ({ children, className }: any) => (
-  <div className={cn("px-3 pt-1 pb-0.5 text-[11px] font-semibold tracking-widest uppercase text-ink/60 [font-family:var(--font-space-grotesk)]", className)}>
+  <div className={cn("px-3 pt-1 pb-0.5 text-[11px] font-semibold tracking-widest uppercase text-ink/60 font-sans", className)}>
     {children}
   </div>
 );
 
 const SuggestionMenuEmpty = ({ children, className }: any) => (
-  <div className={cn("px-3 py-2 text-[13px] text-ink/40 italic [font-family:var(--font-space-grotesk)]", className)}>
+  <div className={cn("px-3 py-2 text-[13px] text-ink/40 italic font-sans", className)}>
     {children ?? "No results"}
   </div>
 );
@@ -406,12 +410,24 @@ const GenericMenuRoot = ({ children, onOpenChange }: any) => {
 
 const GenericMenuDropdown = ({ children, className, sub }: any) => {
   const { open } = React.useContext(MenuOpenContext);
+  const ref = useRef<HTMLDivElement>(null);
+  const [flipX, setFlipX] = useState(false);
+
+  useEffect(() => {
+    if (!open || !ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    setFlipX(rect.right > window.innerWidth);
+  }, [open]);
+
   if (!open) return null;
   return (
     <div
+      ref={ref}
       className={cn(
         "absolute z-10001 bg-cream border-2 border-ink rounded-md shadow-[4px_4px_0_#1c1c27] min-w-40 py-1",
-        sub ? "top-0 left-full" : "top-full left-0",
+        sub
+          ? flipX ? "top-0 right-full" : "top-0 left-full"
+          : "top-full left-0",
         className
       )}
     >
@@ -444,7 +460,7 @@ const GenericMenuLabel = ({ children, className }: any) => (
 const GenericMenuTrigger = ({ children }: any) => {
   const { setOpen, open } = React.useContext(MenuOpenContext);
   return (
-    <div className="inline-block" onClick={(e) => { e.stopPropagation(); setOpen(!open); }}>
+    <div className="block w-full" onClick={(e) => { e.stopPropagation(); setOpen(!open); }}>
       {children}
     </div>
   );
@@ -465,20 +481,37 @@ const GenericMenuButton = ({ children, label, icon, onClick, draggable, onDragSt
 
 // ── Generic Popover ────────────────────────────────────────────────────────────
 
-const PopoverOpenContext = React.createContext<boolean>(false);
+type PopoverCtx = { open: boolean; toggle: () => void };
+const PopoverOpenContext = React.createContext<PopoverCtx>({ open: false, toggle: () => {} });
 
-const GenericPopoverRoot = ({ children, open, onOpenChange }: any) => {
+const GenericPopoverRoot = ({ children, open: controlledOpen, onOpenChange }: any) => {
+  const isControlled = controlledOpen !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? !!controlledOpen : internalOpen;
   const ref = useRef<HTMLDivElement>(null);
+
+  const setOpen = (v: boolean) => {
+    if (!isControlled) setInternalOpen(v);
+    onOpenChange?.(v);
+  };
+
+  const toggle = () => setOpen(!open);
+
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) onOpenChange?.(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open, onOpenChange]);
+    // Use setTimeout to avoid the same click that opened it from immediately closing it
+    const id = setTimeout(() => document.addEventListener("mousedown", handler), 0);
+    return () => {
+      clearTimeout(id);
+      document.removeEventListener("mousedown", handler);
+    };
+  }, [open]);
+
   return (
-    <PopoverOpenContext.Provider value={!!open}>
+    <PopoverOpenContext.Provider value={{ open, toggle }}>
       <div ref={ref} className="relative inline-block">
         {children}
       </div>
@@ -487,22 +520,73 @@ const GenericPopoverRoot = ({ children, open, onOpenChange }: any) => {
 };
 
 const GenericPopoverContent = ({ children, className }: any) => {
-  const open = React.useContext(PopoverOpenContext);
+  const { open } = React.useContext(PopoverOpenContext);
+  const ref = useRef<HTMLDivElement>(null);
+  const [flipUp, setFlipUp] = useState(false);
+  const [flipLeft, setFlipLeft] = useState(false);
+
+  useEffect(() => {
+    if (!open || !ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    setFlipUp(rect.bottom > window.innerHeight);
+    setFlipLeft(rect.right > window.innerWidth);
+  }, [open]);
+
   if (!open) return null;
   return (
-    <div className={cn("absolute top-full left-0 mt-1 z-10002 bg-cream border-2 border-ink rounded-md shadow-[4px_4px_0_#1c1c27] p-3 min-w-55", className)}>
+    <div
+      ref={ref}
+      className={cn(
+        "absolute z-10002 bg-cream border-2 border-ink rounded-md shadow-[4px_4px_0_#1c1c27] p-3 min-w-55",
+        flipUp ? "bottom-full mb-1" : "top-full mt-1",
+        flipLeft ? "right-0" : "left-0",
+        className
+      )}
+    >
       {children}
     </div>
   );
 };
 
-const GenericPopoverTrigger = ({ children }: any) => <>{children}</>;
+const GenericPopoverTrigger = ({ children }: any) => {
+  const { toggle } = React.useContext(PopoverOpenContext);
+  return (
+    <div className="inline-block" onClick={(e) => { e.stopPropagation(); toggle(); }}>
+      {children}
+    </div>
+  );
+};
+
+// ── LinkToolbar ────────────────────────────────────────────────────────────────
+
+const LinkToolbarRoot = ({
+  children,
+  className,
+  onMouseEnter,
+  onMouseLeave,
+}: {
+  children?: React.ReactNode;
+  className?: string;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+}) => (
+  <div
+    className={cn(
+      "flex items-center gap-0.5 px-2 py-1.5 bg-cream border-2 border-ink rounded-md shadow-[4px_4px_0_#1c1c27]",
+      className
+    )}
+    onMouseEnter={onMouseEnter}
+    onMouseLeave={onMouseLeave}
+  >
+    {children}
+  </div>
+);
 
 // ── Assemble the full Components object ───────────────────────────────────────
 
 const components: React.ContextType<typeof ComponentsContext> = {
   FormattingToolbar: { Root: ToolbarRoot, Button: ToolbarButton, Select: ToolbarSelect },
-  LinkToolbar: { Root: ToolbarRoot, Button: ToolbarButton, Select: ToolbarSelect },
+  LinkToolbar: { Root: LinkToolbarRoot, Button: ToolbarButton, Select: ToolbarSelect },
   FilePanel: {
     Root: FilePanelRoot,
     Button: FilePanelButton,

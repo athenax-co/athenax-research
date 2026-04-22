@@ -64,7 +64,7 @@ function DialogContent({ children, className }: { children: React.ReactNode; cla
           // sizing
           "w-full max-w-lg max-h-[90vh] overflow-y-auto outline-none",
           // design — matches existing AthenaX window-card aesthetic
-          "bg-[#f2efe9] border-2 border-ink rounded-[14px]",
+          "bg-cream border-2 border-ink rounded-[14px]",
           "shadow-[8px_8px_0_#1c1c27]",
           // animations
           "transition-all duration-200",
@@ -85,7 +85,7 @@ function DialogContent({ children, className }: { children: React.ReactNode; cla
 
 function DialogHeader({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={["flex items-center justify-between px-5 py-4", "border-b-2 border-ink bg-[#f2efe9]", className].filter(Boolean).join(" ")}>
+    <div className={["flex items-center justify-between px-5 py-4", "border-b-2 border-ink bg-cream", className].filter(Boolean).join(" ")}>
       {children}
     </div>
   );

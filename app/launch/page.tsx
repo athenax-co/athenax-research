@@ -9,10 +9,10 @@ import { useEffect, useRef, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
 import { useCategories } from "@/hooks/queries/useReference";
-import { useInfiniteProducts, useProductStats, type ProductQueryFilters } from "@/hooks/queries/useProduct";
 import SubmitProductButton, { SubmitProductModal } from "@/components/SubmitProductModal";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ProductQueryFilters, useInfiniteProducts, useProductStats } from "@/features/products";
 
 type DateFilter = ProductQueryFilters["dateFilter"];
 

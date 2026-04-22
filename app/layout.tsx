@@ -31,7 +31,10 @@ const vt323 = VT323({
 });
 
 export const metadata: Metadata = {
-  title: "AthenaX Research",
+  title: "AthenaX",
+  icons: {
+      icon: "https://athenax.mypinx.store/favicon.png",
+  },
 };
 
 import Navbar from "@/components/layout/Navbar";

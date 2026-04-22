@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useProducts, useProductStats, getProductStatsLabel } from "@/hooks/queries/useProduct";
 import { IconBounties, IconBuilders, IconLabs, IconTerminal } from "@/components/Icons";
 import { buttonVariants } from "@/components/ui/button";
 import WindowCard from "@/components/ui/WindowCard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { getProductStatsLabel, useProducts, useProductStats } from "@/features/products";
 
 export default function Page() {
   const { data: apiProducts = [] } = useProducts("approved");

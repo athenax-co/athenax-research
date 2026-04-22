@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Dialog, DialogBody, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrafficLights } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/button";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useUpdateProductStatus } from "@/hooks/queries/useProduct";
-import type { ProductOut } from "@/types/product";
+import { useUpdateProductStatus } from "@/features/products";
+import type { ProductOut } from "@/features/products";
 import { formatShortDate, formatSubmittedDateTime } from "@/utils/lib";
 
 type ProductReviewRowProps = {

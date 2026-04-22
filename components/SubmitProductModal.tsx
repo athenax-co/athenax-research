@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBo
 import CategorySelector from "@/components/ui/CategorySelector";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ProductStage, QualityBadge } from "@/enums";
-import { useSubmitProduct } from "@/hooks/queries/useProduct";
+import { useSubmitProduct } from "@/features/products";
 import { useGlobal } from "@/components/GlobalProvider";
 import { cn } from "@/lib/utils";
 

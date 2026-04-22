@@ -66,7 +66,7 @@ export function useMyPapers(status?: PaperStatus, options?: { enabled?: boolean 
   return useQuery({
     queryKey: ["papers", "me", status],
     queryFn: () => paperApi.getMyPapers(status),
-    enabled: user?.role === "researcher" && (options?.enabled ?? true),
+    enabled: !!user && (options?.enabled ?? true),
     select: (data) => {
       const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
       return withCategories(data, cats);

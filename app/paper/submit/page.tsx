@@ -96,9 +96,6 @@ function PaperRow({ paper }: { paper: PaperOut }) {
 type PapersTab = "all" | "draft" | "published";
 
 function MyPapersCompact() {
-  const { user } = useGlobal();
-  const isResearcher = user?.role === "researcher";
-
   const [tab, setTab] = useState<PapersTab>("all");
   const [fetched, setFetched] = useState<Set<PapersTab>>(new Set(["all"]));
 
@@ -113,15 +110,6 @@ function MyPapersCompact() {
 
   const isLoading = tab === "all" ? loadingAll : tab === "draft" ? loadingDrafts : loadingPublished;
   const papers = (tab === "all" ? all : tab === "draft" ? drafts : published).slice(0, 5);
-
-
-  if (!isResearcher) {
-    return (
-      <WindowCard label="YOUR_PAPERS.SYS">
-        <p className="mb-0 text-sm text-muted">Researcher role required to view your papers.</p>
-      </WindowCard>
-    );
-  }
 
   return (
     <WindowCard label="YOUR_PAPERS.SYS">

@@ -2,7 +2,6 @@ export type {
   ProductIn,
   ProductOut,
   ProductDetailOut,
-  ProductFounder,
   ProductSummary,
   ProductComment,
   CategoryRef,

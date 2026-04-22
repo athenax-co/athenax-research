@@ -3,8 +3,8 @@
 import dynamic from "next/dynamic";
 import { Dialog as BaseDialog } from "@base-ui/react";
 import TrafficLights from "@/components/ui/TrafficLights";
-import { Logo } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
+import BrandLogo from "@/components/layout/BrandLogo";
 
 const PaperEditor = dynamic(() => import("./PaperEditor"), { ssr: false });
 
@@ -25,7 +25,7 @@ export function FullScreenEditorDialog({ open, onOpenChange, value, onChange }: 
               <TrafficLights />
               <span className="titlebar-label">PAPER_CONTENT.SYS</span>
             </div>
-            <Logo />
+            <BrandLogo />
             <div className="flex items-center gap-2">
               <Button size="sm" variant="outline" onClick={() => onOpenChange(false)} aria-label="Close editor">
                 Close

@@ -88,12 +88,12 @@ const SOCIAL_LINKS = [
 ];
 
 const FooterSubmitLink = ({ href, text }: { href: string; text: string }) => {
-  const { setSubmitProductOpen } = useGlobal();
+  const { openSubmitProductModal } = useGlobal();
 
   if (href === "/launch?submit") {
     return (
       <button
-        onClick={() => setSubmitProductOpen(true)}
+        onClick={() => openSubmitProductModal()}
         className="block text-sm text-ink mb-2.25 hover:text-danger text-left cursor-pointer"
       >
         {text}

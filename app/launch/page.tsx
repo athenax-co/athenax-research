@@ -25,7 +25,7 @@ const TIME_TABS: { key: DateFilter; label: string; statsKey: "total" | "today" |
 const PAGE_SIZE = 25;
 
 export default function Page() {
-  const { user, showToast, submitProductOpen, setSubmitProductOpen } = useGlobal();
+  const { user, showToast, openSubmitProductModal } = useGlobal();
   const { data: categories = [] } = useCategories();
   const { data: productStats } = useProductStats();
   const searchParams = useSearchParams();
@@ -33,10 +33,10 @@ export default function Page() {
 
   useEffect(() => {
     if (searchParams.get("submit") !== null) {
-      setSubmitProductOpen(true);
+      openSubmitProductModal();
       router.replace("/launch", { scroll: false });
     }
-  }, [searchParams, router, setSubmitProductOpen]);
+  }, [searchParams, router, openSubmitProductModal]);
 
   const [categoryId, setCategoryId] = useQueryState("category", parseAsInteger);
   const [dateFilter, setDateFilter] = useQueryState("date", parseAsString);

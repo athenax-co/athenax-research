@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { getProductStatsLabel, useProducts, useProductStats } from "@/features/products";
 
 export default function Page() {
-  const { setSubmitProductOpen } = useGlobal();
+  const { openSubmitProductModal } = useGlobal();
   const { data: productsData } = useProducts("approved");
   const apiProducts = productsData?.items ?? [];
   const { data: productStats } = useProductStats();
@@ -43,7 +43,7 @@ export default function Page() {
               <Link href="/launch" className={cn(buttonVariants({ size: "lg" }), "no-underline")}>
                 Explore Launches →
               </Link>
-              <Button variant="outline" size="lg" onClick={() => setSubmitProductOpen(true)}>
+              <Button variant="outline" size="lg" onClick={() => openSubmitProductModal()}>
                 Submit Your Product
               </Button>
             </div>

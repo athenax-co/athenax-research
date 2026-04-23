@@ -30,6 +30,7 @@ type GlobalContextType = {
   submitProductOpen: boolean;
   setSubmitProductOpen: (open: boolean) => void;
   showSubmitProductSuccess: (productName: string) => void;
+  openSubmitProductModal: () => void;
 };
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -129,6 +130,16 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
     setSubmitProductSuccessOpen(true);
   };
 
+  // Open submit product modal with auth check
+  const openSubmitProductModal = () => {
+    if (!user) {
+      showToast("Please log in to submit a product", "info");
+      setShowLogin(true);
+      return;
+    }
+    setSubmitProductOpen(true);
+  };
+
   return (
     <GlobalContext.Provider
       value={{
@@ -141,6 +152,7 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
         submitProductOpen,
         setSubmitProductOpen,
         showSubmitProductSuccess,
+        openSubmitProductModal,
       }}
     >
       <div style={{ minHeight: "100vh", background: "#F2EFE9" }}>{children}</div>

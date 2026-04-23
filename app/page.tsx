@@ -126,7 +126,7 @@ export default function Page() {
                   <div
                     key={item.label}
                     aria-disabled="true"
-                    className={`block rounded-[10px] border-2 border-[#1C1C27] p-[16px_18px] text-left text-inherit no-underline opacity-70 shadow-[3px_3px_0_#1C1C27] ${item.bgClass}`}
+                    className={`explore-card block rounded-xl border-2 border-[#1C1C27] p-[18px_22px] text-left text-inherit no-underline opacity-70 cursor-not-allowed ${item.bgClass}`}
                   >
                     <div className="mb-2.5">{item.icon}</div>
                     <div className="mb-0.75 text-[15px] font-bold">{item.label}</div>
@@ -136,7 +136,7 @@ export default function Page() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className={`block cursor-pointer rounded-[10px] border-2 border-[#1C1C27] p-[16px_18px] text-left text-inherit no-underline shadow-[3px_3px_0_#1C1C27] ${item.bgClass}`}
+                    className={`explore-card block cursor-pointer rounded-xl border-2 border-[#1C1C27] p-[18px_22px] text-left text-inherit no-underline ${item.bgClass}`}
                   >
                     <div className="mb-2.5">{item.icon}</div>
                     <div className="mb-0.75 text-[15px] font-bold">{item.label}</div>

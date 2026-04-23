@@ -723,6 +723,15 @@ canvas {
   animation: spin 0.6s linear infinite;
 }
 
+/* ── Explore Cards ── */
+.explore-card {
+  transition: all 0.1s ease;
+}
+.explore-card:hover {
+  box-shadow: 4px 4px 0 #1c1c27;
+  transform: translate(-2px, -2px);
+}
+
 @media (max-width: 768px) {
   .docs-layout {
     flex-direction: column;

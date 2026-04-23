@@ -154,7 +154,8 @@ export default function Page() {
   const [submitType, setSubmitType] = useQueryState("type", parseAsStringLiteral(SUBMIT_TYPES));
   const { mutateAsync: submitPaper, isPending: submittingNew } = useSubmitPaper();
   const { mutateAsync: updatePaper, isPending: updatingDraft } = useUpdatePaper();
-  const { data: products } = useProducts("approved");
+  const { data: productsData } = useProducts("approved");
+  const products = productsData?.items ?? [];
   const { data: myPapers = [], isLoading: loadingMyPapers } = useMyPapers();
 
   const draftPaper = useMemo(

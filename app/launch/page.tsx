@@ -5,16 +5,16 @@ import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
 import SEOMeta from "@/components/SEOMeta";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useEffect, useRef, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
 import { useCategories } from "@/hooks/queries/useReference";
-import SubmitProductButton, { SubmitProductModal } from "@/components/SubmitProductModal";
+import SubmitProductButton from "@/components/SubmitProductModal";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ProductQueryFilters, useInfiniteProducts, useProductStats } from "@/features/products";
+import { useInfiniteProducts, useProductStats } from "@/features/products";
 
-type DateFilter = ProductQueryFilters["dateFilter"];
+type DateFilter = "today" | "this_week" | "this_month" | undefined;
 
 const TIME_TABS: { key: DateFilter; label: string; statsKey: "total" | "today" | "thisWeek" | "thisMonth" }[] = [
   { key: undefined,      label: "All",        statsKey: "total" },
@@ -22,28 +22,29 @@ const TIME_TABS: { key: DateFilter; label: string; statsKey: "total" | "today" |
   { key: "this_month",   label: "This Month", statsKey: "thisMonth" },
 ];
 
+const PAGE_SIZE = 25;
+
 export default function Page() {
-  const { user, showToast } = useGlobal();
+  const { user, showToast, openSubmitProductModal } = useGlobal();
   const { data: categories = [] } = useCategories();
   const { data: productStats } = useProductStats();
-  const [submitOpen, setSubmitOpen] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
 
   useEffect(() => {
     if (searchParams.get("submit") !== null) {
-      setSubmitOpen(true);
+      openSubmitProductModal();
       router.replace("/launch", { scroll: false });
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, openSubmitProductModal]);
 
   const [categoryId, setCategoryId] = useQueryState("category", parseAsInteger);
   const [dateFilter, setDateFilter] = useQueryState("date", parseAsString);
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
 
   const {
     data,
     isLoading: productsLoading,
-    isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
   } = useInfiniteProducts("approved", {
@@ -51,22 +52,29 @@ export default function Page() {
     dateFilter: (dateFilter || undefined) as DateFilter,
   });
 
-  const products = useMemo(() => {
-    const flat = data?.pages.flat() ?? [];
-    return [...new Map(flat.map((p) => [p.id, p])).values()];
+  const allProducts = useMemo(() => {
+    const pages = data?.pages ?? [];
+    const items = pages.flatMap((page) => page.items);
+    return [...new Map(items.map((p) => [p.id, p])).values()];
   }, [data]);
 
-  const sentinelRef = useRef<HTMLDivElement>(null);
+  const totalCount = useMemo(() => data?.pages[0]?.total ?? 0, [data]);
+
+  // Auto-fetch remaining pages when user requests a page we don't have loaded yet
   useEffect(() => {
-    const el = sentinelRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      (entries) => { if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) fetchNextPage(); },
-      { threshold: 0.1 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+    const neededProducts = page * PAGE_SIZE;
+    if (hasNextPage && allProducts.length < neededProducts) {
+      fetchNextPage();
+    }
+  }, [page, allProducts.length, hasNextPage, fetchNextPage]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [categoryId, dateFilter, setPage]);
+
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+  const paginatedProducts = allProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div>
@@ -84,7 +92,7 @@ export default function Page() {
               <div className="status-dot" />
               {productStats
                 ? `${productStats.releases.thisMonth} This Month`
-                : `${products.length} Products Listed`}
+                : `${allProducts.length} Products Listed`}
             </span>
           </div>
           <SubmitProductButton label="+ Submit Your Product" className="self-start hidden sm:inline-flex" />
@@ -180,7 +188,7 @@ export default function Page() {
         )}
 
         {!productsLoading &&
-          products.map((product) => (
+          paginatedProducts.map((product) => (
             <div key={product.id} className="mb-1 border-b-2 border-b-[#D8D4CC] py-5">
               <div className="flex flex-wrap gap-5">
                 <div className="min-w-65 flex-1">
@@ -223,9 +231,29 @@ export default function Page() {
             </div>
           ))}
 
-        <div ref={sentinelRef} className="py-4 text-center">
-          {isFetchingNextPage && <span className="text-xs text-muted">Loading more…</span>}
-        </div>
+        {totalPages > 1 && (
+          <div className="mt-8 mb-7 flex items-center justify-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => setPage(Math.max(1, page - 1))}
+            >
+              ← Prev
+            </Button>
+            <span className="font-['Space_Mono',monospace] text-xs text-muted">
+              Page {page} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= totalPages}
+              onClick={() => setPage(Math.min(totalPages, page + 1))}
+            >
+              Next →
+            </Button>
+          </div>
+        )}
 
         <WindowCard label="LAUNCH_TIERS.SYS" className="mt-7">
           <div className="mb-4 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">LAUNCH PROMOTION TIERS</div>
@@ -282,7 +310,6 @@ export default function Page() {
           </div>
         </WindowCard>
       </div>
-      <SubmitProductModal open={submitOpen} onOpenChange={setSubmitOpen} />
     </div>
   );
 }

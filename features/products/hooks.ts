@@ -46,7 +46,10 @@ export function useProducts(status: ProductStatus) {
     queryFn: () => productApi.getProducts({ status }),
     select: (data) => {
       const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
-      return withCategories(data, cats);
+      return {
+        items: withCategories(data.items, cats),
+        total: data.total,
+      };
     },
   });
 }
@@ -74,13 +77,18 @@ export function useInfiniteProducts(status: ProductStatus, filters: ProductQuery
         offset: pageParam as number,
       }),
     initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) =>
-      lastPage.length === PAGE_SIZE ? allPages.length * PAGE_SIZE : undefined,
+    getNextPageParam: (lastPage, allPages) => {
+      const totalFetched = allPages.reduce((sum, page) => sum + page.items.length, 0);
+      return totalFetched < lastPage.total ? allPages.length * PAGE_SIZE : undefined;
+    },
     select: (data) => {
       const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
       return {
         ...data,
-        pages: data.pages.map((page) => withCategories(page, cats)),
+        pages: data.pages.map((page) => ({
+          ...page,
+          items: withCategories(page.items, cats),
+        })),
       };
     },
   });

@@ -2,14 +2,17 @@
 
 import Link from "next/link";
 import { IconBounties, IconBuilders, IconLabs, IconTerminal } from "@/components/Icons";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import WindowCard from "@/components/ui/WindowCard";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useGlobal } from "@/components/GlobalProvider";
 import { cn } from "@/lib/utils";
 import { getProductStatsLabel, useProducts, useProductStats } from "@/features/products";
 
 export default function Page() {
-  const { data: apiProducts = [] } = useProducts("approved");
+  const { openSubmitProductModal } = useGlobal();
+  const { data: productsData } = useProducts("approved");
+  const apiProducts = productsData?.items ?? [];
   const { data: productStats } = useProductStats();
   const statsLabel = getProductStatsLabel(productStats);
   const liveProductsValue = productStats?.releases.total != null ? String(productStats.releases.total) : "-";
@@ -40,9 +43,9 @@ export default function Page() {
               <Link href="/launch" className={cn(buttonVariants({ size: "lg" }), "no-underline")}>
                 Explore Launches →
               </Link>
-              <Link href="/launch?submit" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "no-underline")}>
+              <Button variant="outline" size="lg" onClick={() => openSubmitProductModal()}>
                 Submit Your Product
-              </Link>
+              </Button>
             </div>
           </div>
 
@@ -123,7 +126,7 @@ export default function Page() {
                   <div
                     key={item.label}
                     aria-disabled="true"
-                    className={`block rounded-[10px] border-2 border-[#1C1C27] p-[16px_18px] text-left text-inherit no-underline opacity-70 shadow-[3px_3px_0_#1C1C27] ${item.bgClass}`}
+                    className={`explore-card block rounded-xl border-2 border-[#1C1C27] p-[18px_22px] text-left text-inherit no-underline opacity-70 cursor-not-allowed ${item.bgClass}`}
                   >
                     <div className="mb-2.5">{item.icon}</div>
                     <div className="mb-0.75 text-[15px] font-bold">{item.label}</div>
@@ -133,7 +136,7 @@ export default function Page() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className={`block cursor-pointer rounded-[10px] border-2 border-[#1C1C27] p-[16px_18px] text-left text-inherit no-underline shadow-[3px_3px_0_#1C1C27] ${item.bgClass}`}
+                    className={`explore-card block cursor-pointer rounded-xl border-2 border-[#1C1C27] p-[18px_22px] text-left text-inherit no-underline ${item.bgClass}`}
                   >
                     <div className="mb-2.5">{item.icon}</div>
                     <div className="mb-0.75 text-[15px] font-bold">{item.label}</div>

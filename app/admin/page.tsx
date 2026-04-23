@@ -72,7 +72,9 @@ export default function Page() {
     chips?: string[];
   } | null>(null);
 
-  const { data: pendingProducts = [], isLoading: loadingPending } = useProducts("pending");
+  const { data: pendingProductsData } = useProducts("pending");
+  const pendingProducts = pendingProductsData?.items ?? [];
+  const loadingPending = false;
   const { data: allPapers = [], isLoading: loadingPapers } = usePapers();
   const pendingPapers = allPapers.filter((p) => p.verificationStatus === PaperVerificationStatus.PENDING);
   const { mutate: updateVerification } = useUpdatePaperVerificationStatus();

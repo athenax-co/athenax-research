@@ -10,6 +10,11 @@ export interface ProductStats {
   };
 }
 
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+}
+
 export interface ProductFilters {
   status?: ProductStatus;
   category_id?: number;
@@ -27,7 +32,7 @@ export function submitProduct(data: ProductIn): Promise<void> {
   return http.post<void>("/product", data, { auth: true });
 }
 
-export function getProducts(filters: ProductFilters = {}): Promise<ProductOut[]> {
+export function getProducts(filters: ProductFilters = {}): Promise<PaginatedResponse<ProductOut>> {
   const params = new URLSearchParams();
   if (filters.status) params.set("status", filters.status);
   if (filters.category_id != null) params.set("category_id", String(filters.category_id));
@@ -36,7 +41,7 @@ export function getProducts(filters: ProductFilters = {}): Promise<ProductOut[]>
   if (filters.limit != null) params.set("limit", String(filters.limit));
   if (filters.offset != null) params.set("offset", String(filters.offset));
   const query = params.toString();
-  return http.get<ProductOut[]>(`/product${query ? `?${query}` : ""}`, { auth: true });
+  return http.get<PaginatedResponse<ProductOut>>(`/product${query ? `?${query}` : ""}`, { auth: true });
 }
 
 export function bookmarkProduct(id: number, bookmarked: boolean): Promise<void> {

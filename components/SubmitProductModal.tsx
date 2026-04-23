@@ -69,8 +69,47 @@ interface SubmitProductModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+interface SubmitProductSuccessModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  productName: string;
+}
+
+export function SubmitProductSuccessModal({ open, onOpenChange, productName }: SubmitProductSuccessModalProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <div className="flex items-center gap-1">
+            <DialogTrafficLights />
+            <DialogTitle>SUBMISSION_SUCCESS.SYS</DialogTitle>
+          </div>
+          <DialogClose />
+        </DialogHeader>
+
+        <DialogBody>
+          <div className="text-center py-6">
+            <div className="text-4xl mb-4">🎉</div>
+            <h2 className="text-xl font-bold mb-3">Your product has been submitted!</h2>
+            <p className="text-sm text-muted mb-4 leading-relaxed">
+              Thanks for submitting <span className="font-semibold text-ink">{productName}</span>! Our team will review it within 48 hours.
+              Check your email for updates.
+            </p>
+            <p className="text-xs text-muted mb-6">
+              In the meantime, explore other launches and join our community on Discord.
+            </p>
+            <Button className="w-full" onClick={() => onOpenChange(false)}>
+              Explore Launches →
+            </Button>
+          </div>
+        </DialogBody>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalProps) {
-  const { showToast } = useGlobal();
+  const { showToast, showSubmitProductSuccess } = useGlobal();
   const { mutateAsync: submitProductMutation, isPending: submitting } = useSubmitProduct();
 
   const [step, setStep] = useState<1 | 2>(1);
@@ -137,8 +176,8 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
       setSelectedCategoryIds([]);
       setFounders([]);
       setResetKey((k) => k + 1);
-      showToast(`${submitForm.name} launch submitted! We'll review within 48 hours.`, "success");
-      handleClose();
+      onOpenChange(false);
+      showSubmitProductSuccess(submitForm.name);
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Failed to submit launch. Please try again.", "error");
     }

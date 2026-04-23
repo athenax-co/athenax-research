@@ -7,7 +7,7 @@ import Toast from "./ui/Toast";
 import LoginModal from "./ui/LoginModal";
 import RegisterModal from "./ui/RegisterModal";
 import CategoryPickerModal from "./ui/CategoryPickerModal";
-import { SubmitProductModal } from "./SubmitProductModal";
+import { SubmitProductModal, SubmitProductSuccessModal } from "./SubmitProductModal";
 import { useRouter } from "next/navigation";
 
 const queryClient = new QueryClient();
@@ -29,6 +29,7 @@ type GlobalContextType = {
   setSelectedLab: (lab: any) => void;
   submitProductOpen: boolean;
   setSubmitProductOpen: (open: boolean) => void;
+  showSubmitProductSuccess: (productName: string) => void;
 };
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -52,6 +53,8 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
   const [showRegister, setShowRegister] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [submitProductOpen, setSubmitProductOpen] = useState(false);
+  const [submitProductSuccessOpen, setSubmitProductSuccessOpen] = useState(false);
+  const [submitProductSuccessName, setSubmitProductSuccessName] = useState("");
   const [selectedLab, setSelectedLab] = useState<any>(null);
 
   const router = useRouter();
@@ -120,6 +123,12 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
     setUserOverride(user);
   };
 
+  // Show submit product success modal
+  const showSubmitProductSuccess = (productName: string) => {
+    setSubmitProductSuccessName(productName);
+    setSubmitProductSuccessOpen(true);
+  };
+
   return (
     <GlobalContext.Provider
       value={{
@@ -131,6 +140,7 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
         setSelectedLab,
         submitProductOpen,
         setSubmitProductOpen,
+        showSubmitProductSuccess,
       }}
     >
       <div style={{ minHeight: "100vh", background: "#F2EFE9" }}>{children}</div>
@@ -152,6 +162,7 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
         />
       )}
       <SubmitProductModal open={submitProductOpen} onOpenChange={setSubmitProductOpen} />
+      <SubmitProductSuccessModal open={submitProductSuccessOpen} onOpenChange={setSubmitProductSuccessOpen} productName={submitProductSuccessName} />
     </GlobalContext.Provider>
   );
 }

@@ -7,5 +7,5 @@ export type {
   CategoryRef,
   ProductStatus,
 } from "./types";
-export type { ProductStats, ProductFilters } from "./api";
+export type { ProductStats, ProductFilters, PaginatedResponse } from "./api";
 export * from "./hooks";

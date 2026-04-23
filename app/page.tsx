@@ -11,7 +11,8 @@ import { getProductStatsLabel, useProducts, useProductStats } from "@/features/p
 
 export default function Page() {
   const { setSubmitProductOpen } = useGlobal();
-  const { data: apiProducts = [] } = useProducts("approved");
+  const { data: productsData } = useProducts("approved");
+  const apiProducts = productsData?.items ?? [];
   const { data: productStats } = useProductStats();
   const statsLabel = getProductStatsLabel(productStats);
   const liveProductsValue = productStats?.releases.total != null ? String(productStats.releases.total) : "-";

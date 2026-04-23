@@ -119,7 +119,7 @@ const Footer = () => {
         <div>
           <BrandLogo className="mb-2" wordmarkClassName="text-[26px]" />
           <div className="text-sm text-ink leading-relaxed">Where New Products Begin.</div>
-          <div className="flex gap-3 mt-4">
+          <div className="flex gap-4 mt-4">
             {SOCIAL_LINKS.map((social) => {
               const IconComponent = social.Icon;
               return (
@@ -131,7 +131,7 @@ const Footer = () => {
                   className="text-ink hover:text-danger transition-colors"
                   aria-label={social.label}
                 >
-                  <IconComponent size={20} />
+                  <IconComponent size={24} />
                 </Link>
               );
             })}

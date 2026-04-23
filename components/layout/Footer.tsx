@@ -3,7 +3,7 @@
 import { subscriberSvc } from "@/utils/lib";
 import { useState } from "react";
 import Link from "next/link";
-import { _globalShowToast } from "@/components/GlobalProvider";
+import { _globalShowToast, useGlobal } from "@/components/GlobalProvider";
 import { Button } from "@/components/ui/button";
 import BrandLogo from "@/components/layout/BrandLogo";
 import { IconDiscord, IconLinkedIn, IconX, IconYouTube } from "../Icons";
@@ -88,6 +88,27 @@ const SOCIAL_LINKS = [
   { href: "https://www.linkedin.com/company/athenaxco/", label: "LinkedIn", Icon: IconLinkedIn },
 ];
 
+const FooterSubmitLink = ({ href, text }: { href: string; text: string }) => {
+  const { setSubmitProductOpen } = useGlobal();
+
+  if (href === "/launch?submit") {
+    return (
+      <button
+        onClick={() => setSubmitProductOpen(true)}
+        className="block text-sm text-ink mb-2.25 hover:text-danger text-left cursor-pointer"
+      >
+        {text}
+      </button>
+    );
+  }
+
+  return (
+    <Link href={href} className="block text-sm text-ink mb-2.25 hover:text-danger">
+      {text}
+    </Link>
+  );
+};
+
 const Footer = () => {
   return (
     <footer className="bg-cream border-t-2 border-ink pt-0 pb-7 mt-25">
@@ -126,9 +147,7 @@ const Footer = () => {
                     {link.text}
                   </span>
                 ) : (
-                  <Link key={link.href} href={link.href} className="block text-sm text-ink mb-2.25 hover:text-danger">
-                    {link.text}
-                  </Link>
+                  <FooterSubmitLink key={link.href} href={link.href} text={link.text} />
                 )
               )}
             </div>

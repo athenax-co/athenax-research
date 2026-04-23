@@ -7,6 +7,7 @@ import Toast from "./ui/Toast";
 import LoginModal from "./ui/LoginModal";
 import RegisterModal from "./ui/RegisterModal";
 import CategoryPickerModal from "./ui/CategoryPickerModal";
+import { SubmitProductModal } from "./SubmitProductModal";
 import { useRouter } from "next/navigation";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,8 @@ type GlobalContextType = {
   handleAuthClick: (action: string) => void;
   selectedLab: any;
   setSelectedLab: (lab: any) => void;
+  submitProductOpen: boolean;
+  setSubmitProductOpen: (open: boolean) => void;
 };
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -48,6 +51,7 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [submitProductOpen, setSubmitProductOpen] = useState(false);
   const [selectedLab, setSelectedLab] = useState<any>(null);
 
   const router = useRouter();
@@ -125,6 +129,8 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
         handleAuthClick,
         selectedLab,
         setSelectedLab,
+        submitProductOpen,
+        setSubmitProductOpen,
       }}
     >
       <div style={{ minHeight: "100vh", background: "#F2EFE9" }}>{children}</div>
@@ -145,6 +151,7 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
           }}
         />
       )}
+      <SubmitProductModal open={submitProductOpen} onOpenChange={setSubmitProductOpen} />
     </GlobalContext.Provider>
   );
 }

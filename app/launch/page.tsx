@@ -5,11 +5,11 @@ import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
 import SEOMeta from "@/components/SEOMeta";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useEffect, useRef, useMemo, useState } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
 import { useCategories } from "@/hooks/queries/useReference";
-import SubmitProductButton, { SubmitProductModal } from "@/components/SubmitProductModal";
+import SubmitProductButton from "@/components/SubmitProductModal";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ProductQueryFilters, useInfiniteProducts, useProductStats } from "@/features/products";
@@ -23,19 +23,18 @@ const TIME_TABS: { key: DateFilter; label: string; statsKey: "total" | "today" |
 ];
 
 export default function Page() {
-  const { user, showToast } = useGlobal();
+  const { user, showToast, submitProductOpen, setSubmitProductOpen } = useGlobal();
   const { data: categories = [] } = useCategories();
   const { data: productStats } = useProductStats();
-  const [submitOpen, setSubmitOpen] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
 
   useEffect(() => {
     if (searchParams.get("submit") !== null) {
-      setSubmitOpen(true);
+      setSubmitProductOpen(true);
       router.replace("/launch", { scroll: false });
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, setSubmitProductOpen]);
 
   const [categoryId, setCategoryId] = useQueryState("category", parseAsInteger);
   const [dateFilter, setDateFilter] = useQueryState("date", parseAsString);
@@ -282,7 +281,6 @@ export default function Page() {
           </div>
         </WindowCard>
       </div>
-      <SubmitProductModal open={submitOpen} onOpenChange={setSubmitOpen} />
     </div>
   );
 }

@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { IconBounties, IconBuilders, IconLabs, IconTerminal } from "@/components/Icons";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import WindowCard from "@/components/ui/WindowCard";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useGlobal } from "@/components/GlobalProvider";
 import { cn } from "@/lib/utils";
 import { getProductStatsLabel, useProducts, useProductStats } from "@/features/products";
 
 export default function Page() {
+  const { setSubmitProductOpen } = useGlobal();
   const { data: apiProducts = [] } = useProducts("approved");
   const { data: productStats } = useProductStats();
   const statsLabel = getProductStatsLabel(productStats);
@@ -40,9 +42,9 @@ export default function Page() {
               <Link href="/launch" className={cn(buttonVariants({ size: "lg" }), "no-underline")}>
                 Explore Launches →
               </Link>
-              <Link href="/launch?submit" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "no-underline")}>
+              <Button variant="outline" size="lg" onClick={() => setSubmitProductOpen(true)}>
                 Submit Your Product
-              </Link>
+              </Button>
             </div>
           </div>
 

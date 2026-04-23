@@ -176,6 +176,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
       setSelectedCategoryIds([]);
       setFounders([]);
       setResetKey((k) => k + 1);
+      setStep(1);
       onOpenChange(false);
       showSubmitProductSuccess(submitForm.name);
     } catch (err) {

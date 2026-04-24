@@ -75,8 +75,7 @@ export default function Page() {
   const { data: pendingProductsData } = useProducts("pending");
   const pendingProducts = pendingProductsData?.items ?? [];
   const loadingPending = false;
-  const { data: allPapers = [], isLoading: loadingPapers } = usePapers();
-  const pendingPapers = allPapers.filter((p) => p.verificationStatus === PaperVerificationStatus.PENDING);
+  const { data: pendingPapers = [], isLoading: loadingPapers } = usePapers(50, 0, PaperVerificationStatus.PENDING);
   const { mutate: updateVerification } = useUpdatePaperVerificationStatus();
   const { mutate: updateProductStatus } = useUpdateProductStatus();
 

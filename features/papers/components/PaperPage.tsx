@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import WindowCard from "@/components/ui/WindowCard";
 import ArsBreakdown from "@/components/ui/ArsBreakdown";
@@ -11,7 +10,7 @@ import { useVotePaper, useUpdatePaperVerificationStatus, useRelatedPapers } from
 import { PaperVerificationStatus } from "@/enums";
 import type { PaperOut } from "@/features/papers/types";
 
-const BlockNoteViewer = dynamic(() => import("@/components/editor/BlockNoteViewer"), { ssr: false });
+import MarkdownViewer from "@/components/editor/MarkdownViewer";
 
 type PaperPageUser = {
   role?: string;
@@ -144,7 +143,7 @@ const PaperPage = ({ paper, user, showToast }: { paper: PaperOut; user: PaperPag
             {paper.sourceType === "editor" && paper.content && (
               <>
                 <hr className="divider-sm" />
-                <BlockNoteViewer content={paper.content} className="text-[15px] leading-[1.8]" />
+                <MarkdownViewer content={paper.content} className="text-[15px] leading-[1.8]" />
               </>
             )}
             <hr className="divider-sm" />

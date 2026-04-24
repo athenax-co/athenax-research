@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBody, DialogTrafficLights } from "@/components/ui/Dialog";
 import CategorySelector from "@/components/ui/CategorySelector";
@@ -76,6 +77,8 @@ interface SubmitProductSuccessModalProps {
 }
 
 export function SubmitProductSuccessModal({ open, onOpenChange, productName }: SubmitProductSuccessModalProps) {
+  const router = useRouter();
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -107,7 +110,7 @@ export function SubmitProductSuccessModal({ open, onOpenChange, productName }: S
               </Link>
               .
             </p>
-            <Button className="w-full" onClick={() => onOpenChange(false)}>
+            <Button className="w-full" onClick={() => { onOpenChange(false); router.push("/launch"); }}>
               Explore Launches →
             </Button>
           </div>

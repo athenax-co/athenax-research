@@ -231,8 +231,8 @@ export default function Page() {
             </div>
           ))}
 
-        {totalPages > 1 && (
-          <div className="mt-8 mb-7 flex items-center justify-center gap-3">
+        {totalPages >= 1 && (
+          <div className="mt-8 mb-7 flex items-center justify-center gap-1.5 flex-wrap">
             <Button
               variant="outline"
               size="sm"
@@ -241,9 +241,34 @@ export default function Page() {
             >
               ← Prev
             </Button>
-            <span className="font-['Space_Mono',monospace] text-xs text-muted">
-              Page {page} of {totalPages}
-            </span>
+            {(() => {
+              const items: (number | "ellipsis")[] = [];
+              const delta = 1; // neighbours on each side of current page
+              const rangeStart = Math.max(2, page - delta);
+              const rangeEnd = Math.min(totalPages - 1, page + delta);
+
+              items.push(1);
+              if (rangeStart > 2) items.push("ellipsis");
+              for (let i = rangeStart; i <= rangeEnd; i++) items.push(i);
+              if (rangeEnd < totalPages - 1) items.push("ellipsis");
+              if (totalPages > 1) items.push(totalPages);
+
+              return items.map((item, idx) =>
+                item === "ellipsis" ? (
+                  <span key={`ellipsis-${idx}`} className="font-['Space_Mono',monospace] text-xs text-muted px-1 select-none">···</span>
+                ) : (
+                  <Button
+                    key={item}
+                    variant={item === page ? "ghost" : "outline"}
+                    size="sm"
+                    className={cn("min-w-8", item === page ? "bg-yellow font-bold" : "")}
+                    onClick={() => setPage(item)}
+                  >
+                    {item}
+                  </Button>
+                )
+              );
+            })()}
             <Button
               variant="outline"
               size="sm"

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBody, DialogTrafficLights } from "@/components/ui/Dialog";
 import CategorySelector from "@/components/ui/CategorySelector";
@@ -76,6 +77,8 @@ interface SubmitProductSuccessModalProps {
 }
 
 export function SubmitProductSuccessModal({ open, onOpenChange, productName }: SubmitProductSuccessModalProps) {
+  const router = useRouter();
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -92,13 +95,22 @@ export function SubmitProductSuccessModal({ open, onOpenChange, productName }: S
             <div className="text-4xl mb-4">🎉</div>
             <h2 className="text-xl font-bold mb-3">Your product has been submitted!</h2>
             <p className="text-sm text-muted mb-4 leading-relaxed">
-              Thanks for submitting <span className="font-semibold text-ink">{productName}</span>! Our team will review it within 48 hours.
-              Check your email for updates.
+              Thanks for submitting <span className="font-semibold text-ink">{productName}</span>! Our team will review it within 48 hours. Check your
+              email for updates.
             </p>
             <p className="text-xs text-muted mb-6">
-              In the meantime, explore other launches and join our community on Discord.
+              In the meantime, explore other launches and follow us on{" "}
+              <Link
+                href="https://x.com/athenax_co"
+                target="_blank"
+                rel="noreferrer"
+                className="font-semibold text-ink underline underline-offset-2 hover:opacity-80"
+              >
+                X
+              </Link>
+              .
             </p>
-            <Button className="w-full" onClick={() => onOpenChange(false)}>
+            <Button className="w-full" onClick={() => { onOpenChange(false); router.push("/launch"); }}>
               Explore Launches →
             </Button>
           </div>
@@ -323,7 +335,10 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
 
               <div className="inp-group">
                 <label className="inp-label">Founders</label>
-                <div className="inp flex flex-wrap gap-1.5 min-h-10 cursor-text" onClick={(e) => (e.currentTarget.querySelector("input") as HTMLInputElement)?.focus()}>
+                <div
+                  className="inp flex flex-wrap gap-1.5 min-h-10 cursor-text"
+                  onClick={(e) => (e.currentTarget.querySelector("input") as HTMLInputElement)?.focus()}
+                >
                   {founders.map((name, i) => (
                     <span key={i} className="inline-flex items-center gap-1 rounded bg-[#F0EDE8] px-2 py-0.5 text-sm font-medium">
                       {name}

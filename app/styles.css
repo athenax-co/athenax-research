@@ -178,6 +178,13 @@ h4 {
   box-shadow: none;
   transform: none;
 }
+.btn:disabled,
+.btn[data-disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none;
+}
 
 /* ── Window Cards ── */
 .window-card {

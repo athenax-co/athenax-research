@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -9,13 +8,12 @@ import { useQueryState, parseAsStringLiteral } from "nuqs";
 import WindowCard from "@/components/ui/WindowCard";
 import CategorySelector from "@/components/ui/CategorySelector";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useMyPapers, useSubmitPaper, useUpdatePaper, FullScreenEditorDialog } from "@/features/papers";
+import { useMyPapers, useSubmitPaper, useUpdatePaper } from "@/features/papers";
+import MarkdownEditor from "@/components/editor/MarkdownEditor";
 import type { PaperOut, PaperSourceType } from "@/features/papers";
 import { useProducts } from "@/features/products";
 import { PaperStatus } from "@/enums";
 import { Button } from "@/components/ui/button";
-
-const BlockNoteViewer = dynamic(() => import("@/components/editor/BlockNoteViewer"), { ssr: false });
 
 const parseAsNullableInteger = {
   parse: (value: string) => (value === "" ? null : parseInt(value)),
@@ -168,7 +166,6 @@ export default function Page() {
 
   const [categoryIds, setCategoryIds] = useState<number[]>([]);
   const [productId, setProductId] = useState<number | undefined>(undefined);
-  const [editorOpen, setEditorOpen] = useState(false);
   const [hydratedDraftId, setHydratedDraftId] = useState<number | null>(null);
   const [missingDraftNotified, setMissingDraftNotified] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -290,7 +287,7 @@ export default function Page() {
 
       if (status === PaperStatus.PUBLISHED) {
         showToast("Paper submitted for review.", "success");
-        router.push("/dashboard");
+        router.push("/paper/submit");
       } else {
         showToast(editingDraftId ? "Draft updated." : "Paper saved as draft.", "success");
         goBack();
@@ -319,7 +316,7 @@ export default function Page() {
 
   return (
     <div>
-      <div className="page-wrap page-wrap-narrow-md section">
+      <div className={`page-wrap section ${submitType !== "new" ? "page-wrap-narrow-md" : "w-full max-w-4xl"}`}>
         <div className="path-badge">/root/paper/submit</div>
         <h1 className="mb-2 text-[42px]">Submit a Paper</h1>
         <p className="mb-0 text-base text-muted">Open-access. Community-voted. Reviewed by admins before publishing.</p>
@@ -404,37 +401,12 @@ export default function Page() {
 
             {sourceType === "editor" && (
               <div className="inp-group">
-                <div className="flex items-center justify-between">
-                  <label className="inp-label mb-0">Paper Content </label>
-                  {form.content && <span className="text-xs text-muted">Content added</span>}
-                </div>
-                <button
-                  type="button"
-                  className="group relative mt-1 min-h-32 w-full overflow-hidden rounded-lg border-2 border-ink bg-white px-3 py-2 text-left text-ink focus-visible:outline-none focus-visible:shadow-[3px_3px_0_#1c1c27] before:pointer-events-none before:absolute before:inset-0 before:z-1 before:bg-ink/20 before:opacity-0 before:transition-opacity hover:before:opacity-100 focus-visible:before:opacity-100 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:z-1 after:h-8 after:bg-linear-to-b after:from-white/0 after:to-white"
-                  onClick={() => setEditorOpen(true)}
-                >
-                  <span className="absolute top-1/2 left-1/2 z-2 -translate-x-1/2 -translate-y-1/2 rounded-md bg-ink px-3 py-2 text-xs font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-                    Click to view
-                  </span>
-
-                  <div className="w-full">
-                    {form.content ? (
-                      <div className="pointer-events-none max-h-24 overflow-hidden text-[15px] font-normal leading-6">
-                        <BlockNoteViewer content={form.content} />
-                      </div>
-                    ) : (
-                      <div className="space-y-1 text-muted">
-                        <p className="leading-6">No platform content yet.</p>
-                        <p className="text-sm leading-6">Start drafting your paper in the editor.</p>
-                      </div>
-                    )}
-                  </div>
-                </button>
-                <FullScreenEditorDialog
-                  open={editorOpen}
-                  onOpenChange={setEditorOpen}
+                <label className="inp-label">Paper Content</label>
+                <MarkdownEditor
                   value={form.content}
-                  onChange={(json) => setForm((prev) => ({ ...prev, content: json }))}
+                  onChange={(md) => setForm((prev) => ({ ...prev, content: md }))}
+                  placeholder={"# Start writing your paper...\n\nUse the toolbar above or write Markdown directly."}
+                  minHeight="min-h-80"
                 />
               </div>
             )}

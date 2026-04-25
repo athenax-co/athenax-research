@@ -8,11 +8,11 @@ export function submitPaper(data: PaperIn): Promise<void> {
 export function getPapers(limit = 50, offset = 0, verificationStatus?: PaperVerificationStatus): Promise<PaperOut[]> {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   if (verificationStatus) params.set("verification_status", verificationStatus);
-  return http.get<PaperOut[]>(`/paper?${params}`);
+  return http.get<PaperOut[]>(`/paper?${params}`, { auth: true });
 }
 
 export function getPaperBySlug(slug: string): Promise<PaperOut> {
-  return http.get<PaperOut>(`/paper/slug/${slug}`);
+  return http.get<PaperOut>(`/paper/slug/${slug}`, { auth: true });
 }
 
 export function getMyPapers(status?: PaperStatus): Promise<PaperOut[]> {

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
 import SEOMeta from "@/components/SEOMeta";
@@ -75,6 +76,11 @@ export default function Page() {
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
   const paginatedProducts = allProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  // Redirect out-of-range page to 1
+  useEffect(() => {
+    if (!productsLoading && totalPages > 0 && page > totalPages) setPage(1);
+  }, [productsLoading, totalPages, page, setPage]);
 
   return (
     <div>
@@ -193,6 +199,12 @@ export default function Page() {
               <div className="flex flex-wrap gap-5">
                 <div className="min-w-65 flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
+                    <Avatar className="size-7 rounded-lg border border-[#D8D4CC]">
+                      <AvatarImage src={product.logo ?? undefined} alt={product.name} className="rounded-md" />
+                      <AvatarFallback className="rounded-md bg-paper text-ink text-xs font-bold">
+                        {product.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
                     <h3 className="mb-0 text-[21px]">
                       <Link href={`/launch/${product.slug}`} className="cursor-pointer text-inherit no-underline" prefetch={false}>
                         {product.name}
@@ -255,7 +267,7 @@ export default function Page() {
           </div>
         )}
 
-        <WindowCard label="LAUNCH_TIERS.SYS" className="mt-7">
+        <WindowCard label="LAUNCH_TIERS.SYS" className="mt-20">
           <div className="mb-4 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">LAUNCH PROMOTION TIERS</div>
           <div className="mb-5 grid grid-cols-1 sm:grid-cols-4 gap-3.5">
             {[

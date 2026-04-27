@@ -2,6 +2,7 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
 import SEOMeta from "@/components/SEOMeta";
@@ -138,9 +139,12 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
         <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:gap-5">
           <div className="flex items-start gap-3 sm:flex-1">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border-2 border-[#1C1C27] bg-paper text-xl font-bold sm:h-16 sm:w-16 sm:text-2xl">
-              {p.name.charAt(0)}
-            </div>
+            <Avatar className="size-14 shrink-0 rounded-2xl border-2 border-ink sm:size-16">
+              <AvatarImage src={p.logo ?? undefined} alt={p.name} className="rounded-2xl" />
+              <AvatarFallback className="rounded-xl bg-paper text-xl font-bold sm:text-2xl">
+                {p.name.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
             <div className="min-w-0 flex-1">
               <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
                 <h1 className="text-[34px] leading-none sm:text-[36px]">{p.name}</h1>

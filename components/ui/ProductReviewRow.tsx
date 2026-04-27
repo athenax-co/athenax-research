@@ -7,6 +7,7 @@ import { useGlobal } from "@/components/GlobalProvider";
 import { useUpdateProductStatus } from "@/features/products";
 import type { ProductOut } from "@/features/products";
 import { formatShortDate, formatSubmittedDateTime } from "@/utils/lib";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 type ProductReviewRowProps = {
   product: ProductOut;
@@ -34,9 +35,12 @@ export default function ProductReviewRow({ product }: ProductReviewRowProps) {
   return (
     <>
       <div className="flex items-start gap-3 border-b border-[#D8D4CC] py-4 last:border-b-0">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border-[1.5px] border-ink bg-paper text-[13px] font-bold">
-          {product.name.charAt(0)}
-        </div>
+        <Avatar className="size-9 rounded-md border border-ink">
+          <AvatarImage src={product.logo ?? undefined} alt={product.name} className="rounded-md" />
+          <AvatarFallback className="rounded-md bg-paper text-[13px] font-bold">
+            {product.name.charAt(0)}
+          </AvatarFallback>
+        </Avatar>
         <div className="min-w-0 flex-1">
           <div className="text-[14px] font-semibold">{product.name}</div>
           <p className="mt-0.5 line-clamp-2 text-[12px] leading-normal text-muted">{product.description}</p>

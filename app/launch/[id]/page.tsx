@@ -139,9 +139,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
         <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:gap-5">
           <div className="flex items-start gap-3 sm:flex-1">
-            <Avatar className="size-14 shrink-0 rounded-2xl border-2 border-ink sm:size-16">
-              <AvatarImage src={p.logo ?? undefined} alt={p.name} className="rounded-2xl" />
-              <AvatarFallback className="rounded-xl bg-paper text-xl font-bold sm:text-2xl">
+            <Avatar className="size-14 shrink-0 rounded-lg overflow-visible sm:size-16">
+              <AvatarImage src={p.logo ?? undefined} alt={p.name} className="size-full object-contain" />
+              <AvatarFallback className="rounded-xl border-2 border-ink bg-paper text-xl font-bold sm:text-2xl">
                 {p.name.charAt(0)}
               </AvatarFallback>
             </Avatar>

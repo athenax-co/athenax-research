@@ -35,9 +35,9 @@ export default function ProductReviewRow({ product }: ProductReviewRowProps) {
   return (
     <>
       <div className="flex items-start gap-3 border-b border-[#D8D4CC] py-4 last:border-b-0">
-        <Avatar className="size-9 rounded-md border border-ink">
-          <AvatarImage src={product.logo ?? undefined} alt={product.name} className="rounded-md" />
-          <AvatarFallback className="rounded-md bg-paper text-[13px] font-bold">
+        <Avatar className="size-9 rounded-md overflow-visible">
+          <AvatarImage src={product.logo ?? undefined} alt={product.name} className="size-full object-contain" />
+          <AvatarFallback className="rounded-md border border-ink bg-paper text-[13px] font-bold">
             {product.name.charAt(0)}
           </AvatarFallback>
         </Avatar>

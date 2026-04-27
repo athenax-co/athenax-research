@@ -31,6 +31,7 @@ export interface ProductOut {
   stage: string;
   funding: number;
   founded: number;
+  logo?: string | null;
   github?: string;
   demo?: string;
   qualityBadge?: string;

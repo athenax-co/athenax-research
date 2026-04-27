@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { IconBounties, IconBuilders, IconLabs, IconTerminal } from "@/components/Icons";
 import { Button, buttonVariants } from "@/components/ui/button";
 import WindowCard from "@/components/ui/WindowCard";
@@ -90,9 +91,12 @@ export default function Page() {
                   className="archive-row cursor-pointer text-inherit no-underline"
                   prefetch={false}
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-[1.5px] border-[#1C1C27] bg-paper text-base font-bold">
-                    {launch.name.charAt(0)}
-                  </div>
+                  <Avatar className="size-10 shrink-0 rounded-lg overflow-visible">
+                    <AvatarImage src={launch.logo ?? undefined} alt={launch.name} className="size-full object-contain" />
+                    <AvatarFallback className="rounded-lg border border-[#D8D4CC] bg-paper text-base font-bold">
+                      {launch.name.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
                   <div className="flex-1">
                     <div className="mb-0.5 flex flex-wrap items-center gap-2">
                       <div className="archive-title">{launch.name}</div>

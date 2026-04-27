@@ -199,9 +199,9 @@ export default function Page() {
               <div className="flex flex-wrap gap-5">
                 <div className="min-w-65 flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <Avatar className="size-7 rounded-lg border border-[#D8D4CC]">
-                      <AvatarImage src={product.logo ?? undefined} alt={product.name} className="rounded-md" />
-                      <AvatarFallback className="rounded-md bg-paper text-ink text-xs font-bold">
+                    <Avatar className="size-7 rounded-md overflow-visible">
+                      <AvatarImage src={product.logo ?? undefined} alt={product.name} className="size-full object-contain" />
+                      <AvatarFallback className="rounded-md border border-[#D8D4CC] bg-paper text-xs font-bold">
                         {product.name.charAt(0)}
                       </AvatarFallback>
                     </Avatar>

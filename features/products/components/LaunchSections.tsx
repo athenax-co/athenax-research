@@ -334,25 +334,40 @@ export function VoicesSection({
   isAdmin,
   onDelete,
   onCreate,
+  onUpdate,
   creating,
 }: {
   voices: ProductVoice[];
   isAdmin: boolean;
   onDelete: (id: number) => void;
   onCreate: (data: VoiceIn) => void;
+  onUpdate: (id: number, data: Partial<VoiceIn>) => void;
   creating: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [editVoice, setEditVoice] = useState<ProductVoice | null>(null);
   const [form, setForm] = useState<VoiceIn>(EMPTY_VOICE);
+  const [editForm, setEditForm] = useState<Partial<VoiceIn>>({});
 
   const shown = expanded ? voices : voices.slice(0, 2);
+
+  function openEdit(v: ProductVoice) {
+    setEditVoice(v);
+    setEditForm({ quote: v.quote, authorHandle: v.authorHandle, authorName: v.authorName ?? "", sourceUrl: v.sourceUrl ?? "" });
+  }
 
   function submitAdd() {
     if (!form.quote.trim() || !form.authorHandle.trim()) return;
     onCreate({ ...form, quote: form.quote.trim(), authorHandle: form.authorHandle.trim() });
     setForm(EMPTY_VOICE);
     setAddOpen(false);
+  }
+
+  function submitEdit() {
+    if (!editVoice || !editForm.quote?.trim() || !editForm.authorHandle?.trim()) return;
+    onUpdate(editVoice.id, editForm);
+    setEditVoice(null);
   }
 
   return (
@@ -380,9 +395,14 @@ export function VoicesSection({
                   </a>
                 )}
                 {isAdmin && (
-                  <button onClick={() => onDelete(v.id)} className="text-[#aaa] hover:text-[#E8323C]" title="Delete">
-                    <Trash2 size={13} />
-                  </button>
+                  <>
+                    <button onClick={() => openEdit(v)} className="text-[#6B6B7A] hover:text-ink" title="Edit">
+                      <Pencil size={13} />
+                    </button>
+                    <button onClick={() => onDelete(v.id)} className="text-[#aaa] hover:text-[#E8323C]" title="Delete">
+                      <Trash2 size={13} />
+                    </button>
+                  </>
                 )}
               </div>
             </div>
@@ -396,15 +416,7 @@ export function VoicesSection({
         </button>
       )}
 
-      <Dialog
-        open={addOpen}
-        onOpenChange={(o) => {
-          if (!o) {
-            setAddOpen(false);
-            setForm(EMPTY_VOICE);
-          }
-        }}
-      >
+      <Dialog open={addOpen} onOpenChange={(o) => { if (!o) { setAddOpen(false); setForm(EMPTY_VOICE); } }}>
         <DialogContent>
           <DialogHeader>
             <div className="flex items-center gap-1">
@@ -415,53 +427,62 @@ export function VoicesSection({
           </DialogHeader>
           <DialogBody>
             <div className="inp-group">
-              <label className="inp-label">
-                Quote <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                className="inp resize-none"
-                rows={3}
-                placeholder="What they said…"
-                value={form.quote}
-                onChange={(e) => setForm({ ...form, quote: e.target.value })}
-              />
+              <label className="inp-label">Quote <span className="text-red-500">*</span></label>
+              <textarea className="inp resize-none" rows={3} placeholder="What they said…" value={form.quote} onChange={(e) => setForm({ ...form, quote: e.target.value })} />
             </div>
             <div className="inp-group">
-              <label className="inp-label">
-                Handle <span className="text-red-500">*</span>
-              </label>
-              <input
-                className="inp"
-                placeholder="@username"
-                value={form.authorHandle}
-                onChange={(e) => setForm({ ...form, authorHandle: e.target.value })}
-              />
+              <label className="inp-label">Handle <span className="text-red-500">*</span></label>
+              <input className="inp" placeholder="@username" value={form.authorHandle} onChange={(e) => setForm({ ...form, authorHandle: e.target.value })} />
             </div>
             <div className="inp-group">
               <label className="inp-label">Author name</label>
-              <input
-                className="inp"
-                placeholder="Display name (optional)"
-                value={form.authorName}
-                onChange={(e) => setForm({ ...form, authorName: e.target.value })}
-              />
+              <input className="inp" placeholder="Display name (optional)" value={form.authorName} onChange={(e) => setForm({ ...form, authorName: e.target.value })} />
             </div>
             <div className="inp-group">
               <label className="inp-label">Source URL</label>
-              <input
-                className="inp"
-                placeholder="https://twitter.com/…"
-                value={form.sourceUrl}
-                onChange={(e) => setForm({ ...form, sourceUrl: e.target.value })}
-              />
+              <input className="inp" placeholder="https://twitter.com/…" value={form.sourceUrl} onChange={(e) => setForm({ ...form, sourceUrl: e.target.value })} />
             </div>
             <div className="flex gap-2.5">
               <Button className="flex-1" onClick={submitAdd} disabled={creating || !form.quote.trim() || !form.authorHandle.trim()}>
                 {creating ? <span className="spinner" /> : "Add Voice →"}
               </Button>
-              <Button variant="ghost" onClick={() => setAddOpen(false)}>
-                Cancel
+              <Button variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button>
+            </div>
+          </DialogBody>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editVoice} onOpenChange={(o) => { if (!o) setEditVoice(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="flex items-center gap-1">
+              <DialogTrafficLights />
+              <DialogTitle>EDIT_VOICE.SYS</DialogTitle>
+            </div>
+            <DialogClose />
+          </DialogHeader>
+          <DialogBody>
+            <div className="inp-group">
+              <label className="inp-label">Quote <span className="text-red-500">*</span></label>
+              <textarea className="inp resize-none" rows={3} value={editForm.quote ?? ""} onChange={(e) => setEditForm({ ...editForm, quote: e.target.value })} />
+            </div>
+            <div className="inp-group">
+              <label className="inp-label">Handle <span className="text-red-500">*</span></label>
+              <input className="inp" value={editForm.authorHandle ?? ""} onChange={(e) => setEditForm({ ...editForm, authorHandle: e.target.value })} />
+            </div>
+            <div className="inp-group">
+              <label className="inp-label">Author name</label>
+              <input className="inp" value={editForm.authorName ?? ""} onChange={(e) => setEditForm({ ...editForm, authorName: e.target.value })} />
+            </div>
+            <div className="inp-group">
+              <label className="inp-label">Source URL</label>
+              <input className="inp" value={editForm.sourceUrl ?? ""} onChange={(e) => setEditForm({ ...editForm, sourceUrl: e.target.value })} />
+            </div>
+            <div className="flex gap-2.5">
+              <Button className="flex-1" onClick={submitEdit} disabled={!editForm.quote?.trim() || !editForm.authorHandle?.trim()}>
+                Save Changes →
               </Button>
+              <Button variant="ghost" onClick={() => setEditVoice(null)}>Cancel</Button>
             </div>
           </DialogBody>
         </DialogContent>

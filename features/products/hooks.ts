@@ -262,6 +262,14 @@ export function useCreateVoice(productId: number, slug: string) {
   });
 }
 
+export function useUpdateVoice(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ voiceId, data }: { voiceId: number; data: Partial<VoiceIn> }) => productApi.updateVoice(productId, voiceId, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
 export function useDeleteVoice(productId: number, slug: string) {
   const queryClient = useQueryClient();
   return useMutation({

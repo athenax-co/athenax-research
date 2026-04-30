@@ -19,6 +19,7 @@ import {
   useDeleteTeamMember,
   useUpdateTeamMemberStatus,
   useCreateVoice,
+  useUpdateVoice,
   useDeleteVoice,
   useCreateBounty,
   useDeleteBounty,
@@ -62,6 +63,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { mutate: deleteTeamMember } = useDeleteTeamMember(apiProductId, id);
   const { mutate: updateTeamMemberStatus } = useUpdateTeamMemberStatus(apiProductId, id);
   const { mutate: createVoice, isPending: creatingVoice } = useCreateVoice(apiProductId, id);
+  const { mutate: updateVoice } = useUpdateVoice(apiProductId, id);
   const { mutate: deleteVoice } = useDeleteVoice(apiProductId, id);
   const { mutate: createBounty, isPending: creatingBounty } = useCreateBounty(apiProductId, id);
   const { mutate: deleteBounty } = useDeleteBounty(apiProductId, id);
@@ -401,6 +403,15 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   onSuccess: () => showToast("Voice removed.", "info"),
                   onError: () => showToast("Action failed.", "error"),
                 })
+              }
+              onUpdate={(voiceId, data) =>
+                updateVoice(
+                  { voiceId, data },
+                  {
+                    onSuccess: () => showToast("Voice updated.", "success"),
+                    onError: () => showToast("Action failed.", "error"),
+                  }
+                )
               }
               onCreate={(data) =>
                 createVoice(data, {

@@ -113,6 +113,10 @@ export function createVoice(productId: number, data: VoiceIn): Promise<ProductVo
   return http.post<ProductVoice>(`/product/${productId}/voices`, data, { auth: true });
 }
 
+export function updateVoice(productId: number, voiceId: number, data: Partial<VoiceIn>): Promise<ProductVoice> {
+  return http.patch<ProductVoice>(`/product/${productId}/voices/${voiceId}`, data, { auth: true });
+}
+
 export function deleteVoice(productId: number, voiceId: number): Promise<void> {
   return http.del<void>(`/product/${productId}/voices/${voiceId}`, { auth: true });
 }

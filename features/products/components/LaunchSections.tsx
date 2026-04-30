@@ -88,6 +88,12 @@ export function TeamSection({
   const [form, setForm] = useState<TeamMemberIn>(EMPTY_MEMBER);
   const [editForm, setEditForm] = useState<Partial<TeamMemberIn>>({});
 
+  const formatLinkLabel = (url: string) => {
+    let label = url.replace(/^https?:\/\//, "").replace(/^www\./, "");
+    label = label.replace(/^twitter\.com\//, "x.com/");
+    return label;
+  };
+
   const shown = expanded ? members : members.slice(0, 3);
   const hiddenCount = members.length - 3;
 
@@ -127,28 +133,28 @@ export function TeamSection({
 
       {members.length === 0 && <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No team members listed.</p>}
 
-      <div className={`overflow-hidden transition-all ${expanded ? "max-h-200 overflow-y-auto" : "max-h-100"}`}>
+      <div className={`overflow-hidden transition-all ${expanded ? "max-h-200 overflow-y-auto" : "max-h-120"}`}>
         {shown.map((m, i) => (
-          <div key={m.id} className={`flex items-center gap-3.5 py-3.5 ${i < shown.length - 1 ? "border-b border-b-[rgba(0,0,0,0.08)]" : ""}`}>
+          <div key={m.id} className={`flex items-start gap-4 py-4 ${i < shown.length - 1 ? "border-b border-b-[rgba(0,0,0,0.08)]" : ""}`}>
             <div
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ink text-[14px] font-bold"
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-ink text-[16px] font-bold"
               style={{ background: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
             >
               {m.name.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
-                <span className="text-sm font-bold">{m.name}</span>
-                {m.roleLabel && <span className="font-['Space_Mono',monospace] text-[10px] text-[#888]">· {m.roleLabel}</span>}
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <span className="text-[17px] font-bold leading-snug">{m.name}</span>
+                {m.roleLabel && <span className="font-['Space_Mono',monospace] text-[11px] text-[#8A8A8A]">· {m.roleLabel}</span>}
                 {(isAdmin || isOwner) && m.status === "pending" && (
                   <span className="rounded border border-[rgba(0,0,0,0.15)] bg-[#FFF8DC] px-1.5 py-0.5 font-['Space_Mono',monospace] text-[9px] font-semibold tracking-[0.05em] text-[#8B6914]">
                     PENDING
                   </span>
                 )}
               </div>
-              {m.bioNote && <div className="truncate text-xs text-[#555] mb-0.5">{m.bioNote}</div>}
+              {m.bioNote && <div className="text-[13px] text-[#5A5A5A] mb-1.5">{m.bioNote}</div>}
               {(m.twitterUrl || m.githubUrl) && (
-                <div className="flex gap-2.5 font-['Space_Mono',monospace] text-[10px]">
+                <div className="flex flex-wrap gap-3 font-['Space_Mono',monospace] text-[11px]">
                   {m.twitterUrl && (
                     <a
                       href={m.twitterUrl.startsWith("http") ? m.twitterUrl : `https://${m.twitterUrl}`}
@@ -156,7 +162,7 @@ export function TeamSection({
                       rel="noreferrer"
                       className="text-[#185FA5] hover:underline"
                     >
-                      ↗ {m.twitterUrl}
+                      ↗ {formatLinkLabel(m.twitterUrl)}
                     </a>
                   )}
                   {m.githubUrl && (
@@ -166,7 +172,7 @@ export function TeamSection({
                       rel="noreferrer"
                       className="text-[#185FA5] hover:underline"
                     >
-                      ↗ {m.githubUrl}
+                      ↗ {formatLinkLabel(m.githubUrl)}
                     </a>
                   )}
                 </div>
@@ -416,7 +422,15 @@ export function VoicesSection({
         </button>
       )}
 
-      <Dialog open={addOpen} onOpenChange={(o) => { if (!o) { setAddOpen(false); setForm(EMPTY_VOICE); } }}>
+      <Dialog
+        open={addOpen}
+        onOpenChange={(o) => {
+          if (!o) {
+            setAddOpen(false);
+            setForm(EMPTY_VOICE);
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <div className="flex items-center gap-1">
@@ -427,32 +441,64 @@ export function VoicesSection({
           </DialogHeader>
           <DialogBody>
             <div className="inp-group">
-              <label className="inp-label">Quote <span className="text-red-500">*</span></label>
-              <textarea className="inp resize-none" rows={3} placeholder="What they said…" value={form.quote} onChange={(e) => setForm({ ...form, quote: e.target.value })} />
+              <label className="inp-label">
+                Quote <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                className="inp resize-none"
+                rows={3}
+                placeholder="What they said…"
+                value={form.quote}
+                onChange={(e) => setForm({ ...form, quote: e.target.value })}
+              />
             </div>
             <div className="inp-group">
-              <label className="inp-label">Handle <span className="text-red-500">*</span></label>
-              <input className="inp" placeholder="@username" value={form.authorHandle} onChange={(e) => setForm({ ...form, authorHandle: e.target.value })} />
+              <label className="inp-label">
+                Handle <span className="text-red-500">*</span>
+              </label>
+              <input
+                className="inp"
+                placeholder="@username"
+                value={form.authorHandle}
+                onChange={(e) => setForm({ ...form, authorHandle: e.target.value })}
+              />
             </div>
             <div className="inp-group">
               <label className="inp-label">Author name</label>
-              <input className="inp" placeholder="Display name (optional)" value={form.authorName} onChange={(e) => setForm({ ...form, authorName: e.target.value })} />
+              <input
+                className="inp"
+                placeholder="Display name (optional)"
+                value={form.authorName}
+                onChange={(e) => setForm({ ...form, authorName: e.target.value })}
+              />
             </div>
             <div className="inp-group">
               <label className="inp-label">Source URL</label>
-              <input className="inp" placeholder="https://twitter.com/…" value={form.sourceUrl} onChange={(e) => setForm({ ...form, sourceUrl: e.target.value })} />
+              <input
+                className="inp"
+                placeholder="https://twitter.com/…"
+                value={form.sourceUrl}
+                onChange={(e) => setForm({ ...form, sourceUrl: e.target.value })}
+              />
             </div>
             <div className="flex gap-2.5">
               <Button className="flex-1" onClick={submitAdd} disabled={creating || !form.quote.trim() || !form.authorHandle.trim()}>
                 {creating ? <span className="spinner" /> : "Add Voice →"}
               </Button>
-              <Button variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button>
+              <Button variant="ghost" onClick={() => setAddOpen(false)}>
+                Cancel
+              </Button>
             </div>
           </DialogBody>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!editVoice} onOpenChange={(o) => { if (!o) setEditVoice(null); }}>
+      <Dialog
+        open={!!editVoice}
+        onOpenChange={(o) => {
+          if (!o) setEditVoice(null);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <div className="flex items-center gap-1">
@@ -463,12 +509,25 @@ export function VoicesSection({
           </DialogHeader>
           <DialogBody>
             <div className="inp-group">
-              <label className="inp-label">Quote <span className="text-red-500">*</span></label>
-              <textarea className="inp resize-none" rows={3} value={editForm.quote ?? ""} onChange={(e) => setEditForm({ ...editForm, quote: e.target.value })} />
+              <label className="inp-label">
+                Quote <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                className="inp resize-none"
+                rows={3}
+                value={editForm.quote ?? ""}
+                onChange={(e) => setEditForm({ ...editForm, quote: e.target.value })}
+              />
             </div>
             <div className="inp-group">
-              <label className="inp-label">Handle <span className="text-red-500">*</span></label>
-              <input className="inp" value={editForm.authorHandle ?? ""} onChange={(e) => setEditForm({ ...editForm, authorHandle: e.target.value })} />
+              <label className="inp-label">
+                Handle <span className="text-red-500">*</span>
+              </label>
+              <input
+                className="inp"
+                value={editForm.authorHandle ?? ""}
+                onChange={(e) => setEditForm({ ...editForm, authorHandle: e.target.value })}
+              />
             </div>
             <div className="inp-group">
               <label className="inp-label">Author name</label>
@@ -482,7 +541,9 @@ export function VoicesSection({
               <Button className="flex-1" onClick={submitEdit} disabled={!editForm.quote?.trim() || !editForm.authorHandle?.trim()}>
                 Save Changes →
               </Button>
-              <Button variant="ghost" onClick={() => setEditVoice(null)}>Cancel</Button>
+              <Button variant="ghost" onClick={() => setEditVoice(null)}>
+                Cancel
+              </Button>
             </div>
           </DialogBody>
         </DialogContent>

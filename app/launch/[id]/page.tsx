@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { use } from "react";
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
@@ -8,12 +8,29 @@ import SEOMeta from "@/components/SEOMeta";
 import { IconShare } from "@/components/Icons";
 import { useGlobal } from "@/components/GlobalProvider";
 import {
-  useProductBySlug, useVoteProduct, useInterestProduct, useProducts,
-  useComments, useCreateComment,
+  useProductBySlug,
+  useVoteProduct,
+  useInterestProduct,
+  useProducts,
+  useComments,
+  useCreateComment,
+  useCreateTeamMember,
+  useUpdateTeamMember,
+  useDeleteTeamMember,
+  useUpdateTeamMemberStatus,
+  useCreateVoice,
+  useDeleteVoice,
+  useCreateBounty,
+  useDeleteBounty,
+  useUpdateProductStatus,
+  GallerySection,
+  TeamSection,
+  VoicesSection,
+  BountiesSection,
+  DiscussionSection,
 } from "@/features/products";
-import type {
-  ProductDetailOut, ProductMedia, TeamMemberOut, ProductVoice, Bounty, ProductComment,
-} from "@/features/products";
+import type { ProductDetailOut } from "@/features/products";
+import { VerificationStatus, ProductStatus } from "@/enums";
 import { useCategories } from "@/hooks/queries/useReference";
 
 const LINK_LABELS: Record<string, string> = {
@@ -37,6 +54,18 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const apiProductId = apiProduct?.id ?? 0;
   const { data: comments = [] } = useComments(apiProductId);
   const { mutate: createComment } = useCreateComment(apiProductId);
+
+  const isAdmin = (user?.role as string) === "admin";
+
+  const { mutate: createTeamMember, isPending: creatingTeamMember } = useCreateTeamMember(apiProductId, id);
+  const { mutate: updateTeamMember } = useUpdateTeamMember(apiProductId, id);
+  const { mutate: deleteTeamMember } = useDeleteTeamMember(apiProductId, id);
+  const { mutate: updateTeamMemberStatus } = useUpdateTeamMemberStatus(apiProductId, id);
+  const { mutate: createVoice, isPending: creatingVoice } = useCreateVoice(apiProductId, id);
+  const { mutate: deleteVoice } = useDeleteVoice(apiProductId, id);
+  const { mutate: createBounty, isPending: creatingBounty } = useCreateBounty(apiProductId, id);
+  const { mutate: deleteBounty } = useDeleteBounty(apiProductId, id);
+  const { mutate: updateProductStatus, isPending: updatingStatus } = useUpdateProductStatus();
 
   const shareLaunch = async (slug: string) => {
     const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
@@ -128,6 +157,23 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     );
   };
 
+  const isPending = p.status === ProductStatus.PENDING;
+  const isOwner = user != null && p.createdById != null && user.id === p.createdById;
+
+  const handleVerifyProduct = (status: ProductStatus) => {
+    updateProductStatus(
+      { id: p.id, status },
+      {
+        onSuccess: () =>
+          showToast(
+            status === ProductStatus.APPROVED ? "Launch approved." : "Launch rejected.",
+            status === ProductStatus.APPROVED ? "success" : "info"
+          ),
+        onError: () => showToast("Action failed. Please try again.", "error"),
+      }
+    );
+  };
+
   const factRows = [
     p.categories.length > 0 ? { label: "Category", value: p.categories[0].name } : null,
     { label: "Status", value: "● Live Beta", isStatus: true },
@@ -143,6 +189,35 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
   return (
     <div>
+      {isPending && isOwner && !isAdmin && (
+        <div className="sticky top-17 z-40 flex items-center gap-3 border-b border-[#D4A017]/30 bg-[#FFFBEB] px-5 py-3">
+          <span className="font-['Space_Mono',monospace] text-[10px] font-bold tracking-widest text-[#B45309]">PENDING_REVIEW.SYS</span>
+          <span className="h-3 w-px bg-[#D4A017]/40" />
+          <p className="flex-1 text-[13px] font-medium text-[#92400E]">
+            Your launch is awaiting editorial review. It will become publicly visible once approved.
+          </p>
+        </div>
+      )}
+
+      {isPending && isAdmin && (
+        <div className="sticky top-17 z-40 flex flex-wrap items-center gap-3 border-b border-[#D8D4CC] bg-paper px-5 py-3">
+          <span className="font-['Space_Mono',monospace] text-[10px] font-bold tracking-widest text-[#E8323C]">LAUNCH_REVIEW_QUEUE.SYS</span>
+          <span className="h-3 w-px bg-[#D8D4CC]" />
+          <p className="flex-1 text-[13px] font-semibold text-ink">This launch is pending review — approve or reject below.</p>
+          <div className="flex shrink-0 gap-2">
+            <Link href="/admin?tab=launches" className="btn btn-ghost btn-sm">
+              ← Queue
+            </Link>
+            <button className="btn btn-primary btn-sm" onClick={() => handleVerifyProduct(ProductStatus.APPROVED)} disabled={updatingStatus}>
+              {updatingStatus ? <span className="spinner" /> : "✓ Approve"}
+            </button>
+            <button className="btn btn-outline btn-sm" onClick={() => handleVerifyProduct(ProductStatus.REJECTED)} disabled={updatingStatus}>
+              {updatingStatus ? <span className="spinner" /> : "✗ Reject"}
+            </button>
+          </div>
+        </div>
+      )}
+
       <SEOMeta
         title={`${p.name} — ${primaryCategory} | AthenaX Launch`}
         description={`${p.name} launched on AthenaX.${p.description ? ` ${p.description.slice(0, 120)}` : ""}`}
@@ -150,7 +225,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       />
 
       <div className="page-wrap section" style={{ maxWidth: 1040 }}>
-        {/* BREADCRUMB */}
         <div className="mb-6 flex flex-wrap items-center gap-3">
           <Link
             href="/launch"
@@ -161,7 +235,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           <span className="rounded font-['Space_Mono',monospace] border border-ink bg-white px-3 py-1 text-[11px]">/root/launch/{p.slug}</span>
         </div>
 
-        {/* HERO */}
         <div className="mb-8 grid grid-cols-[90px_1fr_auto] items-start gap-4 border-b border-b-[rgba(0,0,0,0.12)] pb-7 max-[640px]:grid-cols-[70px_1fr]">
           <Avatar className="size-[90px] shrink-0 rounded-xl overflow-visible border border-ink shadow-[3px_3px_0_#1a1a1a] max-[640px]:size-[70px]">
             <AvatarImage src={p.logo ?? undefined} alt={p.name} className="size-full object-contain" />
@@ -171,24 +244,10 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           <div className="min-w-0">
             <div className="mb-1.5 flex flex-wrap items-center gap-2">
               <h1 className="text-[36px] leading-none tracking-tight max-[640px]:text-[28px]">{p.name}</h1>
-              {p.categories.length > 0 && (
-                <span className="topic-pill text-[10px]">
-                  {p.categories[0].name.toUpperCase()}
-                </span>
-              )}
-              <span className="topic-pill bg-[#D7E9B5] text-[10px]">
-                LIVE
-              </span>
-              {p.stage && (
-                <span className="topic-pill bg-[#E8E4D9] text-[10px]">
-                  {p.stage.toUpperCase()}
-                </span>
-              )}
-              {hasGithub && (
-                <span className="topic-pill bg-[#E8E4D9] text-[10px]">
-                  OPEN SOURCE
-                </span>
-              )}
+              {p.categories.length > 0 && <span className="topic-pill text-[10px]">{p.categories[0].name.toUpperCase()}</span>}
+              <span className="topic-pill bg-[#D7E9B5] text-[10px]">LIVE</span>
+              {p.stage && <span className="topic-pill bg-[#E8E4D9] text-[10px]">{p.stage.toUpperCase()}</span>}
+              {hasGithub && <span className="topic-pill bg-[#E8E4D9] text-[10px]">OPEN SOURCE</span>}
             </div>
             {p.description && <p className="mb-2 text-[15px] leading-[1.6] text-[#555] max-w-[600px]">{p.description}</p>}
             <div className="font-['Space_Mono',monospace] text-[11px] text-[#888] tracking-[0.02em]">
@@ -215,9 +274,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           </div>
         </div>
 
-        {/* BLOCK 1: ABOUT | GALLERY + LINKS */}
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-          {/* ABOUT.SYS */}
           <WindowCard label="ABOUT.SYS" className="md:row-span-2">
             <p className="mb-3 text-[15px] leading-[1.7]">{p.description ?? "No description provided."}</p>
             <p className="mb-8 text-[13px] italic text-[#555]">
@@ -250,12 +307,10 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             )}
           </WindowCard>
 
-          {/* GALLERY.SYS */}
           <WindowCard label="GALLERY.SYS" bodyClass="p-3">
             <GallerySection media={p.media} />
           </WindowCard>
 
-          {/* LINKS.SYS */}
           <WindowCard label="LINKS.SYS" bodyClass="px-5 py-3">
             {links.length > 0 ? (
               links.map((l) => (
@@ -294,32 +349,91 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           </WindowCard>
         </div>
 
-        {/* BLOCK 2: TEAM + VOICES */}
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
           <WindowCard label="TEAM.SYS">
-            <TeamSection members={p.team} />
+            <TeamSection
+              members={p.team}
+              isAdmin={isAdmin}
+              isOwner={isOwner}
+              onApprove={(memberId) =>
+                updateTeamMemberStatus(
+                  { memberId, status: VerificationStatus.APPROVED },
+                  { onSuccess: () => showToast("Member approved.", "success"), onError: () => showToast("Action failed.", "error") }
+                )
+              }
+              onReject={(memberId) =>
+                updateTeamMemberStatus(
+                  { memberId, status: VerificationStatus.REJECTED },
+                  { onSuccess: () => showToast("Member rejected.", "info"), onError: () => showToast("Action failed.", "error") }
+                )
+              }
+              onDelete={(memberId) =>
+                deleteTeamMember(memberId, {
+                  onSuccess: () => showToast("Member removed.", "info"),
+                  onError: () => showToast("Action failed.", "error"),
+                })
+              }
+              onUpdate={(memberId, data) =>
+                updateTeamMember(
+                  { memberId, data },
+                  { onSuccess: () => showToast("Member updated.", "success"), onError: () => showToast("Action failed.", "error") }
+                )
+              }
+              onCreate={(data) =>
+                createTeamMember(data, {
+                  onSuccess: () => showToast("Member added — pending approval.", "success"),
+                  onError: () => showToast("Action failed.", "error"),
+                })
+              }
+              creating={creatingTeamMember}
+            />
           </WindowCard>
 
           <WindowCard label="VOICES.SYS">
-            <VoicesSection voices={p.voices} />
+            <VoicesSection
+              voices={p.voices}
+              isAdmin={isAdmin}
+              onDelete={(voiceId) =>
+                deleteVoice(voiceId, {
+                  onSuccess: () => showToast("Voice removed.", "info"),
+                  onError: () => showToast("Action failed.", "error"),
+                })
+              }
+              onCreate={(data) =>
+                createVoice(data, {
+                  onSuccess: () => showToast("Voice added.", "success"),
+                  onError: () => showToast("Action failed.", "error"),
+                })
+              }
+              creating={creatingVoice}
+            />
           </WindowCard>
         </div>
 
-        {/* BLOCK 3: BOUNTIES */}
         <div className="mb-8">
           <WindowCard label="BOUNTIES.SYS" titleRight="ACTIVE BOUNTIES FOR THIS PROJECT">
-            <BountiesSection bounties={p.bounties} />
+            <BountiesSection
+              bounties={p.bounties}
+              isAdmin={isAdmin}
+              onDelete={(bountyId) =>
+                deleteBounty(bountyId, {
+                  onSuccess: () => showToast("Bounty removed.", "info"),
+                  onError: () => showToast("Action failed.", "error"),
+                })
+              }
+              onCreate={(data) =>
+                createBounty(data, {
+                  onSuccess: () => showToast("Bounty created.", "success"),
+                  onError: () => showToast("Action failed.", "error"),
+                })
+              }
+              creating={creatingBounty}
+            />
           </WindowCard>
         </div>
 
-        {/* BLOCK 4: DISCUSSION */}
-        <DiscussionSection
-          user={user}
-          comments={comments}
-          onPost={(text) => createComment(text)}
-        />
+        <DiscussionSection user={user} comments={comments} onPost={(text) => createComment(text)} />
 
-        {/* LINKED PAPERS */}
         {p.papers && p.papers.length > 0 && (
           <div className="mt-8">
             <WindowCard label="RESEARCH.SYS">
@@ -341,7 +455,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           </div>
         )}
 
-        {/* SIMILAR PROJECTS */}
         {similarProducts.length > 0 && (
           <div className="mt-14 border-t border-t-[rgba(0,0,0,0.12)] pt-8">
             <div className="mb-4 font-['Space_Mono',monospace] text-[11px] uppercase tracking-[0.08em] text-[#888]">›_ similar projects</div>
@@ -355,15 +468,15 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   <div className="mb-2.5 flex items-center gap-3">
                     <Avatar className="size-10 shrink-0 rounded-lg overflow-visible border border-ink">
                       <AvatarImage src={s.logo ?? undefined} alt={s.name} className="size-full object-contain" />
-                      <AvatarFallback className="rounded-lg border border-[#D8D4CC] bg-paper text-base font-bold">
-                        {s.name.charAt(0)}
-                      </AvatarFallback>
+                      <AvatarFallback className="rounded-lg border border-[#D8D4CC] bg-paper text-base font-bold">{s.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="mb-0.75 text-[15px] font-bold">{s.name}</div>
                   </div>
                   <div className="mb-2 flex flex-wrap gap-1.5">
                     {s.categories.map((c) => (
-                      <span key={c.id} className="topic-pill px-2 py-0.5 text-[10px]">{c.name}</span>
+                      <span key={c.id} className="topic-pill px-2 py-0.5 text-[10px]">
+                        {c.name}
+                      </span>
                     ))}
                     {s.stage && <span className="ftag text-[10px]">{s.stage}</span>}
                   </div>
@@ -375,254 +488,5 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         )}
       </div>
     </div>
-  );
-}
-
-function GallerySection({ media }: { media: ProductMedia[] }) {
-  const images = media.filter((m) => m.mediaType === "image").sort((a, b) => a.sortOrder - b.sortOrder);
-
-  if (images.length === 0) {
-    return (
-      <div className="grid grid-cols-[1.4fr_1fr] grid-rows-2 gap-1.5">
-        <div className="row-span-2 flex aspect-auto min-h-[120px] items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
-          screenshot.png
-        </div>
-        <div className="flex aspect-[16/10] items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
-          02.png
-        </div>
-        <div className="flex aspect-[16/10] items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
-          03.png
-        </div>
-      </div>
-    );
-  }
-
-  const shown = images.slice(0, 3);
-  const extra = images.length - 3;
-
-  return (
-    <div className="grid grid-cols-[1.4fr_1fr] grid-rows-2 gap-1.5">
-      <div className="row-span-2 min-h-[120px] overflow-hidden rounded border border-[rgba(0,0,0,0.08)]">
-        <img src={shown[0].storageKey} alt="" className="h-full w-full object-cover" />
-      </div>
-      <div className="aspect-[16/10] overflow-hidden rounded border border-[rgba(0,0,0,0.08)]">
-        {shown[1] ? (
-          <img src={shown[1].storageKey} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full items-center justify-center bg-[#E8E4D9] text-[10px] font-['Space_Mono',monospace] text-[#888]">02.png</div>
-        )}
-      </div>
-      <div className="relative aspect-[16/10] overflow-hidden rounded border border-[rgba(0,0,0,0.08)]">
-        {shown[2] ? (
-          <img src={shown[2].storageKey} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full items-center justify-center bg-[#E8E4D9] text-[10px] font-['Space_Mono',monospace] text-[#888]">03.png</div>
-        )}
-        {extra > 0 && (
-          <span className="absolute bottom-1.5 right-1.5 rounded bg-[rgba(0,0,0,0.5)] px-1.5 py-0.5 text-[9px] font-['Space_Mono',monospace] text-white">
-            + {extra} more
-          </span>
-        )}
-      </div>
-    </div>
-  );
-}
-
-const AVATAR_COLORS = ["#FFE14D", "#B5D8E9", "#E9C9B5", "#D4C5E2", "#C5DED4"];
-
-function TeamSection({ members }: { members: TeamMemberOut[] }) {
-  const [expanded, setExpanded] = useState(false);
-
-  if (members.length === 0) {
-    return <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No team members listed.</p>;
-  }
-
-  const shown = expanded ? members : members.slice(0, 3);
-  const hiddenCount = members.length - 3;
-
-  return (
-    <>
-      <div className={`overflow-hidden transition-all ${expanded ? "max-h-[600px] overflow-y-auto" : "max-h-[340px]"}`}>
-        {shown.map((m, i) => (
-          <div key={m.id} className={`flex items-center gap-3.5 py-3.5 ${i < shown.length - 1 ? "border-b border-b-[rgba(0,0,0,0.08)]" : ""}`}>
-            <div
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ink text-[14px] font-bold"
-              style={{ background: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
-            >
-              {m.name.charAt(0)}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-baseline gap-1.5 mb-0.5">
-                <span className="text-sm font-bold">{m.name}</span>
-                {m.roleLabel && <span className="font-['Space_Mono',monospace] text-[10px] text-[#888]">· {m.roleLabel}</span>}
-              </div>
-              {m.bioNote && <div className="truncate text-xs text-[#555] mb-0.5">{m.bioNote}</div>}
-              {(m.twitterUrl || m.githubUrl) && (
-                <div className="flex gap-2.5 font-['Space_Mono',monospace] text-[10px]">
-                  {m.twitterUrl && (
-                    <a href={m.twitterUrl.startsWith("http") ? m.twitterUrl : `https://${m.twitterUrl}`} target="_blank" rel="noreferrer" className="text-[#185FA5] hover:underline">
-                      ↗ {m.twitterUrl}
-                    </a>
-                  )}
-                  {m.githubUrl && (
-                    <a href={m.githubUrl.startsWith("http") ? m.githubUrl : `https://${m.githubUrl}`} target="_blank" rel="noreferrer" className="text-[#185FA5] hover:underline">
-                      ↗ {m.githubUrl}
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-      {hiddenCount > 0 && (
-        <button onClick={() => setExpanded(!expanded)} className="mt-3 font-['Space_Mono',monospace] text-[11px] text-[#888] hover:text-[#1a1a1a]">
-          {expanded ? "− show less" : `+ ${hiddenCount} more team members`}
-        </button>
-      )}
-    </>
-  );
-}
-
-function VoicesSection({ voices }: { voices: ProductVoice[] }) {
-  const [expanded, setExpanded] = useState(false);
-
-  if (voices.length === 0) {
-    return <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No voices yet.</p>;
-  }
-
-  const shown = expanded ? voices : voices.slice(0, 2);
-
-  return (
-    <>
-      <div className={`overflow-hidden transition-all ${expanded ? "max-h-[600px] overflow-y-auto" : "max-h-[310px]"}`}>
-        {shown.map((v) => (
-          <div key={v.id} className="mb-2.5 rounded-md border border-[rgba(0,0,0,0.08)] bg-[#FFFCEF] px-4 py-3.5 last:mb-0">
-            <p className="text-[13px] italic leading-[1.55]">"{v.quote}"</p>
-            <div className="mt-2 flex items-center justify-between font-['Space_Mono',monospace] text-[10px]">
-              <span className="font-medium text-[#1a1a1a]">{v.authorName ?? v.authorHandle}</span>
-              {v.sourceUrl && (
-                <a href={v.sourceUrl} target="_blank" rel="noreferrer" className="text-[#185FA5] hover:underline">
-                  ↗ open thread
-                </a>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-      {voices.length > 2 && (
-        <button onClick={() => setExpanded(!expanded)} className="mt-2.5 font-['Space_Mono',monospace] text-[11px] text-[#888] hover:text-[#1a1a1a]">
-          {expanded ? "− show less" : `show ${voices.length - 2} more →`}
-        </button>
-      )}
-    </>
-  );
-}
-
-function BountiesSection({ bounties }: { bounties: Bounty[] }) {
-  if (bounties.length === 0) {
-    return <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No active bounties.</p>;
-  }
-
-  return (
-    <>
-      {bounties.map((b, i) => (
-        <div
-          key={b.id}
-          className={`flex items-start justify-between py-3.5 ${i < bounties.length - 1 ? "border-b border-b-[rgba(0,0,0,0.08)]" : ""}`}
-        >
-          <div className="flex-1 min-w-0">
-            <div className="mb-1 text-sm font-semibold">{b.title}</div>
-            <div className="flex flex-wrap items-center gap-1.5 font-['Space_Mono',monospace] text-[10px] text-[#888]">
-              {b.techLabel && (
-                <span className="rounded border border-[rgba(0,0,0,0.12)] bg-[#FAFAF7] px-1.5 py-0.5 text-[9px]">
-                  {b.techLabel}
-                </span>
-              )}
-              <span className="capitalize">{b.status}</span>
-            </div>
-          </div>
-          <a
-            href={b.externalUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="ml-4 shrink-0 font-['Space_Mono',monospace] text-[15px] font-bold text-[#639922] hover:underline"
-          >
-            ${Number(b.rewardAmount).toLocaleString()}
-          </a>
-        </div>
-      ))}
-    </>
-  );
-}
-
-function DiscussionSection({
-  user,
-  comments,
-  onPost,
-}: {
-  user: any;
-  comments: ProductComment[];
-  onPost: (text: string) => void;
-}) {
-  const [text, setText] = useState("");
-
-  return (
-    <WindowCard label="DISCUSSION.SYS">
-      <div className="mb-4 font-['Space_Mono',monospace] text-[10px] uppercase tracking-[0.06em] text-[#888]">
-        {comments.length} comments · developer & researcher discussion
-      </div>
-
-      {comments.length === 0 && (
-        <p className="mb-4 font-['Space_Mono',monospace] text-[10px] text-[#888]">No comments yet. Be the first.</p>
-      )}
-
-      {comments.map((c) => (
-        <div
-          key={c.id}
-          className={`mb-2.5 rounded-lg bg-[#FFFCEF] px-4 py-3.5 ${c.pinned ? "border-l-[3px] border-l-[#E94842] rounded-l-none border border-[rgba(0,0,0,0.08)]" : "border border-[rgba(0,0,0,0.08)]"}`}
-        >
-          <div className="mb-2 flex items-center gap-2.5">
-            <div
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[rgba(0,0,0,0.12)] font-['Space_Mono',monospace] text-[10px] font-semibold text-[#555]"
-              style={{ background: AVATAR_COLORS[c.createdById % AVATAR_COLORS.length] }}
-            >
-              U
-            </div>
-            <span className="font-['Space_Mono',monospace] text-[10px] text-[#888]">
-              {new Date(c.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-            </span>
-            {c.pinned && (
-              <span className="font-['Space_Mono',monospace] text-[9px] bg-[#FFE14D] border border-ink px-1.5 py-0.5 rounded font-semibold tracking-[0.05em]">
-                PINNED
-              </span>
-            )}
-          </div>
-          <div className="text-sm leading-[1.55]">{c.text}</div>
-        </div>
-      ))}
-
-      <div className="mt-4 border-t border-t-[rgba(0,0,0,0.08)] pt-4 flex items-center gap-2.5">
-        {user ? (
-          <>
-            <input
-              className="flex-1 rounded-lg border border-[rgba(0,0,0,0.12)] bg-[#FFFCEF] px-3.5 py-3 text-[13px] placeholder:text-[#aaa] focus:outline-none focus:border-ink"
-              placeholder="Share your thoughts…"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            />
-            <button
-              disabled={!text.trim()}
-              onClick={() => { onPost(text.trim()); setText(""); }}
-              className="rounded-full border border-ink bg-white px-4 py-2.5 text-[13px] font-medium shadow-[2px_2px_0_#1a1a1a] transition-transform hover:-translate-x-px hover:-translate-y-px disabled:opacity-40"
-            >
-              Post
-            </button>
-          </>
-        ) : (
-          <p className="font-['Space_Mono',monospace] text-[10px] text-[#888]">Sign in to join the discussion.</p>
-        )}
-      </div>
-    </WindowCard>
   );
 }

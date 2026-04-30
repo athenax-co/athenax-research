@@ -8,7 +8,7 @@ export interface ProductIn {
   funding: number;
   founded: number;
   shortDesc?: string;
-  description: string;
+  description?: string;
   qualityBadge: string;
   email?: string;
   twitter?: string;
@@ -24,6 +24,7 @@ export interface CategoryRef {
 export interface ProductOut {
   id: number;
   userId: number;
+  createdById: number | null;
   slug: string;
   name: string;
   shortDesc?: string | null;
@@ -122,6 +123,28 @@ export interface ProductSummary {
   bookmarkCount: number;
   voteCount: number;
   createdAt: string;
+}
+
+export interface TeamMemberIn {
+  name: string;
+  roleLabel?: string;
+  bioNote?: string;
+  twitterUrl?: string;
+  githubUrl?: string;
+}
+
+export interface VoiceIn {
+  quote: string;
+  authorHandle: string;
+  authorName?: string;
+  sourceUrl?: string;
+}
+
+export interface BountyIn {
+  title: string;
+  techLabel?: string;
+  rewardAmount: string;
+  externalUrl: string;
 }
 
 export interface ProductComment {

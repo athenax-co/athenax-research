@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBody, DialogTrafficLights } from "@/components/ui/Dialog";
@@ -120,6 +120,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>(draft?.categoryIds ?? []);
   const [founders, setFounders] = useState<string[]>(draft?.founders ?? []);
   const [errors, setErrors] = useState<Partial<Record<"name" | "url" | "description" | "email" | "twitter" | "github", string>>>({});
+  const founderInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     saveDraft(submitForm, selectedCategoryIds, founders);
@@ -156,18 +157,22 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
   };
 
   const handleSubmit = async () => {
+    const pendingFounder = founderInputRef.current?.value.trim();
+    const allFounders = pendingFounder ? [...founders, pendingFounder] : founders;
+    if (founderInputRef.current) founderInputRef.current.value = "";
+
     try {
       await submitProductMutation({
         name: submitForm.name,
         stage: submitForm.stage,
         funding: Number(submitForm.funding) || 0,
         founded: Number(submitForm.founded) || new Date().getFullYear(),
-        description: submitForm.description,
+        shortDesc: submitForm.description,
         qualityBadge: submitForm.qualityBadge,
         email: submitForm.email || undefined,
         twitter: submitForm.twitter || undefined,
         categoryIds: selectedCategoryIds,
-        founders,
+        founders: allFounders,
       });
       clearDraft();
       setSubmitForm(DEFAULT_FORM);
@@ -335,6 +340,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
                     </span>
                   ))}
                   <input
+                    ref={founderInputRef}
                     className="flex-1 min-w-32 bg-transparent outline-none text-sm placeholder:text-muted"
                     placeholder={founders.length === 0 ? "Type a name, press Enter" : "Add another…"}
                     onKeyDown={(e) => {

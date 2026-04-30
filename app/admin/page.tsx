@@ -193,22 +193,7 @@ export default function Page() {
                     { onSuccess: () => showToast(`Rejected: ${product.name}`, "info"), onError: () => showToast("Action failed.", "error") }
                   )
                 }
-                onReview={() =>
-                  openReview({
-                    title: product.name,
-                    description: product.description,
-                    chips: (product.categories ?? []).map((category) => category.name),
-                    meta: [
-                      { label: "Stage", value: product.stage },
-                      { label: "Funding", value: product.funding != null ? `$${product.funding.toLocaleString()}` : "—" },
-                      { label: "Founded", value: product.founded != null ? String(product.founded) : "—" },
-                    ],
-                    details: [
-                      { label: "Quality Badge", value: product.qualityBadge || "None" },
-                      { label: "Submitted", value: new Date(product.createdAt).toLocaleDateString("en-GB") },
-                    ],
-                  })
-                }
+                reviewHref={`/launch/${product.slug}`}
               />
             ))
           )}

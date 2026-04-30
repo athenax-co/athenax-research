@@ -164,8 +164,6 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
         founded: Number(submitForm.founded) || new Date().getFullYear(),
         description: submitForm.description,
         qualityBadge: submitForm.qualityBadge,
-        github: submitForm.github || undefined,
-        demo: submitForm.url,
         email: submitForm.email || undefined,
         twitter: submitForm.twitter || undefined,
         categoryIds: selectedCategoryIds,

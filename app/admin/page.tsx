@@ -204,8 +204,6 @@ export default function Page() {
                       { label: "Founded", value: product.founded != null ? String(product.founded) : "—" },
                     ],
                     details: [
-                      { label: "GitHub", value: product.github || "Not provided" },
-                      { label: "Demo", value: product.demo || "Not provided" },
                       { label: "Quality Badge", value: product.qualityBadge || "None" },
                       { label: "Submitted", value: new Date(product.createdAt).toLocaleDateString("en-GB") },
                     ],

@@ -7,23 +7,36 @@ import WindowCard from "@/components/ui/WindowCard";
 import SEOMeta from "@/components/SEOMeta";
 import { IconShare } from "@/components/Icons";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useProductBySlug, useVoteProduct, useInterestProduct, useProducts } from "@/features/products";
-import type { ProductDetailOut } from "@/features/products";
+import {
+  useProductBySlug, useVoteProduct, useInterestProduct, useProducts,
+  useComments, useCreateComment,
+} from "@/features/products";
+import type {
+  ProductDetailOut, ProductMedia, TeamMemberOut, ProductVoice, Bounty, ProductComment,
+} from "@/features/products";
 import { useCategories } from "@/hooks/queries/useReference";
+
+const LINK_LABELS: Record<string, string> = {
+  website: "Website",
+  github: "GitHub",
+  twitter: "Twitter / X",
+  docs: "Documentation",
+  demo: "Demo",
+  discord: "Discord",
+};
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { user, showToast } = useGlobal();
   const { id } = use(params);
 
-  useCategories(); // seeds category cache so useProductBySlug can resolve category names
+  useCategories();
   const { data: apiProduct, isLoading } = useProductBySlug(id);
   const { data: allProductsData } = useProducts("approved");
   const { mutate: vote, isPending: voting } = useVoteProduct();
   const { mutate: interest, isPending: registeringInterest } = useInterestProduct();
   const apiProductId = apiProduct?.id ?? 0;
-  // const { data: comments = [] } = useComments(apiProductId);
-  // const { mutate: createComment, isPending: posting } = useCreateComment(apiProductId);
-  // const { mutate: deleteComment, isPending: deletingComment } = useDeleteComment(apiProductId);
+  const { data: comments = [] } = useComments(apiProductId);
+  const { mutate: createComment } = useCreateComment(apiProductId);
 
   const shareLaunch = async (slug: string) => {
     const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
@@ -79,6 +92,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     .sort(() => Math.random() - 0.5)
     .slice(0, 3);
 
+  const hasGithub = p.links.some((l) => l.linkType === "github");
+
   const handleApiVote = () => {
     if (!user) {
       showToast("Sign in to upvote.", "error");
@@ -117,15 +132,14 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     p.categories.length > 0 ? { label: "Category", value: p.categories[0].name } : null,
     { label: "Status", value: "● Live Beta", isStatus: true },
     p.founded != null ? { label: "Founded", value: String(p.founded) } : null,
-    { label: "Pricing", value: p.github ? "Open Source / Free" : p.funding != null ? `$${p.funding.toLocaleString()}` : "Free" },
+    { label: "Pricing", value: hasGithub ? "Open Source / Free" : p.funding != null ? `$${p.funding.toLocaleString()}` : "Free" },
     p.stage ? { label: "Stage", value: p.stage } : { label: "Stage", value: "Early Stage" },
   ].filter(Boolean) as { label: string; value: string; isStatus?: boolean }[];
 
-  const links = [
-    p.demo ? { label: "Website", url: p.demo } : null,
-    p.github ? { label: "GitHub", url: p.github } : null,
-    (p as any).twitter ? { label: "Twitter / X", url: (p as any).twitter } : null,
-  ].filter(Boolean) as { label: string; url: string }[];
+  const links = p.links.map((l) => ({
+    label: l.label ?? LINK_LABELS[l.linkType] ?? l.linkType,
+    url: l.url,
+  }));
 
   return (
     <div>
@@ -170,7 +184,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   {p.stage.toUpperCase()}
                 </span>
               )}
-              {p.github && (
+              {hasGithub && (
                 <span className="topic-pill bg-[#E8E4D9] text-[10px]">
                   OPEN SOURCE
                 </span>
@@ -207,7 +221,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           <WindowCard label="ABOUT.SYS" className="md:row-span-2">
             <p className="mb-3 text-[15px] leading-[1.7]">{p.description ?? "No description provided."}</p>
             <p className="mb-8 text-[13px] italic text-[#555]">
-              {p.github ? "Open source · available on GitHub" : "Compatible with leading developer tools and platforms."}
+              {hasGithub ? "Open source · available on GitHub" : "Compatible with leading developer tools and platforms."}
             </p>
 
             <div className="mb-8">
@@ -222,34 +236,23 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               ))}
             </div>
 
-            <div>
-              <div className="mb-2.5 font-['Space_Mono',monospace] text-[11px] uppercase tracking-[0.06em] text-[#888]">Backers</div>
-              <div className="flex flex-wrap gap-2">
-                {(p.founders && p.founders.length > 0 ? p.founders : ["a16z Crypto", "Sequoia Scout", "Naval Ravikant"]).map((name) => (
-                  <span key={name} className="rounded-full border border-[rgba(0,0,0,0.15)] bg-white px-4 py-1.5 text-[13px] font-medium">
-                    {name}
-                  </span>
-                ))}
+            {p.backers.length > 0 && (
+              <div>
+                <div className="mb-2.5 font-['Space_Mono',monospace] text-[11px] uppercase tracking-[0.06em] text-[#888]">Backers</div>
+                <div className="flex flex-wrap gap-2">
+                  {p.backers.map((b) => (
+                    <span key={b.id} className="rounded-full border border-[rgba(0,0,0,0.15)] bg-white px-4 py-1.5 text-[13px] font-medium">
+                      {b.name}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </WindowCard>
 
           {/* GALLERY.SYS */}
           <WindowCard label="GALLERY.SYS" bodyClass="p-3">
-            <div className="grid grid-cols-[1.4fr_1fr] grid-rows-2 gap-1.5">
-              <div className="row-span-2 flex aspect-auto min-h-[120px] items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
-                screenshot.png
-              </div>
-              <div className="flex aspect-[16/10] items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
-                02.png
-              </div>
-              <div className="relative flex aspect-[16/10] items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
-                03.png
-                <span className="absolute bottom-1.5 right-1.5 rounded bg-[rgba(0,0,0,0.05)] px-1.5 py-0.5 text-[9px] font-['Space_Mono',monospace] text-[#888]">
-                  + 2 more
-                </span>
-              </div>
-            </div>
+            <GallerySection media={p.media} />
           </WindowCard>
 
           {/* LINKS.SYS */}
@@ -272,7 +275,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               <p className="py-3 text-[13px] text-[#888]">No links provided.</p>
             )}
 
-            {/* Investor actions inside links card */}
             {isInvestor && (
               <div className="mt-3 pt-3 border-t border-t-[rgba(0,0,0,0.08)]">
                 <button
@@ -292,28 +294,30 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           </WindowCard>
         </div>
 
-        {/* BLOCK 2: TEAM + VOICES (mock) */}
+        {/* BLOCK 2: TEAM + VOICES */}
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-          {/* TEAM.SYS */}
           <WindowCard label="TEAM.SYS">
-            <TeamSection founders={p.founders ?? []} />
+            <TeamSection members={p.team} />
           </WindowCard>
 
-          {/* VOICES.SYS */}
           <WindowCard label="VOICES.SYS">
-            <VoicesSection />
+            <VoicesSection voices={p.voices} />
           </WindowCard>
         </div>
 
-        {/* BLOCK 3: BOUNTIES (mock) */}
+        {/* BLOCK 3: BOUNTIES */}
         <div className="mb-8">
           <WindowCard label="BOUNTIES.SYS" titleRight="ACTIVE BOUNTIES FOR THIS PROJECT">
-            <BountiesSection />
+            <BountiesSection bounties={p.bounties} />
           </WindowCard>
         </div>
 
         {/* BLOCK 4: DISCUSSION */}
-        <DiscussionSection user={user} />
+        <DiscussionSection
+          user={user}
+          comments={comments}
+          onPost={(text) => createComment(text)}
+        />
 
         {/* LINKED PAPERS */}
         {p.papers && p.papers.length > 0 && (
@@ -374,91 +378,95 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   );
 }
 
+function GallerySection({ media }: { media: ProductMedia[] }) {
+  const images = media.filter((m) => m.mediaType === "image").sort((a, b) => a.sortOrder - b.sortOrder);
+
+  if (images.length === 0) {
+    return (
+      <div className="grid grid-cols-[1.4fr_1fr] grid-rows-2 gap-1.5">
+        <div className="row-span-2 flex aspect-auto min-h-[120px] items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
+          screenshot.png
+        </div>
+        <div className="flex aspect-[16/10] items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
+          02.png
+        </div>
+        <div className="flex aspect-[16/10] items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
+          03.png
+        </div>
+      </div>
+    );
+  }
+
+  const shown = images.slice(0, 3);
+  const extra = images.length - 3;
+
+  return (
+    <div className="grid grid-cols-[1.4fr_1fr] grid-rows-2 gap-1.5">
+      <div className="row-span-2 min-h-[120px] overflow-hidden rounded border border-[rgba(0,0,0,0.08)]">
+        <img src={shown[0].storageKey} alt="" className="h-full w-full object-cover" />
+      </div>
+      <div className="aspect-[16/10] overflow-hidden rounded border border-[rgba(0,0,0,0.08)]">
+        {shown[1] ? (
+          <img src={shown[1].storageKey} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full items-center justify-center bg-[#E8E4D9] text-[10px] font-['Space_Mono',monospace] text-[#888]">02.png</div>
+        )}
+      </div>
+      <div className="relative aspect-[16/10] overflow-hidden rounded border border-[rgba(0,0,0,0.08)]">
+        {shown[2] ? (
+          <img src={shown[2].storageKey} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full items-center justify-center bg-[#E8E4D9] text-[10px] font-['Space_Mono',monospace] text-[#888]">03.png</div>
+        )}
+        {extra > 0 && (
+          <span className="absolute bottom-1.5 right-1.5 rounded bg-[rgba(0,0,0,0.5)] px-1.5 py-0.5 text-[9px] font-['Space_Mono',monospace] text-white">
+            + {extra} more
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 const AVATAR_COLORS = ["#FFE14D", "#B5D8E9", "#E9C9B5", "#D4C5E2", "#C5DED4"];
 
-type TeamMember = { name: string; role: string; bio: string | null; color: string; twitter?: string; github?: string };
-
-function TeamSection({ founders }: { founders: string[] }) {
+function TeamSection({ members }: { members: TeamMemberOut[] }) {
   const [expanded, setExpanded] = useState(false);
 
-  const realMembers: TeamMember[] = founders.map((name, i) => ({
-    name,
-    role: i === 0 ? "founder, ceo" : "co-founder",
-    bio: null,
-    color: AVATAR_COLORS[i % AVATAR_COLORS.length],
-  }));
+  if (members.length === 0) {
+    return <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No team members listed.</p>;
+  }
 
-  const mockExtra: TeamMember[] = [
-    { name: "Sara Kim", role: "design lead", bio: "Previously Figma · RISD '20", color: AVATAR_COLORS[3], twitter: "x.com/sarakim" },
-    {
-      name: "James Liu",
-      role: "backend engineer",
-      bio: "Previously Cloudflare · Rust contributor",
-      color: AVATAR_COLORS[4],
-      twitter: "x.com/jamesliu",
-      github: "github.com/jamesliu",
-    },
-  ];
-
-  const fallback: TeamMember[] = [
-    {
-      name: "Alex Chen",
-      role: "founder, ceo",
-      bio: "Previously Replit · Stanford CS '21",
-      color: AVATAR_COLORS[0],
-      twitter: "x.com/achen",
-      github: "github.com/achen",
-    },
-    {
-      name: "Maya Rodriguez",
-      role: "founding engineer",
-      bio: "Previously TerminalCo · OpenAgent SDK maintainer",
-      color: AVATAR_COLORS[1],
-      twitter: "x.com/mayar",
-      github: "github.com/mayar",
-    },
-    {
-      name: "Daniel Park",
-      role: "founding engineer",
-      bio: "Previously Vercel · Tauri core contributor",
-      color: AVATAR_COLORS[2],
-      twitter: "x.com/danpark",
-      github: "github.com/danpark",
-    },
-  ];
-
-  const visible = realMembers.length > 0 ? realMembers : fallback;
-  const all = [...visible, ...mockExtra];
-  const shown = expanded ? all : all.slice(0, 3);
-  const hiddenCount = all.length - 3;
+  const shown = expanded ? members : members.slice(0, 3);
+  const hiddenCount = members.length - 3;
 
   return (
     <>
       <div className={`overflow-hidden transition-all ${expanded ? "max-h-[600px] overflow-y-auto" : "max-h-[340px]"}`}>
         {shown.map((m, i) => (
-          <div key={m.name} className={`flex items-center gap-3.5 py-3.5 ${i < shown.length - 1 ? "border-b border-b-[rgba(0,0,0,0.08)]" : ""}`}>
+          <div key={m.id} className={`flex items-center gap-3.5 py-3.5 ${i < shown.length - 1 ? "border-b border-b-[rgba(0,0,0,0.08)]" : ""}`}>
             <div
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ink text-[14px] font-bold"
-              style={{ background: m.color }}
+              style={{ background: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
             >
               {m.name.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline gap-1.5 mb-0.5">
                 <span className="text-sm font-bold">{m.name}</span>
-                <span className="font-['Space_Mono',monospace] text-[10px] text-[#888]">· {m.role}</span>
+                {m.roleLabel && <span className="font-['Space_Mono',monospace] text-[10px] text-[#888]">· {m.roleLabel}</span>}
               </div>
-              {m.bio && <div className="truncate text-xs text-[#555] mb-0.5">{m.bio}</div>}
-              {(m.twitter || m.github) && (
+              {m.bioNote && <div className="truncate text-xs text-[#555] mb-0.5">{m.bioNote}</div>}
+              {(m.twitterUrl || m.githubUrl) && (
                 <div className="flex gap-2.5 font-['Space_Mono',monospace] text-[10px]">
-                  {m.twitter && (
-                    <a href={`https://${m.twitter}`} target="_blank" rel="noreferrer" className="text-[#185FA5] hover:underline">
-                      ↗ {m.twitter}
+                  {m.twitterUrl && (
+                    <a href={m.twitterUrl.startsWith("http") ? m.twitterUrl : `https://${m.twitterUrl}`} target="_blank" rel="noreferrer" className="text-[#185FA5] hover:underline">
+                      ↗ {m.twitterUrl}
                     </a>
                   )}
-                  {m.github && (
-                    <a href={`https://${m.github}`} target="_blank" rel="noreferrer" className="text-[#185FA5] hover:underline">
-                      ↗ {m.github}
+                  {m.githubUrl && (
+                    <a href={m.githubUrl.startsWith("http") ? m.githubUrl : `https://${m.githubUrl}`} target="_blank" rel="noreferrer" className="text-[#185FA5] hover:underline">
+                      ↗ {m.githubUrl}
                     </a>
                   )}
                 </div>
@@ -476,129 +484,114 @@ function TeamSection({ founders }: { founders: string[] }) {
   );
 }
 
-const MOCK_VOICES = [
-  { quote: "Finally a product directory that actually indexes the research behind each launch.", handle: "@swyx", threadUrl: "https://x.com/swyx" },
-  { quote: "The ARS score is the first signal I check before any diligence call.", handle: "@simonw", threadUrl: "https://x.com/simonw" },
-  {
-    quote: "Every YC batch should be crosslisted here. The research lineage display is underrated.",
-    handle: "@kelseyhightower",
-    threadUrl: "https://x.com/kelseyhightower",
-  },
-  {
-    quote: "Switched our whole team's discovery workflow to AthenaX. The archive alone is worth it.",
-    handle: "@rauchg",
-    threadUrl: "https://x.com/rauchg",
-  },
-];
-
-function VoicesSection() {
+function VoicesSection({ voices }: { voices: ProductVoice[] }) {
   const [expanded, setExpanded] = useState(false);
-  const shown = expanded ? MOCK_VOICES : MOCK_VOICES.slice(0, 2);
+
+  if (voices.length === 0) {
+    return <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No voices yet.</p>;
+  }
+
+  const shown = expanded ? voices : voices.slice(0, 2);
 
   return (
     <>
       <div className={`overflow-hidden transition-all ${expanded ? "max-h-[600px] overflow-y-auto" : "max-h-[310px]"}`}>
-        {shown.map((v, i) => (
-          <div key={i} className="mb-2.5 rounded-md border border-[rgba(0,0,0,0.08)] bg-[#FFFCEF] px-4 py-3.5 last:mb-0">
+        {shown.map((v) => (
+          <div key={v.id} className="mb-2.5 rounded-md border border-[rgba(0,0,0,0.08)] bg-[#FFFCEF] px-4 py-3.5 last:mb-0">
             <p className="text-[13px] italic leading-[1.55]">"{v.quote}"</p>
             <div className="mt-2 flex items-center justify-between font-['Space_Mono',monospace] text-[10px]">
-              <span className="font-medium text-[#1a1a1a]">{v.handle}</span>
-              <a href={v.threadUrl} target="_blank" rel="noreferrer" className="text-[#185FA5] hover:underline">
-                ↗ open thread
-              </a>
+              <span className="font-medium text-[#1a1a1a]">{v.authorName ?? v.authorHandle}</span>
+              {v.sourceUrl && (
+                <a href={v.sourceUrl} target="_blank" rel="noreferrer" className="text-[#185FA5] hover:underline">
+                  ↗ open thread
+                </a>
+              )}
             </div>
           </div>
         ))}
       </div>
-      {MOCK_VOICES.length > 2 && (
+      {voices.length > 2 && (
         <button onClick={() => setExpanded(!expanded)} className="mt-2.5 font-['Space_Mono',monospace] text-[11px] text-[#888] hover:text-[#1a1a1a]">
-          {expanded ? "− show less" : `show ${MOCK_VOICES.length - 2} more →`}
+          {expanded ? "− show less" : `show ${voices.length - 2} more →`}
         </button>
       )}
     </>
   );
 }
 
-const MOCK_BOUNTIES = [
-  { title: "Integration test coverage", tags: ["Testing", "CI"], status: "open · 4 attempts", amount: "$2,500" },
-  { title: "Mobile responsive layout", tags: ["React", "UI"], status: "open · 1 attempt", amount: "$1,800" },
-  { title: "API performance benchmark", tags: ["Research"], status: "open · 0 attempts", amount: "$1,200" },
-];
+function BountiesSection({ bounties }: { bounties: Bounty[] }) {
+  if (bounties.length === 0) {
+    return <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No active bounties.</p>;
+  }
 
-function BountiesSection() {
   return (
     <>
-      {MOCK_BOUNTIES.map((b, i) => (
+      {bounties.map((b, i) => (
         <div
-          key={i}
-          className={`flex items-start justify-between py-3.5 ${i < MOCK_BOUNTIES.length - 1 ? "border-b border-b-[rgba(0,0,0,0.08)]" : ""}`}
+          key={b.id}
+          className={`flex items-start justify-between py-3.5 ${i < bounties.length - 1 ? "border-b border-b-[rgba(0,0,0,0.08)]" : ""}`}
         >
           <div className="flex-1 min-w-0">
             <div className="mb-1 text-sm font-semibold">{b.title}</div>
             <div className="flex flex-wrap items-center gap-1.5 font-['Space_Mono',monospace] text-[10px] text-[#888]">
-              {b.tags.map((t) => (
-                <span key={t} className="rounded border border-[rgba(0,0,0,0.12)] bg-[#FAFAF7] px-1.5 py-0.5 text-[9px]">
-                  {t}
+              {b.techLabel && (
+                <span className="rounded border border-[rgba(0,0,0,0.12)] bg-[#FAFAF7] px-1.5 py-0.5 text-[9px]">
+                  {b.techLabel}
                 </span>
-              ))}
-              <span>{b.status}</span>
+              )}
+              <span className="capitalize">{b.status}</span>
             </div>
           </div>
-          <span className="ml-4 shrink-0 font-['Space_Mono',monospace] text-[15px] font-bold text-[#639922]">{b.amount}</span>
+          <a
+            href={b.externalUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="ml-4 shrink-0 font-['Space_Mono',monospace] text-[15px] font-bold text-[#639922] hover:underline"
+          >
+            ${Number(b.rewardAmount).toLocaleString()}
+          </a>
         </div>
       ))}
-      <p className="mt-3 font-['Space_Mono',monospace] text-[10px] text-[#888] opacity-70">Mock data — bounties system coming soon</p>
     </>
   );
 }
 
-
-
-const MOCK_COMMENTS = [
-  {
-    id: 1,
-    initials: "AC",
-    name: "Alex Chen",
-    role: "Founder",
-    pinned: true,
-    avatarClass: "bg-[#FFE14D] border-ink",
-    text: "Hey! We built this because we were tired of the existing solutions. Would love feedback on the core feature — it's still early. Check the GitHub for install instructions.",
-    upvotes: 18,
-  },
-  {
-    id: 2,
-    initials: "DK",
-    name: "Daniel Kim",
-    role: "@dkim_dev",
-    pinned: false,
-    avatarClass: "bg-[#E8E4D9] border-[rgba(0,0,0,0.12)]",
-    text: "The architecture alone is worth checking out. How does it handle concurrent updates?",
-    upvotes: 4,
-  },
-];
-
-function DiscussionSection({ user }: { user: any }) {
+function DiscussionSection({
+  user,
+  comments,
+  onPost,
+}: {
+  user: any;
+  comments: ProductComment[];
+  onPost: (text: string) => void;
+}) {
   const [text, setText] = useState("");
 
   return (
     <WindowCard label="DISCUSSION.SYS">
       <div className="mb-4 font-['Space_Mono',monospace] text-[10px] uppercase tracking-[0.06em] text-[#888]">
-        {MOCK_COMMENTS.length} comments · developer & researcher discussion
+        {comments.length} comments · developer & researcher discussion
       </div>
 
-      {MOCK_COMMENTS.map((c) => (
+      {comments.length === 0 && (
+        <p className="mb-4 font-['Space_Mono',monospace] text-[10px] text-[#888]">No comments yet. Be the first.</p>
+      )}
+
+      {comments.map((c) => (
         <div
           key={c.id}
           className={`mb-2.5 rounded-lg bg-[#FFFCEF] px-4 py-3.5 ${c.pinned ? "border-l-[3px] border-l-[#E94842] rounded-l-none border border-[rgba(0,0,0,0.08)]" : "border border-[rgba(0,0,0,0.08)]"}`}
         >
           <div className="mb-2 flex items-center gap-2.5">
             <div
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border font-['Space_Mono',monospace] text-[10px] font-semibold text-[#555] ${c.avatarClass}`}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[rgba(0,0,0,0.12)] font-['Space_Mono',monospace] text-[10px] font-semibold text-[#555]"
+              style={{ background: AVATAR_COLORS[c.createdById % AVATAR_COLORS.length] }}
             >
-              {c.initials}
+              U
             </div>
-            <span className="text-[13px] font-semibold">{c.name}</span>
-            <span className="font-['Space_Mono',monospace] text-[10px] text-[#888]">{c.role}</span>
+            <span className="font-['Space_Mono',monospace] text-[10px] text-[#888]">
+              {new Date(c.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+            </span>
             {c.pinned && (
               <span className="font-['Space_Mono',monospace] text-[9px] bg-[#FFE14D] border border-ink px-1.5 py-0.5 rounded font-semibold tracking-[0.05em]">
                 PINNED
@@ -606,12 +599,6 @@ function DiscussionSection({ user }: { user: any }) {
             )}
           </div>
           <div className="text-sm leading-[1.55]">{c.text}</div>
-          <div className="mt-2 flex gap-3.5 font-['Space_Mono',monospace] text-[11px] text-[#888]">
-            <span>▲ {c.upvotes}</span>
-            <a href="#" className="text-[#185FA5]">
-              ↗ reply
-            </a>
-          </div>
         </div>
       ))}
 
@@ -626,6 +613,7 @@ function DiscussionSection({ user }: { user: any }) {
             />
             <button
               disabled={!text.trim()}
+              onClick={() => { onPost(text.trim()); setText(""); }}
               className="rounded-full border border-ink bg-white px-4 py-2.5 text-[13px] font-medium shadow-[2px_2px_0_#1a1a1a] transition-transform hover:-translate-x-px hover:-translate-y-px disabled:opacity-40"
             >
               Post

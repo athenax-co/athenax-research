@@ -13,7 +13,7 @@ export interface ProductIn {
   qualityBadge: string;
   email?: string;
   categoryIds: number[];
-  subCategories?: string[];
+  subCategoryIds?: number[];
   backers?: string[];
 }
 
@@ -40,9 +40,9 @@ export interface ProductOut {
   bookmarkCount: number;
   investorInterestCount: number;
   categoryIds: number[];
+  subCategoryIds?: number[];
   categories: CategoryRef[];
   bookmarked?: boolean | null;
-  subCategories?: string[];
   createdAt: string;
   updatedAt: string;
 }

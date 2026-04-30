@@ -33,6 +33,9 @@ import {
 import type { ProductDetailOut } from "@/features/products";
 import { VerificationStatus, ProductStatus } from "@/enums";
 import { useCategories } from "@/hooks/queries/useReference";
+import { useQueries } from "@tanstack/react-query";
+import { getSubcategories } from "@/api/reference";
+import type { CategoryOut } from "@/types/reference";
 
 const LINK_LABELS: Record<string, string> = {
   website: "Website",
@@ -49,6 +52,20 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
   useCategories();
   const { data: apiProduct, isLoading } = useProductBySlug(id);
+
+  const subcategoryResults = useQueries({
+    queries: (apiProduct?.categoryIds ?? []).map((catId) => ({
+      queryKey: ["subcategories", catId],
+      queryFn: () => getSubcategories(catId),
+      staleTime: 2 * 60 * 1000,
+    })),
+  });
+  const subCategoryMap: Record<number, string> = {};
+  for (const result of subcategoryResults) {
+    for (const sub of (result.data ?? []) as CategoryOut[]) {
+      subCategoryMap[sub.id] = sub.name;
+    }
+  }
   const { data: allProductsData } = useProducts("approved");
   const { mutate: vote, isPending: voting } = useVoteProduct();
   const { mutate: interest, isPending: registeringInterest } = useInterestProduct();
@@ -247,8 +264,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             <div className="mb-1.5 flex flex-wrap items-center gap-2">
               <h1 className="text-[36px] leading-none tracking-tight max-[640px]:text-[28px]">{p.name}</h1>
               {p.categories.length > 0 && <span className="topic-pill text-[10px]">{p.categories[0].name.toUpperCase()}</span>}
-              {p.subCategories?.map((sc) => (
-                <span key={sc} className="topic-pill bg-[#E8E4D9] text-[10px]">{sc.toUpperCase()}</span>
+              {p.subCategoryIds?.map((id) => subCategoryMap[id] && (
+                <span key={id} className="topic-pill bg-[#E8E4D9] text-[10px]">{subCategoryMap[id].toUpperCase()}</span>
               ))}
               <span className="topic-pill bg-[#D7E9B5] text-[10px]">LIVE</span>
               {p.stage && <span className="topic-pill bg-[#E8E4D9] text-[10px]">{p.stage.toUpperCase()}</span>}

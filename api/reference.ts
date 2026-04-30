@@ -1,4 +1,4 @@
-import { BASE_URL, handleResponse } from "@/api/client";
+import { http, BASE_URL, handleResponse } from "@/api/client";
 import type { CategoryOut, UniversityOut, LabOut, CategoryRef } from "@/types/reference";
 
 // ─── category ─────────────────────────────────────────────────────────────────
@@ -6,6 +6,14 @@ import type { CategoryOut, UniversityOut, LabOut, CategoryRef } from "@/types/re
 export async function getCategories(): Promise<CategoryOut[]> {
   const res = await fetch(`${BASE_URL}/category?limit=200`, { credentials: "include" });
   return handleResponse<CategoryOut[]>(res);
+}
+
+export async function getSubcategories(parentId: number): Promise<CategoryOut[]> {
+  return http.get<CategoryOut[]>(`/category/${parentId}/subcategories`);
+}
+
+export async function createSubcategory(parentId: number, name: string): Promise<CategoryOut> {
+  return http.post<CategoryOut>(`/category/${parentId}/subcategories`, { name }, { auth: true });
 }
 
 // ─── university ───────────────────────────────────────────────────────────────

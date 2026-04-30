@@ -1,5 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as referenceApi from "@/api/reference";
+import type { CategoryOut } from "@/types/reference";
 
 // ─── query keys ──────────────────────────────────────────────────────────────
 
@@ -38,5 +39,29 @@ export function useLabs() {
     queryKey: REFERENCE_QUERY_KEYS.labs,
     queryFn: referenceApi.getLabs,
     staleTime: STALE,
+  });
+}
+
+// ─── useSubcategories ────────────────────────────────────────────────────────
+
+export function useSubcategories(parentId: number | null) {
+  return useQuery<CategoryOut[]>({
+    queryKey: ["subcategories", parentId],
+    queryFn: () => referenceApi.getSubcategories(parentId!),
+    enabled: parentId != null,
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
+// ─── useCreateSubcategory ────────────────────────────────────────────────────
+
+export function useCreateSubcategory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ parentId, name }: { parentId: number; name: string }) =>
+      referenceApi.createSubcategory(parentId, name),
+    onSuccess: (newSub, { parentId }) => {
+      queryClient.setQueryData<CategoryOut[]>(["subcategories", parentId], (old = []) => [...old, newSub]);
+    },
   });
 }

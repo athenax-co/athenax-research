@@ -4,6 +4,7 @@ export type { ProductStatus };
 
 export interface ProductIn {
   name: string;
+  url?: string;
   stage: string;
   funding: number;
   founded: number;
@@ -11,9 +12,9 @@ export interface ProductIn {
   description?: string;
   qualityBadge: string;
   email?: string;
-  twitter?: string;
   categoryIds: number[];
-  founders?: string[];
+  subCategories?: string[];
+  backers?: string[];
 }
 
 export interface CategoryRef {
@@ -33,7 +34,6 @@ export interface ProductOut {
   funding: number;
   founded: number;
   logo?: string | null;
-  twitter?: string | null;
   qualityBadge?: string;
   status: ProductStatus;
   voteCount: number;
@@ -42,7 +42,7 @@ export interface ProductOut {
   categoryIds: number[];
   categories: CategoryRef[];
   bookmarked?: boolean | null;
-  founders: string[];
+  subCategories?: string[];
   createdAt: string;
   updatedAt: string;
 }

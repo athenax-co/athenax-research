@@ -224,7 +224,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         type="product"
       />
 
-      <div className="page-wrap section" style={{ maxWidth: 1040 }}>
+      <div className="page-wrap section" style={{ maxWidth: 1100 }}>
         <div className="mb-6 flex flex-wrap items-center gap-3">
           <Link
             href="/launch"
@@ -236,7 +236,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         </div>
 
         <div className="mb-8 grid grid-cols-[90px_1fr_auto] items-start gap-4 border-b border-b-[rgba(0,0,0,0.12)] pb-7 max-[640px]:grid-cols-[70px_1fr]">
-          <Avatar className="size-[90px] shrink-0 rounded-xl overflow-visible border border-ink shadow-[3px_3px_0_#1a1a1a] max-[640px]:size-[70px]">
+          <Avatar className="size-22 shrink-0 rounded-xl overflow-visible border border-ink shadow-[3px_3px_0_#1a1a1a] max-[640px]:size-17.5">
             <AvatarImage src={p.logo ?? undefined} alt={p.name} className="size-full object-contain" />
             <AvatarFallback className="rounded-xl bg-white text-4xl font-extrabold max-[640px]:text-3xl">{p.name.charAt(0)}</AvatarFallback>
           </Avatar>
@@ -245,11 +245,14 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             <div className="mb-1.5 flex flex-wrap items-center gap-2">
               <h1 className="text-[36px] leading-none tracking-tight max-[640px]:text-[28px]">{p.name}</h1>
               {p.categories.length > 0 && <span className="topic-pill text-[10px]">{p.categories[0].name.toUpperCase()}</span>}
+              {p.subCategories?.map((sc) => (
+                <span key={sc} className="topic-pill bg-[#E8E4D9] text-[10px]">{sc.toUpperCase()}</span>
+              ))}
               <span className="topic-pill bg-[#D7E9B5] text-[10px]">LIVE</span>
               {p.stage && <span className="topic-pill bg-[#E8E4D9] text-[10px]">{p.stage.toUpperCase()}</span>}
               {hasGithub && <span className="topic-pill bg-[#E8E4D9] text-[10px]">OPEN SOURCE</span>}
             </div>
-            {p.description && <p className="mb-2 text-[15px] leading-[1.6] text-[#555] max-w-[600px]">{p.description}</p>}
+            {p.description && <p className="mb-2 text-[15px] leading-[1.6] text-[#555] max-w-150">{p.description}</p>}
             <div className="font-['Space_Mono',monospace] text-[11px] text-[#888] tracking-[0.02em]">
               {p.founded != null && <>founded {p.founded}</>}
               {p.founded != null && p.createdAt && <span className="mx-1 text-[#ccc]">·</span>}

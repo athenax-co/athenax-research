@@ -44,12 +44,20 @@ export function useLabs() {
 
 // ─── useSubcategories ────────────────────────────────────────────────────────
 
+const SUBCATEGORY_STALE = 2 * 60 * 1000;
+
+export function subcategoryQueryOptions(parentId: number) {
+  return {
+    queryKey: ["subcategories", parentId] as const,
+    queryFn: () => referenceApi.getSubcategories(parentId),
+    staleTime: SUBCATEGORY_STALE,
+  };
+}
+
 export function useSubcategories(parentId: number | null) {
   return useQuery<CategoryOut[]>({
-    queryKey: ["subcategories", parentId],
-    queryFn: () => referenceApi.getSubcategories(parentId!),
+    ...subcategoryQueryOptions(parentId!),
     enabled: parentId != null,
-    staleTime: 2 * 60 * 1000,
   });
 }
 

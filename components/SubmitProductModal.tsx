@@ -4,8 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBody, DialogTrafficLights } from "@/components/ui/Dialog";
-import CategorySelector from "@/components/ui/CategorySelector";
 import SubcategoryPicker from "@/components/ui/SubcategoryPicker";
+import { useCategories } from "@/hooks/queries/useReference";
 import TagInput from "@/components/ui/TagInput";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ProductStage, QualityBadge } from "@/enums";
@@ -109,11 +109,11 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
   const { mutateAsync: submitProductMutation, isPending: submitting } = useSubmitProduct();
 
   const [step, setStep] = useState<1 | 2>(1);
-  const [resetKey, setResetKey] = useState(0);
 
   const draft = loadDraft();
   const [submitForm, setSubmitForm] = useState({ ...DEFAULT_FORM, ...(draft?.form ?? {}) });
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>(draft?.categoryIds ?? []);
+  const { data: categories = [] } = useCategories();
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(draft?.categoryIds?.[0] ?? null);
   const [subCategoryIds, setSubCategoryIds] = useState<number[]>(draft?.subCategoryIds ?? []);
   const [backers, setBackers] = useState<string[]>(draft?.backers ?? []);
   const [errors, setErrors] = useState<Partial<Record<"name" | "url" | "shortDesc" | "email" | "github", string>>>({});
@@ -121,7 +121,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
   const set = (k: keyof typeof DEFAULT_FORM) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setSubmitForm((f) => {
       const next = { ...f, [k]: e.target.value };
-      saveDraft(next, selectedCategoryIds, subCategoryIds, backers);
+      saveDraft(next, selectedCategoryId ? [selectedCategoryId] : [], subCategoryIds, backers);
       return next;
     });
 
@@ -163,16 +163,15 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
         description: submitForm.description || undefined,
         qualityBadge: submitForm.qualityBadge,
         email: submitForm.email || undefined,
-        categoryIds: selectedCategoryIds,
+        categoryIds: selectedCategoryId ? [selectedCategoryId] : [],
         subCategoryIds,
         backers,
       });
       clearDraft();
       setSubmitForm(DEFAULT_FORM);
-      setSelectedCategoryIds([]);
+      setSelectedCategoryId(null);
       setSubCategoryIds([]);
       setBackers([]);
-      setResetKey((k) => k + 1);
       setStep(1);
       onOpenChange(false);
       showSubmitProductSuccess(submitForm.name);
@@ -312,25 +311,32 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
               </div>
 
               <div className="inp-group">
-                <label className="inp-label">Categories</label>
-                <CategorySelector
-                  key={resetKey}
-                  onChangeIds={(ids) => {
-                    setSelectedCategoryIds(ids);
+                <label className="inp-label">Category</label>
+                <select
+                  className="inp"
+                  value={selectedCategoryId ?? ""}
+                  onChange={(e) => {
+                    const id = e.target.value ? Number(e.target.value) : null;
+                    setSelectedCategoryId(id);
                     setSubCategoryIds([]);
-                    saveDraft(submitForm, ids, [], backers);
+                    saveDraft(submitForm, id ? [id] : [], [], backers);
                   }}
-                />
+                >
+                  <option value="" disabled>Select a category…</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="inp-group">
                 <label className="inp-label">Sub-categories</label>
                 <SubcategoryPicker
-                  categoryIds={selectedCategoryIds}
+                  categoryIds={selectedCategoryId ? [selectedCategoryId] : []}
                   value={subCategoryIds}
                   onChange={(ids) => {
                     setSubCategoryIds(ids);
-                    saveDraft(submitForm, selectedCategoryIds, ids, backers);
+                    saveDraft(submitForm, selectedCategoryId ? [selectedCategoryId] : [], ids, backers);
                   }}
                 />
               </div>
@@ -341,7 +347,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
                   value={backers}
                   onChange={(vals) => {
                     setBackers(vals);
-                    saveDraft(submitForm, selectedCategoryIds, subCategoryIds, vals);
+                    saveDraft(submitForm, selectedCategoryId ? [selectedCategoryId] : [], subCategoryIds, vals);
                   }}
                   placeholder="Investor or firm name — press Enter to add"
                   addAnother="Add another…"

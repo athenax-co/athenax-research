@@ -33,9 +33,8 @@ import {
 } from "@/features/products";
 import type { ProductDetailOut } from "@/features/products";
 import { VerificationStatus, ProductStatus } from "@/enums";
-import { useCategories } from "@/hooks/queries/useReference";
+import { subcategoryQueryOptions } from "@/hooks/queries/useReference";
 import { useQueries } from "@tanstack/react-query";
-import { getSubcategories } from "@/api/reference";
 import type { CategoryOut } from "@/types/reference";
 
 const LINK_LABELS: Record<string, string> = {
@@ -51,15 +50,10 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { user, showToast } = useGlobal();
   const { id } = use(params);
 
-  useCategories();
   const { data: apiProduct, isLoading } = useProductBySlug(id);
 
   const subcategoryResults = useQueries({
-    queries: (apiProduct?.categoryIds ?? []).map((catId) => ({
-      queryKey: ["subcategories", catId],
-      queryFn: () => getSubcategories(catId),
-      staleTime: 2 * 60 * 1000,
-    })),
+    queries: (apiProduct?.categoryIds ?? []).map((catId) => subcategoryQueryOptions(catId)),
   });
   const subCategoryMap: Record<number, string> = {};
   for (const result of subcategoryResults) {

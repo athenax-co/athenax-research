@@ -6,6 +6,7 @@ import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
 import SEOMeta from "@/components/SEOMeta";
 import { useGlobal } from "@/components/GlobalProvider";
+import { ProductBadge } from "@/components/ui/ProductBadge";
 import { useEffect, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
@@ -18,9 +19,9 @@ import { useInfiniteProducts, useProductStats } from "@/features/products";
 type DateFilter = "today" | "this_week" | "this_month" | undefined;
 
 const TIME_TABS: { key: DateFilter; label: string; statsKey: "total" | "today" | "thisWeek" | "thisMonth" }[] = [
-  { key: undefined,      label: "All",        statsKey: "total" },
-  { key: "this_week",    label: "This Week",  statsKey: "thisWeek" },
-  { key: "this_month",   label: "This Month", statsKey: "thisMonth" },
+  { key: undefined, label: "All", statsKey: "total" },
+  { key: "this_week", label: "This Week", statsKey: "thisWeek" },
+  { key: "this_month", label: "This Month", statsKey: "thisMonth" },
 ];
 
 const PAGE_SIZE = 25;
@@ -96,9 +97,7 @@ export default function Page() {
             <h1 className="mb-1 text-[48px]">AthenaX Launch</h1>
             <span className="status-badge mb-0">
               <div className="status-dot" />
-              {productStats
-                ? `${productStats.releases.thisMonth} This Month`
-                : `${allProducts.length} Products Listed`}
+              {productStats ? `${productStats.releases.thisMonth} This Month` : `${allProducts.length} Products Listed`}
             </span>
           </div>
           <SubmitProductButton label="+ Submit Your Product" className="self-start hidden sm:inline-flex" />
@@ -138,9 +137,7 @@ export default function Page() {
             >
               {tab.label}
               {productStats != null && tab.key == null && (
-                <span className="ml-1 font-['Space_Mono',monospace] text-[10px] opacity-60">
-                  ({productStats.releases[tab.statsKey]})
-                </span>
+                <span className="ml-1 font-['Space_Mono',monospace] text-[10px] opacity-60">({productStats.releases[tab.statsKey]})</span>
               )}
               {productStats != null && tab.key != null && (
                 <span className="ml-1 font-['Space_Mono',monospace] text-[10px] opacity-60 hidden sm:inline">
@@ -205,15 +202,8 @@ export default function Page() {
                         {product.name.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
-                    <h3 className="mb-0 text-[21px]">
-                      <Link href={`/launch/${product.slug}`} className="cursor-pointer text-inherit no-underline" prefetch={false}>
-                        {product.name}
-                      </Link>
-                    </h3>
                     {(product.categories ?? []).map((c) => (
-                      <span key={c.id} className="topic-pill">
-                        {c.name}
-                      </span>
+                      <ProductBadge key={c.id} label={c.name} />
                     ))}
                     {product.qualityBadge && <span className="ftag bg-[#EAF0F6] text-[10px]">{product.qualityBadge}</span>}
                   </div>
@@ -245,23 +235,13 @@ export default function Page() {
 
         {totalPages > 1 && (
           <div className="mt-8 mb-7 flex items-center justify-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page <= 1}
-              onClick={() => setPage(Math.max(1, page - 1))}
-            >
+            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(Math.max(1, page - 1))}>
               ← Prev
             </Button>
             <span className="font-['Space_Mono',monospace] text-xs text-muted">
               Page {page} of {totalPages}
             </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= totalPages}
-              onClick={() => setPage(Math.min(totalPages, page + 1))}
-            >
+            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(Math.min(totalPages, page + 1))}>
               Next →
             </Button>
           </div>

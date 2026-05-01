@@ -5,6 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { IconBounties, IconBuilders, IconLabs, IconTerminal } from "@/components/Icons";
 import { Button, buttonVariants } from "@/components/ui/button";
 import WindowCard from "@/components/ui/WindowCard";
+import { ProductBadge } from "@/components/ui/ProductBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGlobal } from "@/components/GlobalProvider";
 import { cn } from "@/lib/utils";
@@ -100,7 +101,7 @@ export default function Page() {
                   <div className="flex-1">
                     <div className="mb-0.5 flex flex-wrap items-center gap-2">
                       <div className="archive-title">{launch.name}</div>
-                      {launch.categories?.[0]?.name && <span className="topic-pill px-2 py-0.5 text-[10px]">{launch.categories[0].name}</span>}
+                      {launch.categories?.[0]?.name && <ProductBadge label={launch.categories[0].name} />}
                     </div>
                     <div className="mt-0.75 text-xs leading-normal text-muted">{launch.description.slice(0, 110)}…</div>
                   </div>

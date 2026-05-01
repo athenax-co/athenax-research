@@ -4,6 +4,7 @@ import { use } from "react";
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
+import { ProductBadge } from "@/components/ui/ProductBadge";
 import SEOMeta from "@/components/SEOMeta";
 import { IconShare } from "@/components/Icons";
 import { useGlobal } from "@/components/GlobalProvider";
@@ -263,11 +264,11 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           <div className="min-w-0">
             <div className="mb-1.5 flex flex-wrap items-center gap-2">
               <h1 className="text-[36px] leading-none tracking-tight max-[640px]:text-[28px]">{p.name}</h1>
-              {p.categories.length > 0 && <span className="topic-pill text-[10px]">{p.categories[0].name.toUpperCase()}</span>}
+              {p.categories.length > 0 && <ProductBadge label={p.categories[0].name} />}
               {p.subCategoryIds?.map((id) => subCategoryMap[id] && (
                 <span key={id} className="topic-pill bg-[#E8E4D9] text-[10px]">{subCategoryMap[id].toUpperCase()}</span>
               ))}
-              <span className="topic-pill bg-[#D7E9B5] text-[10px]">LIVE</span>
+              <ProductBadge label="LIVE" type="status" />
               {p.stage && <span className="topic-pill bg-[#E8E4D9] text-[10px]">{p.stage.toUpperCase()}</span>}
               {hasGithub && <span className="topic-pill bg-[#E8E4D9] text-[10px]">OPEN SOURCE</span>}
             </div>
@@ -505,9 +506,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   </div>
                   <div className="mb-2 flex flex-wrap gap-1.5">
                     {s.categories.map((c) => (
-                      <span key={c.id} className="topic-pill px-2 py-0.5 text-[10px]">
-                        {c.name}
-                      </span>
+                      <ProductBadge key={c.id} label={c.name} />
                     ))}
                     {s.stage && <span className="ftag text-[10px]">{s.stage}</span>}
                   </div>

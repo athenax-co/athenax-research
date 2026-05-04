@@ -17,7 +17,7 @@ const STALE = 10 * 60 * 1000; // 10 minutes — reference data changes infrequen
 export function useCategories() {
   return useQuery({
     queryKey: REFERENCE_QUERY_KEYS.categories,
-    queryFn: referenceApi.getCategories,
+    queryFn: () => referenceApi.getCategories(),
     staleTime: STALE,
   });
 }
@@ -44,13 +44,11 @@ export function useLabs() {
 
 // ─── useSubcategories ────────────────────────────────────────────────────────
 
-const SUBCATEGORY_STALE = 2 * 60 * 1000;
-
 export function subcategoryQueryOptions(parentId: number) {
   return {
     queryKey: ["subcategories", parentId] as const,
-    queryFn: () => referenceApi.getSubcategories(parentId),
-    staleTime: SUBCATEGORY_STALE,
+    queryFn: () => referenceApi.getCategories(parentId),
+    staleTime: 2 * 60 * 1000,
   };
 }
 

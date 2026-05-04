@@ -153,6 +153,7 @@ export function useUpdateProductStatus() {
     mutationFn: ({ id, status }: { id: number; status: ProductStatus }) => productApi.updateProductStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["product"] });
     },
   });
 }
@@ -162,6 +163,7 @@ export function useComments(productId: number) {
     queryKey: ["comments", productId],
     queryFn: () => productApi.getComments(productId),
     enabled: productId > 0,
+    retry: false,
   });
 }
 
@@ -215,8 +217,15 @@ export function useInterestProduct() {
 }
 
 export function useBookmarkProduct() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, bookmarked }: { id: number; bookmarked: boolean }) => productApi.bookmarkProduct(id, bookmarked),
+    onSuccess: (_data, { id, bookmarked }) => {
+      queryClient.setQueriesData({ queryKey: ["product"] }, (old: ProductDetailOut | undefined) => {
+        if (!old || old.id !== id) return old;
+        return { ...old, bookmarked };
+      });
+    },
   });
 }
 

@@ -11,6 +11,7 @@ import { usePapers, useUpdatePaperVerificationStatus } from "@/features/papers";
 import { SEED_BOUNTIES, SEED_LAUNCHES, SEED_PAPERS, SEED_RESEARCHERS, SEED_SPONSORS, SEED_STARTUPS } from "@/data/seed";
 import { PaperVerificationStatus, ProductStatus } from "@/enums";
 import { cn } from "@/utils/lib";
+import { ProductBadge } from "@/components/ui/ProductBadge";
 
 type AdminTab = "launches" | "papers" | "cohorts" | "bounties" | "platform";
 
@@ -28,17 +29,18 @@ function QueueRow({ name, meta, chips = [], onApprove, onReject, reviewHref, onR
   return (
     <div className="flex flex-wrap items-center gap-3 border-b border-[#D8D4CC] py-3 last:border-b-0">
       <div className="min-w-0 flex-1">
-        <div className="mb-1 text-[15px] font-semibold text-ink">{name}</div>
+        <div className="flex gap-4">
+          <div className="mb-1 text-[15px] font-semibold text-ink">{name}</div>
+          {chips.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {chips.map((chip) => (
+                <ProductBadge key={chip} label={chip} />
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="mb-2 font-['Space_Mono',monospace] text-[12px] text-muted">{meta}</div>
-        {chips.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {chips.map((chip) => (
-              <span key={chip} className="topic-pill text-[10px]">
-                {chip}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
       <div className="flex shrink-0 flex-wrap gap-2">
         <Button size="sm" onClick={onApprove}>
@@ -87,9 +89,7 @@ export default function Page() {
         <WindowCard label="ACCESS_DENIED.SYS" bodyClass="window-body window-body-yellow">
           <p className="mb-4 text-[15px]">Admin access required. Sign in as an admin account.</p>
           <div className="flex flex-wrap gap-2.5">
-            <Button onClick={() => handleAuthClick("login")}>
-              Sign In to Continue
-            </Button>
+            <Button onClick={() => handleAuthClick("login")}>Sign In to Continue</Button>
             <Link className="btn btn-outline" href="/dashboard">
               Back to Dashboard
             </Link>

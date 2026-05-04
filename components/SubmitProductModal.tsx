@@ -20,12 +20,13 @@ const step1Schema = z.object({
   url: z.url("Invalid URL").min(1, "Product URL is required"),
   shortDesc: z.string().min(1, "One-line description is required"),
   email: z.union([z.email("Must be a valid email"), z.literal("")]).optional(),
-  github: z
-    .url()
-    .regex(/^(https?:\/\/)?(www\.)?github\.com\/[A-Za-z0-9_.-]+(\/[A-Za-z0-9_.-]+)?$/, "Must be a valid GitHub URL")
-    .or(z.literal(""))
-    .optional(),
 });
+
+const githubSchema = z
+  .url()
+  .regex(/^(https?:\/\/)?(www\.)?github\.com\/[A-Za-z0-9_.-]+(\/[A-Za-z0-9_.-]+)?$/, "Must be a valid GitHub URL")
+  .or(z.literal(""))
+  .optional();
 
 const DEFAULT_FORM = {
   name: "",
@@ -152,10 +153,16 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
   };
 
   const handleSubmit = async () => {
+    const githubResult = githubSchema.safeParse(submitForm.github);
+    if (!githubResult.success) {
+      setErrors({ github: githubResult.error.issues[0]?.message });
+      return;
+    }
     try {
       await submitProductMutation({
         name: submitForm.name,
         url: submitForm.url || undefined,
+        github: submitForm.github || undefined,
         stage: submitForm.stage,
         funding: Number(submitForm.funding) || 0,
         founded: Number(submitForm.founded) || new Date().getFullYear(),
@@ -329,7 +336,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
                 </select>
               </div>
 
-              <div className="inp-group">
+              <div className="inp-group hidden">
                 <label className="inp-label">Sub-categories</label>
                 <SubcategoryPicker
                   categoryIds={selectedCategoryId ? [selectedCategoryId] : []}

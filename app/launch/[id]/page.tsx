@@ -7,6 +7,7 @@ import WindowCard from "@/components/ui/WindowCard";
 import { ProductBadge } from "@/components/ui/ProductBadge";
 import SEOMeta from "@/components/SEOMeta";
 import { IconShare } from "@/components/Icons";
+import { Bookmark } from "lucide-react";
 import { useGlobal } from "@/components/GlobalProvider";
 import {
   useProductBySlug,
@@ -25,6 +26,7 @@ import {
   useCreateBounty,
   useDeleteBounty,
   useUpdateProductStatus,
+  useBookmarkProduct,
   GallerySection,
   TeamSection,
   VoicesSection,
@@ -80,6 +82,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { mutate: createBounty, isPending: creatingBounty } = useCreateBounty(apiProductId, id);
   const { mutate: deleteBounty } = useDeleteBounty(apiProductId, id);
   const { mutate: updateProductStatus, isPending: updatingStatus } = useUpdateProductStatus();
+
+  const { mutate: bookmark, isPending: bookmarking } = useBookmarkProduct();
 
   const shareLaunch = async (slug: string) => {
     const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
@@ -138,16 +142,27 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const hasGithub = p.links.some((l) => l.linkType === "github");
 
   const handleApiVote = () => {
-    if (!user) {
-      showToast("Sign in to upvote.", "error");
-      return;
-    }
+    if (!user) { showToast("Sign in to upvote.", "error"); return; }
+    if (p.status !== ProductStatus.APPROVED) { showToast("Only approved launches can be upvoted.", "error"); return; }
     const newVoted = !p.voted;
     vote(
       { id: p.id, voted: newVoted },
       {
         onSuccess: () => showToast(newVoted ? `Upvoted ${p.name}!` : "Vote removed.", "success"),
         onError: () => showToast("Failed to vote. Please try again.", "error"),
+      }
+    );
+  };
+
+  const handleBookmark = () => {
+    if (!user) { showToast("Sign in to bookmark.", "error"); return; }
+    if (p.status !== ProductStatus.APPROVED) { showToast("Only approved launches can be bookmarked.", "error"); return; }
+    const next = !p.bookmarked;
+    bookmark(
+      { id: p.id, bookmarked: next },
+      {
+        onSuccess: () => showToast(next ? `Saved ${p.name}` : `Removed ${p.name}`, next ? "success" : "info"),
+        onError: () => showToast("Failed to bookmark. Please try again.", "error"),
       }
     );
   };
@@ -266,7 +281,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               {p.stage && <span className="topic-pill bg-[#E8E4D9] text-[10px]">{p.stage.toUpperCase()}</span>}
               {hasGithub && <span className="topic-pill bg-[#E8E4D9] text-[10px]">OPEN SOURCE</span>}
             </div>
-            {p.description && <p className="mb-2 text-[15px] leading-[1.6] text-[#555] max-w-150">{p.description}</p>}
+            {p.shortDesc && <p className="mb-2 text-[15px] leading-[1.6] text-[#555] max-w-150">{p.shortDesc}</p>}
             <div className="font-['Space_Mono',monospace] text-[11px] text-[#888] tracking-[0.02em]">
               {p.founded != null && <>founded {p.founded}</>}
               {p.founded != null && p.createdAt && <span className="mx-1 text-[#ccc]">·</span>}
@@ -274,19 +289,29 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             </div>
           </div>
 
-          <div className="flex shrink-0 items-start gap-2 pt-2 max-[640px]:col-span-2 max-[640px]:pt-0">
+          <div className="shrink-0 flex w-full items-center gap-2 sm:w-auto max-[640px]:col-span-2">
             <button
+              className={p.voted ? "btn btn-ghost btn-sm bg-success flex-1 justify-center sm:flex-none" : "btn btn-outline btn-sm flex-1 justify-center sm:flex-none"}
               onClick={handleApiVote}
               disabled={voting}
-              className={`inline-flex items-center gap-1.5 rounded-full border border-ink px-4 py-2.5 text-[13px] font-medium shadow-[2px_2px_0_#1a1a1a] transition-transform hover:-translate-x-px hover:-translate-y-px ${p.voted ? "bg-[#D7E9B5]" : "bg-white"}`}
             >
-              {p.voted ? "✓" : "☆"} {voting ? "…" : p.voted ? "Voted" : "Upvote"} · {p.voteCount.toLocaleString()}
+              {voting ? "…" : p.voted ? "✓ Voted" : "▲ Upvote"}&nbsp;·&nbsp;{p.voteCount.toLocaleString()}
             </button>
             <button
+              className="btn btn-ghost btn-sm flex-1 justify-center sm:flex-none"
+              style={{ fontSize: 12 }}
               onClick={() => shareLaunch(p.slug)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-ink bg-white px-4 py-2.5 text-[13px] font-medium shadow-[2px_2px_0_#1a1a1a] transition-transform hover:-translate-x-px hover:-translate-y-px"
             >
-              <IconShare size={13} /> Share
+              <IconShare size={14} />
+              Share
+            </button>
+            <button
+              className={`btn btn-ghost btn-sm aspect-square px-2 sm:flex-none ${p.bookmarked ? "text-[#B45309]" : ""}`}
+              onClick={handleBookmark}
+              disabled={bookmarking}
+              title={p.bookmarked ? "Remove bookmark" : "Bookmark"}
+            >
+              <Bookmark size={15} fill={p.bookmarked ? "currentColor" : "none"} />
             </button>
           </div>
         </div>
@@ -458,7 +483,14 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           </WindowCard>
         </div>
 
-        <DiscussionSection user={user} comments={comments} onPost={(text) => createComment(text)} />
+        <DiscussionSection
+          user={user}
+          comments={comments}
+          onPost={(text) => {
+            if (p.status !== ProductStatus.APPROVED) { showToast("Only approved launches can be commented on.", "error"); return; }
+            createComment(text);
+          }}
+        />
 
         {p.papers && p.papers.length > 0 && (
           <div className="mt-8">
@@ -504,7 +536,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     ))}
                     {s.stage && <span className="ftag text-[10px]">{s.stage}</span>}
                   </div>
-                  <div className="text-xs text-muted">{s.description}</div>
+                  <div className="text-xs text-muted">{s.shortDesc ?? s.description}</div>
                 </Link>
               ))}
             </div>

@@ -5,6 +5,7 @@ export type { ProductStatus };
 export interface ProductIn {
   name: string;
   url?: string;
+  github?: string;
   stage: string;
   funding: number;
   founded: number;

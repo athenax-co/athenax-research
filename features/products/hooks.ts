@@ -270,6 +270,23 @@ export function useUpdateVoice(productId: number, slug: string) {
   });
 }
 
+export function useSwapVoice(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ idA, orderA, idB, orderB }: { idA: number; orderA: number; idB: number; orderB: number }) => {
+      if (orderA === orderB) {
+        await productApi.updateVoice(productId, idA, { sortOrder: orderB - 1 });
+      } else {
+        await Promise.all([
+          productApi.updateVoice(productId, idA, { sortOrder: orderB }),
+          productApi.updateVoice(productId, idB, { sortOrder: orderA }),
+        ]);
+      }
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
 export function useDeleteVoice(productId: number, slug: string) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -290,6 +307,40 @@ export function useDeleteBounty(productId: number, slug: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (bountyId: number) => productApi.deleteBounty(productId, bountyId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useUploadProductMedia(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ file, sortOrder }: { file: File; sortOrder?: number }) =>
+      productApi.uploadProductMedia(productId, file, sortOrder),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useSwapProductMedia(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ idA, orderA, idB, orderB }: { idA: number; orderA: number; idB: number; orderB: number }) => {
+      if (orderA === orderB) {
+        await productApi.updateProductMedia(productId, idA, orderB - 1);
+      } else {
+        await Promise.all([
+          productApi.updateProductMedia(productId, idA, orderB),
+          productApi.updateProductMedia(productId, idB, orderA),
+        ]);
+      }
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useDeleteProductMedia(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (mediaId: number) => productApi.deleteProductMedia(productId, mediaId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
   });
 }

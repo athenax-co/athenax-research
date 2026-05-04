@@ -1,59 +1,224 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import WindowCard from "@/components/ui/WindowCard";
 import { Dialog, DialogBody, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrafficLights } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, ChevronUp, ChevronDown, Upload, X, ChevronLeft, ChevronRight } from "lucide-react";
 import type { ProductMedia, TeamMemberOut, ProductVoice, Bounty, ProductComment, TeamMemberIn, VoiceIn, BountyIn } from "@/features/products";
+import Link from "next/link";
 
-export function GallerySection({ media }: { media: ProductMedia[] }) {
+type GallerySectionProps = {
+  media: ProductMedia[];
+  isAdmin?: boolean;
+  onUpload?: (file: File) => void;
+  onDelete?: (id: number) => void;
+  onSwap?: (idA: number, orderA: number, idB: number, orderB: number) => void;
+  uploading?: boolean;
+};
+
+export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, uploading }: GallerySectionProps) {
+  const fileRef = useRef<HTMLInputElement>(null);
   const images = media.filter((m) => m.mediaType === "image").sort((a, b) => a.sortOrder - b.sortOrder);
+
+  if (isAdmin) {
+    return (
+      <div className="space-y-2">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="font-['Space_Mono',monospace] text-[10px] text-[#888]">{images.length} image{images.length !== 1 ? "s" : ""}</span>
+          <button
+            className="flex items-center gap-1.5 rounded border border-ink bg-white px-2.5 py-1 font-['Space_Mono',monospace] text-[11px] font-medium shadow-[1.5px_1.5px_0_#1a1a1a] transition-transform hover:-translate-x-px hover:-translate-y-px disabled:opacity-50"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+          >
+            {uploading ? <span className="spinner" /> : <Upload size={11} />}
+            {uploading ? "Uploading…" : "Upload Image"}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file && onUpload) onUpload(file);
+              e.target.value = "";
+            }}
+          />
+        </div>
+
+        {images.length === 0 ? (
+          <div className="flex min-h-20 items-center justify-center rounded border border-dashed border-[#D8D4CC] bg-[#FAFAF7] font-['Space_Mono',monospace] text-[10px] text-[#aaa]">
+            No images yet — upload one above
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            {images.map((img, i) => (
+              <div key={img.id} className="flex items-center gap-2 rounded border border-[rgba(0,0,0,0.08)] bg-white p-1.5">
+                <img src={img.url ?? undefined} alt="" className="h-12 w-20 shrink-0 rounded object-cover" />
+                <span className="flex-1 truncate font-['Space_Mono',monospace] text-[10px] text-[#888]">{i + 1} / {images.length}</span>
+                <div className="flex shrink-0 items-center gap-1">
+                  <button
+                    className="p-1 text-[#888] hover:text-ink disabled:opacity-30"
+                    disabled={i === 0}
+                    onClick={() => onSwap?.(img.id, img.sortOrder, images[i - 1].id, images[i - 1].sortOrder)}
+                    title="Move up"
+                  >
+                    <ChevronUp size={14} />
+                  </button>
+                  <button
+                    className="p-1 text-[#888] hover:text-ink disabled:opacity-30"
+                    disabled={i === images.length - 1}
+                    onClick={() => onSwap?.(img.id, img.sortOrder, images[i + 1].id, images[i + 1].sortOrder)}
+                    title="Move down"
+                  >
+                    <ChevronDown size={14} />
+                  </button>
+                  <button
+                    className="p-1 text-[#aaa] hover:text-[#E8323C]"
+                    onClick={() => onDelete?.(img.id)}
+                    title="Delete"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const openAt = (i: number) => setLightboxIndex(i);
+  const closeLightbox = () => setLightboxIndex(null);
+
+  const prev = useCallback(() => setLightboxIndex((i) => (i != null && i > 0 ? i - 1 : i)), []);
+  const next = useCallback(() => setLightboxIndex((i) => (i != null && i < images.length - 1 ? i + 1 : i)), [images.length]);
+
+  useEffect(() => {
+    if (lightboxIndex == null) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") prev();
+      else if (e.key === "ArrowRight") next();
+      else if (e.key === "Escape") closeLightbox();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [lightboxIndex, prev, next]);
 
   if (images.length === 0) {
     return (
-      <div className="grid grid-cols-[1.4fr_1fr] grid-rows-2 gap-1.5">
-        <div className="row-span-2 flex aspect-auto min-h-30 items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
+      <div className="grid h-72 grid-cols-[1.4fr_1fr] grid-rows-2 gap-1.5">
+        <div className="row-span-2 flex items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
           screenshot.png
         </div>
-        <div className="flex aspect-16/10 items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
+        <div className="flex items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
           02.png
         </div>
-        <div className="flex aspect-16/10 items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
+        <div className="flex items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
           03.png
         </div>
       </div>
     );
   }
 
-  const shown = images.slice(0, 3);
+  const [first, second, third] = images;
   const extra = images.length - 3;
 
   return (
-    <div className="grid grid-cols-[1.4fr_1fr] grid-rows-2 gap-1.5">
-      <div className="row-span-2 min-h-30 overflow-hidden rounded border border-[rgba(0,0,0,0.08)]">
-        <img src={shown[0].storageKey} alt="" className="h-full w-full object-cover" />
+    <>
+      <div className="grid h-72 grid-cols-[1.4fr_1fr] grid-rows-2 gap-1.5">
+        <button
+          className="row-span-2 overflow-hidden rounded border border-[rgba(0,0,0,0.08)] cursor-pointer"
+          onClick={() => openAt(0)}
+        >
+          <img src={first.url ?? undefined} alt="" className="h-full w-full object-cover" />
+        </button>
+
+        <button
+          className="overflow-hidden rounded border border-[rgba(0,0,0,0.08)] cursor-pointer"
+          onClick={() => second && openAt(1)}
+        >
+          {second ? (
+            <img src={second.url ?? undefined} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full items-center justify-center bg-[#E8E4D9] text-[10px] font-['Space_Mono',monospace] text-[#888]">02.png</div>
+          )}
+        </button>
+
+        <button
+          className="relative overflow-hidden rounded border border-[rgba(0,0,0,0.08)] cursor-pointer"
+          onClick={() => openAt(third ? 2 : 0)}
+        >
+          {third ? (
+            <img src={third.url ?? undefined} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full items-center justify-center bg-[#E8E4D9] text-[10px] font-['Space_Mono',monospace] text-[#888]">03.png</div>
+          )}
+          {extra > 0 && (
+            <span className="absolute bottom-1.5 right-1.5 rounded bg-[rgba(0,0,0,0.55)] px-1.5 py-0.5 text-[9px] font-['Space_Mono',monospace] text-white">
+              + {extra} more
+            </span>
+          )}
+        </button>
       </div>
-      <div className="aspect-16/10 overflow-hidden rounded border border-[rgba(0,0,0,0.08)]">
-        {shown[1] ? (
-          <img src={shown[1].storageKey} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full items-center justify-center bg-[#E8E4D9] text-[10px] font-['Space_Mono',monospace] text-[#888]">02.png</div>
-        )}
-      </div>
-      <div className="relative aspect-16/10 overflow-hidden rounded border border-[rgba(0,0,0,0.08)]">
-        {shown[2] ? (
-          <img src={shown[2].storageKey} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full items-center justify-center bg-[#E8E4D9] text-[10px] font-['Space_Mono',monospace] text-[#888]">03.png</div>
-        )}
-        {extra > 0 && (
-          <span className="absolute bottom-1.5 right-1.5 rounded bg-[rgba(0,0,0,0.5)] px-1.5 py-0.5 text-[9px] font-['Space_Mono',monospace] text-white">
-            + {extra} more
+
+      {lightboxIndex != null && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85"
+          onClick={closeLightbox}
+        >
+          <button
+            className="absolute top-4 right-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+            onClick={closeLightbox}
+          >
+            <X size={20} />
+          </button>
+
+          <span className="absolute top-4 left-1/2 -translate-x-1/2 font-['Space_Mono',monospace] text-[11px] text-white/60">
+            {lightboxIndex + 1} / {images.length}
           </span>
-        )}
-      </div>
-    </div>
+
+          <button
+            className="absolute left-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 disabled:opacity-20"
+            disabled={lightboxIndex === 0}
+            onClick={(e) => { e.stopPropagation(); prev(); }}
+          >
+            <ChevronLeft size={22} />
+          </button>
+
+          <img
+            src={images[lightboxIndex].url ?? undefined}
+            alt=""
+            className="max-h-[85vh] max-w-[85vw] rounded-lg object-contain shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          <button
+            className="absolute right-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 disabled:opacity-20"
+            disabled={lightboxIndex === images.length - 1}
+            onClick={(e) => { e.stopPropagation(); next(); }}
+          >
+            <ChevronRight size={22} />
+          </button>
+
+          <div className="absolute bottom-5 flex gap-1.5" onClick={(e) => e.stopPropagation()}>
+            {images.map((img, i) => (
+              <button
+                key={img.id}
+                onClick={() => setLightboxIndex(i)}
+                className={`h-12 w-16 overflow-hidden rounded border-2 transition-all ${i === lightboxIndex ? "border-white" : "border-transparent opacity-50 hover:opacity-75"}`}
+              >
+                <img src={img.url ?? undefined} alt="" className="h-full w-full object-cover" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -341,6 +506,7 @@ export function VoicesSection({
   onDelete,
   onCreate,
   onUpdate,
+  onSwap,
   creating,
 }: {
   voices: ProductVoice[];
@@ -348,6 +514,7 @@ export function VoicesSection({
   onDelete: (id: number) => void;
   onCreate: (data: VoiceIn) => void;
   onUpdate: (id: number, data: Partial<VoiceIn>) => void;
+  onSwap?: (idA: number, orderA: number, idB: number, orderB: number) => void;
   creating: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -356,7 +523,8 @@ export function VoicesSection({
   const [form, setForm] = useState<VoiceIn>(EMPTY_VOICE);
   const [editForm, setEditForm] = useState<Partial<VoiceIn>>({});
 
-  const shown = expanded ? voices : voices.slice(0, 2);
+  const sorted = [...voices].sort((a, b) => a.sortOrder - b.sortOrder);
+  const shown = expanded ? sorted : sorted.slice(0, 2);
 
   function openEdit(v: ProductVoice) {
     setEditVoice(v);
@@ -389,19 +557,35 @@ export function VoicesSection({
       {voices.length === 0 && <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No voices yet.</p>}
 
       <div className={`overflow-hidden transition-all ${expanded ? "max-h-150 overflow-y-auto" : "max-h-77.5"}`}>
-        {shown.map((v) => (
+        {shown.map((v, i) => (
           <div key={v.id} className="mb-2.5 rounded-md border border-[rgba(0,0,0,0.08)] bg-[#FFFCEF] px-4 py-3.5 last:mb-0">
             <p className="text-[13px] italic leading-[1.55]">"{v.quote}"</p>
             <div className="mt-2 flex items-center justify-between font-['Space_Mono',monospace] text-[10px]">
               <span className="font-medium text-[#1a1a1a]">{v.authorName ?? v.authorHandle}</span>
               <div className="flex items-center gap-3">
                 {v.sourceUrl && (
-                  <a href={v.sourceUrl} target="_blank" rel="noreferrer" className="text-[#185FA5] hover:underline">
+                  <Link href={v.sourceUrl} target="_blank" rel="noreferrer" className="text-[#185FA5] hover:underline">
                     ↗ open thread
-                  </a>
+                  </Link>
                 )}
                 {isAdmin && (
                   <>
+                    <button
+                      className="text-[#888] hover:text-ink disabled:opacity-30"
+                      disabled={i === 0}
+                      onClick={() => onSwap?.(v.id, v.sortOrder, sorted[i - 1].id, sorted[i - 1].sortOrder)}
+                      title="Move up"
+                    >
+                      <ChevronUp size={13} />
+                    </button>
+                    <button
+                      className="text-[#888] hover:text-ink disabled:opacity-30"
+                      disabled={i === sorted.length - 1}
+                      onClick={() => onSwap?.(v.id, v.sortOrder, sorted[i + 1].id, sorted[i + 1].sortOrder)}
+                      title="Move down"
+                    >
+                      <ChevronDown size={13} />
+                    </button>
                     <button onClick={() => openEdit(v)} className="text-[#6B6B7A] hover:text-ink" title="Edit">
                       <Pencil size={13} />
                     </button>
@@ -416,9 +600,9 @@ export function VoicesSection({
         ))}
       </div>
 
-      {voices.length > 2 && (
+      {sorted.length > 2 && (
         <button onClick={() => setExpanded(!expanded)} className="mt-2.5 font-['Space_Mono',monospace] text-[11px] text-[#888] hover:text-[#1a1a1a]">
-          {expanded ? "− show less" : `show ${voices.length - 2} more →`}
+          {expanded ? "− show less" : `show ${sorted.length - 2} more →`}
         </button>
       )}
 

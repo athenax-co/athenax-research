@@ -27,6 +27,10 @@ import {
   useDeleteBounty,
   useUpdateProductStatus,
   useBookmarkProduct,
+  useUploadProductMedia,
+  useSwapProductMedia,
+  useDeleteProductMedia,
+  useSwapVoice,
   GallerySection,
   TeamSection,
   VoicesSection,
@@ -82,6 +86,10 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { mutate: createBounty, isPending: creatingBounty } = useCreateBounty(apiProductId, id);
   const { mutate: deleteBounty } = useDeleteBounty(apiProductId, id);
   const { mutate: updateProductStatus, isPending: updatingStatus } = useUpdateProductStatus();
+  const { mutate: uploadMedia, isPending: uploadingMedia } = useUploadProductMedia(apiProductId, id);
+  const { mutate: swapMedia } = useSwapProductMedia(apiProductId, id);
+  const { mutate: deleteMedia } = useDeleteProductMedia(apiProductId, id);
+  const { mutate: swapVoice } = useSwapVoice(apiProductId, id);
 
   const { mutate: bookmark, isPending: bookmarking } = useBookmarkProduct();
 
@@ -350,7 +358,26 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           </WindowCard>
 
           <WindowCard label="GALLERY.SYS" bodyClass="p-3">
-            <GallerySection media={p.media} />
+            <GallerySection
+              media={p.media}
+              isAdmin={isAdmin}
+              uploading={uploadingMedia}
+              onUpload={(file) =>
+                uploadMedia({ file }, {
+                  onSuccess: () => showToast("Image uploaded.", "success"),
+                  onError: () => showToast("Upload failed. Please try again.", "error"),
+                })
+              }
+              onDelete={(mediaId) =>
+                deleteMedia(mediaId, {
+                  onSuccess: () => showToast("Image removed.", "info"),
+                  onError: () => showToast("Action failed.", "error"),
+                })
+              }
+              onSwap={(idA, orderA, idB, orderB) =>
+                swapMedia({ idA, orderA, idB, orderB }, { onError: () => showToast("Failed to reorder.", "error") })
+              }
+            />
           </WindowCard>
 
           <WindowCard label="LINKS.SYS" bodyClass="px-5 py-3">
@@ -455,6 +482,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   onSuccess: () => showToast("Voice added.", "success"),
                   onError: () => showToast("Action failed.", "error"),
                 })
+              }
+              onSwap={(idA, orderA, idB, orderB) =>
+                swapVoice({ idA, orderA, idB, orderB }, { onError: () => showToast("Failed to reorder.", "error") })
               }
               creating={creatingVoice}
             />

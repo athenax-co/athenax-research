@@ -1,5 +1,5 @@
-import { http } from "@/api/client";
-import type { ProductIn, ProductOut, ProductDetailOut, ProductStatus, ProductComment, ProductSummary, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty } from "./types";
+import { http, BASE_URL, handleResponse } from "@/api/client";
+import type { ProductIn, ProductOut, ProductDetailOut, ProductStatus, ProductComment, ProductSummary, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty, ProductMedia } from "./types";
 import type { VerificationStatus } from "@/enums";
 
 export interface ProductStats {
@@ -127,4 +127,24 @@ export function createBounty(productId: number, data: BountyIn): Promise<Bounty>
 
 export function deleteBounty(productId: number, bountyId: number): Promise<void> {
   return http.del<void>(`/product/${productId}/bounties/${bountyId}`, { auth: true });
+}
+
+export async function uploadProductMedia(productId: number, file: File, sortOrder?: number): Promise<ProductMedia> {
+  const form = new FormData();
+  form.append("file", file);
+  if (sortOrder != null) form.append("sort_order", String(sortOrder));
+  const res = await fetch(`${BASE_URL}/product/${productId}/media/upload`, {
+    method: "POST",
+    credentials: "include",
+    body: form,
+  });
+  return handleResponse<ProductMedia>(res);
+}
+
+export function updateProductMedia(productId: number, mediaId: number, sortOrder: number): Promise<ProductMedia> {
+  return http.patch<ProductMedia>(`/product/${productId}/media/${mediaId}`, { sortOrder }, { auth: true });
+}
+
+export function deleteProductMedia(productId: number, mediaId: number): Promise<void> {
+  return http.del<void>(`/product/${productId}/media/${mediaId}`, { auth: true });
 }

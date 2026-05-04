@@ -14,6 +14,7 @@ import SubmitProductButton from "@/components/SubmitProductModal";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { usePagedProducts, useProductStats } from "@/features/products";
+import { ProductBadge } from "@/components/ui/ProductBadge";
 
 type DateFilter = "today" | "this_week" | "this_month" | undefined;
 

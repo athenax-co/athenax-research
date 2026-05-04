@@ -14,6 +14,7 @@ import SubmitProductButton from "@/components/SubmitProductModal";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { usePagedProducts, useProductStats } from "@/features/products";
+import { ProductBadge } from "@/components/ui/ProductBadge";
 
 type DateFilter = "today" | "this_week" | "this_month" | undefined;
 
@@ -209,19 +210,13 @@ export default function Page() {
                         {product.name.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
-                    <h3 className="mb-0 text-[21px]">
-                      <Link href={`/launch/${product.slug}`} className="cursor-pointer text-inherit no-underline" prefetch={false}>
-                        {product.name}
-                      </Link>
-                    </h3>
+                    <span className="font-bold text-xl text-ink">{product.name}</span>
                     {(product.categories ?? []).map((c) => (
-                      <span key={c.id} className="topic-pill">
-                        {c.name}
-                      </span>
+                      <ProductBadge key={c.id} label={c.name} />
                     ))}
                     {product.qualityBadge && <span className="ftag bg-[#EAF0F6] text-[10px]">{product.qualityBadge}</span>}
                   </div>
-                  <p className="mb-2.5 text-[13px] leading-[1.6] text-[#1C1C27]">{product.description}</p>
+                  <p className="mb-2.5 text-[13px] leading-[1.6] text-[#1C1C27]">{product.shortDesc ?? product.description}</p>
 
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
                     <span className="font-['Space_Mono',monospace] text-xs font-bold text-[#E8323C]">▲ {product.voteCount.toLocaleString()}</span>

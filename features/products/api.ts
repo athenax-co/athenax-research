@@ -1,5 +1,6 @@
 import { http } from "@/api/client";
-import type { ProductIn, ProductOut, ProductDetailOut, ProductStatus, ProductComment, ProductSummary } from "./types";
+import type { ProductIn, ProductOut, ProductDetailOut, ProductStatus, ProductComment, ProductSummary, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty } from "./types";
+import type { VerificationStatus } from "@/enums";
 
 export interface ProductStats {
   releases: {
@@ -90,4 +91,40 @@ export function updateComment(productId: number, commentId: number, text: string
 
 export function deleteComment(productId: number, commentId: number): Promise<void> {
   return http.del<void>(`/product/${productId}/comments/${commentId}`, { auth: true });
+}
+
+export function createTeamMember(productId: number, data: TeamMemberIn): Promise<TeamMemberOut> {
+  return http.post<TeamMemberOut>(`/product/${productId}/team`, data, { auth: true });
+}
+
+export function updateTeamMember(productId: number, memberId: number, data: Partial<TeamMemberIn>): Promise<TeamMemberOut> {
+  return http.patch<TeamMemberOut>(`/product/${productId}/team/${memberId}`, data, { auth: true });
+}
+
+export function deleteTeamMember(productId: number, memberId: number): Promise<void> {
+  return http.del<void>(`/product/${productId}/team/${memberId}`, { auth: true });
+}
+
+export function updateTeamMemberStatus(productId: number, memberId: number, status: VerificationStatus): Promise<TeamMemberOut> {
+  return http.patch<TeamMemberOut>(`/product/${productId}/team/${memberId}/status`, { status }, { auth: true });
+}
+
+export function createVoice(productId: number, data: VoiceIn): Promise<ProductVoice> {
+  return http.post<ProductVoice>(`/product/${productId}/voices`, data, { auth: true });
+}
+
+export function updateVoice(productId: number, voiceId: number, data: Partial<VoiceIn>): Promise<ProductVoice> {
+  return http.patch<ProductVoice>(`/product/${productId}/voices/${voiceId}`, data, { auth: true });
+}
+
+export function deleteVoice(productId: number, voiceId: number): Promise<void> {
+  return http.del<void>(`/product/${productId}/voices/${voiceId}`, { auth: true });
+}
+
+export function createBounty(productId: number, data: BountyIn): Promise<Bounty> {
+  return http.post<Bounty>(`/product/${productId}/bounties`, data, { auth: true });
+}
+
+export function deleteBounty(productId: number, bountyId: number): Promise<void> {
+  return http.del<void>(`/product/${productId}/bounties/${bountyId}`, { auth: true });
 }

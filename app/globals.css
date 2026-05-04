@@ -20,6 +20,9 @@
   --color-paper: #f9f5dc;
   --color-success: #d4edda;
   --color-danger: #e8323c;
+  --color-badge-yellow: #ffe14d;
+  --color-badge-green: #d7e9b5;
+  --color-badge-gray: #e8e4d9;
 }
 
 @layer base {

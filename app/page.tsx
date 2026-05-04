@@ -5,6 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { IconBounties, IconBuilders, IconLabs, IconTerminal } from "@/components/Icons";
 import { Button, buttonVariants } from "@/components/ui/button";
 import WindowCard from "@/components/ui/WindowCard";
+import { ProductBadge } from "@/components/ui/ProductBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGlobal } from "@/components/GlobalProvider";
 import { cn } from "@/lib/utils";
@@ -84,31 +85,38 @@ export default function Page() {
                 </Link>
               </div>
               <hr className="divider" />
-              {latestProducts.map((launch: any) => (
-                <Link
-                  key={launch.id}
-                  href={`/launch/${launch.slug}`}
-                  className="archive-row cursor-pointer text-inherit no-underline"
-                  prefetch={false}
-                >
-                  <Avatar className="size-10 shrink-0 rounded-lg overflow-visible">
-                    <AvatarImage src={launch.logo ?? undefined} alt={launch.name} className="size-full object-contain" />
-                    <AvatarFallback className="rounded-lg border border-[#D8D4CC] bg-paper text-base font-bold">
-                      {launch.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="mb-0.5 flex flex-wrap items-center gap-2">
-                      <div className="archive-title">{launch.name}</div>
-                      {launch.categories?.[0]?.name && <span className="topic-pill px-2 py-0.5 text-[10px]">{launch.categories[0].name}</span>}
+              {latestProducts.map((launch: any) => {
+                const description =
+                  typeof launch.description === "string" ? launch.description : typeof launch.shortDesc === "string" ? launch.shortDesc : "";
+
+                return (
+                  <Link
+                    key={launch.id}
+                    href={`/launch/${launch.slug}`}
+                    className="archive-row cursor-pointer text-inherit no-underline"
+                    prefetch={false}
+                  >
+                    <Avatar className="size-10 shrink-0 rounded-lg overflow-visible">
+                      <AvatarImage src={launch.logo ?? undefined} alt={launch.name} className="size-full object-contain" />
+                      <AvatarFallback className="rounded-lg border border-[#D8D4CC] bg-paper text-base font-bold">
+                        {launch.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="mb-0.5 flex flex-wrap items-center gap-2">
+                        <div className="archive-title">{launch.name}</div>
+                        {launch.categories?.[0]?.name && <ProductBadge label={launch.categories[0].name} />}
+                      </div>
+                      <div className="mt-0.75 text-xs leading-normal text-muted">
+                        {description ? `${description.slice(0, 110)}…` : "No description yet."}
+                      </div>
                     </div>
-                    <div className="mt-0.75 text-xs leading-normal text-muted">{launch.description.slice(0, 110)}…</div>
-                  </div>
-                  <div className="min-w-16 shrink-0 text-right">
-                    <div className="font-['Space_Mono',monospace] text-[15px] font-bold text-danger">★ {launch.bookmarkCount}</div>
-                  </div>
-                </Link>
-              ))}
+                    <div className="min-w-16 shrink-0 text-right">
+                      <div className="font-['Space_Mono',monospace] text-[15px] font-bold text-danger">★ {launch.bookmarkCount}</div>
+                    </div>
+                  </Link>
+                );
+              })}
               <div className="mt-4.5 flex flex-wrap items-center gap-2.5 sm:gap-3">
                 <Link href="/launch" className={cn(buttonVariants({ size: isMobile ? "sm" : "default" }), "no-underline")}>
                   View All Launches →

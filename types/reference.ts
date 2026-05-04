@@ -1,6 +1,7 @@
 export interface CategoryOut {
   id: number;
   name: string;
+  parentId: number | null;
 }
 
 export interface UniversityOut {

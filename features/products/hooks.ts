@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as productApi from "./api";
 import type { ProductFilters, ProductStats } from "./api";
-import type { ProductComment, ProductDetailOut, ProductIn, ProductOut, ProductStatus, ProductSummary } from "./types";
+import type { ProductComment, ProductDetailOut, ProductIn, ProductOut, ProductStatus, ProductSummary, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty } from "./types";
+import type { VerificationStatus } from "@/enums";
 import type { CategoryOut } from "@/types/reference";
 import { resolveCategories } from "@/utils/lib";
 import { REFERENCE_QUERY_KEYS } from "@/hooks/queries/useReference";
@@ -143,6 +144,7 @@ export function useUpdateProductStatus() {
     mutationFn: ({ id, status }: { id: number; status: ProductStatus }) => productApi.updateProductStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["product"] });
     },
   });
 }
@@ -152,6 +154,7 @@ export function useComments(productId: number) {
     queryKey: ["comments", productId],
     queryFn: () => productApi.getComments(productId),
     enabled: productId > 0,
+    retry: false,
   });
 }
 
@@ -205,7 +208,88 @@ export function useInterestProduct() {
 }
 
 export function useBookmarkProduct() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, bookmarked }: { id: number; bookmarked: boolean }) => productApi.bookmarkProduct(id, bookmarked),
+    onSuccess: (_data, { id, bookmarked }) => {
+      queryClient.setQueriesData({ queryKey: ["product"] }, (old: ProductDetailOut | undefined) => {
+        if (!old || old.id !== id) return old;
+        return { ...old, bookmarked };
+      });
+    },
+  });
+}
+
+export function useCreateTeamMember(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: TeamMemberIn) => productApi.createTeamMember(productId, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useUpdateTeamMember(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ memberId, data }: { memberId: number; data: Partial<TeamMemberIn> }) =>
+      productApi.updateTeamMember(productId, memberId, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useDeleteTeamMember(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (memberId: number) => productApi.deleteTeamMember(productId, memberId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useUpdateTeamMemberStatus(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ memberId, status }: { memberId: number; status: VerificationStatus }) =>
+      productApi.updateTeamMemberStatus(productId, memberId, status),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useCreateVoice(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: VoiceIn) => productApi.createVoice(productId, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useUpdateVoice(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ voiceId, data }: { voiceId: number; data: Partial<VoiceIn> }) => productApi.updateVoice(productId, voiceId, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useDeleteVoice(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (voiceId: number) => productApi.deleteVoice(productId, voiceId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useCreateBounty(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: BountyIn) => productApi.createBounty(productId, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useDeleteBounty(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (bountyId: number) => productApi.deleteBounty(productId, bountyId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
   });
 }

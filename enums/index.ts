@@ -39,3 +39,38 @@ export const PaperVerificationStatus = {
 } as const;
 
 export type PaperVerificationStatus = (typeof PaperVerificationStatus)[keyof typeof PaperVerificationStatus];
+
+export const VerificationStatus = {
+    PENDING:  "pending",
+    APPROVED: "approved",
+    REJECTED: "rejected",
+} as const;
+
+export type VerificationStatus = (typeof VerificationStatus)[keyof typeof VerificationStatus];
+
+export const ProductLinkType = {
+    WEBSITE: "website",
+    GITHUB:  "github",
+    TWITTER: "twitter",
+    DOCS:    "docs",
+    DEMO:    "demo",
+    DISCORD: "discord",
+} as const;
+
+export type ProductLinkType = (typeof ProductLinkType)[keyof typeof ProductLinkType];
+
+export const ProductMediaType = {
+    IMAGE:         "image",
+    VIDEO_HOSTED:  "video_hosted",
+    VIDEO_YOUTUBE: "video_youtube",
+} as const;
+
+export type ProductMediaType = (typeof ProductMediaType)[keyof typeof ProductMediaType];
+
+export const BountyStatus = {
+    OPEN:      "open",
+    COMPLETED: "completed",
+    CANCELLED: "cancelled",
+} as const;
+
+export type BountyStatus = (typeof BountyStatus)[keyof typeof BountyStatus];

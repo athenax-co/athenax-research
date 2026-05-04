@@ -103,17 +103,6 @@ export default function ProductReviewRow({ product }: ProductReviewRowProps) {
                 ))}
               </div>
 
-              {[
-                { label: "GitHub", value: product.github },
-                { label: "Demo", value: product.demo },
-              ]
-                .filter((l) => l.value)
-                .map((l) => (
-                  <div key={l.label} className="mb-1.5 flex items-center justify-between border-b border-[#D8D4CC] py-1.5">
-                    <span className="text-[12px] font-semibold text-muted">{l.label}</span>
-                    <span className="font-['Space_Mono',monospace] text-[11px]">{l.value}</span>
-                  </div>
-                ))}
 
               <div className="mt-2 flex flex-wrap gap-3">
                 <span className="font-['Space_Mono',monospace] text-[10px] text-muted">Submitted: {formatSubmittedDateTime(product.createdAt)}</span>

@@ -58,10 +58,9 @@ export interface ProductLink {
 
 export interface ProductMedia {
   id: number;
-  productId: number;
   mediaType: ProductMediaType;
-  storageKey: string;
   sortOrder: number;
+  url: string | null;
 }
 
 export interface TeamMemberOut {
@@ -139,6 +138,7 @@ export interface VoiceIn {
   authorHandle: string;
   authorName?: string;
   sourceUrl?: string;
+  sortOrder?: number;
 }
 
 export interface BountyIn {

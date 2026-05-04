@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as productApi from "./api";
 import type { ProductFilters, ProductStats } from "./api";
 import type { ProductComment, ProductDetailOut, ProductIn, ProductOut, ProductStatus, ProductSummary, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty } from "./types";
@@ -55,45 +55,36 @@ export function useProducts(status: ProductStatus) {
   });
 }
 
-const PAGE_SIZE = 50;
-
 export type ProductQueryFilters = {
   categoryId?: number;
   dateFilter?: ProductFilters["date_filter"];
   sortBy?: ProductFilters["sort_by"];
 };
 
-export function useInfiniteProducts(status: ProductStatus, filters: ProductQueryFilters = {}) {
+export function usePagedProducts(
+  status: ProductStatus,
+  filters: ProductQueryFilters & { page: number; pageSize: number }
+) {
   const queryClient = useQueryClient();
-  const { categoryId, dateFilter, sortBy } = filters;
-  return useInfiniteQuery({
-    queryKey: ["products", "infinite", status, categoryId, dateFilter, sortBy],
-    queryFn: ({ pageParam = 0 }) =>
+  const { categoryId, dateFilter, sortBy, page, pageSize } = filters;
+  return useQuery({
+    queryKey: ["products", "paged", status, categoryId, dateFilter, sortBy, page, pageSize],
+    queryFn: () =>
       productApi.getProducts({
         status,
         category_id: categoryId,
         date_filter: dateFilter,
         sort_by: sortBy,
-        limit: PAGE_SIZE,
-        offset: pageParam as number,
+        limit: pageSize,
+        offset: (page - 1) * pageSize,
       }),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const totalFetched = allPages.reduce((sum, page) => sum + page.items.length, 0);
-      return totalFetched < lastPage.total ? allPages.length * PAGE_SIZE : undefined;
-    },
     select: (data) => {
       const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
-      return {
-        ...data,
-        pages: data.pages.map((page) => ({
-          ...page,
-          items: withCategories(page.items, cats),
-        })),
-      };
+      return { ...data, items: withCategories(data.items, cats) };
     },
   });
 }
+
 
 export function useProductBySlug(slug: string) {
   const queryClient = useQueryClient();

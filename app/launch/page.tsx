@@ -6,15 +6,14 @@ import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
 import SEOMeta from "@/components/SEOMeta";
 import { useGlobal } from "@/components/GlobalProvider";
-import { ProductBadge } from "@/components/ui/ProductBadge";
-import { useEffect, useMemo } from "react";
+import { useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
 import { useCategories } from "@/hooks/queries/useReference";
 import SubmitProductButton from "@/components/SubmitProductModal";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useInfiniteProducts, useProductStats } from "@/features/products";
+import { usePagedProducts, useProductStats } from "@/features/products";
 
 type DateFilter = "today" | "this_week" | "this_month" | undefined;
 
@@ -44,39 +43,47 @@ export default function Page() {
   const [dateFilter, setDateFilter] = useQueryState("date", parseAsString);
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
 
-  const {
-    data,
-    isLoading: productsLoading,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteProducts("approved", {
+  // Track whether a filter change (not a page change) triggered a page reset
+  const filterResetRef = useRef(false);
+
+  const { data, isLoading: productsLoading } = usePagedProducts("approved", {
     categoryId: categoryId ?? undefined,
     dateFilter: (dateFilter || undefined) as DateFilter,
+    page,
+    pageSize: PAGE_SIZE,
   });
 
-  const allProducts = useMemo(() => {
-    const pages = data?.pages ?? [];
-    const items = pages.flatMap((page) => page.items);
-    return [...new Map(items.map((p) => [p.id, p])).values()];
-  }, [data]);
+  const pagedProducts = data?.items ?? [];
+  const totalCount = data?.total ?? 0;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
-  const totalCount = useMemo(() => data?.pages[0]?.total ?? 0, [data]);
-
-  // Auto-fetch remaining pages when user requests a page we don't have loaded yet
+  // Reset to page 1 when filters change, scroll stays
+  const prevCategoryRef = useRef(categoryId);
+  const prevDateRef = useRef(dateFilter);
   useEffect(() => {
-    const neededProducts = page * PAGE_SIZE;
-    if (hasNextPage && allProducts.length < neededProducts) {
-      fetchNextPage();
+    if (prevCategoryRef.current !== categoryId || prevDateRef.current !== dateFilter) {
+      prevCategoryRef.current = categoryId;
+      prevDateRef.current = dateFilter;
+      filterResetRef.current = true;
+      setPage(1);
     }
-  }, [page, allProducts.length, hasNextPage, fetchNextPage]);
-
-  // Reset page when filters change
-  useEffect(() => {
-    setPage(1);
   }, [categoryId, dateFilter, setPage]);
 
-  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
-  const paginatedProducts = allProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  // Scroll to top on page change (but not on filter-triggered resets)
+  const prevPageRef = useRef(page);
+  useEffect(() => {
+    if (prevPageRef.current !== page) {
+      prevPageRef.current = page;
+      if (!filterResetRef.current) {
+        const section = document.getElementById("launch-tabs-section");
+        if (section) {
+          const top = section.getBoundingClientRect().top + window.scrollY - 80;
+          window.scrollTo({ top, behavior: "smooth" });
+        }
+      }
+      filterResetRef.current = false;
+    }
+  }, [page]);
 
   // Redirect out-of-range page to 1
   useEffect(() => {
@@ -97,7 +104,7 @@ export default function Page() {
             <h1 className="mb-1 text-[48px]">AthenaX Launch</h1>
             <span className="status-badge mb-0">
               <div className="status-dot" />
-              {productStats ? `${productStats.releases.thisMonth} This Month` : `${allProducts.length} Products Listed`}
+              {productStats ? `${productStats.releases.thisMonth} This Month` : `${totalCount} Products Listed`}
             </span>
           </div>
           <SubmitProductButton label="+ Submit Your Product" className="self-start hidden sm:inline-flex" />
@@ -126,7 +133,7 @@ export default function Page() {
           ))}
         </div>
 
-        <div className="mb-5 flex gap-2 border-b-2 border-b-[#1C1C27] pb-2.5">
+        <div className="mb-5 flex gap-2 border-b-2 border-b-[#1C1C27] pb-2.5" id="launch-tabs-section">
           {TIME_TABS.map((tab) => (
             <Button
               key={tab.label}
@@ -191,7 +198,7 @@ export default function Page() {
         )}
 
         {!productsLoading &&
-          paginatedProducts.map((product) => (
+          pagedProducts.map((product) => (
             <div key={product.id} className="mb-1 border-b-2 border-b-[#D8D4CC] py-5">
               <div className="flex flex-wrap gap-5">
                 <div className="min-w-65 flex-1">
@@ -234,14 +241,41 @@ export default function Page() {
             </div>
           ))}
 
-        {totalPages > 1 && (
-          <div className="mt-8 mb-7 flex items-center justify-center gap-3">
+        {totalPages >= 1 && (
+          <div className="mt-8 mb-7 flex items-center justify-center gap-1.5 flex-wrap">
             <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(Math.max(1, page - 1))}>
               ← Prev
             </Button>
-            <span className="font-['Space_Mono',monospace] text-xs text-muted">
-              Page {page} of {totalPages}
-            </span>
+            {(() => {
+              const items: (number | "ellipsis")[] = [];
+              const delta = 1; // neighbours on each side of current page
+              const rangeStart = Math.max(2, page - delta);
+              const rangeEnd = Math.min(totalPages - 1, page + delta);
+
+              items.push(1);
+              if (rangeStart > 2) items.push("ellipsis");
+              for (let i = rangeStart; i <= rangeEnd; i++) items.push(i);
+              if (rangeEnd < totalPages - 1) items.push("ellipsis");
+              if (totalPages > 1) items.push(totalPages);
+
+              return items.map((item, idx) =>
+                item === "ellipsis" ? (
+                  <span key={`ellipsis-${idx}`} className="font-['Space_Mono',monospace] text-xs text-muted px-1 select-none">
+                    ···
+                  </span>
+                ) : (
+                  <Button
+                    key={item}
+                    variant={item === page ? "ghost" : "outline"}
+                    size="sm"
+                    className={cn("min-w-8", item === page ? "bg-yellow font-bold" : "")}
+                    onClick={() => setPage(item)}
+                  >
+                    {item}
+                  </Button>
+                )
+              );
+            })()}
             <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(Math.min(totalPages, page + 1))}>
               Next →
             </Button>

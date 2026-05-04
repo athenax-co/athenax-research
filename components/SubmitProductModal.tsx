@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBody, DialogTrafficLights } from "@/components/ui/Dialog";
 import SubcategoryPicker from "@/components/ui/SubcategoryPicker";
@@ -75,6 +76,8 @@ interface SubmitProductSuccessModalProps {
 }
 
 export function SubmitProductSuccessModal({ open, onOpenChange, productName }: SubmitProductSuccessModalProps) {
+  const router = useRouter();
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -94,8 +97,19 @@ export function SubmitProductSuccessModal({ open, onOpenChange, productName }: S
               Thanks for submitting <span className="font-semibold text-ink">{productName}</span>! Our team will review it within 48 hours. Check your
               email for updates.
             </p>
-            <p className="text-xs text-muted mb-6">In the meantime, explore other launches and join our community on Discord.</p>
-            <Button className="w-full" onClick={() => onOpenChange(false)}>
+            <p className="text-xs text-muted mb-6">
+              In the meantime, explore other launches and follow us on{" "}
+              <Link
+                href="https://x.com/athenax_co"
+                target="_blank"
+                rel="noreferrer"
+                className="font-semibold text-ink underline underline-offset-2 hover:opacity-80"
+              >
+                X
+              </Link>
+              .
+            </p>
+            <Button className="w-full" onClick={() => { onOpenChange(false); router.push("/launch"); }}>
               Explore Launches →
             </Button>
           </div>

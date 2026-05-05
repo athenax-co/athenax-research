@@ -179,7 +179,7 @@ export default function Page() {
               <QueueRow
                 key={product.id}
                 name={product.name}
-                meta={`${product.stage ?? "—"} · Funding ${product.funding != null ? `$${product.funding.toLocaleString()}` : "—"} · Founded ${product.founded ?? "—"} · Submitted ${new Date(product.createdAt).toLocaleDateString("en-CA")}`}
+                meta={`${product.stage ?? "—"} · Funding ${product.funding != null ? `$${product.funding.toLocaleString()}` : "—"} · Founded ${product.founded ?? "—"} · Submitted ${new Date(product.createdAt).toLocaleDateString("en-CA")}${product.pendingSubcategoryName ? ` · ⚠ Custom sub-category: ${product.pendingSubcategoryName}` : ""}`}
                 chips={(product.categories ?? []).map((category) => category.name)}
                 onApprove={() =>
                   updateProductStatus(

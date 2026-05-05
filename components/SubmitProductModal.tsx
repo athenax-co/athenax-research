@@ -5,8 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBody, DialogTrafficLights } from "@/components/ui/Dialog";
-import SubcategoryPicker from "@/components/ui/SubcategoryPicker";
-import { useCategories } from "@/hooks/queries/useReference";
+import { useCategories, useSubcategories } from "@/hooks/queries/useReference";
 import TagInput from "@/components/ui/TagInput";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ProductStage, QualityBadge } from "@/enums";
@@ -130,6 +129,9 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
   const { data: categories = [] } = useCategories();
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(draft?.categoryIds?.[0] ?? null);
   const [subCategoryIds, setSubCategoryIds] = useState<number[]>(draft?.subCategoryIds ?? []);
+  const [selectedOther, setSelectedOther] = useState(false);
+  const [otherName, setOtherName] = useState("");
+  const { data: subcategories = [], isPending: loadingSubcategories } = useSubcategories(selectedCategoryId);
   const [backers, setBackers] = useState<string[]>(draft?.backers ?? []);
   const [errors, setErrors] = useState<Partial<Record<"name" | "url" | "shortDesc" | "email" | "github", string>>>({});
 
@@ -185,13 +187,16 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
         qualityBadge: submitForm.qualityBadge,
         email: submitForm.email || undefined,
         categoryIds: selectedCategoryId ? [selectedCategoryId] : [],
-        subCategoryIds,
+        subCategoryIds: selectedOther ? [] : subCategoryIds,
+        otherSubcategoryName: selectedOther && otherName.trim() ? otherName.trim() : undefined,
         backers,
       });
       clearDraft();
       setSubmitForm(DEFAULT_FORM);
       setSelectedCategoryId(null);
       setSubCategoryIds([]);
+      setSelectedOther(false);
+      setOtherName("");
       setBackers([]);
       setStep(1);
       onOpenChange(false);
@@ -350,17 +355,59 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
                 </select>
               </div>
 
-              <div className="inp-group hidden">
-                <label className="inp-label">Sub-categories</label>
-                <SubcategoryPicker
-                  categoryIds={selectedCategoryId ? [selectedCategoryId] : []}
-                  value={subCategoryIds}
-                  onChange={(ids) => {
-                    setSubCategoryIds(ids);
-                    saveDraft(submitForm, selectedCategoryId ? [selectedCategoryId] : [], ids, backers);
-                  }}
-                />
-              </div>
+              {selectedCategoryId && (
+                <div className="inp-group">
+                  <label className="inp-label">Sub-category</label>
+                  {loadingSubcategories ? (
+                    <p className="text-xs text-muted pt-1">Loading…</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {subcategories.map((sub) => (
+                        <button
+                          key={sub.id}
+                          type="button"
+                          onClick={() => {
+                            setSubCategoryIds([sub.id]);
+                            setSelectedOther(false);
+                            setOtherName("");
+                            saveDraft(submitForm, [selectedCategoryId], [sub.id], backers);
+                          }}
+                          className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                            subCategoryIds.includes(sub.id) && !selectedOther
+                              ? "bg-ink text-cream border-ink"
+                              : "bg-transparent text-ink border-ink hover:bg-ink/5"
+                          }`}
+                        >
+                          {sub.name}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedOther(true);
+                          setSubCategoryIds([]);
+                          saveDraft(submitForm, [selectedCategoryId], [], backers);
+                        }}
+                        className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                          selectedOther
+                            ? "bg-ink text-cream border-ink"
+                            : "bg-transparent text-ink border-ink hover:bg-ink/5"
+                        }`}
+                      >
+                        Other
+                      </button>
+                    </div>
+                  )}
+                  {selectedOther && (
+                    <input
+                      className="inp mt-2"
+                      value={otherName}
+                      onChange={(e) => setOtherName(e.target.value)}
+                      placeholder="Describe your sub-category…"
+                    />
+                  )}
+                </div>
+              )}
 
               <div className="inp-group">
                 <label className="inp-label">Backers</label>

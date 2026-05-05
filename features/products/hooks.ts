@@ -145,6 +145,7 @@ export function useUpdateProductStatus() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["product"] });
+      queryClient.invalidateQueries({ queryKey: ["subcategories"] });
     },
   });
 }

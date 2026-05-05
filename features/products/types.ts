@@ -15,6 +15,7 @@ export interface ProductIn {
   email?: string;
   categoryIds: number[];
   subCategoryIds?: number[];
+  otherSubcategoryName?: string;
   backers?: string[];
 }
 
@@ -42,6 +43,7 @@ export interface ProductOut {
   investorInterestCount: number;
   categoryIds: number[];
   subCategoryIds?: number[];
+  pendingSubcategoryName?: string | null;
   categories: CategoryRef[];
   bookmarked?: boolean | null;
   createdAt: string;

@@ -240,7 +240,12 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         <div className="sticky top-17 z-40 flex flex-wrap items-center gap-3 border-b border-[#D8D4CC] bg-paper px-5 py-3">
           <span className="font-['Space_Mono',monospace] text-[10px] font-bold tracking-widest text-[#E8323C]">LAUNCH_REVIEW_QUEUE.SYS</span>
           <span className="h-3 w-px bg-[#D8D4CC]" />
-          <p className="flex-1 text-[13px] font-semibold text-ink">This launch is pending review — approve or reject below.</p>
+          <p className="flex-1 text-[13px] font-semibold text-ink">
+            This launch is pending review — approve or reject below.
+            {p.pendingSubcategoryName && (
+              <span className="ml-2 font-normal text-[#92400E]">Custom sub-category: <strong>{p.pendingSubcategoryName}</strong></span>
+            )}
+          </p>
           <div className="flex shrink-0 gap-2">
             <Link href="/admin?tab=launches" className="btn btn-ghost btn-sm">
               ← Queue
@@ -285,6 +290,11 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               {p.subCategoryIds?.map((id) => subCategoryMap[id] && (
                 <span key={id} className="topic-pill bg-[#E8E4D9] text-[10px]">{subCategoryMap[id].toUpperCase()}</span>
               ))}
+              {p.pendingSubcategoryName && (
+                <span className="topic-pill bg-[#FEF3C7] text-[10px] border-[#D4A017]/40 text-[#92400E]">
+                  ⚠ {p.pendingSubcategoryName.toUpperCase()} (PENDING)
+                </span>
+              )}
               <ProductBadge label="LIVE" type="status" />
               {p.stage && <span className="topic-pill bg-[#E8E4D9] text-[10px]">{p.stage.toUpperCase()}</span>}
               {hasGithub && <span className="topic-pill bg-[#E8E4D9] text-[10px]">OPEN SOURCE</span>}

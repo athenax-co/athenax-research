@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as productApi from "./api";
 import type { ProductFilters, ProductStats } from "./api";
 import type { ProductComment, ProductDetailOut, ProductIn, ProductOut, ProductStatus, ProductSummary, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty } from "./types";
@@ -150,10 +150,18 @@ export function useUpdateProductStatus() {
   });
 }
 
+const COMMENTS_PAGE_SIZE = 10;
+
 export function useComments(productId: number) {
-  return useQuery<ProductComment[]>({
+  return useInfiniteQuery({
     queryKey: ["comments", productId],
-    queryFn: () => productApi.getComments(productId),
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) =>
+      productApi.getComments(productId, COMMENTS_PAGE_SIZE, pageParam as number),
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      const nextOffset = (lastPageParam as number) + COMMENTS_PAGE_SIZE;
+      return nextOffset < lastPage.total ? nextOffset : undefined;
+    },
     enabled: productId > 0,
     retry: false,
   });
@@ -162,9 +170,10 @@ export function useComments(productId: number) {
 export function useCreateComment(productId: number) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (text: string) => productApi.createComment(productId, text),
-    onSuccess: (newComment) => {
-      queryClient.setQueryData<ProductComment[]>(["comments", productId], (old = []) => [...old, newComment]);
+    mutationFn: ({ text, parentId }: { text: string; parentId?: number }) =>
+      productApi.createComment(productId, text, parentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", productId] });
     },
   });
 }
@@ -172,11 +181,10 @@ export function useCreateComment(productId: number) {
 export function useUpdateComment(productId: number) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ commentId, text }: { commentId: number; text: string }) => productApi.updateComment(productId, commentId, text),
-    onSuccess: (updated) => {
-      queryClient.setQueryData<ProductComment[]>(["comments", productId], (old = []) =>
-        old.map((c) => (c.id === updated.id ? updated : c))
-      );
+    mutationFn: ({ commentId, text }: { commentId: number; text: string }) =>
+      productApi.updateComment(productId, commentId, text),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", productId] });
     },
   });
 }
@@ -185,8 +193,19 @@ export function useDeleteComment(productId: number) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (commentId: number) => productApi.deleteComment(productId, commentId),
-    onSuccess: (_data, commentId) => {
-      queryClient.setQueryData<ProductComment[]>(["comments", productId], (old = []) => old.filter((c) => c.id !== commentId));
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", productId] });
+    },
+  });
+}
+
+export function usePinComment(productId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ commentId, pinned }: { commentId: number; pinned: boolean }) =>
+      productApi.pinComment(productId, commentId, pinned),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", productId] });
     },
   });
 }

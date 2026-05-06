@@ -158,6 +158,9 @@ export interface ProductComment {
   id: number;
   productId: number;
   createdById: number;
+  username: string;
+  parentId: number | null;
+  depth: number;
   text: string;
   pinned: boolean;
   createdAt: string;

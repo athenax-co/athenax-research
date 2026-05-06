@@ -77,12 +77,12 @@ export function interestProduct(id: number, interested: boolean): Promise<void> 
   return http.put<void>(`/product/${id}/interest`, { interested }, { auth: true });
 }
 
-export function getComments(productId: number, limit = 50, offset = 0): Promise<ProductComment[]> {
-  return http.get<ProductComment[]>(`/product/${productId}/comments?limit=${limit}&offset=${offset}`);
+export function getComments(productId: number, limit = 10, offset = 0): Promise<PaginatedResponse<ProductComment>> {
+  return http.get<PaginatedResponse<ProductComment>>(`/product/${productId}/comments?limit=${limit}&offset=${offset}`);
 }
 
-export function createComment(productId: number, text: string): Promise<ProductComment> {
-  return http.post<ProductComment>(`/product/${productId}/comments`, { text }, { auth: true });
+export function createComment(productId: number, text: string, parentId?: number): Promise<ProductComment> {
+  return http.post<ProductComment>(`/product/${productId}/comments`, { text, parentId }, { auth: true });
 }
 
 export function updateComment(productId: number, commentId: number, text: string): Promise<ProductComment> {
@@ -91,6 +91,10 @@ export function updateComment(productId: number, commentId: number, text: string
 
 export function deleteComment(productId: number, commentId: number): Promise<void> {
   return http.del<void>(`/product/${productId}/comments/${commentId}`, { auth: true });
+}
+
+export function pinComment(productId: number, commentId: number, pinned: boolean): Promise<ProductComment> {
+  return http.patch<ProductComment>(`/product/${productId}/comments/${commentId}/pin`, { pinned }, { auth: true });
 }
 
 export function createTeamMember(productId: number, data: TeamMemberIn): Promise<TeamMemberOut> {

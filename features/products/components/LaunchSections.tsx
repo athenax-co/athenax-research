@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import WindowCard from "@/components/ui/WindowCard";
 import { Dialog, DialogBody, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrafficLights } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, ChevronUp, ChevronDown, Upload, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Pencil, Trash2, ChevronUp, ChevronDown, Upload, X, ChevronLeft, ChevronRight, Pin, PinOff } from "lucide-react";
 import type { ProductMedia, TeamMemberOut, ProductVoice, Bounty, ProductComment, TeamMemberIn, VoiceIn, BountyIn } from "@/features/products";
 import Link from "next/link";
 
@@ -20,6 +20,24 @@ type GallerySectionProps = {
 export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, uploading }: GallerySectionProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const images = media.filter((m) => m.mediaType === "image").sort((a, b) => a.sortOrder - b.sortOrder);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const openAt = (i: number) => setLightboxIndex(i);
+  const closeLightbox = () => setLightboxIndex(null);
+
+  const prev = useCallback(() => setLightboxIndex((i) => (i != null && i > 0 ? i - 1 : i)), []);
+  const next = useCallback(() => setLightboxIndex((i) => (i != null && i < images.length - 1 ? i + 1 : i)), [images.length]);
+
+  useEffect(() => {
+    if (lightboxIndex == null) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") prev();
+      else if (e.key === "ArrowRight") next();
+      else if (e.key === "Escape") closeLightbox();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [lightboxIndex, prev, next]);
 
   if (isAdmin) {
     return (
@@ -89,25 +107,6 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
       </div>
     );
   }
-
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-
-  const openAt = (i: number) => setLightboxIndex(i);
-  const closeLightbox = () => setLightboxIndex(null);
-
-  const prev = useCallback(() => setLightboxIndex((i) => (i != null && i > 0 ? i - 1 : i)), []);
-  const next = useCallback(() => setLightboxIndex((i) => (i != null && i < images.length - 1 ? i + 1 : i)), [images.length]);
-
-  useEffect(() => {
-    if (lightboxIndex == null) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") prev();
-      else if (e.key === "ArrowRight") next();
-      else if (e.key === "Escape") closeLightbox();
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [lightboxIndex, prev, next]);
 
   if (images.length === 0) {
     return (
@@ -924,41 +923,223 @@ export function BountiesSection({
   );
 }
 
-export function DiscussionSection({ user, comments, onPost }: { user: any; comments: ProductComment[]; onPost: (text: string) => void }) {
-  const [text, setText] = useState("");
+interface CommentNode extends ProductComment {
+  children: CommentNode[];
+}
+
+function buildCommentTree(flat: ProductComment[]): CommentNode[] {
+  const map = new Map<number, CommentNode>();
+  const roots: CommentNode[] = [];
+  for (const c of flat) map.set(c.id, { ...c, children: [] });
+  for (const c of flat) {
+    const node = map.get(c.id)!;
+    if (c.parentId !== null && map.has(c.parentId)) {
+      map.get(c.parentId)!.children.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+  return roots.sort((a, b) => Number(b.pinned) - Number(a.pinned));
+}
+
+const MAX_VISUAL_DEPTH = 3;
+const INDENT_PX = 20;
+
+function CommentCard({
+  node,
+  depth,
+  user,
+  isAdmin,
+  replyingTo,
+  replyText,
+  onStartReply,
+  onCancelReply,
+  onSubmitReply,
+  onChangeReplyText,
+  onPin,
+}: {
+  node: CommentNode;
+  depth: number;
+  user: any;
+  isAdmin?: boolean;
+  replyingTo: number | null;
+  replyText: string;
+  onStartReply: (id: number) => void;
+  onCancelReply: () => void;
+  onSubmitReply: () => void;
+  onChangeReplyText: (v: string) => void;
+  onPin?: (commentId: number, pinned: boolean) => void;
+}) {
+  const isReplying = replyingTo === node.id;
+  const indent = Math.min(depth, MAX_VISUAL_DEPTH) * INDENT_PX;
+
+  return (
+    <div style={{ marginLeft: indent }}>
+      <div
+        className={`mb-2 rounded-lg bg-[#FFFCEF] px-4 py-3 ${
+          node.pinned
+            ? "border-l-[3px] border-l-[#E94842] rounded-l-none border border-[rgba(0,0,0,0.08)]"
+            : "border border-[rgba(0,0,0,0.08)]"
+        }`}
+      >
+        <div className="mb-1.5 flex items-center gap-2.5">
+          <div
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[rgba(0,0,0,0.12)] font-['Space_Mono',monospace] text-[10px] font-semibold text-[#555]"
+            style={{ background: AVATAR_COLORS[node.createdById % AVATAR_COLORS.length] }}
+          >
+            {node.username?.[0]?.toUpperCase() ?? "U"}
+          </div>
+          <span className="font-['Space_Mono',monospace] text-[10px] font-semibold text-[#444]">
+            {node.username}
+          </span>
+          <span className="font-['Space_Mono',monospace] text-[10px] text-[#888]">
+            {new Date(node.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+          </span>
+          {node.pinned && (
+            <span className="font-['Space_Mono',monospace] text-[9px] bg-[#FFE14D] border border-ink px-1.5 py-0.5 rounded font-semibold tracking-[0.05em]">
+              PINNED
+            </span>
+          )}
+          {isAdmin && onPin && (node.pinned || node.children.length === 0) && (
+            <button
+              onClick={() => onPin(node.id, !node.pinned)}
+              className="ml-auto text-[#888] hover:text-ink transition-colors"
+              title={node.pinned ? "Unpin" : "Pin"}
+            >
+              {node.pinned ? <PinOff size={13} /> : <Pin size={13} />}
+            </button>
+          )}
+        </div>
+        <div className="text-sm leading-[1.55]">{node.text}</div>
+        {user && (
+          <button
+            onClick={() => (isReplying ? onCancelReply() : onStartReply(node.id))}
+            className="mt-1.5 font-['Space_Mono',monospace] text-[10px] text-[#888] hover:text-ink transition-colors"
+          >
+            {isReplying ? "cancel" : "reply"}
+          </button>
+        )}
+      </div>
+
+      {isReplying && (
+        <div className="mb-2 flex items-center gap-2">
+          <input
+            autoFocus
+            className="flex-1 rounded-lg border border-[rgba(0,0,0,0.12)] bg-[#FFFCEF] px-3 py-2.5 text-[13px] placeholder:text-[#aaa] focus:outline-none focus:border-ink"
+            placeholder={`Replying…`}
+            value={replyText}
+            onChange={(e) => onChangeReplyText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSubmitReply(); }
+            }}
+          />
+          <button
+            disabled={!replyText.trim()}
+            onClick={onSubmitReply}
+            className="rounded-full border border-ink bg-white px-3.5 py-2 text-[12px] font-medium shadow-[2px_2px_0_#1a1a1a] transition-transform hover:-translate-x-px hover:-translate-y-px disabled:opacity-40"
+          >
+            Post
+          </button>
+        </div>
+      )}
+
+      {node.children.map((child) => (
+        <CommentCard
+          key={child.id}
+          node={child}
+          depth={depth + 1}
+          user={user}
+          isAdmin={isAdmin}
+          replyingTo={replyingTo}
+          replyText={replyText}
+          onStartReply={onStartReply}
+          onCancelReply={onCancelReply}
+          onSubmitReply={onSubmitReply}
+          onChangeReplyText={onChangeReplyText}
+          onPin={onPin}
+        />
+      ))}
+    </div>
+  );
+}
+
+export function DiscussionSection({
+  user,
+  isAdmin,
+  comments,
+  total,
+  onPost,
+  onReply,
+  onPin,
+  onLoadMore,
+  hasMore,
+  loadingMore,
+}: {
+  user: any;
+  isAdmin?: boolean;
+  comments: ProductComment[];
+  total: number;
+  onPost: (text: string) => void;
+  onReply: (text: string, parentId: number) => void;
+  onPin?: (commentId: number, pinned: boolean) => void;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  loadingMore?: boolean;
+}) {
+  const [rootText, setRootText] = useState("");
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState("");
+
+  const tree = buildCommentTree(comments);
+
+  const handleStartReply = (id: number) => {
+    setReplyingTo(id);
+    setReplyText("");
+  };
+
+  const handleSubmitReply = () => {
+    if (!replyText.trim() || replyingTo === null) return;
+    onReply(replyText.trim(), replyingTo);
+    setReplyingTo(null);
+    setReplyText("");
+  };
 
   return (
     <WindowCard label="DISCUSSION.SYS">
       <div className="mb-4 font-['Space_Mono',monospace] text-[10px] uppercase tracking-[0.06em] text-[#888]">
-        {comments.length} comments · developer & researcher discussion
+        {total} {total === 1 ? "comment" : "comments"} · developer & researcher discussion
       </div>
 
-      {comments.length === 0 && <p className="mb-4 font-['Space_Mono',monospace] text-[10px] text-[#888]">No comments yet. Be the first.</p>}
+      {tree.length === 0 && (
+        <p className="mb-4 font-['Space_Mono',monospace] text-[10px] text-[#888]">No comments yet. Be the first.</p>
+      )}
 
-      {comments.map((c) => (
-        <div
-          key={c.id}
-          className={`mb-2.5 rounded-lg bg-[#FFFCEF] px-4 py-3.5 ${c.pinned ? "border-l-[3px] border-l-[#E94842] rounded-l-none border border-[rgba(0,0,0,0.08)]" : "border border-[rgba(0,0,0,0.08)]"}`}
-        >
-          <div className="mb-2 flex items-center gap-2.5">
-            <div
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[rgba(0,0,0,0.12)] font-['Space_Mono',monospace] text-[10px] font-semibold text-[#555]"
-              style={{ background: AVATAR_COLORS[c.createdById % AVATAR_COLORS.length] }}
-            >
-              U
-            </div>
-            <span className="font-['Space_Mono',monospace] text-[10px] text-[#888]">
-              {new Date(c.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-            </span>
-            {c.pinned && (
-              <span className="font-['Space_Mono',monospace] text-[9px] bg-[#FFE14D] border border-ink px-1.5 py-0.5 rounded font-semibold tracking-[0.05em]">
-                PINNED
-              </span>
-            )}
-          </div>
-          <div className="text-sm leading-[1.55]">{c.text}</div>
-        </div>
+      {tree.map((node) => (
+        <CommentCard
+          key={node.id}
+          node={node}
+          depth={0}
+          user={user}
+          isAdmin={isAdmin}
+          replyingTo={replyingTo}
+          replyText={replyText}
+          onStartReply={handleStartReply}
+          onCancelReply={() => setReplyingTo(null)}
+          onSubmitReply={handleSubmitReply}
+          onChangeReplyText={setReplyText}
+          onPin={onPin}
+        />
       ))}
+
+      {hasMore && (
+        <button
+          onClick={onLoadMore}
+          disabled={loadingMore}
+          className="mt-2 mb-4 w-full rounded-lg border border-[rgba(0,0,0,0.12)] py-2 font-['Space_Mono',monospace] text-[10px] text-[#888] hover:text-ink hover:border-ink transition-colors disabled:opacity-40"
+        >
+          {loadingMore ? "loading…" : "show more comments"}
+        </button>
+      )}
 
       <div className="mt-4 border-t border-t-[rgba(0,0,0,0.08)] pt-4 flex items-center gap-2.5">
         {user ? (
@@ -966,15 +1147,18 @@ export function DiscussionSection({ user, comments, onPost }: { user: any; comme
             <input
               className="flex-1 rounded-lg border border-[rgba(0,0,0,0.12)] bg-[#FFFCEF] px-3.5 py-3 text-[13px] placeholder:text-[#aaa] focus:outline-none focus:border-ink"
               placeholder="Share your thoughts…"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
+              value={rootText}
+              onChange={(e) => setRootText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (rootText.trim()) { onPost(rootText.trim()); setRootText(""); }
+                }
+              }}
             />
             <button
-              disabled={!text.trim()}
-              onClick={() => {
-                onPost(text.trim());
-                setText("");
-              }}
+              disabled={!rootText.trim()}
+              onClick={() => { onPost(rootText.trim()); setRootText(""); }}
               className="rounded-full border border-ink bg-white px-4 py-2.5 text-[13px] font-medium shadow-[2px_2px_0_#1a1a1a] transition-transform hover:-translate-x-px hover:-translate-y-px disabled:opacity-40"
             >
               Post

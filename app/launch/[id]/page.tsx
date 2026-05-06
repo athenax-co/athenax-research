@@ -31,6 +31,7 @@ import {
   useSwapProductMedia,
   useDeleteProductMedia,
   useSwapVoice,
+  usePinComment,
   GallerySection,
   TeamSection,
   VoicesSection,
@@ -71,8 +72,11 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { mutate: vote, isPending: voting } = useVoteProduct();
   const { mutate: interest, isPending: registeringInterest } = useInterestProduct();
   const apiProductId = apiProduct?.id ?? 0;
-  const { data: comments = [] } = useComments(apiProductId);
+  const { data: commentsData, fetchNextPage, hasNextPage, isFetchingNextPage } = useComments(apiProductId);
+  const allComments = commentsData?.pages.flatMap((p) => p.items) ?? [];
+  const commentsTotal = commentsData?.pages[0]?.total ?? 0;
   const { mutate: createComment } = useCreateComment(apiProductId);
+  const { mutate: pinComment } = usePinComment(apiProductId);
 
   const isAdmin = (user?.role as string) === "admin";
 
@@ -525,11 +529,21 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
         <DiscussionSection
           user={user}
-          comments={comments}
+          isAdmin={isAdmin}
+          comments={allComments}
+          total={commentsTotal}
           onPost={(text) => {
             if (p.status !== ProductStatus.APPROVED) { showToast("Only approved launches can be commented on.", "error"); return; }
-            createComment(text);
+            createComment({ text });
           }}
+          onReply={(text, parentId) => {
+            if (p.status !== ProductStatus.APPROVED) { showToast("Only approved launches can be commented on.", "error"); return; }
+            createComment({ text, parentId });
+          }}
+          onPin={(commentId, pinned) => pinComment({ commentId, pinned })}
+          onLoadMore={fetchNextPage}
+          hasMore={!!hasNextPage}
+          loadingMore={isFetchingNextPage}
         />
 
         {p.papers && p.papers.length > 0 && (

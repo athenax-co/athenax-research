@@ -72,8 +72,10 @@ export interface TeamMemberOut {
   name: string;
   roleLabel: string | null;
   bioNote: string | null;
+  linkedinUrl: string | null;
   twitterUrl: string | null;
   githubUrl: string | null;
+  otherUrl: string | null;
   status: VerificationStatus;
 }
 
@@ -131,8 +133,10 @@ export interface TeamMemberIn {
   name: string;
   roleLabel?: string;
   bioNote?: string;
+  linkedinUrl?: string;
   twitterUrl?: string;
   githubUrl?: string;
+  otherUrl?: string;
 }
 
 export interface VoiceIn {

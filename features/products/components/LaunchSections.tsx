@@ -224,7 +224,7 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
 
 const AVATAR_COLORS = ["#FFE14D", "#B5D8E9", "#E9C9B5", "#D4C5E2", "#C5DED4"];
 
-const EMPTY_MEMBER: TeamMemberIn = { name: "", roleLabel: "", bioNote: "", twitterUrl: "", githubUrl: "" };
+const EMPTY_MEMBER: TeamMemberIn = { name: "", roleLabel: "", bioNote: "", linkedinUrl: "", twitterUrl: "", githubUrl: "", otherUrl: "" };
 
 export function TeamSection({
   members,
@@ -268,8 +268,10 @@ export function TeamSection({
       name: m.name,
       roleLabel: m.roleLabel ?? "",
       bioNote: m.bioNote ?? "",
+      linkedinUrl: m.linkedinUrl ?? "",
       twitterUrl: m.twitterUrl ?? "",
       githubUrl: m.githubUrl ?? "",
+      otherUrl: m.otherUrl ?? "",
     });
   }
 
@@ -318,8 +320,18 @@ export function TeamSection({
                 )}
               </div>
               {m.bioNote && <div className="text-[13px] text-[#5A5A5A] mb-1.5">{m.bioNote}</div>}
-              {(m.twitterUrl || m.githubUrl) && (
+              {(m.linkedinUrl || m.twitterUrl || m.githubUrl || m.otherUrl) && (
                 <div className="flex flex-wrap gap-3 font-['Space_Mono',monospace] text-[11px]">
+                  {m.linkedinUrl && (
+                    <a
+                      href={m.linkedinUrl.startsWith("http") ? m.linkedinUrl : `https://${m.linkedinUrl}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[#185FA5] hover:underline"
+                    >
+                      ↗ {formatLinkLabel(m.linkedinUrl)}
+                    </a>
+                  )}
                   {m.twitterUrl && (
                     <a
                       href={m.twitterUrl.startsWith("http") ? m.twitterUrl : `https://${m.twitterUrl}`}
@@ -338,6 +350,16 @@ export function TeamSection({
                       className="text-[#185FA5] hover:underline"
                     >
                       ↗ {formatLinkLabel(m.githubUrl)}
+                    </a>
+                  )}
+                  {m.otherUrl && (
+                    <a
+                      href={m.otherUrl.startsWith("http") ? m.otherUrl : `https://${m.otherUrl}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[#185FA5] hover:underline"
+                    >
+                      ↗ {formatLinkLabel(m.otherUrl)}
                     </a>
                   )}
                 </div>
@@ -417,6 +439,15 @@ export function TeamSection({
               />
             </div>
             <div className="inp-group">
+              <label className="inp-label">LinkedIn URL</label>
+              <input
+                className="inp"
+                placeholder="https://linkedin.com/in/…"
+                value={form.linkedinUrl}
+                onChange={(e) => setForm({ ...form, linkedinUrl: e.target.value })}
+              />
+            </div>
+            <div className="inp-group">
               <label className="inp-label">Twitter URL</label>
               <input
                 className="inp"
@@ -432,6 +463,15 @@ export function TeamSection({
                 placeholder="https://github.com/…"
                 value={form.githubUrl}
                 onChange={(e) => setForm({ ...form, githubUrl: e.target.value })}
+              />
+            </div>
+            <div className="inp-group">
+              <label className="inp-label">Other URL</label>
+              <input
+                className="inp"
+                placeholder="https://…"
+                value={form.otherUrl}
+                onChange={(e) => setForm({ ...form, otherUrl: e.target.value })}
               />
             </div>
             <div className="flex gap-2.5">

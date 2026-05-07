@@ -91,7 +91,7 @@ export default function Page() {
                   typeof launch.shortDesc === "string" ? launch.shortDesc : typeof launch.description === "string" ? launch.description : "";
 
                 return (
-                  <div key={launch.id} className="archive-row">
+                  <Link key={launch.id} href={`/launch/${launch.slug}`} className="archive-row no-underline" prefetch={false}>
                     <Avatar className="size-10 shrink-0 rounded-lg overflow-visible">
                       <AvatarImage src={launch.logo ?? undefined} alt={launch.name} className="size-full object-contain" />
                       <AvatarFallback className="rounded-lg border border-[#D8D4CC] bg-paper text-base font-bold">
@@ -100,24 +100,27 @@ export default function Page() {
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="mb-0.5 flex flex-wrap items-center gap-2">
-                        <Link href={`/launch/${launch.slug}`} className="archive-title no-underline" prefetch={false}>
+                        <span className="archive-title">
                           {launch.name}
-                        </Link>
+                        </span>
                         {(launch.categories ?? []).map((c: any) => (
                           <ProductBadge key={c.id} label={c.name} />
                         ))}
+                        {(launch.subCategories ?? []).map((name: string) => (
+                          <span key={name} className="topic-pill bg-[#E8E4D9] text-[10px]">{name.toUpperCase()}</span>
+                        ))}
+                        {launch.qualityBadge && <span className="ftag bg-[#EAF0F6] text-[10px]">{launch.qualityBadge}</span>}
+                        {(launch.stage != null || launch.funding != null) && (
+                          <span className="ftag bg-[#EAF0F6] text-[10px]">
+                            {[launch.stage, launch.funding != null ? `$${launch.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
+                          </span>
+                        )}
                       </div>
                       <div className="mt-0.75 text-xs leading-normal text-muted">
                         {description || "No description yet."}
                       </div>
                     </div>
-                    <div className="flex shrink-0 flex-col gap-1.5">
-                      <Link href={`/launch/${launch.slug}`} className={cn(buttonVariants({ size: "sm" }), "no-underline")} prefetch={false}>
-                        View →
-                      </Link>
-                      <BookmarkButton user={user} launch={launch} showToast={showToast} size="sm" useApi initialBookmarked={launch.bookmarked ?? null} />
-                    </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>

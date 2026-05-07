@@ -1,8 +1,8 @@
 export default function Loading() {
   return (
     <div className="page-wrap section">
-      <div className="path-badge">/root/archive</div>
-      <h1 style={{ fontSize: 48, marginBottom: 8 }}>The Archive</h1>
+      <div className="path-badge">/root/research</div>
+      <h1 style={{ fontSize: 48, marginBottom: 8 }}>Research</h1>
       <p style={{ fontSize: 17, color: "#6B6B7A", marginBottom: 0 }}>Artifacts, learnings, and broadcasts.</p>
       <hr className="divider" />
 

@@ -14,8 +14,8 @@ const ArchivePage = () => {
   return (
     <div>
       <div className="page-wrap section">
-        <div className="path-badge">/root/archive</div>
-        <h1 className="mb-2 text-[48px]">The Archive</h1>
+        <div className="path-badge">/root/research</div>
+        <h1 className="mb-2 text-[48px]">Research</h1>
         <p className="text-[17px] text-muted">Artifacts, learnings, and broadcasts.</p>
         <hr className="divider" />
 

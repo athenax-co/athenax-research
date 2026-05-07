@@ -13,7 +13,7 @@ const NAV_COLS = [
     label: "Discover",
     links: [
       { href: "/launch", text: "Launch Feed" },
-      { href: "/archive", text: "Research Archive" },
+      { href: "/archive", text: "Research" },
       { href: "/leaderboard", text: "Leaderboard", disabled: true },
       { href: "/roadmap", text: "Roadmap" },
     ],

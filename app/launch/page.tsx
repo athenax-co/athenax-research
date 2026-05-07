@@ -119,20 +119,27 @@ export default function Page() {
         <SubmitProductButton label="+ Submit Your Product" className="mt-4 w-full sm:hidden" />
         <hr className="divider" />
 
-        <div className="mb-7 grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-          {[
-            { label: "Launches This Month", value: productStats?.releases.thisMonth ?? null },
-            { label: "Investor Intros Made", value: 8 },
-            // { label: "Total Funding Raised", value: "$18.4M" },
-            // { label: "Avg. Founder ARS", value: "7.3" },
-            // { label: "Investor Intros Made", value: "142" },
-          ].map((s) => (
-            <div key={s.label} className="stat-card">
-              <div className="stat-label">{s.label}</div>
-              <div className="stat-value text-[20px]">{s.value ?? ""}</div>
-            </div>
-          ))}
-        </div>
+        <WindowCard label="LAUNCH_STATS.SYS" className="mb-10" bodyClass="bg-white overflow-hidden">
+          <div className="grid sm:grid-cols-2">
+            {[
+              { label: "Launches This Month", value: productStats?.releases.thisMonth ?? null },
+              { label: "Investor Intros Made", value: 8 },
+            ].map((s, index, array) => (
+              <div
+                key={s.label}
+                className={cn(
+                  "px-5 py-4 sm:px-6 sm:py-5",
+                  index < array.length - 1 && "border-b border-b-[#D8D4CC] sm:border-b-0 sm:border-r sm:border-r-[#D8D4CC]"
+                )}
+              >
+                <div className="mb-1.5 font-['Space_Mono',monospace] text-[22px] sm:text-[26px] font-bold leading-none text-danger">
+                  {s.value ?? "-"}
+                </div>
+                <div className="font-['Space_Mono',monospace] text-xs tracking-[0.03em] text-muted">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </WindowCard>
 
         <div className="mb-5 flex gap-2 border-b-2 border-b-[#1C1C27] pb-2.5" id="launch-tabs-section">
           {TIME_TABS.map((tab) => (

@@ -6,9 +6,11 @@ import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
 import SEOMeta from "@/components/SEOMeta";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
+import { Search } from "lucide-react";
 import { useCategories } from "@/hooks/queries/useReference";
 import SubmitProductButton from "@/components/SubmitProductModal";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -42,7 +44,11 @@ export default function Page() {
 
   const [categoryId, setCategoryId] = useQueryState("category", parseAsInteger);
   const [dateFilter, setDateFilter] = useQueryState("date", parseAsString);
+  const [search, setSearch] = useQueryState("q", parseAsString);
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [searchInput, setSearchInput] = useState(search ?? "");
+  const debouncedSearch = useDebounce(searchInput);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   // Track whether a filter change (not a page change) triggered a page reset
   const filterResetRef = useRef(false);
@@ -50,6 +56,7 @@ export default function Page() {
   const { data, isLoading: productsLoading } = usePagedProducts("approved", {
     categoryId: categoryId ?? undefined,
     dateFilter: (dateFilter || undefined) as DateFilter,
+    search: search ?? undefined,
     page,
     pageSize: PAGE_SIZE,
   });
@@ -61,14 +68,37 @@ export default function Page() {
   // Reset to page 1 when filters change, scroll stays
   const prevCategoryRef = useRef(categoryId);
   const prevDateRef = useRef(dateFilter);
+  const prevSearchRef = useRef(search);
   useEffect(() => {
-    if (prevCategoryRef.current !== categoryId || prevDateRef.current !== dateFilter) {
+    if (
+      prevCategoryRef.current !== categoryId ||
+      prevDateRef.current !== dateFilter ||
+      prevSearchRef.current !== search
+    ) {
       prevCategoryRef.current = categoryId;
       prevDateRef.current = dateFilter;
+      prevSearchRef.current = search;
       filterResetRef.current = true;
       setPage(1);
     }
-  }, [categoryId, dateFilter, setPage]);
+  }, [categoryId, dateFilter, search, setPage]);
+
+  // Sync debounced value → URL param
+  useEffect(() => {
+    setSearch(debouncedSearch.trim() || null);
+  }, [debouncedSearch, setSearch]);
+
+  // / key focuses the search input
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "/" && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   // Scroll to top on page change (but not on filter-triggered resets)
   const prevPageRef = useRef(page);
@@ -141,26 +171,45 @@ export default function Page() {
           </div>
         </WindowCard>
 
-        <div className="mb-5 flex gap-2 border-b-2 border-b-[#1C1C27] pb-2.5" id="launch-tabs-section">
-          {TIME_TABS.map((tab) => (
-            <Button
-              key={tab.label}
-              variant={(dateFilter || null) === (tab.key || null) ? "ghost" : "outline"}
-              size="sm"
-              className={(dateFilter || null) === (tab.key || null) ? "bg-yellow" : ""}
-              onClick={() => setDateFilter(tab.key ?? null)}
-            >
-              {tab.label}
-              {productStats != null && tab.key == null && (
-                <span className="ml-1 font-['Space_Mono',monospace] text-[10px] opacity-60">({productStats.releases[tab.statsKey]})</span>
-              )}
-              {productStats != null && tab.key != null && (
-                <span className="ml-1 font-['Space_Mono',monospace] text-[10px] opacity-60 hidden sm:inline">
-                  ({productStats.releases[tab.statsKey]})
-                </span>
-              )}
-            </Button>
-          ))}
+        <div className="mb-5 flex items-center justify-between gap-3 border-b-2 border-b-[#1C1C27] pb-2.5 flex-wrap" id="launch-tabs-section">
+          <div className="flex gap-2 flex-wrap">
+            {TIME_TABS.map((tab) => (
+              <Button
+                key={tab.label}
+                variant={(dateFilter || null) === (tab.key || null) ? "ghost" : "outline"}
+                size="sm"
+                className={(dateFilter || null) === (tab.key || null) ? "bg-yellow" : ""}
+                onClick={() => setDateFilter(tab.key ?? null)}
+              >
+                {tab.label}
+                {productStats != null && tab.key == null && (
+                  <span className="ml-1 font-['Space_Mono',monospace] text-[10px] opacity-60">({productStats.releases[tab.statsKey]})</span>
+                )}
+                {productStats != null && tab.key != null && (
+                  <span className="ml-1 font-['Space_Mono',monospace] text-[10px] opacity-60 hidden sm:inline">
+                    ({productStats.releases[tab.statsKey]})
+                  </span>
+                )}
+              </Button>
+            ))}
+          </div>
+          <div
+            className="flex items-center gap-2 rounded-full border-2 border-[#1C1C27] bg-white px-3.5 py-1.5 shadow-[2px_2px_0_#1C1C27] shrink-0"
+            style={{ width: 280 }}
+          >
+            <Search size={13} className="shrink-0 text-[#888]" />
+            <input
+              ref={searchRef}
+              className="flex-1 bg-transparent text-[13px] placeholder:text-[#aaa] focus:outline-none"
+              placeholder="Search projects..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Escape" && searchRef.current?.blur()}
+            />
+            <kbd className="shrink-0 rounded border border-[#D8D4CC] bg-[#F5F2EC] px-1.5 py-0.5 font-['Space_Mono',monospace] text-[10px] text-[#888]">
+              /
+            </kbd>
+          </div>
         </div>
 
         <div className="mb-2.5 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
@@ -202,6 +251,12 @@ export default function Page() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {!productsLoading && pagedProducts.length === 0 && (
+          <div className="py-16 text-center font-['Space_Mono',monospace] text-[12px] text-muted">
+            No products found{search ? ` for "${search}"` : ""}.
           </div>
         )}
 

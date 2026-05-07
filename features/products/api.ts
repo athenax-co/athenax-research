@@ -21,6 +21,7 @@ export interface ProductFilters {
   category_id?: number;
   date_filter?: "today" | "this_week" | "this_month" | "this_year";
   sort_by?: "newest" | "top";
+  q?: string;
   limit?: number;
   offset?: number;
 }
@@ -39,6 +40,7 @@ export function getProducts(filters: ProductFilters = {}): Promise<PaginatedResp
   if (filters.category_id != null) params.set("category_id", String(filters.category_id));
   if (filters.date_filter) params.set("date_filter", filters.date_filter);
   if (filters.sort_by) params.set("sort_by", filters.sort_by);
+  if (filters.q) params.set("q", filters.q);
   if (filters.limit != null) params.set("limit", String(filters.limit));
   if (filters.offset != null) params.set("offset", String(filters.offset));
   const query = params.toString();

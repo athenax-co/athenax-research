@@ -59,6 +59,7 @@ export type ProductQueryFilters = {
   categoryId?: number;
   dateFilter?: ProductFilters["date_filter"];
   sortBy?: ProductFilters["sort_by"];
+  search?: string;
 };
 
 export function usePagedProducts(
@@ -66,15 +67,16 @@ export function usePagedProducts(
   filters: ProductQueryFilters & { page: number; pageSize: number }
 ) {
   const queryClient = useQueryClient();
-  const { categoryId, dateFilter, sortBy, page, pageSize } = filters;
+  const { categoryId, dateFilter, sortBy, search, page, pageSize } = filters;
   return useQuery({
-    queryKey: ["products", "paged", status, categoryId, dateFilter, sortBy, page, pageSize],
+    queryKey: ["products", "paged", status, categoryId, dateFilter, sortBy, search, page, pageSize],
     queryFn: () =>
       productApi.getProducts({
         status,
         category_id: categoryId,
         date_filter: dateFilter,
         sort_by: sortBy,
+        q: search || undefined,
         limit: pageSize,
         offset: (page - 1) * pageSize,
       }),

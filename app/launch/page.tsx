@@ -218,6 +218,11 @@ export default function Page() {
                       <span key={name} className="topic-pill bg-[#E8E4D9] text-[10px]">{name.toUpperCase()}</span>
                     ))}
                     {product.qualityBadge && <span className="ftag bg-[#EAF0F6] text-[10px]">{product.qualityBadge}</span>}
+                    {(product.stage != null || product.funding != null) && (
+                      <span className="ftag bg-[#EAF0F6] text-[10px]">
+                        {[product.stage, product.funding != null ? `$${product.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
+                      </span>
+                    )}
                   </div>
                   <p className="mb-2.5 text-[13px] leading-[1.6] text-[#1C1C27]">{product.shortDesc ?? product.description}</p>
 
@@ -229,11 +234,6 @@ export default function Page() {
                 </div>
 
                 <div className="flex shrink-0 flex-col justify-start gap-1.5 w-full sm:min-w-30 sm:w-auto">
-                  {(product.stage != null || product.funding != null) && (
-                    <span className="ftag bg-[#EAF0F6] text-center text-[11px]">
-                      {[product.stage, product.funding != null ? `$${product.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
-                    </span>
-                  )}
                   <div className="flex gap-1.5 sm:flex-col">
                     <Link href={`/launch/${product.slug}`} className={cn(buttonVariants({ size: "sm" }), "flex-1 no-underline")} prefetch={false}>
                       View →

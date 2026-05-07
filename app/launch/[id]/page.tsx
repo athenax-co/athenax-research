@@ -210,10 +210,12 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     p.stage ? { label: "Stage", value: p.stage } : null,
   ].filter(Boolean) as { label: string; value: string; isStatus?: boolean }[];
 
-  const links = p.links.map((l) => ({
-    label: l.label ?? LINK_LABELS[l.linkType] ?? l.linkType,
-    url: l.url,
-  }));
+  const links = p.links
+    .filter((l) => l.linkType in LINK_LABELS)
+    .map((l) => ({
+      label: l.label ?? LINK_LABELS[l.linkType],
+      url: l.url,
+    }));
 
   return (
     <div>

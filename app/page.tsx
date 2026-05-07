@@ -6,12 +6,13 @@ import { IconBounties, IconBuilders, IconLabs, IconTerminal } from "@/components
 import { Button, buttonVariants } from "@/components/ui/button";
 import WindowCard from "@/components/ui/WindowCard";
 import { ProductBadge } from "@/components/ui/ProductBadge";
+import BookmarkButton from "@/components/BookmarkButton";
 import { useGlobal } from "@/components/GlobalProvider";
 import { cn } from "@/lib/utils";
 import { getProductStatsLabel, useProducts, useProductStats } from "@/features/products";
 
 export default function Page() {
-  const { openSubmitProductModal } = useGlobal();
+  const { user, showToast, openSubmitProductModal } = useGlobal();
   const { data: productsData } = useProducts("approved");
   const apiProducts = productsData?.items ?? [];
   const { data: productStats } = useProductStats();
@@ -87,34 +88,36 @@ export default function Page() {
               </div>
               {latestProducts.map((launch: any) => {
                 const description =
-                  typeof launch.description === "string" ? launch.description : typeof launch.shortDesc === "string" ? launch.shortDesc : "";
+                  typeof launch.shortDesc === "string" ? launch.shortDesc : typeof launch.description === "string" ? launch.description : "";
 
                 return (
-                  <Link
-                    key={launch.id}
-                    href={`/launch/${launch.slug}`}
-                    className="archive-row cursor-pointer text-inherit no-underline"
-                    prefetch={false}
-                  >
+                  <div key={launch.id} className="archive-row">
                     <Avatar className="size-10 shrink-0 rounded-lg overflow-visible">
                       <AvatarImage src={launch.logo ?? undefined} alt={launch.name} className="size-full object-contain" />
                       <AvatarFallback className="rounded-lg border border-[#D8D4CC] bg-paper text-base font-bold">
                         {launch.name.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="mb-0.5 flex flex-wrap items-center gap-2">
-                        <div className="archive-title">{launch.name}</div>
-                        {launch.categories?.[0]?.name && <ProductBadge label={launch.categories[0].name} />}
+                        <Link href={`/launch/${launch.slug}`} className="archive-title no-underline" prefetch={false}>
+                          {launch.name}
+                        </Link>
+                        {(launch.categories ?? []).map((c: any) => (
+                          <ProductBadge key={c.id} label={c.name} />
+                        ))}
                       </div>
                       <div className="mt-0.75 text-xs leading-normal text-muted">
-                        {description ? `${description.slice(0, 110)}…` : "No description yet."}
+                        {description || "No description yet."}
                       </div>
                     </div>
-                    <div className="min-w-16 shrink-0 text-right">
-                      <div className="font-['Space_Mono',monospace] text-[15px] font-bold text-danger">★ {launch.bookmarkCount}</div>
+                    <div className="flex shrink-0 flex-col gap-1.5">
+                      <Link href={`/launch/${launch.slug}`} className={cn(buttonVariants({ size: "sm" }), "no-underline")} prefetch={false}>
+                        View →
+                      </Link>
+                      <BookmarkButton user={user} launch={launch} showToast={showToast} size="sm" useApi initialBookmarked={launch.bookmarked ?? null} />
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>

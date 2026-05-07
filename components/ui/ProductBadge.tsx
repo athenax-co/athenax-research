@@ -18,7 +18,6 @@ const CATEGORY_TONE_MAP: Record<string, ProductBadgeTone> = {
   ROBOTICS: "green",
   BIOTECH: "green",
   INFRASTRUCTURE: "gray",
-  "CLIMATE & ENERGY": "green",
 };
 
 const STATUS_TONE_MAP: Record<string, ProductBadgeTone> = {

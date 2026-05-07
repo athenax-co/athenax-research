@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { SEED_PAPERS } from "@/data/seed";
 import { useProductStats } from "@/features/products";
 import { cn } from "@/utils/lib";
@@ -390,6 +391,25 @@ export default function RoadmapPage() {
         {sections.map((section) => (
           <RoadmapSectionCard key={section.sysLabel} section={section} open={open} onToggle={toggle} />
         ))}
+      </div>
+
+      <div className="mt-20">
+        <WindowCard label="ABOUT.SYS" bodyClass="window-body bg-white">
+          <div className="flex items-center justify-between gap-6">
+            <div className="min-w-0">
+              <div className="mb-1 text-2xl font-bold text-ink">The research and innovation engine of Web3.</div>
+              <div className="text-sm leading-normal text-muted">
+                We fund open research, score it objectively, and turn the most validated ideas into funded startups.
+              </div>
+            </div>
+            <Link
+              href="/about"
+              className="shrink-0 rounded-full border-2 border-ink px-5 py-2.5 text-[15px] font-semibold text-ink shadow-[2px_2px_0_#1C1C27] transition-all hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0_#1C1C27]"
+            >
+              About us →
+            </Link>
+          </div>
+        </WindowCard>
       </div>
     </div>
   );

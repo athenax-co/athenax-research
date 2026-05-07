@@ -214,6 +214,9 @@ export default function Page() {
                     {(product.categories ?? []).map((c) => (
                       <ProductBadge key={c.id} label={c.name} />
                     ))}
+                    {(product.subCategories ?? []).map((name) => (
+                      <span key={name} className="topic-pill bg-[#E8E4D9] text-[10px]">{name.toUpperCase()}</span>
+                    ))}
                     {product.qualityBadge && <span className="ftag bg-[#EAF0F6] text-[10px]">{product.qualityBadge}</span>}
                   </div>
                   <p className="mb-2.5 text-[13px] leading-[1.6] text-[#1C1C27]">{product.shortDesc ?? product.description}</p>

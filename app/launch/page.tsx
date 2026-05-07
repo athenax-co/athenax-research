@@ -204,13 +204,15 @@ export default function Page() {
               <div className="flex flex-wrap gap-5">
                 <div className="min-w-65 flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <Avatar className="size-7 rounded-md overflow-visible">
-                      <AvatarImage src={product.logo ?? undefined} alt={product.name} className="size-full object-contain" />
-                      <AvatarFallback className="rounded-md border border-[#D8D4CC] bg-paper text-xs font-bold">
-                        {product.name.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <Link href={`/launch/${product.slug}`} className="font-bold text-xl text-ink no-underline hover:text-blue-900" prefetch={false}>{product.name}</Link>
+                    <Link href={`/launch/${product.slug}`} className="group flex items-center gap-2 no-underline" prefetch={false}>
+                      <Avatar className="size-7 rounded-md overflow-visible">
+                        <AvatarImage src={product.logo ?? undefined} alt={product.name} className="size-full object-contain" />
+                        <AvatarFallback className="rounded-md border border-[#D8D4CC] bg-paper text-xs font-bold">
+                          {product.name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-bold text-xl text-ink group-hover:text-blue-900">{product.name}</span>
+                    </Link>
                     {(product.categories ?? []).map((c) => (
                       <ProductBadge key={c.id} label={c.name} />
                     ))}

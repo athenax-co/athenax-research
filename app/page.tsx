@@ -6,7 +6,6 @@ import { IconBounties, IconBuilders, IconLabs, IconTerminal } from "@/components
 import { Button, buttonVariants } from "@/components/ui/button";
 import WindowCard from "@/components/ui/WindowCard";
 import { ProductBadge } from "@/components/ui/ProductBadge";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useGlobal } from "@/components/GlobalProvider";
 import { cn } from "@/lib/utils";
 import { getProductStatsLabel, useProducts, useProductStats } from "@/features/products";
@@ -20,8 +19,6 @@ export default function Page() {
   const liveProductsValue = productStats?.releases.total != null ? String(productStats.releases.total) : "";
 
   const latestProducts = [...apiProducts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 3);
-
-  const isMobile = useIsMobile();
 
   return (
     <div>
@@ -77,14 +74,17 @@ export default function Page() {
           </div>
 
           {latestProducts.length > 0 && (
-            <div className="mb-13">
-              <div className="mb-2 flex items-baseline justify-between">
-                <h2 className="text-[28px]">Latest Launches</h2>
+            <div className="my-20">
+              <div className="mb-5 flex items-baseline justify-between">
+                <h2>
+                  <Link href="/launch" className="link-arrow no-underline text-[28px] font-bold">
+                    Latest Launches
+                  </Link>
+                </h2>
                 <Link href="/launch" className="link-arrow no-underline">
                   See All →
                 </Link>
               </div>
-              <hr className="divider" />
               {latestProducts.map((launch: any) => {
                 const description =
                   typeof launch.description === "string" ? launch.description : typeof launch.shortDesc === "string" ? launch.shortDesc : "";
@@ -117,11 +117,6 @@ export default function Page() {
                   </Link>
                 );
               })}
-              <div className="mt-4.5 flex flex-wrap items-center gap-2.5 sm:gap-3">
-                <Link href="/launch" className={cn(buttonVariants({ size: isMobile ? "sm" : "default" }), "no-underline")}>
-                  View All Launches →
-                </Link>
-              </div>
             </div>
           )}
 

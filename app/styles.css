@@ -29,13 +29,13 @@ body::after {
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 3px;
 }
 ::-webkit-scrollbar-track {
   background: #f2efe9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1c1c27;
+  background: #b8b4ac;
   border-radius: 3px;
 }
 

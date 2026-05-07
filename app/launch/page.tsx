@@ -129,7 +129,7 @@ export default function Page() {
           ].map((s) => (
             <div key={s.label} className="stat-card">
               <div className="stat-label">{s.label}</div>
-              <div className="stat-value text-[20px]">{s.value ?? "-"}</div>
+              <div className="stat-value text-[20px]">{s.value ?? ""}</div>
             </div>
           ))}
         </div>

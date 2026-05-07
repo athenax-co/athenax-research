@@ -17,7 +17,7 @@ export default function Page() {
   const apiProducts = productsData?.items ?? [];
   const { data: productStats } = useProductStats();
   const statsLabel = getProductStatsLabel(productStats);
-  const liveProductsValue = productStats?.releases.total != null ? String(productStats.releases.total) : "-";
+  const liveProductsValue = productStats?.releases.total != null ? String(productStats.releases.total) : "";
 
   const latestProducts = [...apiProducts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 3);
 

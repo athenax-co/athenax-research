@@ -529,7 +529,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         />
 
         {p.papers && p.papers.length > 0 && (
-          <div className="mt-8">
+          <div className="mt-8 hidden">
             <WindowCard label="RESEARCH.SYS">
               <div className="mb-3 font-['Space_Mono',monospace] text-[10px] uppercase tracking-[0.06em] text-[#888]">
                 Research Backing This Product

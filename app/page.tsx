@@ -6,22 +6,20 @@ import { IconBounties, IconBuilders, IconLabs, IconTerminal } from "@/components
 import { Button, buttonVariants } from "@/components/ui/button";
 import WindowCard from "@/components/ui/WindowCard";
 import { ProductBadge } from "@/components/ui/ProductBadge";
-import { useIsMobile } from "@/hooks/use-mobile";
+import BookmarkButton from "@/components/BookmarkButton";
 import { useGlobal } from "@/components/GlobalProvider";
 import { cn } from "@/lib/utils";
 import { getProductStatsLabel, useProducts, useProductStats } from "@/features/products";
 
 export default function Page() {
-  const { openSubmitProductModal } = useGlobal();
+  const { user, showToast, openSubmitProductModal } = useGlobal();
   const { data: productsData } = useProducts("approved");
   const apiProducts = productsData?.items ?? [];
   const { data: productStats } = useProductStats();
   const statsLabel = getProductStatsLabel(productStats);
-  const liveProductsValue = productStats?.releases.total != null ? String(productStats.releases.total) : "-";
+  const liveProductsValue = productStats?.releases.total != null ? String(productStats.releases.total) : "";
 
   const latestProducts = [...apiProducts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 3);
-
-  const isMobile = useIsMobile();
 
   return (
     <div>
@@ -77,51 +75,54 @@ export default function Page() {
           </div>
 
           {latestProducts.length > 0 && (
-            <div className="mb-13">
-              <div className="mb-2 flex items-baseline justify-between">
-                <h2 className="text-[28px]">Latest Launches</h2>
+            <div className="my-20">
+              <div className="mb-5 flex items-baseline justify-between">
+                <h2>
+                  <Link href="/launch" className="link-arrow no-underline text-[28px] font-bold">
+                    Latest Launches
+                  </Link>
+                </h2>
                 <Link href="/launch" className="link-arrow no-underline">
                   See All →
                 </Link>
               </div>
-              <hr className="divider" />
               {latestProducts.map((launch: any) => {
                 const description =
-                  typeof launch.description === "string" ? launch.description : typeof launch.shortDesc === "string" ? launch.shortDesc : "";
+                  typeof launch.shortDesc === "string" ? launch.shortDesc : typeof launch.description === "string" ? launch.description : "";
 
                 return (
-                  <Link
-                    key={launch.id}
-                    href={`/launch/${launch.slug}`}
-                    className="archive-row cursor-pointer text-inherit no-underline"
-                    prefetch={false}
-                  >
+                  <Link key={launch.id} href={`/launch/${launch.slug}`} className="archive-row no-underline" prefetch={false}>
                     <Avatar className="size-10 shrink-0 rounded-lg overflow-visible">
                       <AvatarImage src={launch.logo ?? undefined} alt={launch.name} className="size-full object-contain" />
                       <AvatarFallback className="rounded-lg border border-[#D8D4CC] bg-paper text-base font-bold">
                         {launch.name.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="mb-0.5 flex flex-wrap items-center gap-2">
-                        <div className="archive-title">{launch.name}</div>
-                        {launch.categories?.[0]?.name && <ProductBadge label={launch.categories[0].name} />}
+                        <span className="archive-title">
+                          {launch.name}
+                        </span>
+                        {(launch.categories ?? []).map((c: any) => (
+                          <ProductBadge key={c.id} label={c.name} />
+                        ))}
+                        {(launch.subCategories ?? []).map((name: string) => (
+                          <span key={name} className="topic-pill bg-[#E8E4D9] text-[10px]">{name.toUpperCase()}</span>
+                        ))}
+                        {launch.qualityBadge && <span className="ftag bg-[#EAF0F6] text-[10px]">{launch.qualityBadge}</span>}
+                        {(launch.stage != null || launch.funding != null) && (
+                          <span className="ftag bg-[#EAF0F6] text-[10px]">
+                            {[launch.stage, launch.funding != null ? `$${launch.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
+                          </span>
+                        )}
                       </div>
                       <div className="mt-0.75 text-xs leading-normal text-muted">
-                        {description ? `${description.slice(0, 110)}…` : "No description yet."}
+                        {description || "No description yet."}
                       </div>
-                    </div>
-                    <div className="min-w-16 shrink-0 text-right">
-                      <div className="font-['Space_Mono',monospace] text-[15px] font-bold text-danger">★ {launch.bookmarkCount}</div>
                     </div>
                   </Link>
                 );
               })}
-              <div className="mt-4.5 flex flex-wrap items-center gap-2.5 sm:gap-3">
-                <Link href="/launch" className={cn(buttonVariants({ size: isMobile ? "sm" : "default" }), "no-underline")}>
-                  View All Launches →
-                </Link>
-              </div>
             </div>
           )}
 
@@ -138,7 +139,7 @@ export default function Page() {
                   <div
                     key={item.label}
                     aria-disabled="true"
-                    className={`explore-card block rounded-xl border-2 border-[#1C1C27] p-[18px_22px] text-left text-inherit no-underline opacity-70 cursor-not-allowed ${item.bgClass}`}
+                    className={`block rounded-xl border-2 border-[#1C1C27] p-[18px_22px] text-left text-inherit no-underline cursor-default ${item.bgClass}`}
                   >
                     <div className="mb-2.5">{item.icon}</div>
                     <div className="mb-0.75 text-[15px] font-bold">{item.label}</div>

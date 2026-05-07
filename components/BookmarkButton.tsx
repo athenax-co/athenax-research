@@ -9,7 +9,7 @@ const BookmarkButton = ({
   launch,
   showToast,
   size = "sm",
-  showCount = true,
+  showCount = false,
   useApi = false,
   initialBookmarked,
 }: {
@@ -22,12 +22,12 @@ const BookmarkButton = ({
   initialBookmarked?: boolean | null;
 }) => {
   const queryClient = useQueryClient();
-  const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(() => {
     if (useApi && initialBookmarked != null) return initialBookmarked;
     return user ? bookmarkSvc.isBookmarked(user.id, launch.id) : false;
   });
   const [count, setCount] = useState(() => (useApi ? (launch.bookmarkCount ?? 0) : bookmarkSvc.count(launch.id)));
+  const [loading, setLoading] = useState(false);
 
   const toggle = async () => {
     if (!user) {
@@ -36,20 +36,27 @@ const BookmarkButton = ({
     }
 
     if (useApi) {
+      if (loading) return;
+      const previous = saved;
+      const previousCount = count;
       const next = !saved;
+
+      setSaved(next);
+      setCount(next ? count + 1 : Math.max(0, count - 1));
       setLoading(true);
+
       try {
         await bookmarkProduct(launch.id, next);
-        setSaved(next);
-        setCount((currentCount: number) => (next ? currentCount + 1 : Math.max(0, currentCount - 1)));
         queryClient.setQueriesData({ queryKey: ["products"] }, (products: ProductOut[] | undefined) => {
           if (!Array.isArray(products)) return products;
-          return products.map((product) =>
-            product.id === launch.id ? { ...product, bookmarkCount: Math.max(0, product.bookmarkCount + (next ? 1 : -1)) } : product
+          return products.map((p) =>
+            p.id === launch.id ? { ...p, bookmarkCount: Math.max(0, p.bookmarkCount + (next ? 1 : -1)) } : p
           );
         });
         showToast(next ? `Saved ${launch.name}` : `Removed ${launch.name}`, next ? "success" : "info");
       } catch {
+        setSaved(previous);
+        setCount(previousCount);
         showToast("Failed to bookmark. Please try again.", "error");
       } finally {
         setLoading(false);
@@ -59,7 +66,7 @@ const BookmarkButton = ({
 
     const result = bookmarkSvc.toggle(user.id, launch);
     setSaved(result.saved);
-    setCount((currentCount: number) => (result.saved ? currentCount + 1 : Math.max(0, currentCount - 1)));
+    setCount((c: number) => (result.saved ? c + 1 : Math.max(0, c - 1)));
     showToast(result.saved ? `Saved ${launch.name}` : `Removed ${launch.name}`, result.saved ? "success" : "info");
   };
 
@@ -69,8 +76,8 @@ const BookmarkButton = ({
       onClick={toggle}
       disabled={loading}
     >
-      {loading ? "…" : saved ? "★ Bookmarked" : "☆ Bookmark"}{" "}
-      {!loading && showCount && count > 0 && <span className="ml-1.5 font-['Space_Mono',monospace] text-[10px] opacity-70">{count}</span>}
+      {saved ? "★ Bookmarked" : "☆ Bookmark"}
+      {showCount && count > 0 && <span className="ml-1.5 font-['Space_Mono',monospace] text-[10px] opacity-70">{count}</span>}
     </button>
   );
 };

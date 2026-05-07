@@ -9,7 +9,7 @@ import { useGlobal } from "@/components/GlobalProvider";
 
 type SortKey = "investorInterest" | "votes" | "developerViews" | "githubStars";
 
-const SECTORS = ["All", "AI & Agents", "Robotics", "Biotech", "Crypto & DeFi", "Developer Tools", "Infrastructure", "Climate & Energy"];
+const SECTORS = ["All", "AI & Agents", "Robotics", "Biotech", "Crypto & DeFi", "Developer Tools", "Infrastructure"];
 const SORTS: [SortKey, string][] = [
   ["investorInterest", "⬡ Investor Interest"],
   ["votes", "▲ Top Voted"],

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { SEED_PAPERS } from "@/data/seed";
 import { useProductStats } from "@/features/products";
 import { cn } from "@/utils/lib";
+import WindowCard from "@/components/ui/WindowCard";
 
 type ItemTone = "live" | "coming" | "building" | "data" | "network" | "vision";
 
@@ -356,29 +358,58 @@ export default function RoadmapPage() {
       </div>
 
       <p className="mb-0 max-w-135 text-[17px] leading-[1.65] text-muted">
-        AthenaX launches with real products, real research, and real media. Click any item to expand it.
+        AthenaX launches with verified products, indexed research, and original media. Click any item to expand it.
       </p>
 
       <hr className="divider" />
 
-      <div className="mb-10 grid overflow-hidden rounded-xl border-2 border-ink bg-white shadow-[4px_4px_0_#1C1C27] md:grid-cols-4">
-        {[
-          { label: "Products live", val: productStats?.releases.total ?? null },
-          { label: "Research papers", val: 18 },
-          { label: "Sectors", val: 8 },
-          { label: "Submissions", val: "Open" },
-        ].map((stat, index, array) => (
-          <div key={stat.label} className={cn("px-5 py-4", "border-[#D8D4CC]", index < array.length - 1 && "border-b md:border-b-0 md:border-r")}>
-            <div className="mb-1.25 font-['Space_Mono',monospace] text-[9px] uppercase tracking-widest text-muted">{stat.label}</div>
-            <div className="text-[22px] font-bold text-ink">{stat.val ?? "-"}</div>
-          </div>
-        ))}
-      </div>
+      <WindowCard label="PLATFORM_STATS.SYS" className="mb-10" bodyClass="bg-white overflow-hidden">
+        <div className="grid md:grid-cols-4">
+          {[
+            { label: "Products live", val: productStats?.releases.total ?? null },
+            { label: "Research papers", val: 18 },
+            { label: "Sectors", val: 8 },
+            { label: "Submissions", val: "Open" },
+          ].map((stat, index, array) => (
+            <div
+              key={stat.label}
+              className={cn(
+                "px-5 py-4",
+                index < array.length - 1 && "border-b border-b-[#D8D4CC] md:border-b-0 md:border-r md:border-r-[#D8D4CC]"
+              )}
+            >
+              <div className="mb-1.5 font-['Space_Mono',monospace] text-[22px] font-bold leading-none text-danger">
+                {stat.val ?? "-"}
+              </div>
+              <div className="font-['Space_Mono',monospace] text-xs tracking-[0.03em] text-muted">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </WindowCard>
 
       <div className="flex flex-col gap-10">
         {sections.map((section) => (
           <RoadmapSectionCard key={section.sysLabel} section={section} open={open} onToggle={toggle} />
         ))}
+      </div>
+
+      <div className="mt-20">
+        <WindowCard label="ABOUT.SYS" bodyClass="window-body bg-white">
+          <div className="flex items-center justify-between gap-6">
+            <div className="min-w-0">
+              <div className="mb-1 text-2xl font-bold text-ink">The research and innovation engine of Web3.</div>
+              <div className="text-sm leading-normal text-muted">
+                We fund open research, score it objectively, and turn the most validated ideas into funded startups.
+              </div>
+            </div>
+            <Link
+              href="/about"
+              className="shrink-0 rounded-full border-2 border-ink px-5 py-2.5 text-[15px] font-semibold text-ink shadow-[2px_2px_0_#1C1C27] transition-all hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0_#1C1C27]"
+            >
+              About us →
+            </Link>
+          </div>
+        </WindowCard>
       </div>
     </div>
   );

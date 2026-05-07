@@ -6,9 +6,11 @@ import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
 import SEOMeta from "@/components/SEOMeta";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
+import { Search } from "lucide-react";
 import { useCategories } from "@/hooks/queries/useReference";
 import SubmitProductButton from "@/components/SubmitProductModal";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -24,7 +26,7 @@ const TIME_TABS: { key: DateFilter; label: string; statsKey: "total" | "today" |
   { key: "this_month", label: "This Month", statsKey: "thisMonth" },
 ];
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 21;
 
 export default function Page() {
   const { user, showToast, openSubmitProductModal } = useGlobal();
@@ -42,7 +44,11 @@ export default function Page() {
 
   const [categoryId, setCategoryId] = useQueryState("category", parseAsInteger);
   const [dateFilter, setDateFilter] = useQueryState("date", parseAsString);
+  const [search, setSearch] = useQueryState("q", parseAsString);
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [searchInput, setSearchInput] = useState(search ?? "");
+  const debouncedSearch = useDebounce(searchInput);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   // Track whether a filter change (not a page change) triggered a page reset
   const filterResetRef = useRef(false);
@@ -50,6 +56,7 @@ export default function Page() {
   const { data, isLoading: productsLoading } = usePagedProducts("approved", {
     categoryId: categoryId ?? undefined,
     dateFilter: (dateFilter || undefined) as DateFilter,
+    search: search ?? undefined,
     page,
     pageSize: PAGE_SIZE,
   });
@@ -61,14 +68,37 @@ export default function Page() {
   // Reset to page 1 when filters change, scroll stays
   const prevCategoryRef = useRef(categoryId);
   const prevDateRef = useRef(dateFilter);
+  const prevSearchRef = useRef(search);
   useEffect(() => {
-    if (prevCategoryRef.current !== categoryId || prevDateRef.current !== dateFilter) {
+    if (
+      prevCategoryRef.current !== categoryId ||
+      prevDateRef.current !== dateFilter ||
+      prevSearchRef.current !== search
+    ) {
       prevCategoryRef.current = categoryId;
       prevDateRef.current = dateFilter;
+      prevSearchRef.current = search;
       filterResetRef.current = true;
       setPage(1);
     }
-  }, [categoryId, dateFilter, setPage]);
+  }, [categoryId, dateFilter, search, setPage]);
+
+  // Sync debounced value → URL param
+  useEffect(() => {
+    setSearch(debouncedSearch.trim() || null);
+  }, [debouncedSearch, setSearch]);
+
+  // / key focuses the search input
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "/" && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   // Scroll to top on page change (but not on filter-triggered resets)
   const prevPageRef = useRef(page);
@@ -119,41 +149,67 @@ export default function Page() {
         <SubmitProductButton label="+ Submit Your Product" className="mt-4 w-full sm:hidden" />
         <hr className="divider" />
 
-        <div className="mb-7 grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-          {[
-            { label: "Launches This Month", value: productStats?.releases.thisMonth ?? null },
-            { label: "Investor Intros Made", value: 8 },
-            // { label: "Total Funding Raised", value: "$18.4M" },
-            // { label: "Avg. Founder ARS", value: "7.3" },
-            // { label: "Investor Intros Made", value: "142" },
-          ].map((s) => (
-            <div key={s.label} className="stat-card">
-              <div className="stat-label">{s.label}</div>
-              <div className="stat-value text-[20px]">{s.value ?? "-"}</div>
-            </div>
-          ))}
-        </div>
+        <WindowCard label="LAUNCH_STATS.SYS" className="mb-10" bodyClass="bg-white overflow-hidden">
+          <div className="grid sm:grid-cols-2">
+            {[
+              { label: "Launches This Month", value: productStats?.releases.thisMonth ?? null },
+              { label: "Investor Intros Made", value: 8 },
+            ].map((s, index, array) => (
+              <div
+                key={s.label}
+                className={cn(
+                  "px-5 py-4 sm:px-6 sm:py-5",
+                  index < array.length - 1 && "border-b border-b-[#D8D4CC] sm:border-b-0 sm:border-r sm:border-r-[#D8D4CC]"
+                )}
+              >
+                <div className="mb-1.5 font-['Space_Mono',monospace] text-[22px] sm:text-[26px] font-bold leading-none text-danger">
+                  {s.value ?? "-"}
+                </div>
+                <div className="font-['Space_Mono',monospace] text-xs tracking-[0.03em] text-muted">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </WindowCard>
 
-        <div className="mb-5 flex gap-2 border-b-2 border-b-[#1C1C27] pb-2.5" id="launch-tabs-section">
-          {TIME_TABS.map((tab) => (
-            <Button
-              key={tab.label}
-              variant={(dateFilter || null) === (tab.key || null) ? "ghost" : "outline"}
-              size="sm"
-              className={(dateFilter || null) === (tab.key || null) ? "bg-yellow" : ""}
-              onClick={() => setDateFilter(tab.key ?? null)}
-            >
-              {tab.label}
-              {productStats != null && tab.key == null && (
-                <span className="ml-1 font-['Space_Mono',monospace] text-[10px] opacity-60">({productStats.releases[tab.statsKey]})</span>
-              )}
-              {productStats != null && tab.key != null && (
-                <span className="ml-1 font-['Space_Mono',monospace] text-[10px] opacity-60 hidden sm:inline">
-                  ({productStats.releases[tab.statsKey]})
-                </span>
-              )}
-            </Button>
-          ))}
+        <div className="mb-5 flex items-center justify-between gap-3 border-b-2 border-b-[#1C1C27] pb-2.5 flex-wrap" id="launch-tabs-section">
+          <div className="flex gap-2 flex-wrap">
+            {TIME_TABS.map((tab) => (
+              <Button
+                key={tab.label}
+                variant={(dateFilter || null) === (tab.key || null) ? "ghost" : "outline"}
+                size="sm"
+                className={(dateFilter || null) === (tab.key || null) ? "bg-yellow" : ""}
+                onClick={() => setDateFilter(tab.key ?? null)}
+              >
+                {tab.label}
+                {productStats != null && tab.key == null && (
+                  <span className="ml-1 font-['Space_Mono',monospace] text-[10px] opacity-60">({productStats.releases[tab.statsKey]})</span>
+                )}
+                {productStats != null && tab.key != null && (
+                  <span className="ml-1 font-['Space_Mono',monospace] text-[10px] opacity-60 hidden sm:inline">
+                    ({productStats.releases[tab.statsKey]})
+                  </span>
+                )}
+              </Button>
+            ))}
+          </div>
+          <div
+            className="flex items-center gap-2 rounded-full border-2 border-[#1C1C27] bg-white px-3.5 py-1.5 shadow-[2px_2px_0_#1C1C27] shrink-0"
+            style={{ width: 280 }}
+          >
+            <Search size={13} className="shrink-0 text-[#888]" />
+            <input
+              ref={searchRef}
+              className="flex-1 bg-transparent text-[13px] placeholder:text-[#aaa] focus:outline-none"
+              placeholder="Search projects..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Escape" && searchRef.current?.blur()}
+            />
+            <kbd className="shrink-0 rounded border border-[#D8D4CC] bg-[#F5F2EC] px-1.5 py-0.5 font-['Space_Mono',monospace] text-[10px] text-[#888]">
+              /
+            </kbd>
+          </div>
         </div>
 
         <div className="mb-2.5 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
@@ -198,19 +254,27 @@ export default function Page() {
           </div>
         )}
 
+        {!productsLoading && pagedProducts.length === 0 && (
+          <div className="py-16 text-center font-['Space_Mono',monospace] text-[12px] text-muted">
+            No products found{search ? ` for "${search}"` : ""}.
+          </div>
+        )}
+
         {!productsLoading &&
           pagedProducts.map((product) => (
             <div key={product.id} className="mb-1 border-b-2 border-b-[#D8D4CC] py-5">
               <div className="flex flex-wrap gap-5">
                 <div className="min-w-65 flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <Avatar className="size-7 rounded-md overflow-visible">
-                      <AvatarImage src={product.logo ?? undefined} alt={product.name} className="size-full object-contain" />
-                      <AvatarFallback className="rounded-md border border-[#D8D4CC] bg-paper text-xs font-bold">
-                        {product.name.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="font-bold text-xl text-ink">{product.name}</span>
+                    <Link href={`/launch/${product.slug}`} className="group flex items-center gap-2 no-underline" prefetch={false}>
+                      <Avatar className="size-7 rounded-md overflow-visible">
+                        <AvatarImage src={product.logo ?? undefined} alt={product.name} className="size-full object-contain" />
+                        <AvatarFallback className="rounded-md border border-[#D8D4CC] bg-paper text-xs font-bold">
+                          {product.name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-bold text-xl text-ink group-hover:text-blue-900">{product.name}</span>
+                    </Link>
                     {(product.categories ?? []).map((c) => (
                       <ProductBadge key={c.id} label={c.name} />
                     ))}
@@ -218,22 +282,20 @@ export default function Page() {
                       <span key={name} className="topic-pill bg-[#E8E4D9] text-[10px]">{name.toUpperCase()}</span>
                     ))}
                     {product.qualityBadge && <span className="ftag bg-[#EAF0F6] text-[10px]">{product.qualityBadge}</span>}
+                    {(product.stage != null || product.funding != null) && (
+                      <span className="ftag bg-[#EAF0F6] text-[10px]">
+                        {[product.stage, product.funding != null ? `$${product.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
+                      </span>
+                    )}
                   </div>
                   <p className="mb-2.5 text-[13px] leading-[1.6] text-[#1C1C27]">{product.shortDesc ?? product.description}</p>
 
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                    <span className="font-['Space_Mono',monospace] text-xs font-bold text-[#E8323C]">▲ {product.voteCount.toLocaleString()}</span>
-                    <span className="text-xs text-muted">★ {product.bookmarkCount}</span>
                     {product.founded != null && <span className="text-xs text-muted">Founded {product.founded}</span>}
                   </div>
                 </div>
 
                 <div className="flex shrink-0 flex-col justify-start gap-1.5 w-full sm:min-w-30 sm:w-auto">
-                  {(product.stage != null || product.funding != null) && (
-                    <span className="ftag bg-[#EAF0F6] text-center text-[11px]">
-                      {[product.stage, product.funding != null ? `$${product.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
-                    </span>
-                  )}
                   <div className="flex gap-1.5 sm:flex-col">
                     <Link href={`/launch/${product.slug}`} className={cn(buttonVariants({ size: "sm" }), "flex-1 no-underline")} prefetch={false}>
                       View →

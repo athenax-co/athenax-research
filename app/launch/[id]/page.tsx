@@ -210,10 +210,12 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     p.stage ? { label: "Stage", value: p.stage } : null,
   ].filter(Boolean) as { label: string; value: string; isStatus?: boolean }[];
 
-  const links = p.links.map((l) => ({
-    label: l.label ?? LINK_LABELS[l.linkType] ?? l.linkType,
-    url: l.url,
-  }));
+  const links = p.links
+    .filter((l) => l.linkType in LINK_LABELS)
+    .map((l) => ({
+      label: l.label ?? LINK_LABELS[l.linkType],
+      url: l.url,
+    }));
 
   return (
     <div>
@@ -298,7 +300,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
           <div className="shrink-0 flex w-full items-center gap-2 sm:w-auto max-[640px]:col-span-2">
             <button
-              className={p.voted ? "btn btn-ghost btn-sm bg-success flex-1 justify-center sm:flex-none" : "btn btn-outline btn-sm flex-1 justify-center sm:flex-none"}
+              className={p.voted ? "btn btn-ghost btn-sm bg-success flex-1 justify-center sm:flex-none hidden" : "btn btn-outline btn-sm flex-1 justify-center sm:flex-none hidden"}
               onClick={handleApiVote}
               disabled={voting}
             >
@@ -529,7 +531,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         />
 
         {p.papers && p.papers.length > 0 && (
-          <div className="mt-8">
+          <div className="mt-8 hidden">
             <WindowCard label="RESEARCH.SYS">
               <div className="mb-3 font-['Space_Mono',monospace] text-[10px] uppercase tracking-[0.06em] text-[#888]">
                 Research Backing This Product

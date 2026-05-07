@@ -227,8 +227,6 @@ export default function Page() {
                   <p className="mb-2.5 text-[13px] leading-[1.6] text-[#1C1C27]">{product.shortDesc ?? product.description}</p>
 
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                    <span className="font-['Space_Mono',monospace] text-xs font-bold text-[#E8323C]">▲ {product.voteCount.toLocaleString()}</span>
-                    <span className="text-xs text-muted">★ {product.bookmarkCount}</span>
                     {product.founded != null && <span className="text-xs text-muted">Founded {product.founded}</span>}
                   </div>
                 </div>

@@ -298,7 +298,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
           <div className="shrink-0 flex w-full items-center gap-2 sm:w-auto max-[640px]:col-span-2">
             <button
-              className={p.voted ? "btn btn-ghost btn-sm bg-success flex-1 justify-center sm:flex-none" : "btn btn-outline btn-sm flex-1 justify-center sm:flex-none"}
+              className={p.voted ? "btn btn-ghost btn-sm bg-success flex-1 justify-center sm:flex-none hidden" : "btn btn-outline btn-sm flex-1 justify-center sm:flex-none hidden"}
               onClick={handleApiVote}
               disabled={voting}
             >

@@ -40,9 +40,6 @@ import {
 } from "@/features/products";
 import type { ProductDetailOut } from "@/features/products";
 import { VerificationStatus, ProductStatus } from "@/enums";
-import { subcategoryQueryOptions } from "@/hooks/queries/useReference";
-import { useQueries } from "@tanstack/react-query";
-import type { CategoryOut } from "@/types/reference";
 
 const LINK_LABELS: Record<string, string> = {
   website: "Website",
@@ -59,15 +56,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
   const { data: apiProduct, isLoading } = useProductBySlug(id);
 
-  const subcategoryResults = useQueries({
-    queries: (apiProduct?.categoryIds ?? []).map((catId) => subcategoryQueryOptions(catId)),
-  });
-  const subCategoryMap: Record<number, string> = {};
-  for (const result of subcategoryResults) {
-    for (const sub of (result.data ?? []) as CategoryOut[]) {
-      subCategoryMap[sub.id] = sub.name;
-    }
-  }
   const { data: allProductsData } = useProducts("approved");
   const { mutate: vote, isPending: voting } = useVoteProduct();
   const { mutate: interest, isPending: registeringInterest } = useInterestProduct();
@@ -217,10 +205,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
   const factRows = [
     p.categories.length > 0 ? { label: "Category", value: p.categories[0].name } : null,
-    { label: "Status", value: "● Live Beta", isStatus: true },
     p.founded != null ? { label: "Founded", value: String(p.founded) } : null,
-    { label: "Pricing", value: hasGithub ? "Open Source / Free" : p.funding != null ? `$${p.funding.toLocaleString()}` : "Free" },
-    p.stage ? { label: "Stage", value: p.stage } : { label: "Stage", value: "Early Stage" },
+    p.funding != null ? { label: "Funding", value: `$${p.funding.toLocaleString()}` } : null,
+    p.stage ? { label: "Stage", value: p.stage } : null,
   ].filter(Boolean) as { label: string; value: string; isStatus?: boolean }[];
 
   const links = p.links.map((l) => ({
@@ -291,17 +278,15 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             <div className="mb-1.5 flex flex-wrap items-center gap-2">
               <h1 className="text-[36px] leading-none tracking-tight max-[640px]:text-[28px]">{p.name}</h1>
               {p.categories.length > 0 && <ProductBadge label={p.categories[0].name} />}
-              {p.subCategoryIds?.map((id) => subCategoryMap[id] && (
-                <span key={id} className="topic-pill bg-[#E8E4D9] text-[10px]">{subCategoryMap[id].toUpperCase()}</span>
+              {(p.subCategories ?? []).map((name) => (
+                <span key={name} className="topic-pill bg-[#E8E4D9] text-[10px]">{name.toUpperCase()}</span>
               ))}
               {p.pendingSubcategoryName && (
                 <span className="topic-pill bg-[#FEF3C7] text-[10px] border-[#D4A017]/40 text-[#92400E]">
                   ⚠ {p.pendingSubcategoryName.toUpperCase()} (PENDING)
                 </span>
               )}
-              <ProductBadge label="LIVE" type="status" />
               {p.stage && <span className="topic-pill bg-[#E8E4D9] text-[10px]">{p.stage.toUpperCase()}</span>}
-              {hasGithub && <span className="topic-pill bg-[#E8E4D9] text-[10px]">OPEN SOURCE</span>}
             </div>
             {p.shortDesc && <p className="mb-2 text-[15px] leading-[1.6] text-[#555] max-w-150">{p.shortDesc}</p>}
             <div className="font-['Space_Mono',monospace] text-[11px] text-[#888] tracking-[0.02em]">
@@ -341,9 +326,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
           <WindowCard label="ABOUT.SYS" className="md:row-span-2">
             <p className="mb-3 text-[15px] leading-[1.7]">{p.description ?? "No description provided."}</p>
-            <p className="mb-8 text-[13px] italic text-[#555]">
-              {hasGithub ? "Open source · available on GitHub" : "Compatible with leading developer tools and platforms."}
-            </p>
 
             <div className="mb-8">
               {factRows.map((row, i) => (

@@ -42,7 +42,7 @@ export interface ProductOut {
   bookmarkCount: number;
   investorInterestCount: number;
   categoryIds: number[];
-  subCategoryIds?: number[];
+  subCategories?: string[];
   pendingSubcategoryName?: string | null;
   categories: CategoryRef[];
   bookmarked?: boolean | null;

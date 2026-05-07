@@ -24,7 +24,7 @@ const TIME_TABS: { key: DateFilter; label: string; statsKey: "total" | "today" |
   { key: "this_month", label: "This Month", statsKey: "thisMonth" },
 ];
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 21;
 
 export default function Page() {
   const { user, showToast, openSubmitProductModal } = useGlobal();

@@ -279,13 +279,14 @@ export default function Page() {
                       <ProductBadge key={c.id} label={c.name} />
                     ))}
                     {(product.subCategories ?? []).map((name) => (
-                      <span key={name} className="topic-pill bg-[#E8E4D9] text-[10px]">{name.toUpperCase()}</span>
+                      <ProductBadge key={name} label={name} type="subcategory" />
                     ))}
-                    {product.qualityBadge && <span className="ftag bg-[#EAF0F6] text-[10px]">{product.qualityBadge}</span>}
+                    {product.qualityBadge && <ProductBadge label={product.qualityBadge} type="stage" />}
                     {(product.stage != null || product.funding != null) && (
-                      <span className="ftag bg-[#EAF0F6] text-[10px]">
-                        {[product.stage, product.funding != null ? `$${product.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
-                      </span>
+                      <ProductBadge
+                        label={[product.stage, product.funding != null ? `$${product.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
+                        type="stage"
+                      />
                     )}
                   </div>
                   <p className="mb-2.5 text-[13px] leading-[1.6] text-[#1C1C27]">{product.shortDesc ?? product.description}</p>

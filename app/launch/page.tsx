@@ -194,7 +194,7 @@ export default function Page() {
             ))}
           </div>
           <div
-            className="flex items-center gap-2 rounded-full border-2 border-[#1C1C27] bg-white px-3.5 py-1.5 shadow-[2px_2px_0_#1C1C27] shrink-0"
+            className="flex items-center gap-2 rounded border-2 border-[#1C1C27] bg-white px-3.5 py-1.5 shadow-[2px_2px_0_#1C1C27] shrink-0"
             style={{ width: 280 }}
           >
             <Search size={13} className="shrink-0 text-[#888]" />

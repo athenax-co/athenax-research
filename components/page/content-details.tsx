@@ -3,18 +3,23 @@
 import Link from "next/link";
 import { extractContentText, formatContentDate, isLexicalContent, extractLexicalHeadings, estimateReadTime } from "@/lib/api";
 import { cn } from "@/utils/lib";
-import { ContentListState } from "../Content";
+import { ContentListState, ContentRow } from "../Content";
 import LexicalRenderer from "../LexicalRenderer";
 import ArticleTOC from "../ArticleTOC";
 import { useGlobal } from "../GlobalProvider";
 import { IconShare } from "../Icons";
 import { ProductBadge } from "@/components/ui/ProductBadge";
+import { useArticles } from "@/hooks/queries/useContent";
 
 const ContentDetailPage = ({ kind, item, slug }: { kind: "article" | "research"; item: any | null; slug: string }) => {
   const { showToast } = useGlobal();
+  const { data: articles = [] } = useArticles();
+
   const contentBlocks = extractContentText(item?.content);
   const headings = isLexicalContent(item?.content) ? extractLexicalHeadings(item.content) : [];
   const readTime = item ? estimateReadTime(item.content) : 0;
+
+  const related = articles.filter((a: any) => a.slug !== (item?.slug ?? slug)).slice(0, 2);
 
   const handleShare = async () => {
     const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin}/archive/${item?.slug ?? slug}`;
@@ -79,6 +84,17 @@ const ContentDetailPage = ({ kind, item, slug }: { kind: "article" | "research";
                   >
                     {JSON.stringify(item.content, null, 2)}
                   </pre>
+                )}
+
+                {related.length > 0 && (
+                  <div className="mt-10 pt-6 border-t border-dashed border-[#D8D4CC]">
+                    <p className="titlebar-label mb-4">See Also</p>
+                    {related.map((a: any) => (
+                      <Link key={a.slug} href={`/archive/${a.slug}`}>
+                        <ContentRow item={a} kind="article" />
+                      </Link>
+                    ))}
+                  </div>
                 )}
               </div>
 

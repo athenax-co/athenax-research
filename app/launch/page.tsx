@@ -194,7 +194,7 @@ export default function Page() {
             ))}
           </div>
           <div
-            className="flex items-center gap-2 rounded-full border-2 border-[#1C1C27] bg-white px-3.5 py-1.5 shadow-[2px_2px_0_#1C1C27] shrink-0"
+            className="flex items-center gap-2 rounded border-2 border-[#1C1C27] bg-white px-3.5 py-1.5 shadow-[2px_2px_0_#1C1C27] shrink-0"
             style={{ width: 280 }}
           >
             <Search size={13} className="shrink-0 text-[#888]" />
@@ -273,19 +273,20 @@ export default function Page() {
                           {product.name.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="font-bold text-xl text-ink group-hover:text-blue-900">{product.name}</span>
+                      <span className="font-bold text-xl text-ink group-hover:text-danger">{product.name}</span>
                     </Link>
                     {(product.categories ?? []).map((c) => (
                       <ProductBadge key={c.id} label={c.name} />
                     ))}
                     {(product.subCategories ?? []).map((name) => (
-                      <span key={name} className="topic-pill bg-[#E8E4D9] text-[10px]">{name.toUpperCase()}</span>
+                      <ProductBadge key={name} label={name} type="subcategory" />
                     ))}
-                    {product.qualityBadge && <span className="ftag bg-[#EAF0F6] text-[10px]">{product.qualityBadge}</span>}
+                    {product.qualityBadge && <ProductBadge label={product.qualityBadge} type="stage" />}
                     {(product.stage != null || product.funding != null) && (
-                      <span className="ftag bg-[#EAF0F6] text-[10px]">
-                        {[product.stage, product.funding != null ? `$${product.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
-                      </span>
+                      <ProductBadge
+                        label={[product.stage, product.funding != null ? `$${product.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
+                        type="stage"
+                      />
                     )}
                   </div>
                   <p className="mb-2.5 text-[13px] leading-[1.6] text-[#1C1C27]">{product.shortDesc ?? product.description}</p>

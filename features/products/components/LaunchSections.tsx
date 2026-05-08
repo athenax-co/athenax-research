@@ -251,15 +251,28 @@ export function TeamSection({
   const [editMember, setEditMember] = useState<TeamMemberOut | null>(null);
   const [form, setForm] = useState<TeamMemberIn>(EMPTY_MEMBER);
   const [editForm, setEditForm] = useState<Partial<TeamMemberIn>>({});
+  const teamScrollRef = useRef<HTMLDivElement>(null);
+  const [teamOverflows, setTeamOverflows] = useState(false);
+
+  useEffect(() => {
+    const el = teamScrollRef.current;
+    if (!el || expanded) return;
+    setTeamOverflows(el.scrollHeight > el.clientHeight);
+  }, [members, expanded]);
+
+  useEffect(() => {
+    if (expanded) {
+      teamScrollRef.current?.scrollTo({ top: 80, behavior: "smooth" });
+    } else {
+      teamScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [expanded]);
 
   const formatLinkLabel = (url: string) => {
     let label = url.replace(/^https?:\/\//, "").replace(/^www\./, "");
     label = label.replace(/^twitter\.com\//, "x.com/");
     return label;
   };
-
-  const shown = expanded ? members : members.slice(0, 3);
-  const hiddenCount = members.length - 3;
 
   function openEdit(m: TeamMemberOut) {
     setEditMember(m);
@@ -299,9 +312,10 @@ export function TeamSection({
 
       {members.length === 0 && <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No team members listed.</p>}
 
-      <div className={`overflow-hidden transition-all ${expanded ? "max-h-200 overflow-y-auto" : "max-h-120"}`}>
-        {shown.map((m, i) => (
-          <div key={m.id} className={`flex items-start gap-4 py-4 ${i < shown.length - 1 ? "border-b border-b-[rgba(0,0,0,0.08)]" : ""}`}>
+      <div className="relative">
+      <div ref={teamScrollRef} className={`max-h-[240px] ${expanded ? "overflow-y-auto" : "overflow-hidden"}`}>
+        {members.map((m, i) => (
+          <div key={m.id} className={`flex items-start gap-4 py-4 ${i < members.length - 1 ? "border-b border-b-[rgba(0,0,0,0.08)]" : ""}`}>
             <div
               className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-ink text-[16px] font-bold"
               style={{ background: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
@@ -388,10 +402,14 @@ export function TeamSection({
           </div>
         ))}
       </div>
+      {!expanded && teamOverflows && (
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-5 bg-gradient-to-t from-white to-transparent" />
+      )}
+      </div>
 
-      {hiddenCount > 0 && (
+      {(teamOverflows || expanded) && (
         <button onClick={() => setExpanded(!expanded)} className="mt-3 font-['Space_Mono',monospace] text-[11px] text-[#888] hover:text-[#1a1a1a]">
-          {expanded ? "− show less" : `+ ${hiddenCount} more team members`}
+          {expanded ? "− show less" : "show more →"}
         </button>
       )}
 
@@ -561,9 +579,24 @@ export function VoicesSection({
   const [editVoice, setEditVoice] = useState<ProductVoice | null>(null);
   const [form, setForm] = useState<VoiceIn>(EMPTY_VOICE);
   const [editForm, setEditForm] = useState<Partial<VoiceIn>>({});
+  const voicesScrollRef = useRef<HTMLDivElement>(null);
+  const [voicesOverflow, setVoicesOverflow] = useState(false);
 
   const sorted = [...voices].sort((a, b) => a.sortOrder - b.sortOrder);
-  const shown = expanded ? sorted : sorted.slice(0, 2);
+
+  useEffect(() => {
+    const el = voicesScrollRef.current;
+    if (!el || expanded) return;
+    setVoicesOverflow(el.scrollHeight > el.clientHeight);
+  }, [voices, expanded]);
+
+  useEffect(() => {
+    if (expanded) {
+      voicesScrollRef.current?.scrollTo({ top: 100, behavior: "smooth" });
+    } else {
+      voicesScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [expanded]);
 
   function openEdit(v: ProductVoice) {
     setEditVoice(v);
@@ -595,8 +628,9 @@ export function VoicesSection({
 
       {voices.length === 0 && <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No voices yet.</p>}
 
-      <div className={`overflow-hidden transition-all ${expanded ? "max-h-150 overflow-y-auto" : "max-h-77.5"}`}>
-        {shown.map((v, i) => (
+      <div className="relative">
+      <div ref={voicesScrollRef} className={`max-h-[280px] ${expanded ? "overflow-y-auto" : "overflow-hidden"}`}>
+        {sorted.map((v, i) => (
           <div key={v.id} className="mb-2.5 rounded-md border border-[rgba(0,0,0,0.08)] bg-[#FFFCEF] px-4 py-3.5 last:mb-0">
             <p className="text-[13px] italic leading-[1.55]">"{v.quote}"</p>
             <div className="mt-2 flex items-center justify-between font-['Space_Mono',monospace] text-[10px]">
@@ -638,10 +672,14 @@ export function VoicesSection({
           </div>
         ))}
       </div>
+      {!expanded && voicesOverflow && (
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-5 bg-gradient-to-t from-white to-transparent" />
+      )}
+      </div>
 
-      {sorted.length > 2 && (
+      {(voicesOverflow || expanded) && (
         <button onClick={() => setExpanded(!expanded)} className="mt-2.5 font-['Space_Mono',monospace] text-[11px] text-[#888] hover:text-[#1a1a1a]">
-          {expanded ? "− show less" : `show ${sorted.length - 2} more →`}
+          {expanded ? "− show less" : "show more →"}
         </button>
       )}
 

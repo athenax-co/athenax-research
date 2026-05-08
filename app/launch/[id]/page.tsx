@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
 import { ProductBadge } from "@/components/ui/ProductBadge";
@@ -51,6 +52,7 @@ const LINK_LABELS: Record<string, string> = {
 };
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
+  const router = useRouter();
   const { user, showToast } = useGlobal();
   const { id } = use(params);
 
@@ -142,8 +144,14 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const hasGithub = p.links.some((l) => l.linkType === "github");
 
   const handleApiVote = () => {
-    if (!user) { showToast("Sign in to upvote.", "error"); return; }
-    if (p.status !== ProductStatus.APPROVED) { showToast("Only approved launches can be upvoted.", "error"); return; }
+    if (!user) {
+      showToast("Sign in to upvote.", "error");
+      return;
+    }
+    if (p.status !== ProductStatus.APPROVED) {
+      showToast("Only approved launches can be upvoted.", "error");
+      return;
+    }
     const newVoted = !p.voted;
     vote(
       { id: p.id, voted: newVoted },
@@ -155,8 +163,14 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   };
 
   const handleBookmark = () => {
-    if (!user) { showToast("Sign in to bookmark.", "error"); return; }
-    if (p.status !== ProductStatus.APPROVED) { showToast("Only approved launches can be bookmarked.", "error"); return; }
+    if (!user) {
+      showToast("Sign in to bookmark.", "error");
+      return;
+    }
+    if (p.status !== ProductStatus.APPROVED) {
+      showToast("Only approved launches can be bookmarked.", "error");
+      return;
+    }
     const next = !p.bookmarked;
     bookmark(
       { id: p.id, bookmarked: next },
@@ -236,7 +250,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           <p className="flex-1 text-[13px] font-semibold text-ink">
             This launch is pending review — approve or reject below.
             {p.pendingSubcategoryName && (
-              <span className="ml-2 font-normal text-[#92400E]">Custom sub-category: <strong>{p.pendingSubcategoryName}</strong></span>
+              <span className="ml-2 font-normal text-[#92400E]">
+                Custom sub-category: <strong>{p.pendingSubcategoryName}</strong>
+              </span>
             )}
           </p>
           <div className="flex shrink-0 gap-2">
@@ -261,12 +277,13 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
       <div className="page-wrap section" style={{ maxWidth: 1100 }}>
         <div className="mb-6 flex flex-wrap items-center gap-3">
-          <Link
-            href="/launch"
+          <button
+            type="button"
+            onClick={() => router.back()}
             className="inline-flex items-center rounded-full border border-ink bg-white px-4 py-1.5 text-[13px] font-medium shadow-[2px_2px_0_#1a1a1a] transition-transform hover:-translate-x-px hover:-translate-y-px"
           >
             ← Back to Launch
-          </Link>
+          </button>
           <span className="rounded font-['Space_Mono',monospace] border border-ink bg-white px-3 py-1 text-[11px]">/root/launch/{p.slug}</span>
         </div>
 
@@ -281,7 +298,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               <h1 className="text-[36px] leading-none tracking-tight max-[640px]:text-[28px]">{p.name}</h1>
               {p.categories.length > 0 && <ProductBadge label={p.categories[0].name} />}
               {(p.subCategories ?? []).map((name) => (
-                <span key={name} className="topic-pill bg-[#E8E4D9] text-[10px]">{name.toUpperCase()}</span>
+                <span key={name} className="topic-pill bg-[#E8E4D9] text-[10px]">
+                  {name.toUpperCase()}
+                </span>
               ))}
               {p.pendingSubcategoryName && (
                 <span className="topic-pill bg-[#FEF3C7] text-[10px] border-[#D4A017]/40 text-[#92400E]">
@@ -300,17 +319,17 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
           <div className="shrink-0 flex w-full items-center gap-2 sm:w-auto max-[640px]:col-span-2">
             <button
-              className={p.voted ? "btn btn-ghost btn-sm bg-success flex-1 justify-center sm:flex-none hidden" : "btn btn-outline btn-sm flex-1 justify-center sm:flex-none hidden"}
+              className={
+                p.voted
+                  ? "btn btn-ghost btn-sm bg-success flex-1 justify-center sm:flex-none hidden"
+                  : "btn btn-outline btn-sm flex-1 justify-center sm:flex-none hidden"
+              }
               onClick={handleApiVote}
               disabled={voting}
             >
               {voting ? "…" : p.voted ? "✓ Voted" : "▲ Upvote"}&nbsp;·&nbsp;{p.voteCount.toLocaleString()}
             </button>
-            <button
-              className="btn btn-ghost btn-sm flex-1 justify-center sm:flex-none"
-              style={{ fontSize: 12 }}
-              onClick={() => shareLaunch(p.slug)}
-            >
+            <button className="btn btn-ghost btn-sm flex-1 justify-center sm:flex-none" style={{ fontSize: 12 }} onClick={() => shareLaunch(p.slug)}>
               <IconShare size={14} />
               Share
             </button>
@@ -361,10 +380,13 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               isAdmin={isAdmin}
               uploading={uploadingMedia}
               onUpload={(file) =>
-                uploadMedia({ file }, {
-                  onSuccess: () => showToast("Image uploaded.", "success"),
-                  onError: () => showToast("Upload failed. Please try again.", "error"),
-                })
+                uploadMedia(
+                  { file },
+                  {
+                    onSuccess: () => showToast("Image uploaded.", "success"),
+                    onError: () => showToast("Upload failed. Please try again.", "error"),
+                  }
+                )
               }
               onDelete={(mediaId) =>
                 deleteMedia(mediaId, {
@@ -517,11 +539,17 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           comments={allComments}
           total={commentsTotal}
           onPost={(text) => {
-            if (p.status !== ProductStatus.APPROVED) { showToast("Only approved launches can be commented on.", "error"); return; }
+            if (p.status !== ProductStatus.APPROVED) {
+              showToast("Only approved launches can be commented on.", "error");
+              return;
+            }
             createComment({ text });
           }}
           onReply={(text, parentId) => {
-            if (p.status !== ProductStatus.APPROVED) { showToast("Only approved launches can be commented on.", "error"); return; }
+            if (p.status !== ProductStatus.APPROVED) {
+              showToast("Only approved launches can be commented on.", "error");
+              return;
+            }
             createComment({ text, parentId });
           }}
           onPin={(commentId, pinned) => pinComment({ commentId, pinned })}

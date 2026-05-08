@@ -107,13 +107,14 @@ export default function Page() {
                           <ProductBadge key={c.id} label={c.name} />
                         ))}
                         {(launch.subCategories ?? []).map((name: string) => (
-                          <span key={name} className="topic-pill bg-[#E8E4D9] text-[10px]">{name.toUpperCase()}</span>
+                          <ProductBadge key={name} label={name} type="subcategory" />
                         ))}
-                        {launch.qualityBadge && <span className="ftag bg-[#EAF0F6] text-[10px]">{launch.qualityBadge}</span>}
+                        {launch.qualityBadge && <ProductBadge label={launch.qualityBadge} type="stage" />}
                         {(launch.stage != null || launch.funding != null) && (
-                          <span className="ftag bg-[#EAF0F6] text-[10px]">
-                            {[launch.stage, launch.funding != null ? `$${launch.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
-                          </span>
+                          <ProductBadge
+                            label={[launch.stage, launch.funding != null ? `$${launch.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
+                            type="stage"
+                          />
                         )}
                       </div>
                       <div className="mt-0.75 text-xs leading-normal text-muted">
@@ -139,7 +140,7 @@ export default function Page() {
                   <div
                     key={item.label}
                     aria-disabled="true"
-                    className={`block rounded-xl border-2 border-[#1C1C27] p-[18px_22px] text-left text-inherit no-underline cursor-default ${item.bgClass}`}
+                    className={`block rounded-xl border-2 border-[#1C1C27] p-[18px_22px] text-left text-inherit no-underline cursor-default opacity-60 ${item.bgClass}`}
                   >
                     <div className="mb-2.5">{item.icon}</div>
                     <div className="mb-0.75 text-[15px] font-bold">{item.label}</div>

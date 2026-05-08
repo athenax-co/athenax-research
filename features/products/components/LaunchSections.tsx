@@ -260,6 +260,14 @@ export function TeamSection({
     setTeamOverflows(el.scrollHeight > el.clientHeight);
   }, [members, expanded]);
 
+  useEffect(() => {
+    if (expanded) {
+      teamScrollRef.current?.scrollTo({ top: 80, behavior: "smooth" });
+    } else {
+      teamScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [expanded]);
+
   const formatLinkLabel = (url: string) => {
     let label = url.replace(/^https?:\/\//, "").replace(/^www\./, "");
     label = label.replace(/^twitter\.com\//, "x.com/");
@@ -581,6 +589,14 @@ export function VoicesSection({
     if (!el || expanded) return;
     setVoicesOverflow(el.scrollHeight > el.clientHeight);
   }, [voices, expanded]);
+
+  useEffect(() => {
+    if (expanded) {
+      voicesScrollRef.current?.scrollTo({ top: 100, behavior: "smooth" });
+    } else {
+      voicesScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [expanded]);
 
   function openEdit(v: ProductVoice) {
     setEditVoice(v);

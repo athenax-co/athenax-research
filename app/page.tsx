@@ -139,7 +139,7 @@ export default function Page() {
                   <div
                     key={item.label}
                     aria-disabled="true"
-                    className={`block rounded-xl border-2 border-[#1C1C27] p-[18px_22px] text-left text-inherit no-underline cursor-default ${item.bgClass}`}
+                    className={`block rounded-xl border-2 border-[#1C1C27] p-[18px_22px] text-left text-inherit no-underline cursor-default opacity-60 ${item.bgClass}`}
                   >
                     <div className="mb-2.5">{item.icon}</div>
                     <div className="mb-0.75 text-[15px] font-bold">{item.label}</div>

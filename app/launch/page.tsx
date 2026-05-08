@@ -273,7 +273,7 @@ export default function Page() {
                           {product.name.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="font-bold text-xl text-ink group-hover:text-blue-900">{product.name}</span>
+                      <span className="font-bold text-xl text-ink group-hover:text-danger">{product.name}</span>
                     </Link>
                     {(product.categories ?? []).map((c) => (
                       <ProductBadge key={c.id} label={c.name} />

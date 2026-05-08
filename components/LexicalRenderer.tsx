@@ -1,4 +1,5 @@
 import { JSX } from "react";
+import { slugify } from "@/lib/api";
 
 interface LexicalNode {
    type: string;
@@ -102,7 +103,7 @@ function renderNode(node: LexicalNode, index: number): React.ReactNode {
    // Headings
    if (node.type === "heading") {
       const Tag = node.tag as keyof JSX.IntrinsicElements;
-      const className =
+      const style =
          node.tag === "h1"
             ? { fontSize: 40, fontWeight: 700, margin: "32px 0 24px", lineHeight: 1.1 }
             : node.tag === "h2"
@@ -111,8 +112,13 @@ function renderNode(node: LexicalNode, index: number): React.ReactNode {
                 ? { fontSize: 28, fontWeight: 700, margin: "24px 0 16px", lineHeight: 1.2 }
                 : { fontSize: 24, fontWeight: 700, margin: "16px 0 12px", lineHeight: 1.25 };
 
+      const headingText = (node.children ?? [])
+         .map((c: LexicalNode) => (c.type === "text" ? c.text ?? "" : ""))
+         .join("")
+         .trim();
+
       return (
-         <Tag key={index} style={className}>
+         <Tag key={index} id={headingText ? slugify(headingText) : undefined} style={style}>
             {node.children?.map((child, i) => renderNode(child, i))}
          </Tag>
       );
@@ -170,10 +176,15 @@ function renderNode(node: LexicalNode, index: number): React.ReactNode {
    return null;
 }
 
-export default function LexicalRenderer({ content }: { content: LexicalContent }) {
+export default function LexicalRenderer({ content, skipH1 = false }: { content: LexicalContent; skipH1?: boolean }) {
    if (!content || !content.root) {
       return <p style={styles.empty}>No content available.</p>;
    }
 
-   return <div style={styles.container}>{renderNode(content.root, 0)}</div>;
+   const children = skipH1
+      ? (content.root.children ?? []).filter((n) => !(n.type === "heading" && n.tag === "h1"))
+      : content.root.children;
+
+   const filteredRoot = { ...content.root, children };
+   return <div style={styles.container}>{renderNode(filteredRoot, 0)}</div>;
 }

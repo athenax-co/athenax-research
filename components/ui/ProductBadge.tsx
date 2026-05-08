@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-type ProductBadgeType = "category" | "status" | "stage" | "subcategory";
+type ProductBadgeType = "category" | "status" | "stage" | "subcategory" | "kind";
 
 type ProductBadgeTone = "yellow" | "green" | "gray" | "blue" | "tan";
 
@@ -45,9 +45,15 @@ function capitalizeLabel(label: string) {
   return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
 }
 
+const KIND_TONE_MAP: Record<string, ProductBadgeTone> = {
+  ARTICLE: "yellow",
+  RESEARCH: "blue",
+};
+
 function resolveBadgeTone(label: string, type: ProductBadgeType): ProductBadgeTone {
   if (type === "stage") return "blue";
   if (type === "subcategory") return "tan";
+  if (type === "kind") return KIND_TONE_MAP[normalizeBadgeLabel(label)] ?? "gray";
   const normalized = normalizeBadgeLabel(label);
   if (type === "status") return STATUS_TONE_MAP[normalized] ?? "gray";
   return CATEGORY_TONE_MAP[normalized] ?? "yellow";

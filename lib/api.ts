@@ -157,3 +157,53 @@ export const extractContentText = (value: any): string[] => {
 };
 
 export const isLexicalContent = (value: any) => Boolean(value && typeof value === "object" && value.root && typeof value.root === "object");
+
+const WORDS_PER_MINUTE = 220;
+
+const extractPlainText = (node: any): string => {
+  if (!node) return "";
+  if (typeof node.text === "string") return node.text;
+  if (Array.isArray(node.children)) return node.children.map(extractPlainText).join(" ");
+  return "";
+};
+
+export const estimateReadTime = (content: any): number => {
+  const text = isLexicalContent(content)
+    ? extractPlainText(content.root)
+    : extractContentText(content).join(" ");
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / WORDS_PER_MINUTE));
+};
+
+export const slugify = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+
+export interface TOCHeading {
+  id: string;
+  text: string;
+  tag: string;
+}
+
+export const extractLexicalHeadings = (content: any): TOCHeading[] => {
+  if (!content?.root?.children) return [];
+
+  const getText = (node: any): string => {
+    if (node.type === "text") return node.text || "";
+    return (node.children ?? []).map(getText).join("");
+  };
+
+  const walk = (nodes: any[]): TOCHeading[] =>
+    nodes.flatMap((node) => {
+      if (node.type === "heading") {
+        const text = getText(node).trim();
+        return text ? [{ id: slugify(text), text, tag: node.tag ?? "h2" }] : [];
+      }
+      return node.children ? walk(node.children) : [];
+    });
+
+  return walk(content.root.children);
+};

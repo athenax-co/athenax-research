@@ -43,7 +43,12 @@ export default function ArticleTOC({ headings }: { headings: TOCHeading[] }) {
                 href={`#${id}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  const el = document.getElementById(id);
+                  if (el) {
+                    const offset = 68 + 16; // navbar h-17 (68px) + breathing room
+                    const top = el.getBoundingClientRect().top + window.scrollY - offset;
+                    window.scrollTo({ top, behavior: "smooth" });
+                  }
                   setActiveId(id);
                 }}
                 className={cn(

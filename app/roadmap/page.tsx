@@ -6,6 +6,7 @@ import { SEED_PAPERS } from "@/data/seed";
 import { useProductStats } from "@/features/products";
 import { cn } from "@/utils/lib";
 import WindowCard from "@/components/ui/WindowCard";
+import { buttonVariants } from "@/components/ui/button";
 
 type ItemTone = "live" | "coming" | "building" | "data" | "network" | "vision";
 
@@ -402,10 +403,7 @@ export default function RoadmapPage() {
                 We fund open research, score it objectively, and turn the most validated ideas into funded startups.
               </div>
             </div>
-            <Link
-              href="/about"
-              className="shrink-0 rounded-full border-2 border-ink px-5 py-2.5 text-[15px] font-semibold text-ink shadow-[2px_2px_0_#1C1C27] transition-all hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0_#1C1C27]"
-            >
+            <Link href="/about" className={cn(buttonVariants({ variant: "outline"}), "shrink-0 no-underline")}>
               About us →
             </Link>
           </div>

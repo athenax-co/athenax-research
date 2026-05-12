@@ -111,13 +111,13 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
   if (images.length === 0) {
     return (
       <div className="grid grid-cols-[1.4fr_1fr] grid-rows-2 gap-1.5">
-        <div className="row-span-2 aspect-4/3 flex items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
+        <div className="row-span-2 flex items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
           screenshot.png
         </div>
-        <div className="flex items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
+        <div className="aspect-video flex items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
           02.png
         </div>
-        <div className="flex items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
+        <div className="aspect-video flex items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
           03.png
         </div>
       </div>
@@ -134,11 +134,11 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
           className="row-span-2 overflow-hidden rounded border border-[rgba(0,0,0,0.08)] cursor-pointer"
           onClick={() => openAt(0)}
         >
-          <img src={first.url ?? undefined} alt="" className="aspect-4/3 w-full object-cover" />
+          <img src={first.url ?? undefined} alt="" className="h-full w-full object-cover" />
         </button>
 
         <button
-          className="overflow-hidden rounded border border-[rgba(0,0,0,0.08)] cursor-pointer"
+          className="aspect-video overflow-hidden rounded border border-[rgba(0,0,0,0.08)] cursor-pointer"
           onClick={() => second && openAt(1)}
         >
           {second ? (
@@ -149,7 +149,7 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
         </button>
 
         <button
-          className="relative overflow-hidden rounded border border-[rgba(0,0,0,0.08)] cursor-pointer"
+          className="relative aspect-video overflow-hidden rounded border border-[rgba(0,0,0,0.08)] cursor-pointer"
           onClick={() => openAt(third ? 2 : 0)}
         >
           {third ? (

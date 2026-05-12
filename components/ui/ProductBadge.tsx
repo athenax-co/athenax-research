@@ -3,7 +3,23 @@ import { cn } from "@/lib/utils";
 
 type ProductBadgeType = "category" | "status" | "stage" | "subcategory" | "kind";
 
-type ProductBadgeTone = "yellow" | "green" | "gray" | "blue" | "tan";
+type ProductBadgeTone =
+  | "ai-agents"
+  | "biotech"
+  | "crypto"
+  | "dev-tools"
+  | "infrastructure"
+  | "robotics"
+  | "subcategory"
+  | "status-positive"
+  | "status-progress"
+  | "status-neutral"
+  | "kind-article"
+  | "kind-research"
+  | "kind-whitepaper"
+  | "kind-livestream"
+  | "kind-roundtable"
+  | "gray";
 
 type ProductBadgeProps = {
   label: string;
@@ -12,29 +28,38 @@ type ProductBadgeProps = {
 };
 
 const CATEGORY_TONE_MAP: Record<string, ProductBadgeTone> = {
-  "AI & AGENTS": "yellow",
-  "DEVELOPER TOOLS": "yellow",
-  "CRYPTO & DEFI": "yellow",
-  ROBOTICS: "green",
-  BIOTECH: "green",
-  INFRASTRUCTURE: "gray",
+  "AI & AGENTS":     "ai-agents",
+  "DEVELOPER TOOLS": "dev-tools",
+  "CRYPTO & DEFI":   "crypto",
+  ROBOTICS:          "robotics",
+  BIOTECH:           "biotech",
+  INFRASTRUCTURE:    "infrastructure",
 };
 
-const STATUS_TONE_MAP: Record<string, ProductBadgeTone> = {
-  LIVE: "green",
-  BETA: "yellow",
-};
+const STATUS_POSITIVE = new Set(["LIVE", "ACTIVE", "LAUNCHED"]);
+const STATUS_PROGRESS = new Set(["BETA", "ACTIVE DEVELOPMENT"]);
 
 const toneClasses: Record<ProductBadgeTone, string> = {
-  yellow: "bg-badge-yellow",
-  green: "bg-badge-green",
-  gray: "bg-badge-gray",
-  blue: "bg-[#EAF0F6]",
-  tan: "bg-[#E8E4D9]",
+  "ai-agents":       "bg-[#FFE0CC] border-ink text-ink",
+  "biotech":         "bg-[#D4ECD5] border-ink text-ink",
+  "crypto":          "bg-[#FFE9A0] border-ink text-ink",
+  "dev-tools":       "bg-[#D4E4F7] border-ink text-ink",
+  "infrastructure":  "bg-[#E0DAD0] border-ink text-ink",
+  "robotics":        "bg-[#E0D4F0] border-ink text-ink",
+  "subcategory":     "bg-white border-[#1a1a1a] text-[#1a1a1a]",
+  "status-positive": "bg-[#C8F7C5] border-[#2D6A2E] text-[#2D6A2E]",
+  "status-progress": "bg-[#FFF3C4] border-[#8B7000] text-[#8B7000]",
+  "status-neutral":  "bg-[#E8E4D9] border-[#1a1a1a] text-[#1a1a1a]",
+  "kind-article":     "bg-[#ffe14d] border-ink text-ink",
+  "kind-research":    "bg-[#EAF0F6] border-ink text-ink",
+  "kind-whitepaper":  "bg-[#E8E0F5] border-ink text-ink",
+  "kind-livestream":  "bg-[#FFD6B0] border-ink text-ink",
+  "kind-roundtable":  "bg-[#C8EEE0] border-ink text-ink",
+  "gray":             "bg-[#e8e4d9] border-ink text-ink",
 };
 
 const baseClasses =
-  "inline-flex items-center rounded-full border-[1.5px] border-ink px-2.5 py-[3px] font-['Space_Mono',monospace] text-[10px] font-semibold tracking-[0.04em] text-ink";
+  "inline-flex items-center rounded-full border-[1.5px] px-2.5 py-[3px] font-['Space_Mono',monospace] text-[10px] font-semibold tracking-[0.04em]";
 
 function normalizeBadgeLabel(label: string) {
   return label.replace(/\s+/g, " ").trim().toUpperCase();
@@ -45,18 +70,21 @@ function capitalizeLabel(label: string) {
   return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
 }
 
-const KIND_TONE_MAP: Record<string, ProductBadgeTone> = {
-  ARTICLE: "yellow",
-  RESEARCH: "blue",
-};
-
 function resolveBadgeTone(label: string, type: ProductBadgeType): ProductBadgeTone {
-  if (type === "stage") return "blue";
-  if (type === "subcategory") return "tan";
-  if (type === "kind") return KIND_TONE_MAP[normalizeBadgeLabel(label)] ?? "gray";
   const normalized = normalizeBadgeLabel(label);
-  if (type === "status") return STATUS_TONE_MAP[normalized] ?? "gray";
-  return CATEGORY_TONE_MAP[normalized] ?? "yellow";
+  if (type === "category") return CATEGORY_TONE_MAP[normalized] ?? "gray";
+  if (type === "subcategory") return "subcategory";
+  if (type === "kind") {
+    if (normalized === "ARTICLE") return "kind-article";
+    if (normalized === "RESEARCH") return "kind-research";
+    if (normalized === "WHITEPAPER") return "kind-whitepaper";
+    if (normalized === "LIVESTREAM") return "kind-livestream";
+    if (normalized === "ROUNDTABLE") return "kind-roundtable";
+    return "gray";
+  }
+  if (STATUS_POSITIVE.has(normalized)) return "status-positive";
+  if (STATUS_PROGRESS.has(normalized)) return "status-progress";
+  return "status-neutral";
 }
 
 function ProductBadge({ label, type = "category", className }: ProductBadgeProps) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import ContentDetailPage from "@/components/page/content-details";
+import ContentDetailPage from "@/features/articles/components/Content";
 import { useContentBySlug } from "@/hooks/queries/useContent";
 
 const ContentDetailSkeleton = () => (

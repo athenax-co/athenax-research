@@ -110,8 +110,8 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
 
   if (images.length === 0) {
     return (
-      <div className="grid h-72 grid-cols-[1.4fr_1fr] grid-rows-2 gap-1.5">
-        <div className="row-span-2 flex items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
+      <div className="grid grid-cols-[1.4fr_1fr] grid-rows-2 gap-1.5">
+        <div className="row-span-2 aspect-4/3 flex items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
           screenshot.png
         </div>
         <div className="flex items-center justify-center rounded bg-[#E8E4D9] border border-[rgba(0,0,0,0.08)] text-[10px] font-['Space_Mono',monospace] text-[#888]">
@@ -129,12 +129,12 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
 
   return (
     <>
-      <div className="grid h-72 grid-cols-[1.4fr_1fr] grid-rows-2 gap-1.5">
+      <div className="grid grid-cols-[1.4fr_1fr] grid-rows-2 gap-1.5">
         <button
           className="row-span-2 overflow-hidden rounded border border-[rgba(0,0,0,0.08)] cursor-pointer"
           onClick={() => openAt(0)}
         >
-          <img src={first.url ?? undefined} alt="" className="h-full w-full object-cover" />
+          <img src={first.url ?? undefined} alt="" className="aspect-4/3 w-full object-cover" />
         </button>
 
         <button
@@ -313,7 +313,7 @@ export function TeamSection({
       {members.length === 0 && <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No team members listed.</p>}
 
       <div className="relative">
-      <div ref={teamScrollRef} className={`max-h-[240px] ${expanded ? "overflow-y-auto" : "overflow-hidden"}`}>
+      <div ref={teamScrollRef} className={`max-h-60 ${expanded ? "overflow-y-auto" : "overflow-hidden"}`}>
         {members.map((m, i) => (
           <div key={m.id} className={`flex items-start gap-4 py-4 ${i < members.length - 1 ? "border-b border-b-[rgba(0,0,0,0.08)]" : ""}`}>
             <div
@@ -403,7 +403,7 @@ export function TeamSection({
         ))}
       </div>
       {!expanded && teamOverflows && (
-        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-5 bg-gradient-to-t from-white to-transparent" />
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-5 bg-linear-to-t from-white to-transparent" />
       )}
       </div>
 
@@ -629,7 +629,7 @@ export function VoicesSection({
       {voices.length === 0 && <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No voices yet.</p>}
 
       <div className="relative">
-      <div ref={voicesScrollRef} className={`max-h-[280px] ${expanded ? "overflow-y-auto" : "overflow-hidden"}`}>
+      <div ref={voicesScrollRef} className={`max-h-70 ${expanded ? "overflow-y-auto" : "overflow-hidden"}`}>
         {sorted.map((v, i) => (
           <div key={v.id} className="mb-2.5 rounded-md border border-[rgba(0,0,0,0.08)] bg-[#FFFCEF] px-4 py-3.5 last:mb-0">
             <p className="text-[13px] italic leading-[1.55]">"{v.quote}"</p>
@@ -673,7 +673,7 @@ export function VoicesSection({
         ))}
       </div>
       {!expanded && voicesOverflow && (
-        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-5 bg-gradient-to-t from-white to-transparent" />
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-5 bg-linear-to-t from-white to-transparent" />
       )}
       </div>
 

@@ -74,3 +74,19 @@ export const BountyStatus = {
 } as const;
 
 export type BountyStatus = (typeof BountyStatus)[keyof typeof BountyStatus];
+
+export const ArticleType = {
+    WHITEPAPER:  "whitepaper",
+    LIVESTREAM:  "livestream",
+    ROUNDTABLE:  "roundtable",
+} as const;
+
+export type ArticleType = (typeof ArticleType)[keyof typeof ArticleType];
+
+export const ArticleStatus = {
+    DRAFT:     "draft",
+    PUBLISHED: "published",
+    ARCHIVED:  "archived",
+} as const;
+
+export type ArticleStatus = (typeof ArticleStatus)[keyof typeof ArticleStatus];

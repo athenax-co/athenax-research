@@ -150,9 +150,10 @@ export default function Page() {
         <hr className="divider" />
 
         <WindowCard label="LAUNCH_STATS.SYS" className="mb-10" bodyClass="bg-white overflow-hidden">
-          <div className="grid sm:grid-cols-2">
+          <div className="grid sm:grid-cols-3">
             {[
               { label: "Launches This Month", value: productStats?.releases.thisMonth ?? null },
+              { label: "Categories", value: categories.length || null },
               { label: "Investor Intros Made", value: 8 },
             ].map((s, index, array) => (
               <div
@@ -194,7 +195,7 @@ export default function Page() {
             ))}
           </div>
           <div
-            className="flex items-center gap-2 rounded border-2 border-[#1C1C27] bg-white px-3.5 py-1.5 shadow-[2px_2px_0_#1C1C27] shrink-0"
+            className="flex items-center gap-2 rounded-[8px] border-2 border-[#1C1C27] bg-white px-3.5 py-1.5 shadow-[2px_2px_0_#1C1C27] shrink-0"
             style={{ width: 280 }}
           >
             <Search size={13} className="shrink-0 text-[#888]" />
@@ -212,12 +213,12 @@ export default function Page() {
           </div>
         </div>
 
-        <div className="mb-2.5 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
+        <div className="mb-2.5 flex gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
           {[{ id: 0, name: "All" }, ...categories].map((c) => (
             <Button
               key={c.id}
               variant={(categoryId ?? null) === (c.id || null) ? "ghost" : "outline"}
-              size="sm"
+              size="xs"
               className={`shrink-0 ${(categoryId ?? null) === (c.id || null) ? "bg-yellow" : ""}`}
               onClick={() => setCategoryId(c.id === 0 ? null : c.id)}
             >

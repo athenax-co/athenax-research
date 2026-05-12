@@ -1,5 +1,5 @@
 import { http, BASE_URL, handleResponse } from "@/api/client";
-import type { ProductIn, ProductOut, ProductDetailOut, ProductStatus, ProductComment, ProductSummary, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty, ProductMedia } from "./types";
+import type { ProductIn, ProductOut, ProductDetailOut, ProductStatus, ProductComment, ProductSummary, ProductListItem, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty, ProductMedia } from "./types";
 import type { VerificationStatus } from "@/enums";
 
 export interface ProductStats {
@@ -145,6 +145,10 @@ export async function uploadProductMedia(productId: number, file: File, sortOrde
     body: form,
   });
   return handleResponse<ProductMedia>(res);
+}
+
+export function getSimilarProducts(productId: number): Promise<ProductListItem[]> {
+  return http.get(`/product/${productId}/similar?limit=3`);
 }
 
 export function updateProductMedia(productId: number, mediaId: number, sortOrder: number): Promise<ProductMedia> {

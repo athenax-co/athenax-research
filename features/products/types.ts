@@ -118,6 +118,16 @@ export interface ProductDetailOut extends ProductOut {
   bounties: Bounty[];
 }
 
+export interface ProductListItem {
+  id: number;
+  slug: string;
+  name: string;
+  shortDesc: string | null;
+  logo: string | null;
+  stage: string | null;
+  categories: string[];
+}
+
 export interface ProductSummary {
   id: number;
   slug: string;

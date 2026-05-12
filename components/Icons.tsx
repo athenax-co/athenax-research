@@ -337,20 +337,31 @@ const MediaIcon = ({ type }: { type: string }) => {
   );
 };
 
-const ContentIcon = ({ kind }: { kind: string }) => (
-  <div className="archive-icon" style={{ background: kind === "research" ? "#EAF0F6" : "#F9F5DC" }}>
-    {kind === "research" ? (
-      <IconLabsSmall />
-    ) : (
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <rect x="3" y="1" width="10" height="14" rx="1" stroke="#1C1C27" strokeWidth="1.5" />
-        <line x1="5" y1="5" x2="11" y2="5" stroke="#1C1C27" strokeWidth="1.2" />
-        <line x1="5" y1="8" x2="11" y2="8" stroke="#1C1C27" strokeWidth="1.2" />
-        <line x1="5" y1="11" x2="9" y2="11" stroke="#1C1C27" strokeWidth="1.2" />
-      </svg>
-    )}
-  </div>
-);
+import { ArticleTypeIcon } from "@/components/ui/ArticleMeta";
+
+const ContentIcon = ({ kind, articleType }: { kind: string; articleType?: string }) => {
+  if (kind === "article" && articleType) {
+    return (
+      <div className="archive-icon" style={{ background: "transparent" }}>
+        <ArticleTypeIcon type={articleType} size={22} />
+      </div>
+    );
+  }
+  return (
+    <div className="archive-icon" style={{ background: kind === "research" ? "#EAF0F6" : "#F9F5DC" }}>
+      {kind === "research" ? (
+        <IconLabsSmall />
+      ) : (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <rect x="3" y="1" width="10" height="14" rx="1" stroke="#1C1C27" strokeWidth="1.5" />
+          <line x1="5" y1="5" x2="11" y2="5" stroke="#1C1C27" strokeWidth="1.2" />
+          <line x1="5" y1="8" x2="11" y2="8" stroke="#1C1C27" strokeWidth="1.2" />
+          <line x1="5" y1="11" x2="9" y2="11" stroke="#1C1C27" strokeWidth="1.2" />
+        </svg>
+      )}
+    </div>
+  );
+};
 
 const AthenaXMark = ({ size = 28 }) => (
   <svg width={size} height={size} viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">

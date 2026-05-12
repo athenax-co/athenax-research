@@ -1,4 +1,4 @@
-import ContentDetailPage from "@/components/page/content-details";
+import ContentDetailPage from "@/features/articles/components/Content";
 import { getResearchBySlug } from "@/lib/api";
 
 export const revalidate = 3600;

@@ -53,28 +53,39 @@ const TOOLBAR: (WrapAction | "sep")[] = [
 
 function applyWrap(textarea: HTMLTextAreaElement, action: WrapAction, setValue: (v: string) => void) {
   const { selectionStart: ss, selectionEnd: se, value } = textarea;
-  const selected = value.slice(ss, se) || action.placeholder || "";
+  const selected = value.slice(ss, se);
 
   let insert: string;
   let cursorStart: number;
   let cursorEnd: number;
 
-  if (action.block && !action.after) {
-    insert = action.before + selected;
+  if (action.block && !action.after && selected.includes("\n")) {
+    // Multi-line selection: prefix each line
+    const lines = selected.split("\n");
+    const prefixed = action.before === "1. "
+      ? lines.map((line, i) => `${i + 1}. ${line}`)
+      : lines.map((line) => action.before + line);
+    insert = prefixed.join("\n");
+    cursorStart = ss;
+    cursorEnd = ss + insert.length;
+  } else if (action.block && !action.after) {
+    const text = selected || action.placeholder || "";
+    insert = action.before + text;
     cursorStart = ss + action.before.length;
-    cursorEnd = cursorStart + selected.length;
+    cursorEnd = cursorStart + text.length;
   } else {
+    const text = selected || action.placeholder || "";
     const after = action.after ?? "";
-    insert = action.before + selected + after;
+    insert = action.before + text + after;
     cursorStart = ss + action.before.length;
-    cursorEnd = cursorStart + selected.length;
+    cursorEnd = cursorStart + text.length;
   }
 
   const next = value.slice(0, ss) + insert + value.slice(se);
   setValue(next);
 
   requestAnimationFrame(() => {
-    textarea.focus();
+    textarea.focus({ preventScroll: true });
     textarea.setSelectionRange(cursorStart, cursorEnd);
   });
 }

@@ -6,7 +6,7 @@ import type { TOCHeading } from "@/lib/api";
 import WindowCard from "@/components/ui/WindowCard";
 
 export default function ArticleTOC({ headings }: { headings: TOCHeading[] }) {
-  const items = headings.filter((h) => h.tag !== "h1");
+  const items = headings;
   const [activeId, setActiveId] = useState(items[0]?.id ?? "");
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function ArticleTOC({ headings }: { headings: TOCHeading[] }) {
                 }}
                 className={cn(
                   "block text-sm leading-[1.4] py-1 px-2 rounded no-underline transition-colors duration-100 border-l-2",
-                  tag === "h3" ? "ml-2" : "",
+                  tag === "h2" ? "ml-3" : "",
                   isActive
                     ? "text-ink font-medium border-l-yellow bg-[#f5d94e1a]"
                     : "text-muted border-l-transparent hover:text-ink hover:bg-[#1c1c270a]"

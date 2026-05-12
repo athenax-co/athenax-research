@@ -1,22 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { getArticles, getBroadcasts, getArticleBySlug, getResearchBySlug, sortByPublishedAtDesc } from "@/lib/api";
+import { getBroadcasts, getResearchBySlug, sortByPublishedAtDesc } from "@/lib/api";
+import { useArticleBySlug, useArticlesList } from "@/features/articles";
+
+export { useArticlesList as useArticles };
 
 export const CONTENT_QUERY_KEYS = {
-  articles: ["content", "articles"] as const,
   broadcasts: ["content", "broadcasts"] as const,
-  articleBySlug: (slug: string) => ["content", "article", slug] as const,
   researchBySlug: (slug: string) => ["content", "research", slug] as const,
 };
 
 const STALE = 5 * 60 * 1000;
-
-export function useArticles() {
-  return useQuery({
-    queryKey: CONTENT_QUERY_KEYS.articles,
-    queryFn: async () => sortByPublishedAtDesc(await getArticles()),
-    staleTime: STALE,
-  });
-}
 
 export function useBroadcasts() {
   return useQuery({
@@ -27,21 +20,18 @@ export function useBroadcasts() {
 }
 
 export function useContentBySlug(slug: string) {
-  const article = useQuery({
-    queryKey: CONTENT_QUERY_KEYS.articleBySlug(slug),
-    queryFn: () => getArticleBySlug(slug),
-    staleTime: STALE,
-    enabled: !!slug,
-  });
+  const article = useArticleBySlug(slug);
 
   const research = useQuery({
     queryKey: CONTENT_QUERY_KEYS.researchBySlug(slug),
     queryFn: () => getResearchBySlug(slug),
     staleTime: STALE,
-    enabled: !!slug && article.isFetched && !article.data,
+    enabled: !!slug && article.isFetched && (article.isError || !article.data),
   });
 
-  const loading = article.isLoading || (article.isFetched && !article.data && research.isLoading);
+  const loading =
+    article.isLoading ||
+    (article.isFetched && (article.isError || !article.data) && research.isLoading);
 
   if (article.data) return { item: article.data, kind: "article" as const, loading: false };
   if (research.data) return { item: research.data, kind: "research" as const, loading: false };

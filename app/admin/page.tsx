@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import WindowCard from "@/components/ui/WindowCard";
 import { Dialog, DialogBody, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrafficLights } from "@/components/ui/Dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useProducts, useUpdateProductStatus } from "@/features/products";
 import { usePapers, useUpdatePaperVerificationStatus } from "@/features/papers";
@@ -402,6 +402,21 @@ export default function Page() {
           </DialogBody>
         </DialogContent>
       </Dialog>
+
+      <div className="mb-5 mt-10 grid grid-cols-1 gap-3.5 md:grid-cols-3 border-t border-[#D8D4CC] pt-5">
+        <WindowCard label="ARTICLES.SYS">
+          <div className="mb-1 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">EDITORIAL CONTENT</div>
+          <p className="mb-3 text-[13px] text-muted">Create, edit, and manage articles, white papers, and recaps.</p>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/admin/articles/editor" className={buttonVariants({ size: "sm" })}>
+              + Create New
+            </Link>
+            <Link href="/admin/articles" className={buttonVariants({ variant: "outline", size: "sm" })}>
+              Manage →
+            </Link>
+          </div>
+        </WindowCard>
+      </div>
     </div>
   );
 }

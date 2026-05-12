@@ -2,6 +2,7 @@
 
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/utils/lib";
+import { slugify } from "@/lib/api";
 
 interface MarkdownViewerProps {
   content: string;
@@ -28,7 +29,7 @@ export default function MarkdownViewer({ content, className }: MarkdownViewerPro
         "[&_pre]:mb-4 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-ink [&_pre]:p-4 [&_pre]:text-cream",
         "[&_pre_code]:border-0 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[0.875em] [&_pre_code]:text-inherit",
         "[&_a]:text-[#0b6e99] [&_a]:underline",
-        "[&_blockquote]:mb-3 [&_blockquote]:border-l-[3px] [&_blockquote]:border-[#1c1c2740] [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted",
+        "[&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-[#E8323C] [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-[#6B6B7A]",
         "[&_hr]:my-6 [&_hr]:border-0 [&_hr]:border-t-2 [&_hr]:border-[#d8d4cc]",
         "[&_table]:mb-4 [&_table]:w-full [&_table]:border-collapse",
         "[&_th]:border [&_th]:border-[#d8d4cc] [&_th]:bg-cream [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:font-semibold",
@@ -36,7 +37,14 @@ export default function MarkdownViewer({ content, className }: MarkdownViewerPro
         className
       )}
     >
-      <ReactMarkdown>{content}</ReactMarkdown>
+      <ReactMarkdown
+        components={{
+          h1: ({ children }) => <h1 id={slugify(String(children))}>{children}</h1>,
+          h2: ({ children }) => <h2 id={slugify(String(children))}>{children}</h2>,
+        }}
+      >
+        {content}
+      </ReactMarkdown>
     </div>
   );
 }

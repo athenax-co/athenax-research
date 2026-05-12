@@ -3,6 +3,7 @@ export type {
   ProductOut,
   ProductDetailOut,
   ProductSummary,
+  ProductListItem,
   ProductComment,
   CategoryRef,
   ProductStatus,

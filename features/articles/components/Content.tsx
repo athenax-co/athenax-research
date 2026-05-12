@@ -1,25 +1,41 @@
 "use client";
 
 import Link from "next/link";
-import { extractContentText, formatContentDate, isLexicalContent, extractLexicalHeadings, estimateReadTime } from "@/lib/api";
-import { cn } from "@/utils/lib";
-import { ContentListState, ContentRow } from "../Content";
-import LexicalRenderer from "../LexicalRenderer";
-import ArticleTOC from "../ArticleTOC";
-import { useGlobal } from "../GlobalProvider";
-import { IconShare } from "../Icons";
+import { formatContentDate, extractMarkdownHeadings, estimateReadTime } from "@/lib/api";
+import { ArticleType } from "@/enums";
+import WindowCard from "@/components/ui/WindowCard";
+import { ContentListState, ContentRow } from "../../../components/Content";
+import MarkdownViewer from "../../../components/editor/MarkdownViewer";
+import ArticleTOC from "./ArticleTOC";
+import { useGlobal } from "../../../components/GlobalProvider";
+import { IconShare } from "../../../components/Icons";
 import { ProductBadge } from "@/components/ui/ProductBadge";
-import { useArticles } from "@/hooks/queries/useContent";
+import { useArticlesList } from "@/features/articles";
+
+function extractMarkdownAbstract(content: string): { abstract: string; remainder: string } {
+  const blocks = content.split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
+  const firstPara = blocks.find((b) => !b.startsWith("#") && !b.startsWith(">"));
+  const firstQuote = blocks.find((b) => b.startsWith(">"));
+  const abstractParts = new Set([firstPara, firstQuote].filter(Boolean) as string[]);
+  return {
+    abstract: [...abstractParts].join("\n\n"),
+    remainder: blocks.filter((b) => !abstractParts.has(b)).join("\n\n"),
+  };
+}
 
 const ContentDetailPage = ({ kind, item, slug }: { kind: "article" | "research"; item: any | null; slug: string }) => {
   const { showToast } = useGlobal();
-  const { data: articles = [] } = useArticles();
+  const { data: articles = [] } = useArticlesList();
 
-  const contentBlocks = extractContentText(item?.content);
-  const headings = isLexicalContent(item?.content) ? extractLexicalHeadings(item.content) : [];
-  const readTime = item ? estimateReadTime(item.content) : 0;
+  const content: string = typeof item?.content === "string" ? item.content : "";
+  const headings = content ? extractMarkdownHeadings(content) : [];
+  const readTime = item ? estimateReadTime(content) : 0;
+  const isWhitepaper = kind === "article" && item?.articleType === ArticleType.WHITEPAPER;
+  const { abstract, remainder } = isWhitepaper && content
+    ? extractMarkdownAbstract(content)
+    : { abstract: "", remainder: content };
 
-  const related = articles.filter((a: any) => a.slug !== (item?.slug ?? slug)).slice(0, 2);
+  const related = articles.filter((a) => a.slug !== (item?.slug ?? slug)).slice(0, 2);
 
   const handleShare = async () => {
     const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin}/archive/${item?.slug ?? slug}`;
@@ -46,8 +62,19 @@ const ContentDetailPage = ({ kind, item, slug }: { kind: "article" | "research";
             <div className="section-heading-tight mb-6">
               <div className="path-badge">/root/{kind}/{item.slug || slug}</div>
               <div className="flex items-center gap-2 flex-wrap">
-                <ProductBadge label={kind} type="kind" />
-                {kind === "research" && item.tag && <span className="ftag">{item.tag}</span>}
+                {kind === "article" ? (
+                  <>
+                    {item.articleType && <ProductBadge label={item.articleType} type="kind" />}
+                    {item.categories?.map((cat: string) => (
+                      <ProductBadge key={cat} label={cat} type="category" />
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    <ProductBadge label={kind} type="kind" />
+                    {item.tag && <span className="ftag">{item.tag}</span>}
+                  </>
+                )}
                 <span className="text-sm text-muted">·</span>
                 <span className="text-sm text-muted">{formatContentDate(item.publishedAt)?.toString()}</span>
                 <span className="text-sm text-muted">·</span>
@@ -66,30 +93,18 @@ const ContentDetailPage = ({ kind, item, slug }: { kind: "article" | "research";
 
             <div className="flex gap-10 items-start">
               <div className="flex-1 min-w-0">
-                {isLexicalContent(item?.content) ? (
-                  <LexicalRenderer content={item.content} skipH1 />
-                ) : contentBlocks.length > 0 ? (
-                  contentBlocks.map((block, index) => (
-                    <p
-                      key={index}
-                      className={cn("text-base leading-[1.8] text-ink", index < contentBlocks.length - 1 && "mb-5")}
-                    >
-                      {block}
-                    </p>
-                  ))
-                ) : (
-                  <pre
-                    className="whitespace-pre-wrap wrap-break-word text-xs text-muted m-0"
-                    style={{ fontFamily: "'Space Mono', monospace" }}
-                  >
-                    {JSON.stringify(item.content, null, 2)}
-                  </pre>
+                {abstract && (
+                  <WindowCard label="Abstract" className="mb-6">
+                    <MarkdownViewer content={abstract} />
+                  </WindowCard>
                 )}
+
+                <MarkdownViewer content={remainder} />
 
                 {related.length > 0 && (
                   <div className="mt-10 pt-6 border-t border-dashed border-[#D8D4CC]">
                     <p className="titlebar-label mb-4">See Also</p>
-                    {related.map((a: any) => (
+                    {related.map((a) => (
                       <Link key={a.slug} href={`/archive/${a.slug}`}>
                         <ContentRow item={a} kind="article" />
                       </Link>

@@ -14,7 +14,7 @@ import {
   useProductBySlug,
   useVoteProduct,
   useInterestProduct,
-  useProducts,
+  useSimilarProducts,
   useComments,
   useCreateComment,
   useCreateTeamMember,
@@ -58,10 +58,10 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
   const { data: apiProduct, isLoading } = useProductBySlug(id);
 
-  const { data: allProductsData } = useProducts("approved");
   const { mutate: vote, isPending: voting } = useVoteProduct();
   const { mutate: interest, isPending: registeringInterest } = useInterestProduct();
   const apiProductId = apiProduct?.id ?? 0;
+  const { data: similarProducts } = useSimilarProducts(apiProductId);
   const { data: commentsData, fetchNextPage, hasNextPage, isFetchingNextPage } = useComments(apiProductId);
   const allComments = commentsData?.pages.flatMap((p) => p.items) ?? [];
   const commentsTotal = commentsData?.pages[0]?.total ?? 0;
@@ -135,11 +135,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const p: ProductDetailOut = apiProduct;
   const primaryCategory = p.categories[0]?.name ?? "Product";
   const isInvestor = (user?.role as string) === "investor";
-
-  const similarProducts = (allProductsData?.items ?? [])
-    .filter((item) => item.id !== p.id)
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 3);
 
   const hasGithub = p.links.some((l) => l.linkType === "github");
 
@@ -298,22 +293,21 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               <h1 className="text-[36px] leading-none tracking-tight max-[640px]:text-[28px]">{p.name}</h1>
               {p.categories.length > 0 && <ProductBadge label={p.categories[0].name} />}
               {(p.subCategories ?? []).map((name) => (
-                <span key={name} className="topic-pill bg-[#E8E4D9] text-[10px]">
-                  {name.toUpperCase()}
-                </span>
+                <ProductBadge key={name} label={name} type="subcategory" />
               ))}
               {p.pendingSubcategoryName && (
                 <span className="topic-pill bg-[#FEF3C7] text-[10px] border-[#D4A017]/40 text-[#92400E]">
                   ⚠ {p.pendingSubcategoryName.toUpperCase()} (PENDING)
                 </span>
               )}
-              {p.stage && <span className="topic-pill bg-[#E8E4D9] text-[10px]">{p.stage.toUpperCase()}</span>}
+              {p.qualityBadge && <ProductBadge label={p.qualityBadge} type="stage" />}
+              {p.stage && <ProductBadge label={p.stage} type="stage" />}
             </div>
             {p.shortDesc && <p className="mb-2 text-[15px] leading-[1.6] text-[#555] max-w-150">{p.shortDesc}</p>}
             <div className="font-['Space_Mono',monospace] text-[11px] text-[#888] tracking-[0.02em]">
               {p.founded != null && <>founded {p.founded}</>}
               {p.founded != null && p.createdAt && <span className="mx-1 text-[#ccc]">·</span>}
-              {p.createdAt && <>launched on athenax {new Date(p.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</>}
+              {p.createdAt && <>launched on AthenaX {new Date(p.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</>}
             </div>
           </div>
 
@@ -579,11 +573,11 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           </div>
         )}
 
-        {similarProducts.length > 0 && (
+        {(similarProducts ?? []).length > 0 && (
           <div className="mt-14 border-t border-t-[rgba(0,0,0,0.12)] pt-8">
             <div className="mb-4 font-['Space_Mono',monospace] text-[11px] uppercase tracking-[0.08em] text-[#888]">›_ similar projects</div>
             <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
-              {similarProducts.map((s) => (
+              {(similarProducts ?? []).map((s) => (
                 <Link
                   key={s.id}
                   href={`/launch/${s.slug}`}
@@ -597,12 +591,12 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     <div className="mb-0.75 text-[15px] font-bold">{s.name}</div>
                   </div>
                   <div className="mb-2 flex flex-wrap gap-1.5">
-                    {s.categories.map((c) => (
-                      <ProductBadge key={c.id} label={c.name} />
+                    {s.categories.map((name) => (
+                      <ProductBadge key={name} label={name} />
                     ))}
-                    {s.stage && <span className="ftag text-[10px]">{s.stage}</span>}
+                    {s.stage && <ProductBadge label={s.stage} type="stage" />}
                   </div>
-                  <div className="text-xs text-muted">{s.shortDesc ?? s.description}</div>
+                  <div className="text-xs text-muted">{s.shortDesc}</div>
                 </Link>
               ))}
             </div>

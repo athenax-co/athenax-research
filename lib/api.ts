@@ -141,14 +141,9 @@ export const normalizeTag = (tag: string) => (tag || "").trim().toLowerCase();
 export const extractContentText = (value: any): string[] => {
   if (!value) return [];
   if (typeof value === "string") {
-    return value
-      .split(/\n{2,}/)
-      .map((chunk) => chunk.trim())
-      .filter(Boolean);
+    return value.split(/\n{2,}/).map((c) => c.trim()).filter(Boolean);
   }
-  if (Array.isArray(value)) {
-    return value.flatMap(extractContentText);
-  }
+  if (Array.isArray(value)) return value.flatMap(extractContentText);
   if (typeof value === "object") {
     if (typeof value.text === "string") return [value.text.trim()].filter(Boolean);
     return Object.values(value).flatMap(extractContentText);
@@ -156,22 +151,10 @@ export const extractContentText = (value: any): string[] => {
   return [];
 };
 
-export const isLexicalContent = (value: any) => Boolean(value && typeof value === "object" && value.root && typeof value.root === "object");
-
 const WORDS_PER_MINUTE = 220;
 
-const extractPlainText = (node: any): string => {
-  if (!node) return "";
-  if (typeof node.text === "string") return node.text;
-  if (Array.isArray(node.children)) return node.children.map(extractPlainText).join(" ");
-  return "";
-};
-
-export const estimateReadTime = (content: any): number => {
-  const text = isLexicalContent(content)
-    ? extractPlainText(content.root)
-    : extractContentText(content).join(" ");
-  const words = text.trim().split(/\s+/).filter(Boolean).length;
+export const estimateReadTime = (content: string): number => {
+  const words = content.trim().split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.round(words / WORDS_PER_MINUTE));
 };
 
@@ -188,22 +171,14 @@ export interface TOCHeading {
   tag: string;
 }
 
-export const extractLexicalHeadings = (content: any): TOCHeading[] => {
-  if (!content?.root?.children) return [];
-
-  const getText = (node: any): string => {
-    if (node.type === "text") return node.text || "";
-    return (node.children ?? []).map(getText).join("");
-  };
-
-  const walk = (nodes: any[]): TOCHeading[] =>
-    nodes.flatMap((node) => {
-      if (node.type === "heading") {
-        const text = getText(node).trim();
-        return text ? [{ id: slugify(text), text, tag: node.tag ?? "h2" }] : [];
-      }
-      return node.children ? walk(node.children) : [];
-    });
-
-  return walk(content.root.children);
+export const extractMarkdownHeadings = (markdown: string): TOCHeading[] => {
+  const lines = markdown.split("\n");
+  return lines.flatMap((line) => {
+    const match = line.match(/^(#{1,2})\s+(.+)/);
+    if (!match) return [];
+    const tag = `h${match[1].length}`;
+    const text = match[2].trim();
+    return [{ id: slugify(text), text, tag }];
+  });
 };
+

@@ -3,12 +3,30 @@
 import Link from "next/link";
 import { useQueryState, parseAsString } from "nuqs";
 import { ContentListState, ContentRow } from "@/components/Content";
-import { useArticles, useBroadcasts } from "@/hooks/queries/useContent";
+import { useArticlesList } from "@/features/articles";
+import { ArticleType } from "@/enums";
+import { useBroadcasts } from "@/hooks/queries/useContent";
+import { Button } from "@/components/ui/button";
+
+const TABS = [
+  { id: "articles", label: "Articles" },
+  { id: "broadcast", label: "Broadcast" },
+] as const;
+
+const TYPE_FILTERS: { value: ArticleType | null; label: string }[] = [
+  { value: null, label: "All" },
+  { value: ArticleType.WHITEPAPER, label: "Whitepaper" },
+  { value: ArticleType.LIVESTREAM, label: "Livestream" },
+  { value: ArticleType.ROUNDTABLE, label: "Roundtable" },
+];
 
 const ArchivePage = () => {
   const [tab, setTab] = useQueryState("tab", parseAsString.withDefault("articles"));
+  const [typeFilter, setTypeFilter] = useQueryState("type", parseAsString);
 
-  const { data: articles = [], isLoading: articlesLoading, isError: articlesError } = useArticles();
+  const activeType = (typeFilter as ArticleType | null) ?? null;
+
+  const { data: items = [], isLoading, isError } = useArticlesList({ articleType: activeType ?? undefined });
   const { data: broadcasts = [], isLoading: broadcastsLoading, isError: broadcastsError } = useBroadcasts();
 
   return (
@@ -19,29 +37,58 @@ const ArchivePage = () => {
         <p className="text-[17px] text-muted">Artifacts, learnings, and broadcasts.</p>
         <hr className="divider" />
 
-        <div className="mb-8 flex flex-wrap gap-2">
-          {[
-            ["articles", "Articles"],
-            ["broadcast", "Broadcast"],
-          ].map(([id, label]) => (
-            <button key={id} className={tab === id ? "btn btn-ghost btn-sm bg-yellow" : "btn btn-outline btn-sm"} onClick={() => setTab(id)}>
+        <div className="mb-5 flex items-center gap-2 border-b-2 border-b-[#1C1C27] pb-2.5 flex-wrap">
+          {TABS.map(({ id, label }) => (
+            <Button
+              key={id}
+              variant={tab === id ? "ghost" : "outline"}
+              size="sm"
+              className={tab === id ? "bg-yellow" : ""}
+              onClick={() => {
+                setTab(id);
+                setTypeFilter(null);
+              }}
+            >
               {label}
-            </button>
+            </Button>
           ))}
         </div>
 
         {tab === "articles" && (
-          <div>
-            {articles.length > 0 ? (
-              articles.map((item) => (
+          <>
+            <div className="mb-6 flex flex-wrap gap-1.5">
+              {TYPE_FILTERS.map(({ value, label }) => (
+                <Button
+                  key={label}
+                  variant={activeType === value ? "ghost" : "outline"}
+                  size="xs"
+                  className={activeType === value ? "bg-yellow" : ""}
+                  onClick={() => setTypeFilter(value)}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+
+            {items.length > 0 ? (
+              items.map((item) => (
                 <Link key={item.slug} href={`/archive/${item.slug}`}>
                   <ContentRow item={item} kind="article" onClick={() => {}} />
                 </Link>
               ))
             ) : (
-              <ContentListState loading={articlesLoading} error={articlesError ? "Could not load archive content right now." : ""} emptyText="No published articles available yet." />
+              <ContentListState
+                loading={isLoading}
+                error={isError ? "Could not load content right now." : ""}
+                emptyText={
+                  activeType === ArticleType.WHITEPAPER ? "No whitepapers available yet." :
+                  activeType === ArticleType.LIVESTREAM ? "No livestreams available yet." :
+                  activeType === ArticleType.ROUNDTABLE ? "No roundtables available yet." :
+                  "No articles available yet."
+                }
+              />
             )}
-          </div>
+          </>
         )}
 
         {tab === "broadcast" && (
@@ -50,7 +97,7 @@ const ArchivePage = () => {
               <ContentListState loading={broadcastsLoading} error={broadcastsError ? "Could not load broadcasts right now." : ""} emptyText="No broadcast videos available yet." />
             ) : (
               <div>
-                {broadcasts.map((item) => (
+                {(broadcasts as any[]).map((item) => (
                   <Link key={item.id || item.slug} href={item.id ? `/media/${item.id}` : `/archive/${item.slug}`} className="no-underline">
                     <ContentRow item={item} kind="broadcast" onClick={() => {}} />
                   </Link>

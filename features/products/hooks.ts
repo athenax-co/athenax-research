@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as productApi from "./api";
 import type { ProductFilters, ProductStats } from "./api";
-import type { ProductComment, ProductDetailOut, ProductIn, ProductOut, ProductStatus, ProductSummary, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty } from "./types";
+import type { ProductDetailOut, ProductIn, ProductListItem, ProductOut, ProductStatus, ProductSummary, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty } from "./types";
 import type { VerificationStatus } from "@/enums";
 import type { CategoryOut } from "@/types/reference";
 import { resolveCategories } from "@/utils/lib";
@@ -356,6 +356,15 @@ export function useSwapProductMedia(productId: number, slug: string) {
       }
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useSimilarProducts(productId: number) {
+  return useQuery<ProductListItem[]>({
+    queryKey: ["product", productId, "similar"],
+    queryFn: () => productApi.getSimilarProducts(productId),
+    enabled: productId > 0,
+    staleTime: 5 * 60 * 1000,
   });
 }
 

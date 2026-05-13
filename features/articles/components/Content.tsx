@@ -4,12 +4,12 @@ import Link from "next/link";
 import { formatContentDate, extractMarkdownHeadings, estimateReadTime } from "@/lib/api";
 import { ArticleType } from "@/enums";
 import WindowCard from "@/components/ui/WindowCard";
-import { ContentListState, ContentRow } from "../../../components/Content";
-import MarkdownViewer from "../../../components/editor/MarkdownViewer";
+import { ContentListState, ContentRow } from "@/components/Content";
+import MarkdownViewer from "@/components/editor/MarkdownViewer";
 import ArticleTOC from "./ArticleTOC";
-import { useGlobal } from "../../../components/GlobalProvider";
-import { IconShare } from "../../../components/Icons";
-import { ProductBadge } from "@/components/ui/ProductBadge";
+import { useGlobal } from "@/components/GlobalProvider";
+import { IconShare } from "@/components/Icons";
+import { ArticleBadges } from "@/components/ui/ArticleMeta";
 import { useArticlesList } from "@/features/articles";
 
 function extractMarkdownAbstract(content: string): { abstract: string; remainder: string } {
@@ -63,15 +63,10 @@ const ContentDetailPage = ({ kind, item, slug }: { kind: "article" | "research";
               <div className="path-badge">/root/{kind}/{item.slug || slug}</div>
               <div className="flex items-center gap-2 flex-wrap">
                 {kind === "article" ? (
-                  <>
-                    {item.articleType && <ProductBadge label={item.articleType} type="kind" />}
-                    {item.categories?.map((cat: string) => (
-                      <ProductBadge key={cat} label={cat} type="category" />
-                    ))}
-                  </>
+                  <ArticleBadges articleType={item.articleType} tags={item.tags} />
                 ) : (
                   <>
-                    <ProductBadge label={kind} type="kind" />
+                    <ArticleBadges articleType={kind} />
                     {item.tag && <span className="ftag">{item.tag}</span>}
                   </>
                 )}

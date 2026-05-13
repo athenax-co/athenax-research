@@ -11,7 +11,7 @@ export interface ArticleOut {
   status: ArticleStatus;
   publishedAt: string | null;
   creatorName: string | null;
-  categories: string[];
+  tags: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -22,7 +22,7 @@ export interface ArticleIn {
   content?: string | null;
   status?: ArticleStatus;
   publishedAt?: string | null;
-  categoryIds?: number[];
+  tags?: string[];
 }
 
 export interface ArticleUpdate {
@@ -31,7 +31,7 @@ export interface ArticleUpdate {
   content?: string | null;
   status?: ArticleStatus | null;
   publishedAt?: string | null;
-  categoryIds?: number[] | null;
+  tags?: string[] | null;
 }
 
 export interface ArticleListParams {
@@ -39,5 +39,5 @@ export interface ArticleListParams {
   offset?: number;
   status?: ArticleStatus;
   articleType?: ArticleType;
-  categoryId?: number;
+  tag?: string;
 }

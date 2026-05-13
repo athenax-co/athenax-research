@@ -18,15 +18,15 @@ export function ArticleTypeIcon({ type, size = 28 }: { type: string; size?: numb
   return <img src={src} alt={type} width={size} height={size} className="shrink-0" />;
 }
 
-export function ArticleBadges({ articleType, categories }: { articleType?: string; categories?: string[] }) {
-  if (!articleType && !categories?.length) return null;
+export function ArticleBadges({ articleType, tags }: { articleType?: string; tags?: string[] }) {
+  if (!articleType && !tags?.length) return null;
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {articleType && (
         <ProductBadge label={articleType} type="kind" />
       )}
-      {categories?.map((cat) => (
-        <ProductBadge key={cat} label={cat} type="category" />
+      {tags?.map((tag) => (
+        <ProductBadge key={tag} label={tag} type="tag" />
       ))}
     </div>
   );

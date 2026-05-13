@@ -7,7 +7,7 @@ export function getArticles(params: ArticleListParams = {}, auth = false): Promi
   if (params.offset != null) p.set("offset", String(params.offset));
   if (params.status) p.set("status", params.status);
   if (params.articleType) p.set("articleType", params.articleType);
-  if (params.categoryId != null) p.set("categoryId", String(params.categoryId));
+  if (params.tag) p.set("tag", params.tag);
   const qs = p.toString();
   return http.get<ArticleOut[]>(`/article${qs ? `?${qs}` : ""}`, auth ? { auth: true } : undefined);
 }

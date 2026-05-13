@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-type ProductBadgeType = "category" | "status" | "stage" | "subcategory" | "kind";
+type ProductBadgeType = "category" | "status" | "stage" | "subcategory" | "kind" | "tag";
 
 type ProductBadgeTone =
   | "ai-agents"
@@ -19,7 +19,8 @@ type ProductBadgeTone =
   | "kind-whitepaper"
   | "kind-livestream"
   | "kind-roundtable"
-  | "gray";
+  | "gray"
+  | "tag";
 
 type ProductBadgeProps = {
   label: string;
@@ -52,10 +53,11 @@ const toneClasses: Record<ProductBadgeTone, string> = {
   "status-neutral":  "bg-[#E8E4D9] border-[#1a1a1a] text-[#1a1a1a]",
   "kind-article":     "bg-[#ffe14d] border-ink text-ink",
   "kind-research":    "bg-[#EAF0F6] border-ink text-ink",
-  "kind-whitepaper":  "bg-[#E8E0F5] border-ink text-ink",
-  "kind-livestream":  "bg-[#FFD6B0] border-ink text-ink",
-  "kind-roundtable":  "bg-[#C8EEE0] border-ink text-ink",
+  "kind-whitepaper":  "bg-[#E8DFB8] border-[#D4C88E] text-[#6B5D2F]",
+  "kind-livestream":  "bg-[#D4E4CF] border-[#B8CEB0] text-[#3D5A34]",
+  "kind-roundtable":  "bg-[#EACED0] border-[#D4AEB1] text-[#7A3338]",
   "gray":             "bg-[#e8e4d9] border-ink text-ink",
+  "tag":              "bg-transparent border-[#D4C88E] text-[#8B7A3D]",
 };
 
 const baseClasses =
@@ -72,6 +74,7 @@ function capitalizeLabel(label: string) {
 
 function resolveBadgeTone(label: string, type: ProductBadgeType): ProductBadgeTone {
   const normalized = normalizeBadgeLabel(label);
+  if (type === "tag") return "tag";
   if (type === "category") return CATEGORY_TONE_MAP[normalized] ?? "gray";
   if (type === "subcategory") return "subcategory";
   if (type === "kind") {
@@ -89,10 +92,15 @@ function resolveBadgeTone(label: string, type: ProductBadgeType): ProductBadgeTo
 
 function ProductBadge({ label, type = "category", className }: ProductBadgeProps) {
   const tone = resolveBadgeTone(label, type);
-  const displayLabel = type === "stage" ? capitalizeLabel(label) : normalizeBadgeLabel(label);
+  const displayLabel =
+    type === "tag"
+      ? label.replace(/\s+/g, " ").trim().replace(/\b\w/g, (c) => c.toUpperCase())
+      : type === "stage"
+      ? capitalizeLabel(label)
+      : normalizeBadgeLabel(label);
 
   return (
-    <Badge className={cn(baseClasses, type !== "stage" && "uppercase", toneClasses[tone], className)} variant="outline">
+    <Badge className={cn(baseClasses, type !== "stage" && type !== "tag" && "uppercase", toneClasses[tone], className)} variant="outline">
       {displayLabel}
     </Badge>
   );

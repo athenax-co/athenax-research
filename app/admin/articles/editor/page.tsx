@@ -2,15 +2,23 @@
 
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState, useMemo } from "react";
-import { buttonVariants } from "@/components/ui/button";
+import { useState } from "react";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useArticleById, useCreateArticle, useUpdateArticle, type ArticleOut } from "@/features/articles";
-import { useCategories } from "@/hooks/queries/useReference";
 import { ArticleType, ArticleStatus } from "@/enums";
 import MarkdownEditor from "@/components/editor/MarkdownEditor";
 import { cn } from "@/utils/lib";
-import type { CategoryOut } from "@/types/reference";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrafficLights,
+  DialogBody,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/Dialog";
 
 const TYPE_OPTIONS = [
   { value: ArticleType.WHITEPAPER, label: "Whitepaper" },
@@ -43,12 +51,64 @@ const toDatetimeLocal = (iso?: string | null) => {
 type FormProps = {
   article?: ArticleOut;
   articleId?: number;
-  parentCategories: CategoryOut[];
   userName?: string;
   showToast: (text: string, type?: string) => void;
 };
 
-function ArticleEditorForm({ article, articleId, parentCategories, userName, showToast }: FormProps) {
+function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[]) => void }) {
+  const [input, setInput] = useState("");
+
+  const addTag = (raw: string) => {
+    const tag = raw.trim().toLowerCase();
+    if (tag && !tags.includes(tag)) onChange([...tags, tag]);
+    setInput("");
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addTag(input);
+    } else if (e.key === "Backspace" && input === "" && tags.length > 0) {
+      onChange(tags.slice(0, -1));
+    }
+  };
+
+  const handleBlur = () => {
+    if (input.trim()) addTag(input);
+  };
+
+  return (
+    <div className="flex min-h-10 flex-wrap gap-1.5 rounded-lg border-2 border-ink bg-white px-3 py-2 focus-within:shadow-[3px_3px_0_#1c1c27]">
+      {tags.map((tag) => (
+        <span
+          key={tag}
+          className="flex items-center gap-1 rounded bg-[#F0EDE6] px-2 py-0.5 font-['Space_Mono',monospace] text-[11px] font-bold uppercase tracking-wide text-ink"
+        >
+          {tag}
+          <button
+            type="button"
+            onClick={() => onChange(tags.filter((t) => t !== tag))}
+            className="ml-0.5 text-muted hover:text-ink leading-none"
+            aria-label={`Remove ${tag}`}
+          >
+            ×
+          </button>
+        </span>
+      ))}
+      <input
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={handleBlur}
+        placeholder={tags.length === 0 ? "Type a tag and press Enter or comma…" : ""}
+        className="min-w-35 flex-1 bg-transparent text-[14px] text-ink outline-none placeholder:text-muted/50"
+      />
+    </div>
+  );
+}
+
+function ArticleEditorForm({ article, articleId, userName, showToast }: FormProps) {
   const router = useRouter();
   const { mutate: createArticle, isPending: creating } = useCreateArticle();
   const { mutate: updateArticle, isPending: updating } = useUpdateArticle();
@@ -57,15 +117,29 @@ function ArticleEditorForm({ article, articleId, parentCategories, userName, sho
   const [title, setTitle] = useState(() => article?.title ?? "");
   const [articleType, setArticleType] = useState<ArticleType>(() => article?.articleType ?? ArticleType.WHITEPAPER);
   const [content, setContent] = useState(() => article?.content ?? "");
-  const [categoryId, setCategoryId] = useState<number | "">(() => {
-    const firstName = article?.categories?.[0];
-    if (!firstName) return "";
-    return parentCategories.find((c) => c.name === firstName)?.id ?? "";
-  });
+  const [tags, setTags] = useState<string[]>(() => article?.tags ?? []);
   const [publishedAt, setPublishedAt] = useState(() => toDatetimeLocal(article?.publishedAt));
+
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<ArticleStatus | null>(null);
 
   const isPending = creating || updating;
   const headingText = title.trim() || (isEdit ? "Edit Article" : "New Article");
+  const currentStatus = article?.status;
+
+  const draftLabel = !isEdit
+    ? "Save Draft"
+    : currentStatus === ArticleStatus.DRAFT
+    ? "Update Draft"
+    : "Save as Draft";
+
+  const publishLabel = !isEdit
+    ? "Publish"
+    : currentStatus === ArticleStatus.PUBLISHED
+    ? "Update"
+    : currentStatus === ArticleStatus.ARCHIVED
+    ? "Republish"
+    : "Publish";
 
   const submitWith = (targetStatus: ArticleStatus) => {
     const trimmedTitle = title.trim();
@@ -79,30 +153,40 @@ function ArticleEditorForm({ article, articleId, parentCategories, userName, sho
       articleType,
       status: targetStatus,
       content: content || null,
-      categoryIds: categoryId !== "" ? [categoryId] : [],
+      tags,
       publishedAt: publishedAt ? new Date(publishedAt).toISOString() : null,
+    };
+
+    setPendingAction(targetStatus);
+
+    const onSuccess = (msg: string) => () => {
+      setPendingAction(null);
+      showToast(msg, "success");
+      router.push("/admin/articles");
+    };
+    const onError = (msg: string) => (err: Error) => {
+      setPendingAction(null);
+      showToast(err.message || msg, "error");
     };
 
     if (isEdit && articleId != null) {
       updateArticle(
         { id: articleId, data },
-        {
-          onSuccess: () => {
-            showToast("Article updated.", "success");
-            router.push("/admin/articles");
-          },
-          onError: (err) => showToast(err.message || "Update failed.", "error"),
-        }
+        { onSuccess: onSuccess("Article updated."), onError: onError("Update failed.") }
       );
     } else {
       createArticle(data, {
-        onSuccess: () => {
-          showToast("Article created.", "success");
-          router.push("/admin/articles");
-        },
-        onError: (err) => showToast(err.message || "Create failed.", "error"),
+        onSuccess: onSuccess("Article created."),
+        onError: onError("Create failed."),
       });
     }
+  };
+
+  const handleArchive = () => setArchiveOpen(true);
+
+  const confirmArchive = () => {
+    setArchiveOpen(false);
+    submitWith(ArticleStatus.ARCHIVED);
   };
 
   return (
@@ -115,22 +199,20 @@ function ArticleEditorForm({ article, articleId, parentCategories, userName, sho
         <span className="h-3 w-px bg-[#D8D4CC]" />
         <p className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">{headingText}</p>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
-          <button
-            type="button"
-            className="btn btn-outline btn-sm"
-            onClick={() => submitWith(ArticleStatus.DRAFT)}
-            disabled={isPending}
-          >
-            {creating || updating ? <span className="spinner" /> : "Save Draft"}
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            onClick={() => submitWith(ArticleStatus.PUBLISHED)}
-            disabled={isPending}
-          >
-            {isPending ? <span className="spinner" /> : "Publish"}
-          </button>
+          {isEdit && currentStatus !== ArticleStatus.ARCHIVED && (
+            <>
+              <Button variant="ghost" size="sm" className="text-muted" onClick={handleArchive} disabled={isPending}>
+                {pendingAction === ArticleStatus.ARCHIVED ? <span className="spinner" /> : "Archive"}
+              </Button>
+              <span className="h-3 w-px bg-[#D8D4CC]" />
+            </>
+          )}
+          <Button variant="outline" size="sm" onClick={() => submitWith(ArticleStatus.DRAFT)} disabled={isPending}>
+            {pendingAction === ArticleStatus.DRAFT ? <span className="spinner" /> : draftLabel}
+          </Button>
+          <Button size="sm" onClick={() => submitWith(ArticleStatus.PUBLISHED)} disabled={isPending}>
+            {pendingAction === ArticleStatus.PUBLISHED ? <span className="spinner" /> : publishLabel}
+          </Button>
         </div>
       </div>
 
@@ -189,19 +271,9 @@ function ArticleEditorForm({ article, articleId, parentCategories, userName, sho
               </div>
 
               <div>
-                <label className={FIELD_LABEL}>Category</label>
-                <select
-                  value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value === "" ? "" : Number(e.target.value))}
-                  className={FIELD_INPUT}
-                >
-                  <option value="">— None —</option>
-                  {parentCategories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
+                <label className={FIELD_LABEL}>Tags</label>
+                <TagInput tags={tags} onChange={setTags} />
+                <p className="mt-1 text-[11px] text-muted">Press Enter or comma to add.</p>
               </div>
 
               <div>
@@ -242,19 +314,33 @@ function ArticleEditorForm({ article, articleId, parentCategories, userName, sho
               )}
             </div>
 
-            {isEdit && (
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm w-full justify-center text-muted"
-                onClick={() => submitWith(ArticleStatus.ARCHIVED)}
-                disabled={isPending}
-              >
-                Archive Article
-              </button>
-            )}
           </aside>
         </div>
       </div>
+
+      <Dialog open={archiveOpen} onOpenChange={setArchiveOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTrafficLights />
+            <DialogTitle>Archive Article</DialogTitle>
+            <DialogClose />
+          </DialogHeader>
+          <DialogBody>
+            <p className="text-[15px] text-ink">
+              Archive <span className="font-semibold">&ldquo;{headingText}&rdquo;</span>?
+            </p>
+            <p className="mt-1.5 text-[13px] text-muted">
+              It will be removed from public view. You can republish it at any time.
+            </p>
+          </DialogBody>
+          <DialogFooter>
+            <DialogClose className={buttonVariants({ variant: "outline", size: "sm", className: "text-xs h-9" })}>Cancel</DialogClose>
+            <Button size="sm" onClick={confirmArchive} disabled={isPending}>
+              {pendingAction === ArticleStatus.ARCHIVED ? <span className="spinner" /> : "Archive"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
@@ -266,12 +352,6 @@ export default function Page() {
   const isEdit = id != null;
 
   const { user, showToast } = useGlobal();
-  const { data: categories = [], isLoading: loadingCategories } = useCategories();
-  const parentCategories = useMemo(
-    () => categories.filter((c) => c.parentId === null && c.status === "approved"),
-    [categories]
-  );
-
   const { data: article, isLoading: loadingArticle } = useArticleById(id);
 
   if (!user || (user.role as string) !== "admin") {
@@ -289,7 +369,7 @@ export default function Page() {
     );
   }
 
-  if (isEdit && (loadingArticle || loadingCategories)) {
+  if (isEdit && loadingArticle) {
     return (
       <div className="page-wrap section animate-pulse">
         <div className="mb-8 h-4 w-48 rounded bg-[#E8E4DC]" />
@@ -302,7 +382,6 @@ export default function Page() {
     <ArticleEditorForm
       article={article}
       articleId={id}
-      parentCategories={parentCategories}
       userName={user.name}
       showToast={showToast}
     />

@@ -368,6 +368,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             )}
           </WindowCard>
 
+          <div className="flex flex-col gap-4 md:row-span-2">
           <WindowCard label="GALLERY.SYS" bodyClass="p-3">
             <GallerySection
               media={p.media}
@@ -394,7 +395,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             />
           </WindowCard>
 
-          <WindowCard label="LINKS.SYS" bodyClass="px-5 py-3">
+          <WindowCard label="LINKS.SYS" bodyClass="px-5 py-3" className="flex-1">
             {links.length > 0 ? (
               links.map((l) => (
                 <div key={l.label} className="flex items-baseline justify-between border-b border-b-[rgba(0,0,0,0.08)] py-2.5">
@@ -430,6 +431,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               </div>
             )}
           </WindowCard>
+          </div>
         </div>
 
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">

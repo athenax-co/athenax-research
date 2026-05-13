@@ -22,9 +22,11 @@ type RoadmapItem = {
 };
 
 type RoadmapSection = {
+  id: string;
   sysLabel: string;
   tag: string;
   tagTone: ItemTone;
+  moreLabel: string;
   bodyClassName?: string;
   items: RoadmapItem[];
 };
@@ -49,9 +51,11 @@ const sectionTagClasses: Record<ItemTone, string> = {
 
 const sections: RoadmapSection[] = [
   {
+    id: "live",
     sysLabel: "LIVE_NOW.SYS",
     tag: "Live",
     tagTone: "live",
+    moreLabel: "features",
     items: [
       {
         id: "lf",
@@ -111,9 +115,11 @@ const sections: RoadmapSection[] = [
     ],
   },
   {
+    id: "next",
     sysLabel: "COMING_NEXT.SYS",
     tag: "Next",
     tagTone: "coming",
+    moreLabel: "features",
     bodyClassName: "window-body window-body-cream",
     items: [
       {
@@ -147,9 +153,11 @@ const sections: RoadmapSection[] = [
     ],
   },
   {
+    id: "dev",
     sysLabel: "IN_DEVELOPMENT.SYS",
     tag: "Building",
     tagTone: "building",
+    moreLabel: "features",
     items: [
       {
         id: "rt",
@@ -200,9 +208,11 @@ const sections: RoadmapSection[] = [
     ],
   },
   {
+    id: "vision",
     sysLabel: "VISION.SYS",
     tag: "Long-term",
     tagTone: "vision",
+    moreLabel: "ideas",
     bodyClassName: "window-body window-body-cream",
     items: [
       {
@@ -246,71 +256,84 @@ const sections: RoadmapSection[] = [
   },
 ];
 
-const RoadmapItemCard = ({ item, isOpen, onToggle }: { item: RoadmapItem; isOpen: boolean; onToggle: () => void }) => {
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      className={cn(
-        "w-full cursor-pointer rounded-[10px] border-[1.5px] text-left transition-all duration-100",
-        "hover:-translate-x-px hover:-translate-y-px hover:shadow-[2px_2px_0_#1C1C27]",
-        isOpen
-          ? "border-ink bg-white px-4.5 py-4 shadow-[4px_4px_0_#1C1C27] -translate-x-px -translate-y-px"
-          : cn("border-[#D8D4CC] bg-cream", item.primary ? "px-4.5 py-4" : "px-4 py-3.25")
-      )}
-      aria-expanded={isOpen}
-      aria-controls={`roadmap-item-${item.id}`}
-    >
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <div className={cn("mb-0.75 font-bold text-ink", item.primary ? "text-[15px]" : "text-sm")}>{item.title}</div>
-          <div className="text-xs leading-normal text-muted">{item.desc}</div>
+const RoadmapItemCard = ({
+  item,
+  isOpen,
+  onToggle,
+}: {
+  item: RoadmapItem;
+  isOpen: boolean;
+  onToggle: () => void;
+}) => (
+  <button
+    type="button"
+    onClick={onToggle}
+    className={cn(
+      "w-full cursor-pointer rounded-[10px] border-[1.5px] text-left transition-all duration-100",
+      "hover:-translate-x-px hover:-translate-y-px hover:shadow-[2px_2px_0_#1C1C27]",
+      isOpen
+        ? "border-ink bg-white px-4.5 py-4 shadow-[4px_4px_0_#1C1C27] -translate-x-px -translate-y-px"
+        : cn("border-[#D8D4CC] bg-cream", item.primary ? "px-4.5 py-4" : "px-4 py-3.25")
+    )}
+    aria-expanded={isOpen}
+    aria-controls={`roadmap-item-${item.id}`}
+  >
+    <div className="flex items-center justify-between gap-3">
+      <div className="min-w-0 flex-1">
+        <div className={cn("mb-0.75 font-bold text-ink", item.primary ? "text-[15px]" : "text-sm")}>{item.title}</div>
+        <div className="text-xs leading-normal text-muted">{item.desc}</div>
+      </div>
+      <div className="flex shrink-0 items-center gap-2">
+        <span
+          className={cn(
+            "inline-block rounded-md border-[1.5px] px-2.25 py-0.75 font-['Space_Mono',monospace] text-[10px] font-semibold uppercase tracking-[0.05em]",
+            toneClasses[item.tone]
+          )}
+        >
+          {item.status}
+        </span>
+        <span
+          className={cn(
+            "inline-block font-['Space_Mono',monospace] text-[11px] text-muted transition-transform duration-150",
+            isOpen && "rotate-90"
+          )}
+        >
+          ›
+        </span>
+      </div>
+    </div>
+
+    {isOpen && (
+      <div id={`roadmap-item-${item.id}`} className="mt-3.5 border-t border-[#D8D4CC] pt-3.5">
+        <div className="mb-2.5">
+          <div className="mb-1.25 font-['Space_Mono',monospace] text-[9px] uppercase tracking-[0.08em] text-muted">What it unlocks</div>
+          <div className="text-[13px] leading-[1.6] text-ink">{item.unlocks}</div>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <span
-            className={cn(
-              "inline-block rounded-md border-[1.5px] px-2.25 py-0.75 font-['Space_Mono',monospace] text-[10px] font-semibold uppercase tracking-[0.05em]",
-              toneClasses[item.tone]
-            )}
-          >
-            {item.status}
-          </span>
-          <span
-            className={cn(
-              "inline-block font-['Space_Mono',monospace] text-[11px] text-muted transition-transform duration-150",
-              isOpen && "rotate-90"
-            )}
-          >
-            ›
-          </span>
+        <div>
+          <div className="mb-1.25 font-['Space_Mono',monospace] text-[9px] uppercase tracking-[0.08em] text-muted">Why it matters</div>
+          <div className="text-[13px] leading-[1.6] text-ink">{item.why}</div>
         </div>
       </div>
-
-      {isOpen && (
-        <div id={`roadmap-item-${item.id}`} className="mt-3.5 border-t border-[#D8D4CC] pt-3.5">
-          <div className="mb-2.5">
-            <div className="mb-1.25 font-['Space_Mono',monospace] text-[9px] uppercase tracking-[0.08em] text-muted">What it unlocks</div>
-            <div className="text-[13px] leading-[1.6] text-ink">{item.unlocks}</div>
-          </div>
-          <div>
-            <div className="mb-1.25 font-['Space_Mono',monospace] text-[9px] uppercase tracking-[0.08em] text-muted">Why it matters</div>
-            <div className="text-[13px] leading-[1.6] text-ink">{item.why}</div>
-          </div>
-        </div>
-      )}
-    </button>
-  );
-};
+    )}
+  </button>
+);
 
 const RoadmapSectionCard = ({
   section,
-  open,
-  onToggle,
+  sectionOpen,
+  onToggleSection,
+  openItems,
+  onToggleItem,
 }: {
   section: RoadmapSection;
-  open: Record<string, boolean>;
-  onToggle: (id: string) => void;
+  sectionOpen: boolean;
+  onToggleSection: () => void;
+  openItems: Record<string, boolean>;
+  onToggleItem: (id: string) => void;
 }) => {
+  const [firstItem, ...hiddenItems] = section.items;
+  const hiddenCount = hiddenItems.length;
+
   return (
     <div className="window-card">
       <div className="window-titlebar">
@@ -327,23 +350,52 @@ const RoadmapSectionCard = ({
           {section.tag}
         </span>
       </div>
+
       <div className={section.bodyClassName ?? "window-body"}>
-        <div className="flex flex-col gap-4">
-          {section.items.map((item) => (
-            <RoadmapItemCard key={item.id} item={item} isOpen={Boolean(open[item.id])} onToggle={() => onToggle(item.id)} />
-          ))}
-        </div>
+        <RoadmapItemCard
+          item={firstItem}
+          isOpen={Boolean(openItems[firstItem.id])}
+          onToggle={() => onToggleItem(firstItem.id)}
+        />
+
+        {sectionOpen && hiddenItems.length > 0 && (
+          <div className="flex flex-col gap-4 pt-4">
+            {hiddenItems.map((item) => (
+              <RoadmapItemCard
+                key={item.id}
+                item={item}
+                isOpen={Boolean(openItems[item.id])}
+                onToggle={() => onToggleItem(item.id)}
+              />
+            ))}
+          </div>
+        )}
       </div>
+
+      {hiddenCount > 0 && (
+        <button
+          type="button"
+          onClick={onToggleSection}
+          className="flex w-full items-center gap-1.5 border-t border-[#D8D4CC] bg-cream px-7.5 py-3 font-['Space_Mono',monospace] text-[11px] text-muted transition-colors hover:bg-[#EAE6DF] hover:text-ink"
+        >
+          {sectionOpen ? "− show less" : `+ ${hiddenCount} more ${section.moreLabel} →`}
+        </button>
+      )}
     </div>
   );
 };
 
 export default function RoadmapPage() {
-  const [open, setOpen] = useState<Record<string, boolean>>({ lf: true });
+  const [openSection, setOpenSection] = useState<string | null>(null);
+  const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
   const { data: productStats } = useProductStats();
 
-  const toggle = (key: string) => {
-    setOpen((previous) => ({ ...previous, [key]: !previous[key] }));
+  const toggleSection = (id: string) => {
+    setOpenSection((prev) => (prev === id ? null : id));
+  };
+
+  const toggleItem = (id: string) => {
+    setOpenItems((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   return (
@@ -390,7 +442,14 @@ export default function RoadmapPage() {
 
       <div className="flex flex-col gap-10">
         {sections.map((section) => (
-          <RoadmapSectionCard key={section.sysLabel} section={section} open={open} onToggle={toggle} />
+          <RoadmapSectionCard
+            key={section.id}
+            section={section}
+            sectionOpen={openSection === section.id}
+            onToggleSection={() => toggleSection(section.id)}
+            openItems={openItems}
+            onToggleItem={toggleItem}
+          />
         ))}
       </div>
 
@@ -403,7 +462,7 @@ export default function RoadmapPage() {
                 We fund open research, score it objectively, and turn the most validated ideas into funded startups.
               </div>
             </div>
-            <Link href="/about" className={cn(buttonVariants({ variant: "outline"}), "shrink-0 no-underline")}>
+            <Link href="/about" className={cn(buttonVariants({ variant: "outline" }), "shrink-0 no-underline")}>
               About us →
             </Link>
           </div>

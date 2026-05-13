@@ -19,20 +19,22 @@ const RowIcon = ({ kind, articleType }: { kind: string; articleType?: string }) 
     );
   }
 
+  if (kind === "broadcast") {
+    return (
+      <div className="size-12 shrink-0 overflow-hidden rounded-lg border-2 border-ink">
+        <img src="/Broadcast.svg" alt="Broadcast" className="size-full object-cover" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex size-12 shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-[#FDFCF9] object-cover">
-      {kind === "broadcast" ? (
-        <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
-          <polygon points="4,3 13,8 4,13" fill="#1C1C27" />
-        </svg>
-      ) : (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <rect x="3" y="1" width="10" height="14" rx="1" stroke="#1C1C27" strokeWidth="1.5" />
-          <line x1="5" y1="5" x2="11" y2="5" stroke="#1C1C27" strokeWidth="1.2" />
-          <line x1="5" y1="8" x2="11" y2="8" stroke="#1C1C27" strokeWidth="1.2" />
-          <line x1="5" y1="11" x2="9" y2="11" stroke="#1C1C27" strokeWidth="1.2" />
-        </svg>
-      )}
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="3" y="1" width="10" height="14" rx="1" stroke="#1C1C27" strokeWidth="1.5" />
+        <line x1="5" y1="5" x2="11" y2="5" stroke="#1C1C27" strokeWidth="1.2" />
+        <line x1="5" y1="8" x2="11" y2="8" stroke="#1C1C27" strokeWidth="1.2" />
+        <line x1="5" y1="11" x2="9" y2="11" stroke="#1C1C27" strokeWidth="1.2" />
+      </svg>
     </div>
   );
 };
@@ -50,8 +52,8 @@ export const ContentRow = ({
   statusBadge?: React.ReactNode;
   actions?: React.ReactNode;
 }) => {
-  const categories: string[] = item.categories ?? [];
-  const hasBadges = kind === "article" && (item.articleType || categories.length > 0);
+  const tags: string[] = item.tags ?? [];
+  const hasBadges = kind === "article" && (item.articleType || tags.length > 0);
 
   return (
     <div className="archive-row" onClick={onClick}>
@@ -63,8 +65,8 @@ export const ContentRow = ({
         </div>
         <div className="mt-1.5 flex flex-wrap items-center gap-2">
           {kind === "article" && item.articleType && <ProductBadge label={item.articleType} type="kind" />}
-          {categories.map((cat) => (
-            <ProductBadge key={cat} label={cat} type="category" />
+          {tags.map((tag) => (
+            <ProductBadge key={tag} label={tag} type="tag" />
           ))}
           {hasBadges && <span className="text-muted">·</span>}
           <span className="font-['Space_Mono',monospace] text-[12px] text-muted">

@@ -177,8 +177,9 @@ export const extractMarkdownHeadings = (markdown: string): TOCHeading[] => {
     const match = line.match(/^(#{1,2})\s+(.+)/);
     if (!match) return [];
     const tag = `h${match[1].length}`;
-    const text = match[2].trim();
-    return [{ id: slugify(text), text, tag }];
+    const raw = match[2].trim();
+    const text = raw.replace(/\*\*(.+?)\*\*|__(.+?)__|[*_`]/g, "$1$2");
+    return [{ id: slugify(raw), text, tag }];
   });
 };
 

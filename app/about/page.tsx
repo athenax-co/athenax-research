@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import WindowCard from "@/components/ui/WindowCard";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { useGlobal } from "@/components/GlobalProvider";
 
 export default function Page() {
+  const { openSubmitProductModal } = useGlobal();
   return (
     <div>
       <div className="page-wrap section">
@@ -59,15 +64,11 @@ export default function Page() {
         <WindowCard label="CONTACT.SYS" bodyClass="window-body window-body-blue">
           <h3 className="mb-3 text-[22px]">Get in Touch</h3>
           <div className="flex flex-wrap gap-3.5">
-            <Link className="btn btn-primary" href="/sponsors/apply">
-              Become a Sponsor →
-            </Link>
-            <Link className="btn btn-outline" href="/labs/apply">
-              Join as a Lab →
-            </Link>
-            <Link className="btn btn-ghost" href="/cohort/apply">
-              Apply to Cohort →
-            </Link>
+            {/* <Link className={buttonVariants()} href="/sponsors/apply">Become a Sponsor →</Link>
+            <Link className={buttonVariants({ variant: "outline" })} href="/labs/apply">Join as a Lab →</Link> */}
+            {/* <Link className={buttonVariants({ variant: "ghost" })} href="/cohort/apply">Apply to Cohort →</Link> */}
+            <Button onClick={openSubmitProductModal}>Submit your product →</Button>
+            <Link className={buttonVariants({ variant: "ghost" })} href="mailto:lizzy@athenax.co">Contact Us →</Link>
           </div>
         </WindowCard>
       </div>

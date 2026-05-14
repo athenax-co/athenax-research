@@ -1,13 +1,11 @@
 import { formatContentDate } from "@/lib/api";
-import { ArticleTypeIcon } from "@/components/ui/ArticleMeta";
+import { ArticleTypeIcon, VIDEO_TYPE_ARTICLE_TYPE, ARTICLE_TYPE_LABEL } from "@/components/ui/ArticleMeta";
 import { ProductBadge } from "@/components/ui/ProductBadge";
 
 const formatVideoType = (value?: string) => {
   if (!value) return "";
-  return value
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+  const key = VIDEO_TYPE_ARTICLE_TYPE[value];
+  return key ? (ARTICLE_TYPE_LABEL[key] ?? value) : value;
 };
 
 const RowIcon = ({ kind, articleType }: { kind: string; articleType?: string }) => {
@@ -53,7 +51,9 @@ export const ContentRow = ({
   actions?: React.ReactNode;
 }) => {
   const tags: string[] = item.tags ?? [];
-  const hasBadges = kind === "article" && (item.articleType || tags.length > 0);
+  const hasBadges =
+    (kind === "article" && (item.articleType || tags.length > 0)) ||
+    (kind === "broadcast" && !!item.videoType);
 
   return (
     <div className="archive-row" onClick={onClick}>
@@ -65,6 +65,7 @@ export const ContentRow = ({
         </div>
         <div className="mt-1.5 flex flex-wrap items-center gap-2">
           {kind === "article" && item.articleType && <ProductBadge label={item.articleType} type="kind" />}
+          {kind === "broadcast" && item.videoType && <ProductBadge label={formatVideoType(item.videoType)} type="kind" />}
           {tags.map((tag) => (
             <ProductBadge key={tag} label={tag} type="tag" />
           ))}
@@ -78,7 +79,6 @@ export const ContentRow = ({
                   ? "Archived"
                   : "—"}
             {kind === "research" && item.tag ? ` // ${item.tag}` : ""}
-            {kind === "broadcast" && item.videoType ? ` // ${formatVideoType(item.videoType)}` : ""}
           </span>
         </div>
       </div>

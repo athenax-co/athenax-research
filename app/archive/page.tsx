@@ -20,14 +20,27 @@ const TYPE_FILTERS: { value: ArticleType | null; label: string }[] = [
   { value: ArticleType.ROUNDTABLE, label: "Roundtable" },
 ];
 
+const BROADCAST_FILTERS: { value: string | null; label: string }[] = [
+  { value: null, label: "All" },
+  { value: "whitepaper_reading", label: "Whitepaper" },
+  { value: "live_stream", label: "Livestream" },
+  { value: "roundtable", label: "Roundtable" },
+];
+
 const ArchivePage = () => {
   const [tab, setTab] = useQueryState("tab", parseAsString.withDefault("articles"));
   const [typeFilter, setTypeFilter] = useQueryState("type", parseAsString);
+  const [broadcastFilter, setBroadcastFilter] = useQueryState("btype", parseAsString);
 
   const activeType = (typeFilter as ArticleType | null) ?? null;
+  const activeBroadcastType = broadcastFilter ?? null;
 
   const { data: items = [], isLoading, isError } = useArticlesList({ articleType: activeType ?? undefined });
-  const { data: broadcasts = [], isLoading: broadcastsLoading, isError: broadcastsError } = useBroadcasts();
+  const { data: allBroadcasts = [], isLoading: broadcastsLoading, isError: broadcastsError } = useBroadcasts();
+
+  const broadcasts = activeBroadcastType
+    ? (allBroadcasts as any[]).filter((b) => b.videoType === activeBroadcastType)
+    : (allBroadcasts as any[]);
 
   return (
     <div>
@@ -47,6 +60,7 @@ const ArchivePage = () => {
               onClick={() => {
                 setTab(id);
                 setTypeFilter(null);
+                setBroadcastFilter(null);
               }}
             >
               {label}
@@ -93,12 +107,34 @@ const ArchivePage = () => {
 
         {tab === "broadcast" && (
           <div>
+            <div className="mb-6 flex flex-wrap gap-1.5">
+              {BROADCAST_FILTERS.map(({ value, label }) => (
+                <Button
+                  key={label}
+                  variant={activeBroadcastType === value ? "ghost" : "outline"}
+                  size="xs"
+                  className={activeBroadcastType === value ? "bg-yellow" : ""}
+                  onClick={() => setBroadcastFilter(value)}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
             {broadcasts.length === 0 ? (
-              <ContentListState loading={broadcastsLoading} error={broadcastsError ? "Could not load broadcasts right now." : ""} emptyText="No broadcast videos available yet." />
+              <ContentListState
+                loading={broadcastsLoading}
+                error={broadcastsError ? "Could not load broadcasts right now." : ""}
+                emptyText={
+                  activeBroadcastType === "whitepaper_reading" ? "No whitepaper readings available yet." :
+                  activeBroadcastType === "live_stream" ? "No live streams available yet." :
+                  activeBroadcastType === "roundtable" ? "No roundtables available yet." :
+                  "No broadcast videos available yet."
+                }
+              />
             ) : (
               <div>
-                {(broadcasts as any[]).map((item) => (
-                  <Link key={item.id || item.slug} href={item.id ? `/media/${item.id}` : `/archive/${item.slug}`} className="no-underline">
+                {broadcasts.map((item) => (
+                  <Link key={item.id || item.slug} href={item.id ? `/archive/broadcast/${item.id}` : `/archive/${item.slug}`} className="no-underline">
                     <ContentRow item={item} kind="broadcast" onClick={() => {}} />
                   </Link>
                 ))}

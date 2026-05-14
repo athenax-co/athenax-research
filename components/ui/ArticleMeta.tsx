@@ -6,6 +6,13 @@ export const ARTICLE_TYPE_LABEL: Record<string, string> = {
   roundtable: "Roundtable",
 };
 
+// Maps raw API videoType values → article type keys (shared with broadcasts)
+export const VIDEO_TYPE_ARTICLE_TYPE: Record<string, string> = {
+  whitepaper_reading: "whitepaper",
+  live_stream: "livestream",
+  roundtable: "roundtable",
+};
+
 export const ARTICLE_TYPE_ICON: Record<string, string> = {
   whitepaper: "/Whitepaper.svg",
   livestream: "/Livestream.svg",

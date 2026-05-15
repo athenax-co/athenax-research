@@ -110,12 +110,36 @@ export interface ProductDetailOut extends ProductOut {
   voted: boolean | null;
   bookmarked: boolean | null;
   interested: boolean | null;
+  imported?: boolean | null;
+  email?: string | null;
+  subCategoryIds?: number[];
   links: ProductLink[];
   media: ProductMedia[];
   team: TeamMemberOut[];
   backers: ProductBacker[];
   voices: ProductVoice[];
   bounties: Bounty[];
+}
+
+export interface ProductUpdateIn {
+  name?: string;
+  shortDesc?: string;
+  description?: string;
+  stage?: string;
+  funding?: number;
+  founded?: number;
+  qualityBadge?: string;
+  imported?: boolean;
+  logo?: string;
+  email?: string;
+  categoryIds?: number[];
+  subCategoryIds?: number[];
+}
+
+export interface ProductLinkIn {
+  linkType: ProductLinkType;
+  url: string;
+  label?: string;
 }
 
 export interface ProductListItem {

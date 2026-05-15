@@ -6,6 +6,7 @@ import { Dialog, DialogBody, DialogClose, DialogContent, DialogHeader, DialogTit
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, ChevronUp, ChevronDown, Upload, X, ChevronLeft, ChevronRight, Pin, PinOff } from "lucide-react";
 import type { ProductMedia, TeamMemberOut, ProductVoice, Bounty, ProductComment, TeamMemberIn, VoiceIn, BountyIn } from "@/features/products";
+import Image from "next/image";
 import Link from "next/link";
 
 type GallerySectionProps = {
@@ -73,7 +74,11 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
           <div className="space-y-1.5">
             {images.map((img, i) => (
               <div key={img.id} className="flex items-center gap-2 rounded border border-[rgba(0,0,0,0.08)] bg-white p-1.5">
-                <img src={img.url ?? undefined} alt="" className="h-12 w-20 shrink-0 rounded object-cover" />
+                {img.url ? (
+                  <Image width={80} height={48} src={img.url} alt="" className="h-12 w-20 shrink-0 rounded object-cover" />
+                ) : (
+                  <div className="h-12 w-20 shrink-0 rounded bg-[#E8E4D9]" />
+                )}
                 <span className="flex-1 truncate font-['Space_Mono',monospace] text-[10px] text-[#888]">{i + 1} / {images.length}</span>
                 <div className="flex shrink-0 items-center gap-1">
                   <button
@@ -131,18 +136,20 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
     <>
       <div className="grid grid-cols-[1.4fr_1fr] grid-rows-2 gap-1.5">
         <button
-          className="row-span-2 overflow-hidden rounded border border-[rgba(0,0,0,0.08)] cursor-pointer"
+          className="row-span-2 relative overflow-hidden rounded border border-[rgba(0,0,0,0.08)] cursor-pointer"
           onClick={() => openAt(0)}
         >
-          <img src={first.url ?? undefined} alt="" className="h-full w-full object-cover" />
+          {first.url && <Image fill src={first.url} alt="" className="object-cover" sizes="(max-width: 768px) 60vw, 30vw" />}
         </button>
 
         <button
-          className="aspect-video overflow-hidden rounded border border-[rgba(0,0,0,0.08)] cursor-pointer"
+          className="relative aspect-video overflow-hidden rounded border border-[rgba(0,0,0,0.08)] cursor-pointer"
           onClick={() => second && openAt(1)}
         >
           {second ? (
-            <img src={second.url ?? undefined} alt="" className="h-full w-full object-cover" />
+            second.url ? (
+              <Image fill src={second.url} alt="" className="object-cover" sizes="(max-width: 768px) 40vw, 20vw" />
+            ) : null
           ) : (
             <div className="flex h-full items-center justify-center bg-[#E8E4D9] text-[10px] font-['Space_Mono',monospace] text-[#888]">02.png</div>
           )}
@@ -153,7 +160,9 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
           onClick={() => openAt(third ? 2 : 0)}
         >
           {third ? (
-            <img src={third.url ?? undefined} alt="" className="h-full w-full object-cover" />
+            third.url ? (
+              <Image fill src={third.url} alt="" className="object-cover" sizes="(max-width: 768px) 40vw, 20vw" />
+            ) : null
           ) : (
             <div className="flex h-full items-center justify-center bg-[#E8E4D9] text-[10px] font-['Space_Mono',monospace] text-[#888]">03.png</div>
           )}
@@ -189,12 +198,16 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
             <ChevronLeft size={22} />
           </button>
 
-          <img
-            src={images[lightboxIndex].url ?? undefined}
-            alt=""
-            className="max-h-[85vh] max-w-[85vw] rounded-lg object-contain shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          />
+          {images[lightboxIndex].url && (
+            <Image
+              src={images[lightboxIndex].url}
+              alt=""
+              width={1920}
+              height={1080}
+              className="max-h-[85vh] max-w-[85vw] w-auto h-auto rounded-lg object-contain shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
 
           <button
             className="absolute right-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 disabled:opacity-20"
@@ -211,7 +224,7 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
                 onClick={() => setLightboxIndex(i)}
                 className={`h-12 w-16 overflow-hidden rounded border-2 transition-all ${i === lightboxIndex ? "border-white" : "border-transparent opacity-50 hover:opacity-75"}`}
               >
-                <img src={img.url ?? undefined} alt="" className="h-full w-full object-cover" />
+                {img.url && <Image width={64} height={48} src={img.url} alt="" className="h-full w-full object-cover" />}
               </button>
             ))}
           </div>
@@ -229,6 +242,8 @@ export function TeamSection({
   members,
   isAdmin,
   isOwner,
+  addOpen,
+  onAddOpenChange,
   onApprove,
   onReject,
   onDelete,
@@ -239,6 +254,8 @@ export function TeamSection({
   members: TeamMemberOut[];
   isAdmin: boolean;
   isOwner: boolean;
+  addOpen: boolean;
+  onAddOpenChange: (open: boolean) => void;
   onApprove: (id: number) => void;
   onReject: (id: number) => void;
   onDelete: (id: number) => void;
@@ -247,7 +264,6 @@ export function TeamSection({
   creating: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [addOpen, setAddOpen] = useState(false);
   const [editMember, setEditMember] = useState<TeamMemberOut | null>(null);
   const [form, setForm] = useState<TeamMemberIn>(EMPTY_MEMBER);
   const [editForm, setEditForm] = useState<Partial<TeamMemberIn>>({});
@@ -291,7 +307,7 @@ export function TeamSection({
     if (!form.name.trim()) return;
     onCreate({ ...form, name: form.name.trim() });
     setForm(EMPTY_MEMBER);
-    setAddOpen(false);
+    onAddOpenChange(false);
   }
 
   function submitEdit() {
@@ -302,14 +318,6 @@ export function TeamSection({
 
   return (
     <>
-      {isAdmin && (
-        <div className="mb-4">
-          <Button size="sm" onClick={() => setAddOpen(true)}>
-            + Add Member
-          </Button>
-        </div>
-      )}
-
       {members.length === 0 && <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No team members listed.</p>}
 
       <div className="relative">
@@ -417,12 +425,12 @@ export function TeamSection({
         open={addOpen}
         onOpenChange={(o) => {
           if (!o) {
-            setAddOpen(false);
+            onAddOpenChange(false);
             setForm(EMPTY_MEMBER);
           }
         }}
       >
-        <DialogContent>
+        <DialogContent className="max-w-xl">
           <DialogHeader>
             <div className="flex items-center gap-1">
               <DialogTrafficLights />
@@ -455,47 +463,49 @@ export function TeamSection({
                 onChange={(e) => setForm({ ...form, bioNote: e.target.value })}
               />
             </div>
-            <div className="inp-group">
-              <label className="inp-label">LinkedIn URL</label>
-              <input
-                className="inp"
-                placeholder="https://linkedin.com/in/…"
-                value={form.linkedinUrl}
-                onChange={(e) => setForm({ ...form, linkedinUrl: e.target.value })}
-              />
-            </div>
-            <div className="inp-group">
-              <label className="inp-label">Twitter URL</label>
-              <input
-                className="inp"
-                placeholder="https://twitter.com/…"
-                value={form.twitterUrl}
-                onChange={(e) => setForm({ ...form, twitterUrl: e.target.value })}
-              />
-            </div>
-            <div className="inp-group">
-              <label className="inp-label">GitHub URL</label>
-              <input
-                className="inp"
-                placeholder="https://github.com/…"
-                value={form.githubUrl}
-                onChange={(e) => setForm({ ...form, githubUrl: e.target.value })}
-              />
-            </div>
-            <div className="inp-group">
-              <label className="inp-label">Other URL</label>
-              <input
-                className="inp"
-                placeholder="https://…"
-                value={form.otherUrl}
-                onChange={(e) => setForm({ ...form, otherUrl: e.target.value })}
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="inp-group">
+                <label className="inp-label">LinkedIn URL</label>
+                <input
+                  className="inp"
+                  placeholder="https://linkedin.com/in/…"
+                  value={form.linkedinUrl}
+                  onChange={(e) => setForm({ ...form, linkedinUrl: e.target.value })}
+                />
+              </div>
+              <div className="inp-group">
+                <label className="inp-label">Twitter URL</label>
+                <input
+                  className="inp"
+                  placeholder="https://twitter.com/…"
+                  value={form.twitterUrl}
+                  onChange={(e) => setForm({ ...form, twitterUrl: e.target.value })}
+                />
+              </div>
+              <div className="inp-group">
+                <label className="inp-label">GitHub URL</label>
+                <input
+                  className="inp"
+                  placeholder="https://github.com/…"
+                  value={form.githubUrl}
+                  onChange={(e) => setForm({ ...form, githubUrl: e.target.value })}
+                />
+              </div>
+              <div className="inp-group">
+                <label className="inp-label">Other URL</label>
+                <input
+                  className="inp"
+                  placeholder="https://…"
+                  value={form.otherUrl}
+                  onChange={(e) => setForm({ ...form, otherUrl: e.target.value })}
+                />
+              </div>
             </div>
             <div className="flex gap-2.5">
               <Button className="flex-1" onClick={submitAdd} disabled={creating || !form.name.trim()}>
                 {creating ? <span className="spinner" /> : "Add Member →"}
               </Button>
-              <Button variant="ghost" onClick={() => setAddOpen(false)}>
+              <Button variant="ghost" onClick={() => onAddOpenChange(false)}>
                 Cancel
               </Button>
             </div>
@@ -509,7 +519,7 @@ export function TeamSection({
           if (!o) setEditMember(null);
         }}
       >
-        <DialogContent>
+        <DialogContent className="max-w-xl">
           <DialogHeader>
             <div className="flex items-center gap-1">
               <DialogTrafficLights />
@@ -532,13 +542,23 @@ export function TeamSection({
               <label className="inp-label">Bio</label>
               <input className="inp" value={editForm.bioNote ?? ""} onChange={(e) => setEditForm({ ...editForm, bioNote: e.target.value })} />
             </div>
-            <div className="inp-group">
-              <label className="inp-label">Twitter URL</label>
-              <input className="inp" value={editForm.twitterUrl ?? ""} onChange={(e) => setEditForm({ ...editForm, twitterUrl: e.target.value })} />
-            </div>
-            <div className="inp-group">
-              <label className="inp-label">GitHub URL</label>
-              <input className="inp" value={editForm.githubUrl ?? ""} onChange={(e) => setEditForm({ ...editForm, githubUrl: e.target.value })} />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="inp-group">
+                <label className="inp-label">LinkedIn URL</label>
+                <input className="inp" value={editForm.linkedinUrl ?? ""} onChange={(e) => setEditForm({ ...editForm, linkedinUrl: e.target.value })} />
+              </div>
+              <div className="inp-group">
+                <label className="inp-label">Twitter URL</label>
+                <input className="inp" value={editForm.twitterUrl ?? ""} onChange={(e) => setEditForm({ ...editForm, twitterUrl: e.target.value })} />
+              </div>
+              <div className="inp-group">
+                <label className="inp-label">GitHub URL</label>
+                <input className="inp" value={editForm.githubUrl ?? ""} onChange={(e) => setEditForm({ ...editForm, githubUrl: e.target.value })} />
+              </div>
+              <div className="inp-group">
+                <label className="inp-label">Other URL</label>
+                <input className="inp" value={editForm.otherUrl ?? ""} onChange={(e) => setEditForm({ ...editForm, otherUrl: e.target.value })} />
+              </div>
             </div>
             <div className="flex gap-2.5">
               <Button className="flex-1" onClick={submitEdit} disabled={!editForm.name?.trim()}>
@@ -560,6 +580,8 @@ const EMPTY_VOICE: VoiceIn = { quote: "", authorHandle: "", authorName: "", sour
 export function VoicesSection({
   voices,
   isAdmin,
+  addOpen,
+  onAddOpenChange,
   onDelete,
   onCreate,
   onUpdate,
@@ -568,6 +590,8 @@ export function VoicesSection({
 }: {
   voices: ProductVoice[];
   isAdmin: boolean;
+  addOpen: boolean;
+  onAddOpenChange: (open: boolean) => void;
   onDelete: (id: number) => void;
   onCreate: (data: VoiceIn) => void;
   onUpdate: (id: number, data: Partial<VoiceIn>) => void;
@@ -575,7 +599,6 @@ export function VoicesSection({
   creating: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [addOpen, setAddOpen] = useState(false);
   const [editVoice, setEditVoice] = useState<ProductVoice | null>(null);
   const [form, setForm] = useState<VoiceIn>(EMPTY_VOICE);
   const [editForm, setEditForm] = useState<Partial<VoiceIn>>({});
@@ -607,7 +630,7 @@ export function VoicesSection({
     if (!form.quote.trim() || !form.authorHandle.trim()) return;
     onCreate({ ...form, quote: form.quote.trim(), authorHandle: form.authorHandle.trim() });
     setForm(EMPTY_VOICE);
-    setAddOpen(false);
+    onAddOpenChange(false);
   }
 
   function submitEdit() {
@@ -618,14 +641,6 @@ export function VoicesSection({
 
   return (
     <>
-      {isAdmin && (
-        <div className="mb-4">
-          <Button size="sm" onClick={() => setAddOpen(true)}>
-            + Add Voice
-          </Button>
-        </div>
-      )}
-
       {voices.length === 0 && <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No voices yet.</p>}
 
       <div className="relative">
@@ -687,7 +702,7 @@ export function VoicesSection({
         open={addOpen}
         onOpenChange={(o) => {
           if (!o) {
-            setAddOpen(false);
+            onAddOpenChange(false);
             setForm(EMPTY_VOICE);
           }
         }}
@@ -746,7 +761,7 @@ export function VoicesSection({
               <Button className="flex-1" onClick={submitAdd} disabled={creating || !form.quote.trim() || !form.authorHandle.trim()}>
                 {creating ? <span className="spinner" /> : "Add Voice →"}
               </Button>
-              <Button variant="ghost" onClick={() => setAddOpen(false)}>
+              <Button variant="ghost" onClick={() => onAddOpenChange(false)}>
                 Cancel
               </Button>
             </div>
@@ -818,36 +833,31 @@ const EMPTY_BOUNTY: BountyIn = { title: "", techLabel: "", rewardAmount: "", ext
 export function BountiesSection({
   bounties,
   isAdmin,
+  addOpen,
+  onAddOpenChange,
   onDelete,
   onCreate,
   creating,
 }: {
   bounties: Bounty[];
   isAdmin: boolean;
+  addOpen: boolean;
+  onAddOpenChange: (open: boolean) => void;
   onDelete: (id: number) => void;
   onCreate: (data: BountyIn) => void;
   creating: boolean;
 }) {
-  const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState<BountyIn>(EMPTY_BOUNTY);
 
   function submitAdd() {
     if (!form.title.trim() || !form.rewardAmount || !form.externalUrl.trim()) return;
     onCreate({ ...form, title: form.title.trim(), externalUrl: form.externalUrl.trim() });
     setForm(EMPTY_BOUNTY);
-    setAddOpen(false);
+    onAddOpenChange(false);
   }
 
   return (
     <>
-      {isAdmin && (
-        <div className="mb-4">
-          <Button size="sm" onClick={() => setAddOpen(true)}>
-            + Add Bounty
-          </Button>
-        </div>
-      )}
-
       {bounties.length === 0 && <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No active bounties.</p>}
 
       {bounties.map((b, i) => (
@@ -884,7 +894,7 @@ export function BountiesSection({
         open={addOpen}
         onOpenChange={(o) => {
           if (!o) {
-            setAddOpen(false);
+            onAddOpenChange(false);
             setForm(EMPTY_BOUNTY);
           }
         }}
@@ -950,7 +960,7 @@ export function BountiesSection({
               >
                 {creating ? <span className="spinner" /> : "Create Bounty →"}
               </Button>
-              <Button variant="ghost" onClick={() => setAddOpen(false)}>
+              <Button variant="ghost" onClick={() => onAddOpenChange(false)}>
                 Cancel
               </Button>
             </div>

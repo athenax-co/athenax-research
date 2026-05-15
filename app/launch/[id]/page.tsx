@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -8,7 +8,7 @@ import WindowCard from "@/components/ui/WindowCard";
 import { ProductBadge } from "@/components/ui/ProductBadge";
 import SEOMeta from "@/components/SEOMeta";
 import { IconShare } from "@/components/Icons";
-import { Bookmark } from "lucide-react";
+import { Bookmark, Pencil, Plus } from "lucide-react";
 import { useGlobal } from "@/components/GlobalProvider";
 import {
   useProductBySlug,
@@ -33,11 +33,17 @@ import {
   useDeleteProductMedia,
   useSwapVoice,
   usePinComment,
+  useUpdateProduct,
+  useCreateProductLink,
+  useUpdateProductLink,
+  useDeleteProductLink,
   GallerySection,
   TeamSection,
   VoicesSection,
   BountiesSection,
   DiscussionSection,
+  EditProductInfoDialog,
+  EditProductLinksDialog,
 } from "@/features/products";
 import type { ProductDetailOut } from "@/features/products";
 import { VerificationStatus, ProductStatus } from "@/enums";
@@ -86,6 +92,17 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { mutate: swapVoice } = useSwapVoice(apiProductId, id);
 
   const { mutate: bookmark, isPending: bookmarking } = useBookmarkProduct();
+
+  const [editInfoOpen, setEditInfoOpen] = useState(false);
+  const [editLinksOpen, setEditLinksOpen] = useState(false);
+  const [teamAddOpen, setTeamAddOpen] = useState(false);
+  const [voicesAddOpen, setVoicesAddOpen] = useState(false);
+  const [bountiesAddOpen, setBountiesAddOpen] = useState(false);
+  const { mutate: updateProduct, isPending: updatingProduct } = useUpdateProduct(id);
+  const { mutate: createLink, isPending: creatingLink } = useCreateProductLink(apiProductId, id);
+  const { mutate: updateLink, isPending: updatingLink } = useUpdateProductLink(apiProductId, id);
+  const { mutate: deleteLink, isPending: deletingLink } = useDeleteProductLink(apiProductId, id);
+  const linkPending = creatingLink || updatingLink || deletingLink;
 
   const shareLaunch = async (slug: string) => {
     const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
@@ -339,7 +356,22 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         </div>
 
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <WindowCard label="ABOUT.SYS" className="md:row-span-2">
+          <WindowCard
+            label="ABOUT.SYS"
+            className="md:row-span-2"
+            titleRight={
+              isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => setEditInfoOpen(true)}
+                  className="ml-auto p-1 text-[#888] transition-colors hover:text-ink"
+                  title="Edit"
+                >
+                  <Pencil size={12} />
+                </button>
+              )
+            }
+          >
             <p className="mb-3 text-[15px] leading-[1.7]">{p.description ?? "No description provided."}</p>
 
             <div className="mb-8">
@@ -395,7 +427,23 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             />
           </WindowCard>
 
-          <WindowCard label="LINKS.SYS" bodyClass="px-5 py-3" className="flex-1">
+          <WindowCard
+            label="LINKS.SYS"
+            bodyClass="px-5 py-3"
+            className="flex-1"
+            titleRight={
+              isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => setEditLinksOpen(true)}
+                  className="ml-auto p-1 text-[#888] transition-colors hover:text-ink"
+                  title="Edit"
+                >
+                  <Pencil size={12} />
+                </button>
+              )
+            }
+          >
             {links.length > 0 ? (
               links.map((l) => (
                 <div key={l.label} className="flex items-baseline justify-between border-b border-b-[rgba(0,0,0,0.08)] py-2.5">
@@ -435,11 +483,27 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         </div>
 
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <WindowCard label="TEAM.SYS">
+          <WindowCard
+            label="TEAM.SYS"
+            titleRight={
+              isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => setTeamAddOpen(true)}
+                  className="ml-auto p-1 text-[#888] transition-colors hover:text-ink"
+                  title="Add member"
+                >
+                  <Plus size={12} />
+                </button>
+              )
+            }
+          >
             <TeamSection
               members={p.team}
               isAdmin={isAdmin}
               isOwner={isOwner}
+              addOpen={teamAddOpen}
+              onAddOpenChange={setTeamAddOpen}
               onApprove={(memberId) =>
                 updateTeamMemberStatus(
                   { memberId, status: VerificationStatus.APPROVED },
@@ -474,10 +538,26 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             />
           </WindowCard>
 
-          <WindowCard label="VOICES.SYS">
+          <WindowCard
+            label="VOICES.SYS"
+            titleRight={
+              isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => setVoicesAddOpen(true)}
+                  className="ml-auto p-1 text-[#888] transition-colors hover:text-ink"
+                  title="Add voice"
+                >
+                  <Plus size={12} />
+                </button>
+              )
+            }
+          >
             <VoicesSection
               voices={p.voices}
               isAdmin={isAdmin}
+              addOpen={voicesAddOpen}
+              onAddOpenChange={setVoicesAddOpen}
               onDelete={(voiceId) =>
                 deleteVoice(voiceId, {
                   onSuccess: () => showToast("Voice removed.", "info"),
@@ -508,10 +588,28 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         </div>
 
         <div className="mb-8">
-          <WindowCard label="BOUNTIES.SYS" titleRight="ACTIVE BOUNTIES FOR THIS PROJECT">
+          <WindowCard
+            label="BOUNTIES.SYS"
+            titleRight={
+              isAdmin ? (
+                <button
+                  type="button"
+                  onClick={() => setBountiesAddOpen(true)}
+                  className="ml-auto p-1 text-[#888] transition-colors hover:text-ink"
+                  title="Add bounty"
+                >
+                  <Plus size={12} />
+                </button>
+              ) : (
+                <span className="ml-auto font-['Space_Mono',monospace] text-[10px] text-[#888]">ACTIVE BOUNTIES FOR THIS PROJECT</span>
+              )
+            }
+          >
             <BountiesSection
               bounties={p.bounties}
               isAdmin={isAdmin}
+              addOpen={bountiesAddOpen}
+              onAddOpenChange={setBountiesAddOpen}
               onDelete={(bountyId) =>
                 deleteBounty(bountyId, {
                   onSuccess: () => showToast("Bounty removed.", "info"),
@@ -573,6 +671,56 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               ))}
             </WindowCard>
           </div>
+        )}
+
+        {isAdmin && (
+          <>
+            <EditProductInfoDialog
+              product={p}
+              open={editInfoOpen}
+              onOpenChange={setEditInfoOpen}
+              saving={updatingProduct}
+              onSave={(data) =>
+                updateProduct(
+                  { id: p.id, data },
+                  {
+                    onSuccess: () => {
+                      showToast("Product updated.", "success");
+                      setEditInfoOpen(false);
+                    },
+                    onError: () => showToast("Update failed. Please try again.", "error"),
+                  }
+                )
+              }
+            />
+            <EditProductLinksDialog
+              product={p}
+              open={editLinksOpen}
+              onOpenChange={setEditLinksOpen}
+              onCreateLink={(data) =>
+                createLink(data, {
+                  onSuccess: () => showToast("Link added.", "success"),
+                  onError: () => showToast("Failed to add link.", "error"),
+                })
+              }
+              onUpdateLink={(linkId, data) =>
+                updateLink(
+                  { linkId, data },
+                  {
+                    onSuccess: () => showToast("Link updated.", "success"),
+                    onError: () => showToast("Failed to update link.", "error"),
+                  }
+                )
+              }
+              onDeleteLink={(linkId) =>
+                deleteLink(linkId, {
+                  onSuccess: () => showToast("Link removed.", "info"),
+                  onError: () => showToast("Failed to remove link.", "error"),
+                })
+              }
+              linkPending={linkPending}
+            />
+          </>
         )}
 
         {(similarProducts ?? []).length > 0 && (

@@ -1,5 +1,5 @@
 import { http, BASE_URL, handleResponse } from "@/api/client";
-import type { ProductIn, ProductOut, ProductDetailOut, ProductStatus, ProductComment, ProductSummary, ProductListItem, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty, ProductMedia } from "./types";
+import type { ProductIn, ProductOut, ProductDetailOut, ProductStatus, ProductComment, ProductSummary, ProductListItem, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty, ProductMedia, ProductUpdateIn, ProductLinkIn, ProductLink } from "./types";
 import type { VerificationStatus } from "@/enums";
 
 export interface ProductStats {
@@ -157,4 +157,20 @@ export function updateProductMedia(productId: number, mediaId: number, sortOrder
 
 export function deleteProductMedia(productId: number, mediaId: number): Promise<void> {
   return http.del<void>(`/product/${productId}/media/${mediaId}`, { auth: true });
+}
+
+export function updateProduct(id: number, data: ProductUpdateIn): Promise<ProductOut> {
+  return http.patch<ProductOut>(`/product/${id}`, data, { auth: true });
+}
+
+export function createProductLink(productId: number, data: ProductLinkIn): Promise<ProductLink> {
+  return http.post<ProductLink>(`/product/${productId}/links`, data, { auth: true });
+}
+
+export function updateProductLink(productId: number, linkId: number, data: Partial<ProductLinkIn>): Promise<ProductLink> {
+  return http.patch<ProductLink>(`/product/${productId}/links/${linkId}`, data, { auth: true });
+}
+
+export function deleteProductLink(productId: number, linkId: number): Promise<void> {
+  return http.del<void>(`/product/${productId}/links/${linkId}`, { auth: true });
 }

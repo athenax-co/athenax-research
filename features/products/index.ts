@@ -16,7 +16,10 @@ export type {
   VoiceIn,
   Bounty,
   BountyIn,
+  ProductUpdateIn,
+  ProductLinkIn,
 } from "./types";
 export type { ProductStats, ProductFilters, PaginatedResponse } from "./api";
 export * from "./hooks";
 export { GallerySection, TeamSection, VoicesSection, BountiesSection, DiscussionSection } from "./components/LaunchSections";
+export { EditProductInfoDialog, EditProductLinksDialog } from "./components/AdminEditProductDialog";

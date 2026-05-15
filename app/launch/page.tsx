@@ -350,7 +350,7 @@ export default function Page() {
           </div>
         )}
 
-        <WindowCard label="LAUNCH_TIERS.SYS" className="mt-20">
+        <WindowCard label="LAUNCH_TIERS.SYS" className="mt-20 hidden">
           <div className="mb-4 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">LAUNCH PROMOTION TIERS</div>
           <div className="mb-5 grid grid-cols-1 sm:grid-cols-4 gap-3.5">
             {[

@@ -59,7 +59,7 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
   const [input, setInput] = useState("");
 
   const addTag = (raw: string) => {
-    const tag = raw.trim().toLowerCase();
+    const tag = raw.trim();
     if (tag && !tags.includes(tag)) onChange([...tags, tag]);
     setInput("");
   };
@@ -82,7 +82,7 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
       {tags.map((tag) => (
         <span
           key={tag}
-          className="flex items-center gap-1 rounded bg-[#F0EDE6] px-2 py-0.5 font-['Space_Mono',monospace] text-[11px] font-bold uppercase tracking-wide text-ink"
+          className="flex items-center gap-1 rounded bg-[#F0EDE6] px-2 py-0.5 font-['Space_Mono',monospace] text-[11px] font-bold tracking-wide text-ink"
         >
           {tag}
           <button

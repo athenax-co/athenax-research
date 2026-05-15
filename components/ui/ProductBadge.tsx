@@ -94,7 +94,7 @@ function ProductBadge({ label, type = "category", className }: ProductBadgeProps
   const tone = resolveBadgeTone(label, type);
   const displayLabel =
     type === "tag"
-      ? label.replace(/\s+/g, " ").trim().replace(/\b\w/g, (c) => c.toUpperCase())
+      ? label.replace(/\s+/g, " ").trim()
       : type === "stage"
       ? capitalizeLabel(label)
       : normalizeBadgeLabel(label);

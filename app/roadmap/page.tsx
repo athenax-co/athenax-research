@@ -1,473 +1,218 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { SEED_PAPERS } from "@/data/seed";
-import { useProductStats } from "@/features/products";
-import { cn } from "@/utils/lib";
-import WindowCard from "@/components/ui/WindowCard";
+import Footer from "@/components/layout/Footer";
 import { buttonVariants } from "@/components/ui/button";
 
-type ItemTone = "live" | "coming" | "building" | "data" | "network" | "vision";
-
-type RoadmapItem = {
-  id: string;
-  title: string;
-  desc: string;
+type Phase = {
+  num: string;
+  code: string;
   status: string;
-  tone: ItemTone;
-  unlocks: string;
-  why: string;
-  primary?: boolean;
+  dot: string;
+  year: string;
+  isLive?: boolean;
+  essence: string;
+  unlocks: readonly string[];
 };
 
-type RoadmapSection = {
-  id: string;
-  sysLabel: string;
-  tag: string;
-  tagTone: ItemTone;
-  moreLabel: string;
-  bodyClassName?: string;
-  items: RoadmapItem[];
-};
-
-const toneClasses: Record<ItemTone, string> = {
-  live: "text-[#15803D] bg-[#D4EDDA] border-[#15803D]",
-  coming: "text-ink bg-[#EAF0F6] border-[#9AA5B1]",
-  building: "text-ink bg-[#F9F5DC] border-[#BFA93B]",
-  data: "text-ink bg-[#F9F5DC] border-[#BFA93B]",
-  network: "text-ink bg-[#F9F5DC] border-[#BFA93B]",
-  vision: "text-ink bg-cream border-[#D8D4CC]",
-};
-
-const sectionTagClasses: Record<ItemTone, string> = {
-  live: "text-[#15803D] bg-[#D4EDDA] border-[#15803D]",
-  coming: "text-ink bg-[#EAF0F6] border-ink",
-  building: "text-ink bg-[#F9F5DC] border-ink",
-  data: "text-ink bg-[#F9F5DC] border-ink",
-  network: "text-ink bg-[#F9F5DC] border-ink",
-  vision: "text-ink bg-cream border-ink",
-};
-
-const sections: RoadmapSection[] = [
+const PHASES: Phase[] = [
   {
-    id: "live",
-    sysLabel: "LIVE_NOW.SYS",
-    tag: "Live",
-    tagTone: "live",
-    moreLabel: "features",
-    items: [
-      {
-        id: "lf",
-        primary: true,
-        title: "Launch feed",
-        desc: "Browse research-backed products across 7 frontier technology sectors.",
-        status: "Live",
-        tone: "live",
-        unlocks: "The core discovery experience. Every product listed is research-backed and founder-submitted.",
-        why: "The feed is the product. Everything else is built to support what appears here.",
-      },
-      {
-        id: "pd",
-        title: "Product detail pages",
-        desc: "Full product pages with description, founders, links, and community discussion.",
-        status: "Live",
-        tone: "live",
-        unlocks: "Deep product context - who built it, what it does, where to try it.",
-        why: "Discovery is useless without depth. Every launch has a full dedicated page.",
-      },
-      {
-        id: "vc",
-        title: "Vote, comment, bookmark",
-        desc: "Upvote products, leave comments, and save what matters to you.",
-        status: "Live",
-        tone: "live",
-        unlocks: "Community signal. Votes determine ranking. Comments surface insight.",
-        why: "Real engagement drives real discovery. Signal from the community is the ranking system.",
-      },
-      {
-        id: "sp",
-        title: "Submit your product",
-        desc: "Founders submit directly. Products go live after review.",
-        status: "Live",
-        tone: "live",
-        unlocks: "Any research-backed founder can get their product in front of this audience.",
-        why: "Supply and demand. More quality submissions leads to a better feed for everyone.",
-      },
-      {
-        id: "ra",
-        title: "Research archive",
-        desc: `${SEED_PAPERS.length} indexed papers across frontier technology.`,
-        status: "Live",
-        tone: "live",
-        unlocks: "The knowledge layer behind the products. Papers that products are built on.",
-        why: "Context matters. Research archive connects products back to their scientific foundations.",
-      },
-      {
-        id: "me",
-        title: "Media and essays",
-        desc: "AthenaX perspective on frontier tech - essays and research commentary.",
-        status: "Live",
-        tone: "live",
-        unlocks: "Editorial context around what is being built and why it matters.",
-        why: "Products need narrative. Media gives the ecosystem a voice.",
-      },
-    ],
+    num: "00", code: "Genesis", status: "OPERATIONAL", dot: "#4CAF50", year: "2025", isLive: true,
+    essence: "Research-backed products become visible. Founders submit. Builders connect.",
+    unlocks: ["Launch feed", "Research archive", "Founder submission", "Community signal"],
   },
   {
-    id: "next",
-    sysLabel: "COMING_NEXT.SYS",
-    tag: "Next",
-    tagTone: "coming",
-    moreLabel: "features",
-    bodyClassName: "window-body window-body-cream",
-    items: [
-      {
-        id: "rp",
-        primary: true,
-        title: "Researcher profiles",
-        desc: "Named researchers with lab affiliations and publications linked to every product they founded.",
-        status: "Coming",
-        tone: "coming",
-        unlocks: "Credibility context on every product card. Who built this and what have they published?",
-        why: "The single most requested feature. Turns anonymous launches into credible founder stories.",
-      },
-      {
-        id: "bd",
-        title: "Better discovery",
-        desc: "Smarter search, richer sector filters, and topic-specific feeds.",
-        status: "Coming",
-        tone: "coming",
-        unlocks: "Find exactly what you are looking for instead of browsing the full feed.",
-        why: "As the launch count grows, navigation needs to scale with it.",
-      },
-      {
-        id: "ff",
-        title: "Follow and feed",
-        desc: "Follow topics and founders. Get a personalised launch and research feed.",
-        status: "Coming",
-        tone: "coming",
-        unlocks: "Retention. Users who follow topics and founders return daily.",
-        why: "A personalised feed makes the platform habitual, not occasional.",
-      },
-    ],
+    num: "01", code: "Network", status: "EMERGING", dot: "#E0A030", year: "Q3 2026",
+    essence: "Researchers become first-class. Products carry the credentials of those behind them.",
+    unlocks: ["Researcher identity", "Founder graph", "Personalised feeds", "Curation depth"],
   },
   {
-    id: "dev",
-    sysLabel: "IN_DEVELOPMENT.SYS",
-    tag: "Building",
-    tagTone: "building",
-    moreLabel: "features",
-    items: [
-      {
-        id: "rt",
-        primary: true,
-        title: "Research Terminal",
-        desc: "Investor intelligence layer - track which researchers are founding companies.",
-        status: "Building",
-        tone: "building",
-        unlocks: "Subscription product for investors. Query by lab, topic, or credential velocity.",
-        why: "The highest-value surface on the platform. Institutional subscribers pay $500-$50K/month for early founder signals.",
-      },
-      {
-        id: "ars",
-        title: "ARS credentialing",
-        desc: "Academic reputation scores based on citations, peer reviews, and publications.",
-        status: "Data layer",
-        tone: "data",
-        unlocks: "A portable credibility score for every researcher. Verifiable, not self-reported.",
-        why: "Needs real publication data to activate. Currently a preview signal and will become the core trust layer.",
-      },
-      {
-        id: "bm",
-        title: "Bounty marketplace",
-        desc: "Companies post funded research challenges. Credentialed researchers apply and earn.",
-        status: "Building",
-        tone: "building",
-        unlocks: "Revenue stream and ecosystem flywheel. Companies fund research, researchers earn, platform takes 10%.",
-        why: "Creates a direct economic loop between companies who need research and researchers who produce it.",
-      },
-      {
-        id: "bc",
-        title: "Builder cohorts",
-        desc: "12-week incubation program converting researchers into funded founders.",
-        status: "Building",
-        tone: "building",
-        unlocks: "$150-250K per team. 5-8% equity. Graduates become the best-performing launches on the feed.",
-        why: "The cohort is both a product and proof-of-concept. Cohort graduates demonstrate the AthenaX model works.",
-      },
-      {
-        id: "lu",
-        title: "Labs and universities",
-        desc: "Institutional index of partner research labs and universities.",
-        status: "Network",
-        tone: "network",
-        unlocks: "Links researchers to their institutions, papers to their labs, products to their origins.",
-        why: "Institutional trust. A product from MIT CSAIL means something different than a product from nowhere.",
-      },
-    ],
+    num: "02", code: "Terminal", status: "DEPLOYING", dot: "#E0A030", year: "Q4 2026",
+    essence: "The ecosystem anticipates itself. Reputation and movement across labs become observable.",
+    unlocks: ["Research Terminal", "Reputation system", "Founder radar", "Institutional graph"],
   },
   {
-    id: "vision",
-    sysLabel: "VISION.SYS",
-    tag: "Long-term",
-    tagTone: "vision",
-    moreLabel: "ideas",
-    bodyClassName: "window-body window-body-cream",
-    items: [
-      {
-        id: "vrc",
-        primary: true,
-        title: "Verified research credentials",
-        desc: "Every researcher has a portable reputation score - verified, on-chain, permanent.",
-        status: "Vision",
-        tone: "vision",
-        unlocks: "A credential system that follows researchers from academia into industry into investment.",
-        why: "The most durable moat in the platform. Years of citation data create a signal competitors cannot replicate overnight.",
-      },
-      {
-        id: "vai",
-        title: "AI intelligence layer",
-        desc: "Auto-summarised research, smart signal detection, pre-formation founder radar.",
-        status: "Vision",
-        tone: "vision",
-        unlocks: "The platform thinks ahead of its users. Surfaces founders before they announce, papers before they trend.",
-        why: "The intelligence layer is what separates AthenaX from a directory.",
-      },
-      {
-        id: "vdao",
-        title: "DAO governance",
-        desc: "Community ownership, on-chain funding, and public goods infrastructure.",
-        status: "Vision",
-        tone: "vision",
-        unlocks: "The platform becomes owned by the researchers and builders who create its value.",
-        why: "NounsDAO proved that on-chain governance can coordinate $100M+ in public goods. AthenaX applies that model to research.",
-      },
-      {
-        id: "vos",
-        title: "Where New Products Begin",
-        desc: "Every product. Every founder. Every breakthrough - discovered here first.",
-        status: "Vision",
-        tone: "vision",
-        unlocks: "The full AthenaX OS. Research-to-product-to-capital in one system.",
-        why: "The end state is a platform where every serious frontier technology product has a home and every serious investor has a subscription.",
-      },
-    ],
+    num: "03", code: "Economy", status: "SEQUENCED", dot: "#B5B0A6", year: "2027",
+    essence: "Capital follows the work shaping the future. Research becomes fundable, researchers become founders.",
+    unlocks: ["Bounty marketplace", "Builder cohorts", "Placement layer", "Sponsored programs"],
+  },
+  {
+    num: "04", code: "Autonomy", status: "HORIZON", dot: "#B5B0A6", year: "2028+",
+    essence: "AI-native research summarisation, autonomous agents, and on-chain governance compose a self-organising economy.",
+    unlocks: ["AI research layer", "DAO governance", "Autonomous agents", "Open infrastructure"],
   },
 ];
 
-const RoadmapItemCard = ({
-  item,
-  isOpen,
-  onToggle,
-}: {
-  item: RoadmapItem;
-  isOpen: boolean;
-  onToggle: () => void;
-}) => (
-  <button
-    type="button"
-    onClick={onToggle}
-    className={cn(
-      "w-full cursor-pointer rounded-[10px] border-[1.5px] text-left transition-all duration-100",
-      "hover:-translate-x-px hover:-translate-y-px hover:shadow-[2px_2px_0_#1C1C27]",
-      isOpen
-        ? "border-ink bg-white px-4.5 py-4 shadow-[4px_4px_0_#1C1C27] -translate-x-px -translate-y-px"
-        : cn("border-[#D8D4CC] bg-cream", item.primary ? "px-4.5 py-4" : "px-4 py-3.25")
-    )}
-    aria-expanded={isOpen}
-    aria-controls={`roadmap-item-${item.id}`}
-  >
-    <div className="flex items-center justify-between gap-3">
-      <div className="min-w-0 flex-1">
-        <div className={cn("mb-0.75 font-bold text-ink", item.primary ? "text-[15px]" : "text-sm")}>{item.title}</div>
-        <div className="text-xs leading-normal text-muted">{item.desc}</div>
-      </div>
-      <div className="flex shrink-0 items-center gap-2">
-        <span
-          className={cn(
-            "inline-block rounded-md border-[1.5px] px-2.25 py-0.75 font-['Space_Mono',monospace] text-[10px] font-semibold uppercase tracking-[0.05em]",
-            toneClasses[item.tone]
-          )}
-        >
-          {item.status}
-        </span>
-        <span
-          className={cn(
-            "inline-block font-['Space_Mono',monospace] text-[11px] text-muted transition-transform duration-150",
-            isOpen && "rotate-90"
-          )}
-        >
-          ›
-        </span>
-      </div>
-    </div>
+export default function RoadmapPage() {
+  const [active, setActive] = useState(0);
+  const [direction, setDirection] = useState(1);
 
-    {isOpen && (
-      <div id={`roadmap-item-${item.id}`} className="mt-3.5 border-t border-[#D8D4CC] pt-3.5">
-        <div className="mb-2.5">
-          <div className="mb-1.25 font-['Space_Mono',monospace] text-[9px] uppercase tracking-[0.08em] text-muted">What it unlocks</div>
-          <div className="text-[13px] leading-[1.6] text-ink">{item.unlocks}</div>
-        </div>
-        <div>
-          <div className="mb-1.25 font-['Space_Mono',monospace] text-[9px] uppercase tracking-[0.08em] text-muted">Why it matters</div>
-          <div className="text-[13px] leading-[1.6] text-ink">{item.why}</div>
-        </div>
-      </div>
-    )}
-  </button>
-);
+  const goTo = (idx: number) => {
+    if (idx < 0 || idx >= PHASES.length || idx === active) return;
+    setDirection(idx > active ? 1 : -1);
+    setActive(idx);
+  };
 
-const RoadmapSectionCard = ({
-  section,
-  sectionOpen,
-  onToggleSection,
-  openItems,
-  onToggleItem,
-}: {
-  section: RoadmapSection;
-  sectionOpen: boolean;
-  onToggleSection: () => void;
-  openItems: Record<string, boolean>;
-  onToggleItem: (id: string) => void;
-}) => {
-  const [firstItem, ...hiddenItems] = section.items;
-  const hiddenCount = hiddenItems.length;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") goTo(active + 1);
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") goTo(active - 1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [active]);
+
+  const phase = PHASES[active];
+  const progress = ((active + 1) / PHASES.length) * 100;
 
   return (
-    <div className="window-card">
-      <div className="window-titlebar">
-        <div className="dot dot-r" />
-        <div className="dot dot-y" />
-        <div className="dot dot-g" />
-        <span className="titlebar-label opacity-40">{section.sysLabel}</span>
-        <span
-          className={cn(
-            "ml-auto inline-block rounded-md border-[1.5px] px-2.25 py-0.5 font-['Space_Mono',monospace] text-[10px] font-semibold uppercase tracking-[0.05em]",
-            sectionTagClasses[section.tagTone]
-          )}
-        >
-          {section.tag}
-        </span>
-      </div>
+    <div>
+      <div className="page-wrap pt-18 pb-20">
 
-      <div className={section.bodyClassName ?? "window-body"}>
-        <RoadmapItemCard
-          item={firstItem}
-          isOpen={Boolean(openItems[firstItem.id])}
-          onToggle={() => onToggleItem(firstItem.id)}
-        />
+        <div className="path-badge">/root/roadmap</div>
+        <h1 className="text-5xl mb-2">The Roadmap</h1>
+        <p className="text-[17px] text-muted mb-0">Five phases from launch to autonomy.</p>
+        <hr className="divider" />
 
-        {sectionOpen && hiddenItems.length > 0 && (
-          <div className="flex flex-col gap-4 pt-4">
-            {hiddenItems.map((item) => (
-              <RoadmapItemCard
-                key={item.id}
-                item={item}
-                isOpen={Boolean(openItems[item.id])}
-                onToggle={() => onToggleItem(item.id)}
+        {/* ── Main phase display ── */}
+        <div className="ax-phase-grid mb-16">
+
+          {/* Giant numeral */}
+          <div className="text-left overflow-hidden relative">
+            <div
+              key={`num-${active}`}
+              className={`ax-numeral ${phase.isLive ? "live" : ""} ${direction >= 0 ? "ax-anim-fwd" : "ax-anim-bwd"}`}
+            >
+              {phase.num}
+            </div>
+          </div>
+
+          {/* Right-hand content */}
+          <div key={`txt-${active}`} className="ax-anim-text">
+            <div className="ax-phase-pill">
+              <span
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{
+                  background: phase.dot,
+                  boxShadow: phase.isLive ? "0 0 0 0 rgba(76,175,80,0.6)" : "none",
+                  animation: phase.isLive ? "ax-dot-pulse 2.4s ease-in-out infinite" : "none",
+                }}
               />
+              <span className="font-bold">{phase.status}</span>
+              <span className="opacity-[0.55]">·</span>
+              <span className="opacity-[0.7]">{phase.year}</span>
+            </div>
+
+            <div className="text-[clamp(38px,4.6vw,60px)] leading-none font-semibold tracking-[-0.025em] mb-4.5">
+              {phase.code}<span className="text-danger">.</span>
+            </div>
+
+            <p className="text-base leading-[1.55] text-ink max-w-107.5 mb-6 opacity-[0.82]">
+              {phase.essence}
+            </p>
+
+            <div className="flex flex-wrap gap-1.5 mb-5">
+              {phase.unlocks.map((u) => (
+                <span key={u} className="ftag">
+                  {u}
+                </span>
+              ))}
+            </div>
+
+            {phase.isLive ? (
+              <Link href="/launch" className={buttonVariants({ variant: "outline", size: "sm" })}>
+                See it live →
+              </Link>
+            ) : (
+              <button className="ax-soon-btn" disabled aria-disabled="true" tabIndex={-1}>
+                Coming soon
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── Stepper ── */}
+        <div className="mb-24">
+          <div className="ax-rail mb-7">
+            <div className="ax-rail-fill" style={{ width: `${progress}%` }} />
+          </div>
+
+          <div
+            className="grid gap-4 items-start"
+            style={{ gridTemplateColumns: `repeat(${PHASES.length}, 1fr)` }}
+          >
+            {PHASES.map((p, i) => (
+              <button
+                key={p.num}
+                onClick={() => goTo(i)}
+                className={`ax-step-row ${i === active ? "active" : ""}`}
+              >
+                <div className="flex items-center gap-2.5 mb-2">
+                  <span className={`ax-step-dot ${i === active ? "active" : ""} ${i === active && p.isLive ? "live" : ""}`} />
+                  <span
+                    className="mono text-[11px] font-bold tracking-[-0.01em] transition-colors duration-400"
+                    style={{ color: i === active ? (p.isLive ? "var(--color-danger)" : "var(--color-ink)") : "var(--color-muted)" }}
+                  >
+                    {p.num}
+                  </span>
+                </div>
+                <div
+                  className="text-[13px] font-medium tracking-[-0.005em]"
+                  style={{ color: i === active ? "var(--color-ink)" : "var(--color-muted)" }}
+                >
+                  {p.code}
+                </div>
+                <div className="mono text-[9px] text-muted tracking-widest uppercase mt-0.75">
+                  {p.year}
+                </div>
+              </button>
             ))}
           </div>
-        )}
-      </div>
 
-      {hiddenCount > 0 && (
-        <button
-          type="button"
-          onClick={onToggleSection}
-          className="flex w-full items-center gap-1.5 border-t border-[#D8D4CC] bg-cream px-7.5 py-3 font-['Space_Mono',monospace] text-[11px] text-muted transition-colors hover:bg-[#EAE6DF] hover:text-ink"
-        >
-          {sectionOpen ? "− show less" : `+ ${hiddenCount} more ${section.moreLabel} →`}
-        </button>
-      )}
-    </div>
-  );
-};
-
-export default function RoadmapPage() {
-  const [openSection, setOpenSection] = useState<string | null>(null);
-  const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
-  const { data: productStats } = useProductStats();
-
-  const toggleSection = (id: string) => {
-    setOpenSection((prev) => (prev === id ? null : id));
-  };
-
-  const toggleItem = (id: string) => {
-    setOpenItems((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  return (
-    <div className="page-wrap section">
-      <div className="path-badge">/root/roadmap</div>
-
-      <div className="mb-3 flex flex-wrap items-center gap-3.5">
-        <h1 className="text-[clamp(36px,5vw,52px)] leading-none">What We&apos;re Building</h1>
-        <span className="inline-flex items-center gap-1.75 rounded-full border-[1.5px] border-ink bg-success px-3.25 py-1 font-['Space_Mono',monospace] text-[10px] font-bold uppercase tracking-[0.07em] text-ink">
-          <span className="size-1.75 shrink-0 rounded-full bg-[#4CAF50] animate-pulse" />
-          Live
-        </span>
-      </div>
-
-      <p className="mb-0 max-w-135 text-[17px] leading-[1.65] text-muted">
-        AthenaX launches with verified products, indexed research, and original media. Click any item to expand it.
-      </p>
-
-      <hr className="divider" />
-
-      <WindowCard label="PLATFORM_STATS.SYS" className="mb-10" bodyClass="bg-white overflow-hidden">
-        <div className="grid md:grid-cols-4">
-          {[
-            { label: "Products live", val: productStats?.releases.total ?? null },
-            { label: "Research papers", val: 18 },
-            { label: "Sectors", val: 8 },
-            { label: "Submissions", val: "Open" },
-          ].map((stat, index, array) => (
-            <div
-              key={stat.label}
-              className={cn(
-                "px-5 py-4",
-                index < array.length - 1 && "border-b border-b-[#D8D4CC] md:border-b-0 md:border-r md:border-r-[#D8D4CC]"
-              )}
-            >
-              <div className="mb-1.5 font-['Space_Mono',monospace] text-[22px] font-bold leading-none text-danger">
-                {stat.val ?? "-"}
-              </div>
-              <div className="font-['Space_Mono',monospace] text-xs tracking-[0.03em] text-muted">{stat.label}</div>
-            </div>
-          ))}
+          <div className="flex items-center justify-center mt-8 gap-4.5">
+            <button className="ax-nav-btn" onClick={() => goTo(active - 1)} disabled={active === 0} aria-label="Previous phase">
+              ←
+            </button>
+            <button className="ax-nav-btn" onClick={() => goTo(active + 1)} disabled={active === PHASES.length - 1} aria-label="Next phase">
+              →
+            </button>
+          </div>
         </div>
-      </WindowCard>
 
-      <div className="flex flex-col gap-10">
-        {sections.map((section) => (
-          <RoadmapSectionCard
-            key={section.id}
-            section={section}
-            sectionOpen={openSection === section.id}
-            onToggleSection={() => toggleSection(section.id)}
-            openItems={openItems}
-            onToggleItem={toggleItem}
-          />
-        ))}
-      </div>
+        {/* ── Bottom CTA ── */}
+        <hr className="divider mt-0 mb-12" />
 
-      <div className="mt-20">
-        <WindowCard label="ABOUT.SYS" bodyClass="window-body bg-white">
-          <div className="flex items-center justify-between gap-6">
-            <div className="min-w-0">
-              <div className="mb-1 text-2xl font-bold text-ink">The research and innovation engine of Web3.</div>
-              <div className="text-sm leading-normal text-muted">
-                We fund open research, score it objectively, and turn the most validated ideas into funded startups.
-              </div>
-            </div>
-            <Link href="/about" className={cn(buttonVariants({ variant: "outline" }), "shrink-0 no-underline")}>
-              About us →
+        <div className="max-w-155">
+          <div className="mono text-[11px] text-ink tracking-[0.18em] uppercase mb-4.5 inline-flex items-center gap-2">
+            <span
+              className="w-2 h-2 rounded-full bg-[#4CAF50]"
+              style={{ animation: "ax-dot-pulse 2.4s ease-in-out infinite" }}
+            />
+            <span className="font-bold">Phase 00 is live</span>
+          </div>
+
+          <h2 className="text-[clamp(32px,4.4vw,52px)] leading-[1.05] mb-4.5 tracking-[-0.025em] font-semibold">
+            Where new products <span className="text-danger">begin.</span>
+          </h2>
+
+          <p className="text-[17px] leading-[1.6] text-muted max-w-140 mb-7">
+            Genesis is operational. Explore the first wave of research-backed
+            frontier tech — or submit your own.
+          </p>
+
+          <div className="flex gap-3 flex-wrap">
+            <Link href="/launch" className={buttonVariants({ size: "lg" })}>
+              Enter the launch feed →
+            </Link>
+            <Link href="/archive" className={buttonVariants({ variant: "outline", size: "lg" })}>
+              Browse the archive
             </Link>
           </div>
-        </WindowCard>
+        </div>
+
       </div>
+      <Footer />
     </div>
   );
 }

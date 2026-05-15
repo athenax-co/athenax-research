@@ -90,6 +90,8 @@ The context value (`useGlobal()`) exposes: `user`, `setUser`, `showToast`, `hand
 
 Tailwind CSS v4. Four font CSS variables available: `--font-inter`, `--font-londrina`, `--font-space-grotesk` (primary body font), `--font-vt323`. Utility helper `cn()` in `utils/lib.ts` combines `clsx` + `tailwind-merge`.
 
+**Buttons:** Always use the `Button` component from `@/components/ui/button`. Never use a raw `<button className="btn ...">`. Use `buttonVariants` when you need the class string without the component wrapper (e.g. on a `<Link>` element). Variants: `default` (primary/red), `outline`, `secondary`, `ghost`, `link`. Sizes: `default`, `xs`, `sm`, `lg`, `icon`, `icon-xs`, `icon-sm`, `icon-lg`. Only use raw `<button>` for fully custom UI controls (e.g. stepper rows, nav arrows) that don't map to any variant and would conflict with the `btn` base class.
+
 ### Local-only Persistence
 
 `utils/lib.ts` exports `dbRead()`/`dbWrite()` for localStorage. Used for bookmarks, votes, follows — not for auth state (auth uses cookies only).

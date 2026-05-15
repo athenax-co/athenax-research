@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Footer from "@/components/layout/Footer";
 import { buttonVariants } from "@/components/ui/button";
 
 type Phase = {
@@ -202,17 +201,16 @@ export default function RoadmapPage() {
           </p>
 
           <div className="flex gap-3 flex-wrap">
-            <Link href="/launch" className={buttonVariants({ size: "lg" })}>
+            <Link href="/launch" className={buttonVariants()}>
               Enter the launch feed →
             </Link>
-            <Link href="/archive" className={buttonVariants({ variant: "outline", size: "lg" })}>
+            <Link href="/archive" className={buttonVariants({ variant: "outline" })}>
               Browse the archive
             </Link>
           </div>
         </div>
 
       </div>
-      <Footer />
     </div>
   );
 }

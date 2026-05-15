@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,9 +12,97 @@ import {
   DialogClose
 } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ProductStage, ProductLinkType } from "@/enums";
 import type { ProductDetailOut, ProductUpdateIn, ProductLinkIn } from "../types";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, Upload } from "lucide-react";
+
+// ─── Edit Logo Dialog (LOGO.SYS) ─────────────────────────────────────────────
+
+interface EditLogoProps {
+  product: ProductDetailOut;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onUpload: (file: File) => void;
+  onDelete: () => void;
+  uploadPending?: boolean;
+  deletePending?: boolean;
+}
+
+export function EditProductLogoDialog({ product, open, onOpenChange, onUpload, onDelete, uploadPending, deletePending }: EditLogoProps) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setFile(null);
+      setPreview(null);
+    }
+  }, [open]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTrafficLights />
+          <DialogTitle>EDIT_LOGO.SYS</DialogTitle>
+          <DialogClose />
+        </DialogHeader>
+
+        <DialogBody className="py-5 space-y-4">
+          <div className="flex flex-col items-center gap-4">
+            <Avatar className="size-24 rounded-xl border border-ink shadow-[3px_3px_0_#1a1a1a]">
+              <AvatarImage src={preview ?? product.logo ?? undefined} alt={product.name} className="size-full object-contain" />
+              <AvatarFallback className="rounded-xl bg-white text-4xl font-extrabold">{product.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <button
+              type="button"
+              className="flex items-center gap-1.5 rounded border border-ink bg-white px-2.5 py-1 font-['Space_Mono',monospace] text-[11px] font-medium shadow-[1.5px_1.5px_0_#1a1a1a] transition-transform hover:-translate-x-px hover:-translate-y-px disabled:opacity-50"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploadPending || deletePending}
+            >
+              <Upload size={11} />
+              {file ? file.name : "Upload Logo Image"}
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (!f) return;
+                setFile(f);
+                setPreview(URL.createObjectURL(f));
+                e.target.value = "";
+              }}
+            />
+          </div>
+        </DialogBody>
+
+        <DialogFooter>
+          {product.logo && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="mr-auto text-red-500 hover:text-red-600"
+              onClick={onDelete}
+              disabled={deletePending || uploadPending}
+            >
+              {deletePending ? <span className="spinner mr-1" /> : <Trash2 size={13} className="mr-1" />}
+              {deletePending ? "Deleting…" : "Delete"}
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button size="sm" onClick={() => file && onUpload(file)} disabled={!file || uploadPending || deletePending}>
+            {uploadPending ? "Uploading…" : "Upload"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 // ─── Edit Info Dialog (ABOUT.SYS) ────────────────────────────────────────────
 

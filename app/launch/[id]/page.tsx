@@ -37,6 +37,8 @@ import {
   useCreateProductLink,
   useUpdateProductLink,
   useDeleteProductLink,
+  useUploadProductLogo,
+  useDeleteProductLogo,
   GallerySection,
   TeamSection,
   VoicesSection,
@@ -44,6 +46,7 @@ import {
   DiscussionSection,
   EditProductInfoDialog,
   EditProductLinksDialog,
+  EditProductLogoDialog,
 } from "@/features/products";
 import type { ProductDetailOut } from "@/features/products";
 import { VerificationStatus, ProductStatus } from "@/enums";
@@ -93,11 +96,14 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
   const { mutate: bookmark, isPending: bookmarking } = useBookmarkProduct();
 
+  const [editLogoOpen, setEditLogoOpen] = useState(false);
   const [editInfoOpen, setEditInfoOpen] = useState(false);
   const [editLinksOpen, setEditLinksOpen] = useState(false);
   const [teamAddOpen, setTeamAddOpen] = useState(false);
   const [voicesAddOpen, setVoicesAddOpen] = useState(false);
   const [bountiesAddOpen, setBountiesAddOpen] = useState(false);
+  const { mutate: uploadLogo, isPending: uploadingLogo } = useUploadProductLogo(apiProductId, id);
+  const { mutate: deleteLogo, isPending: deletingLogo } = useDeleteProductLogo(apiProductId, id);
   const { mutate: updateProduct, isPending: updatingProduct } = useUpdateProduct(id);
   const { mutate: createLink, isPending: creatingLink } = useCreateProductLink(apiProductId, id);
   const { mutate: updateLink, isPending: updatingLink } = useUpdateProductLink(apiProductId, id);
@@ -300,10 +306,22 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         </div>
 
         <div className="mb-8 grid grid-cols-[90px_1fr_auto] items-start gap-4 border-b border-b-[rgba(0,0,0,0.12)] pb-7 max-[640px]:grid-cols-[70px_1fr]">
-          <Avatar className="size-22 shrink-0 rounded-xl overflow-visible border border-ink shadow-[3px_3px_0_#1a1a1a] max-[640px]:size-17.5">
-            <AvatarImage src={p.logo ?? undefined} alt={p.name} className="size-full object-contain" />
-            <AvatarFallback className="rounded-xl bg-white text-4xl font-extrabold max-[640px]:text-3xl">{p.name.charAt(0)}</AvatarFallback>
-          </Avatar>
+          <div className="relative shrink-0">
+            <Avatar className="size-22 rounded-xl overflow-visible border border-ink shadow-[3px_3px_0_#1a1a1a] max-[640px]:size-17.5">
+              <AvatarImage src={p.logo ?? undefined} alt={p.name} className="size-full object-contain" />
+              <AvatarFallback className="rounded-xl bg-white text-4xl font-extrabold max-[640px]:text-3xl">{p.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => setEditLogoOpen(true)}
+                className="absolute -bottom-1.5 -right-1.5 flex size-6 items-center justify-center rounded-full border border-ink bg-white shadow-[1px_1px_0_#1a1a1a] text-[#888] transition-colors hover:text-ink"
+                title="Edit logo"
+              >
+                <Pencil size={10} />
+              </button>
+            )}
+          </div>
 
           <div className="min-w-0">
             <div className="mb-1.5 flex flex-wrap items-center gap-2">
@@ -675,6 +693,31 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
         {isAdmin && (
           <>
+            <EditProductLogoDialog
+              product={p}
+              open={editLogoOpen}
+              onOpenChange={setEditLogoOpen}
+              uploadPending={uploadingLogo}
+              deletePending={deletingLogo}
+              onUpload={(file) =>
+                uploadLogo(file, {
+                  onSuccess: () => {
+                    showToast("Logo updated.", "success");
+                    setEditLogoOpen(false);
+                  },
+                  onError: () => showToast("Upload failed. Please try again.", "error"),
+                })
+              }
+              onDelete={() =>
+                deleteLogo(undefined, {
+                  onSuccess: () => {
+                    showToast("Logo removed.", "info");
+                    setEditLogoOpen(false);
+                  },
+                  onError: () => showToast("Delete failed. Please try again.", "error"),
+                })
+              }
+            />
             <EditProductInfoDialog
               product={p}
               open={editInfoOpen}

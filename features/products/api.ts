@@ -174,3 +174,18 @@ export function updateProductLink(productId: number, linkId: number, data: Parti
 export function deleteProductLink(productId: number, linkId: number): Promise<void> {
   return http.del<void>(`/product/${productId}/links/${linkId}`, { auth: true });
 }
+
+export async function uploadProductLogo(productId: number, file: File): Promise<{ logo: string }> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch(`${BASE_URL}/product/${productId}/logo/upload`, {
+    method: "POST",
+    credentials: "include",
+    body: form,
+  });
+  return handleResponse<{ logo: string }>(res);
+}
+
+export function deleteProductLogo(productId: number): Promise<void> {
+  return http.del<void>(`/product/${productId}/logo`, { auth: true });
+}

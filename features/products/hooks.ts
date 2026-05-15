@@ -408,3 +408,19 @@ export function useDeleteProductLink(productId: number, slug: string) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
   });
 }
+
+export function useUploadProductLogo(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => productApi.uploadProductLogo(productId, file),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useDeleteProductLogo(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => productApi.deleteProductLogo(productId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}

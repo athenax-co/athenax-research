@@ -691,6 +691,17 @@ canvas {
   align-items: center;
   min-height: min(580px, 70vh);
 }
+@media (max-width: 767px) {
+  .ax-phase-grid {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    gap: 8px;
+  }
+  .ax-numeral {
+    font-size: 96px;
+    line-height: 1;
+  }
+}
 
 .ax-phase-pill {
   display: inline-flex;

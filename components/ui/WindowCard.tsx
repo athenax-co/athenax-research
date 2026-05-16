@@ -1,3 +1,4 @@
+import React from "react";
 import TrafficLights from "./TrafficLights";
 import { cn } from "@/utils/lib";
 
@@ -14,7 +15,7 @@ const WindowCard = ({
   bodyClass?: string;
   className?: string;
   titlebarLabelClassName?: string;
-  titleRight?: string;
+  titleRight?: React.ReactNode;
   children: React.ReactNode;
   style?: React.CSSProperties;
 }) => (

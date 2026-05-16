@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as productApi from "./api";
 import type { ProductFilters, ProductStats } from "./api";
-import type { ProductDetailOut, ProductIn, ProductListItem, ProductOut, ProductStatus, ProductSummary, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty } from "./types";
+import type { ProductDetailOut, ProductIn, ProductListItem, ProductOut, ProductStatus, ProductSummary, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty, ProductUpdateIn, ProductLinkIn } from "./types";
 import type { VerificationStatus } from "@/enums";
 import type { CategoryOut } from "@/types/reference";
 import { resolveCategories } from "@/utils/lib";
@@ -372,6 +372,55 @@ export function useDeleteProductMedia(productId: number, slug: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (mediaId: number) => productApi.deleteProductMedia(productId, mediaId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useUpdateProduct(slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: ProductUpdateIn }) => productApi.updateProduct(id, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useCreateProductLink(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ProductLinkIn) => productApi.createProductLink(productId, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useUpdateProductLink(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ linkId, data }: { linkId: number; data: Partial<ProductLinkIn> }) =>
+      productApi.updateProductLink(productId, linkId, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useDeleteProductLink(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (linkId: number) => productApi.deleteProductLink(productId, linkId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useUploadProductLogo(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => productApi.uploadProductLogo(productId, file),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useDeleteProductLogo(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => productApi.deleteProductLogo(productId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
   });
 }

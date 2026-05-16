@@ -122,6 +122,8 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
   useEffect(() => {
     if (open) {
       setForm({
+        name: product.name ?? "",
+        shortDesc: product.shortDesc ?? "",
         description: product.description ?? "",
         stage: product.stage ?? "",
         funding: product.funding ?? undefined,
@@ -149,6 +151,26 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
         </DialogHeader>
 
         <DialogBody className="space-y-4 py-5">
+          <div className="inp-group mb-0">
+            <label className="inp-label">Name</label>
+            <input
+              className="inp"
+              type="text"
+              value={form.name ?? ""}
+              onChange={(e) => set("name", e.target.value)}
+            />
+          </div>
+
+          <div className="inp-group mb-0">
+            <label className="inp-label">Short Description</label>
+            <input
+              className="inp"
+              type="text"
+              value={form.shortDesc ?? ""}
+              onChange={(e) => set("shortDesc", e.target.value)}
+            />
+          </div>
+
           <div className="inp-group mb-0">
             <label className="inp-label">Description</label>
             <textarea
@@ -317,7 +339,7 @@ export function EditProductLinksDialog({
                   </button>
                   <button
                     type="button"
-                    onClick={() => onDeleteLink(link.id)}
+                    onClick={() => { if (confirm("Delete this link?")) onDeleteLink(link.id); }}
                     disabled={linkPending}
                     className="shrink-0 p-1 text-[#888] transition-colors hover:text-red-500 disabled:opacity-40"
                   >

@@ -402,7 +402,7 @@ export function TeamSection({
                 <button onClick={() => openEdit(m)} className="p-1 text-[#6B6B7A] hover:text-ink" title="Edit">
                   <Pencil size={14} />
                 </button>
-                <button onClick={() => onDelete(m.id)} className="p-1 text-[#aaa] hover:text-[#E8323C]" title="Delete">
+                <button onClick={() => { if (confirm(`Delete ${m.name}?`)) onDelete(m.id); }} className="p-1 text-[#aaa] hover:text-[#E8323C]" title="Delete">
                   <Trash2 size={14} />
                 </button>
               </div>

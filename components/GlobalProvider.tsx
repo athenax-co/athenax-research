@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { QueryClient } from "@tanstack/react-query";
 import { AUTH_QUERY_KEYS, useLogout, useSession } from "@/hooks/queries/useAuth";
 import Toast from "./ui/Toast";
@@ -93,12 +93,8 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
 
   // ── toasts ────────────────────────────────────────────────────────────────
   const showToast = (text: string, type: string = "info") => {
-    setToasts((t) => {
-      if (t.some((existing) => existing.text === text)) return t;
-      const id = Math.random().toString(36).slice(2, 8);
-      const next = [...t, { id, text, type }];
-      return next.length > 3 ? next.slice(-3) : next;
-    });
+    const id = Math.random().toString(36).slice(2, 8);
+    setToasts((t) => [...t, { id, text, type }]);
   };
 
   useEffect(() => {
@@ -135,7 +131,7 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Open submit product modal with auth check
-  const openSubmitProductModal = () => {
+  const openSubmitProductModal = useCallback(() => {
     if (!user) {
       if (showLogin) return;
       showToast("Please log in to submit a product", "info");
@@ -144,7 +140,7 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
     }
     if (submitProductOpen) return;
     setSubmitProductOpen(true);
-  };
+  }, [user, showLogin, submitProductOpen]);
 
   return (
     <GlobalContext.Provider

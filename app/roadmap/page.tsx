@@ -119,14 +119,10 @@ export default function RoadmapPage() {
               ))}
             </div>
 
-            {phase.isLive ? (
+            {phase.isLive && (
               <Link href="/launch" className={buttonVariants({ variant: "outline", size: "sm" })}>
                 See it live →
               </Link>
-            ) : (
-              <button className="ax-soon-btn" disabled aria-disabled="true" tabIndex={-1}>
-                Coming soon
-              </button>
             )}
           </div>
         </div>

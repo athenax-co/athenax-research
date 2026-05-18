@@ -31,7 +31,7 @@ export default function ArticleTOC({ headings }: { headings: TOCHeading[] }) {
   if (items.length === 0) return null;
 
   return (
-    <aside className="w-70 min-w-50 sticky top-24 shrink-0 self-start">
+    <aside className="hidden md:block w-70 min-w-50 sticky top-24 shrink-0 self-start">
       <WindowCard label="Table of Contents" bodyClass="window-body-cream">
         <div className="p-2 flex flex-col gap-0.5">
           <p className="titlebar-label pb-1.5">On this page</p>

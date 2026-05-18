@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { QueryClient } from "@tanstack/react-query";
 import { AUTH_QUERY_KEYS, useLogout, useSession } from "@/hooks/queries/useAuth";
 import Toast from "./ui/Toast";
@@ -44,7 +44,7 @@ export function useGlobal() {
 }
 
 // Global toast ref — lets Footer / non-component code call showToast
-export let _globalShowToast = (text: string, type: string) => {};
+export let _globalShowToast: (text: string, type: string) => void = () => {};
 
 // ─── inner provider (needs QueryClient in scope) ──────────────────────────────
 
@@ -131,14 +131,16 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Open submit product modal with auth check
-  const openSubmitProductModal = () => {
+  const openSubmitProductModal = useCallback(() => {
     if (!user) {
+      if (showLogin) return;
       showToast("Please log in to submit a product", "info");
       setShowLogin(true);
       return;
     }
+    if (submitProductOpen) return;
     setSubmitProductOpen(true);
-  };
+  }, [user, showLogin, submitProductOpen]);
 
   return (
     <GlobalContext.Provider

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { _globalShowToast, useGlobal } from "@/components/GlobalProvider";
 import { Button } from "@/components/ui/button";
 import BrandLogo from "@/components/layout/BrandLogo";
-import { IconDiscord, IconLinkedIn, IconX, IconYouTube } from "../Icons";
+import { IconDiscord, IconInstagram, IconLinkedIn, IconX, IconYouTube } from "../Icons";
 
 const NAV_COLS = [
   {
@@ -86,6 +86,7 @@ const SOCIAL_LINKS = [
   { href: "https://discord.com/invite/RURu4tTjHZ", label: "Discord", Icon: IconDiscord },
   { href: "https://www.youtube.com/@AthenaX_co", label: "YouTube", Icon: IconYouTube },
   { href: "https://www.linkedin.com/company/athenaxco/", label: "LinkedIn", Icon: IconLinkedIn },
+  { href: "https://www.instagram.com/athenax_co/", label: "Instagram", Icon: IconInstagram, size: 20 },
 ];
 
 const FooterSubmitLink = ({ href, text }: { href: string; text: string }) => {
@@ -119,7 +120,7 @@ const Footer = () => {
         <div>
           <BrandLogo className="mb-2" wordmarkClassName="text-[26px]" />
           <div className="text-sm text-ink leading-relaxed">Where New Products Begin.</div>
-          <div className="flex gap-4 mt-4">
+          <div className="flex items-center gap-4 mt-4">
             {SOCIAL_LINKS.map((social) => {
               const IconComponent = social.Icon;
               return (
@@ -131,7 +132,7 @@ const Footer = () => {
                   className="text-ink hover:text-danger transition-colors"
                   aria-label={social.label}
                 >
-                  <IconComponent size={24} />
+                  <IconComponent size={social.size ?? 24} />
                 </Link>
               );
             })}
@@ -154,8 +155,15 @@ const Footer = () => {
           ))}
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-10 font-mono text-[11px] text-muted text-center mt-11 pt-5.5 border-t border-[#D8D4CC] tracking-[0.04em]">
-        CC0 /// NO RIGHTS RESERVED /// OPEN SOURCE
+      <div className="max-w-7xl text-[10px] mx-auto px-10 font-sans text-muted flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-10 mt-11 pt-5.5 border-t border-[#D8D4CC] tracking-[0.04em]">
+        <span>CC0 /// NO RIGHTS RESERVED /// OPEN SOURCE</span>
+        <div className="flex items-center gap-1.5">
+          <span className="uppercase">Powered by</span>
+          <Link href="https://nouns.wtf/" target="_blank" rel="noopener noreferrer">
+            <img src="https://athenax.mypinx.store/Noggles.png" alt="Noggles" className="h-4 w-auto" />
+          </Link>
+          <span className="uppercase">Nouns</span>
+        </div>
       </div>
     </footer>
   );

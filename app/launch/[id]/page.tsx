@@ -605,7 +605,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           </WindowCard>
         </div>
 
-        <div className="mb-8">
+        <div className="mb-8 hidden">
           <WindowCard
             label="BOUNTIES.SYS"
             titleRight={

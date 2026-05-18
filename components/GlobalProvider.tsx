@@ -44,7 +44,7 @@ export function useGlobal() {
 }
 
 // Global toast ref — lets Footer / non-component code call showToast
-export let _globalShowToast = (text: string, type: string) => {};
+export let _globalShowToast: (text: string, type: string) => void = () => {};
 
 // ─── inner provider (needs QueryClient in scope) ──────────────────────────────
 
@@ -93,8 +93,12 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
 
   // ── toasts ────────────────────────────────────────────────────────────────
   const showToast = (text: string, type: string = "info") => {
-    const id = Math.random().toString(36).slice(2, 8);
-    setToasts((t) => [...t, { id, text, type }]);
+    setToasts((t) => {
+      if (t.some((existing) => existing.text === text)) return t;
+      const id = Math.random().toString(36).slice(2, 8);
+      const next = [...t, { id, text, type }];
+      return next.length > 3 ? next.slice(-3) : next;
+    });
   };
 
   useEffect(() => {
@@ -133,10 +137,12 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
   // Open submit product modal with auth check
   const openSubmitProductModal = () => {
     if (!user) {
+      if (showLogin) return;
       showToast("Please log in to submit a product", "info");
       setShowLogin(true);
       return;
     }
+    if (submitProductOpen) return;
     setSubmitProductOpen(true);
   };
 

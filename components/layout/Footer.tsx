@@ -137,12 +137,6 @@ const Footer = () => {
               );
             })}
           </div>
-          <div className="flex items-center gap-3 mt-3">
-            <span className="text-xs text-muted">Powered by</span>
-            <Link href="https://nouns.wtf" target="_blank" rel="noopener noreferrer">
-              <img src="https://athenax.mypinx.store/Noggles.png" alt="Noggles" className="h-4 w-auto" />
-            </Link>
-          </div>
         </div>
         <div className="flex gap-14 flex-wrap">
           {NAV_COLS.map((col) => (
@@ -161,8 +155,15 @@ const Footer = () => {
           ))}
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-10 font-mono text-[11px] text-muted text-center mt-11 pt-5.5 border-t border-[#D8D4CC] tracking-[0.04em]">
-        CC0 /// NO RIGHTS RESERVED /// OPEN SOURCE
+      <div className="max-w-7xl text-[10px] mx-auto px-10 font-sans text-muted flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-10 mt-11 pt-5.5 border-t border-[#D8D4CC] tracking-[0.04em]">
+        <span>CC0 /// NO RIGHTS RESERVED /// OPEN SOURCE</span>
+        <div className="flex items-center gap-1.5">
+          <span className="uppercase">Powered by</span>
+          <Link href="https://nouns.wtf/" target="_blank" rel="noopener noreferrer">
+            <img src="https://athenax.mypinx.store/Noggles.png" alt="Noggles" className="h-4 w-auto" />
+          </Link>
+          <span className="uppercase">Nouns</span>
+        </div>
       </div>
     </footer>
   );

@@ -157,7 +157,7 @@ export default function Page() {
         <h1 className="mb-0 text-5xl">Dashboard</h1>
         <span className="font-mono text-xs text-muted">Welcome back, {user.name.split(" ")[0]}</span>
       </div>
-      <p className="mb-0 text-[17px] text-muted">Your saves, votes, follows, and activity in one place.</p>
+      <p className="mb-0 text-[17px] text-muted">Your activity in one place.</p>
       <hr className="divider" />
 
       {(user.role as string) === "founder" && <FounderSubmissions />}
@@ -165,9 +165,9 @@ export default function Page() {
       <div className="grid-4 mb-7 gap-3.5">
         {[
           { label: "Saved Products", value: bookmarkedProducts?.length ?? 0 },
-          { label: "Products Voted", value: votedProducts?.length ?? 0 },
-          { label: "Following", value: follows.length },
-          { label: "Notifications", value: notifSvc.unread(user.id) },
+          // { label: "Products Voted", value: votedProducts?.length ?? 0 },
+          // { label: "Following", value: follows.length },
+          // { label: "Notifications", value: notifSvc.unread(user.id) },
         ].map((s) => (
           <div key={s.label} className="stat-card">
             <div className="stat-label">{s.label}</div>
@@ -195,7 +195,7 @@ export default function Page() {
             </WindowCard>
           </div>
 
-          <div className="mb-8">
+          <div className="mb-8 hidden">
             <WindowCard label="VOTED_PRODUCTS.SYS">
               {votesLoading ? (
                 <p className="text-[13px] text-muted">Loading…</p>
@@ -214,7 +214,7 @@ export default function Page() {
         </div>
 
         <div>
-          <div className="mb-8">
+          <div className="mb-8 hidden">
             <WindowCard label="FOLLOWING.SYS">
               {follows.length === 0 ? (
                 <div>
@@ -268,7 +268,7 @@ export default function Page() {
             </WindowCard>
           </div>
 
-          <WindowCard label="RECENT_ACTIVITY.SYS">
+          <WindowCard label="RECENT_ACTIVITY.SYS" className="hidden">
             {notifs.length === 0 ? (
               <p className="text-[13px] text-muted">No activity yet. Follow researchers and products to start your feed.</p>
             ) : (

@@ -28,7 +28,7 @@ const NAV_COLS = [
   {
     label: "Company",
     links: [
-      { href: "/about", text: "About" },
+      { href: "/about", text: "About", disabled: true },
       { href: "/how-it-works", text: "How It Works", disabled: true },
       { href: "/digest", text: "Research Digest", disabled: true },
     ],
@@ -162,7 +162,7 @@ const Footer = () => {
           <Link href="https://nouns.wtf/" target="_blank" rel="noopener noreferrer">
             <img src="https://athenax.mypinx.store/Noggles.png" alt="Noggles" className="h-4 w-auto" />
           </Link>
-          <span className="uppercase">Nouns</span>
+          {/* <span className="uppercase">Nouns</span> */}
         </div>
       </div>
     </footer>

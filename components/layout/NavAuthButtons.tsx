@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useGlobal } from "@/components/GlobalProvider";
-import NotificationBell from "@/components/layout/NotificationBell";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +12,6 @@ export const NavAuthDesktop = () => {
     <div className="hidden md:flex items-center gap-1.5">
       {user ? (
         <>
-          <NotificationBell user={user} />
           {user.role === "admin" && (
             <Link className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "text-[#E8323C] no-underline")} href="/admin">
               Admin
@@ -130,11 +128,7 @@ export const NavAuthMobileShortcut = () => {
 
   return (
     <>
-      {user ? (
-        <>
-          <NotificationBell user={user} />
-        </>
-      ) : (
+      {!user && (
         <Button size="sm" onClick={() => handleAuthClick("login")}>
           Sign In
         </Button>

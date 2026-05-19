@@ -10,6 +10,7 @@ import SEOMeta from "@/components/SEOMeta";
 import { IconShare } from "@/components/Icons";
 import { Bookmark, Pencil, Plus } from "lucide-react";
 import { useGlobal } from "@/components/GlobalProvider";
+import { prettyUrl } from "@/utils/lib";
 import {
   useProductBySlug,
   useVoteProduct,
@@ -464,15 +465,16 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           >
             {links.length > 0 ? (
               links.map((l) => (
-                <div key={l.label} className="flex items-baseline justify-between border-b border-b-[rgba(0,0,0,0.08)] py-2.5">
-                  <span className="text-sm font-semibold">{l.label}</span>
+                <div key={l.label} className="flex items-baseline justify-between gap-3 border-b border-b-[rgba(0,0,0,0.08)] py-2.5">
+                  <span className="shrink-0 text-sm font-semibold">{l.label}</span>
                   <Link
                     href={l.url.startsWith("http") ? l.url : `https://${l.url}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="font-['Space_Mono',monospace] text-xs text-[#C4605C] no-underline hover:underline"
+                    title={l.url}
+                    className="min-w-0 truncate font-['Space_Mono',monospace] text-xs text-[#C4605C] no-underline hover:underline"
                   >
-                    ↗ {l.url}
+                    ↗ {prettyUrl(l.url)}
                   </Link>
                 </div>
               ))

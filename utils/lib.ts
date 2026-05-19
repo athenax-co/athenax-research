@@ -25,6 +25,11 @@ export function formatSubmittedDateTime(value: string | number | Date) {
   }).format(new Date(value));
 }
 
+// ── Utility: Strip protocol, leading www, and trailing slash for display ───
+export function prettyUrl(url: string): string {
+  return url.trim().replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/+$/, "");
+}
+
 // ── Utility: Resolve category IDs to { id, name } objects ──
 export function resolveCategories(ids: number[], allCategories: { id: number; name: string }[]): { id: number; name: string }[] {
   return ids.flatMap((id) => {

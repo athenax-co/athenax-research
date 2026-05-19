@@ -23,6 +23,33 @@ function extractMarkdownAbstract(content: string): { abstract: string; remainder
   };
 }
 
+function extractMarkdownSection(content: string, name: string): { section: string; remainder: string } {
+  const lines = content.split("\n");
+  const target = name.trim().toLowerCase();
+  const headingText = (line: string): string | null => {
+    const m = line.trim().match(/^#{1,6}\s+(.+?)\s*$/);
+    if (!m) return null;
+    return m[1].replace(/[*_`]/g, "").trim().toLowerCase();
+  };
+  const isBoundary = (line: string) => {
+    const t = line.trim();
+    return headingText(line) !== null || /^-{3,}$/.test(t) || /^\*{3,}$/.test(t);
+  };
+
+  const start = lines.findIndex((l) => headingText(l) === target);
+  if (start === -1) return { section: "", remainder: content };
+  let end = lines.length;
+  for (let i = start + 1; i < lines.length; i++) {
+    if (isBoundary(lines[i])) {
+      end = i;
+      break;
+    }
+  }
+  const section = lines.slice(start + 1, end).join("\n").trim();
+  const remainder = [...lines.slice(0, start), ...lines.slice(end)].join("\n").replace(/\n{3,}/g, "\n\n").trim();
+  return { section, remainder };
+}
+
 const ContentDetailPage = ({ kind, item, slug }: { kind: "article" | "research"; item: any | null; slug: string }) => {
   const { showToast } = useGlobal();
   const { data: articles = [] } = useArticlesList();
@@ -31,9 +58,22 @@ const ContentDetailPage = ({ kind, item, slug }: { kind: "article" | "research";
   const headings = content ? extractMarkdownHeadings(content) : [];
   const readTime = item ? estimateReadTime(content) : 0;
   const isWhitepaper = kind === "article" && item?.articleType === ArticleType.WHITEPAPER;
-  const { abstract, remainder } = isWhitepaper && content
+  const isLivestream = kind === "article" && item?.articleType === ArticleType.LIVESTREAM;
+  const isRoundtable = kind === "article" && item?.articleType === ArticleType.ROUNDTABLE;
+  const hasKeyTakeaways = isLivestream || isRoundtable;
+  const hasGuestBio = isLivestream;
+
+  const { abstract, remainder: afterAbstract } = isWhitepaper && content
     ? extractMarkdownAbstract(content)
     : { abstract: "", remainder: content };
+
+  const { section: keyTakeaways, remainder: afterTakeaways } = hasKeyTakeaways
+    ? extractMarkdownSection(afterAbstract, "Key Takeaways")
+    : { section: "", remainder: afterAbstract };
+
+  const { section: guestBio, remainder } = hasGuestBio
+    ? extractMarkdownSection(afterTakeaways, "Guest Bio")
+    : { section: "", remainder: afterTakeaways };
 
   const related = articles.filter((a) => a.slug !== (item?.slug ?? slug)).slice(0, 2);
 
@@ -91,6 +131,18 @@ const ContentDetailPage = ({ kind, item, slug }: { kind: "article" | "research";
                 {abstract && (
                   <WindowCard label="Abstract" className="mb-6">
                     <MarkdownViewer content={abstract} />
+                  </WindowCard>
+                )}
+
+                {keyTakeaways && (
+                  <WindowCard label="Key Takeaways" className="mb-6">
+                    <MarkdownViewer content={keyTakeaways} />
+                  </WindowCard>
+                )}
+
+                {guestBio && (
+                  <WindowCard label="Guest Bio" className="mb-6">
+                    <MarkdownViewer content={guestBio} />
                   </WindowCard>
                 )}
 

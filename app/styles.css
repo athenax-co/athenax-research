@@ -695,7 +695,7 @@ canvas {
   .ax-phase-grid {
     grid-template-columns: 1fr;
     min-height: auto;
-    gap: 8px;
+    gap: 24px;
   }
   .ax-numeral {
     font-size: 96px;

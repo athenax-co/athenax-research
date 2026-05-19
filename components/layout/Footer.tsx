@@ -22,7 +22,7 @@ const NAV_COLS = [
     label: "Submit",
     links: [
       { href: "/launch?submit", text: "Submit Product" },
-      { href: "/paper/submit", text: "Submit a Paper" },
+      { href: "/paper/submit", text: "Submit a Paper", disabled: true },
     ],
   },
   {

@@ -25,9 +25,14 @@ export function formatSubmittedDateTime(value: string | number | Date) {
   }).format(new Date(value));
 }
 
-// ── Utility: Strip protocol, leading www, and trailing slash for display ───
+// ── Utility: Strip protocol, leading www, trailing slash, and twitter→x for display ───
 export function prettyUrl(url: string): string {
-  return url.trim().replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/+$/, "");
+  return url
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/^www\./i, "")
+    .replace(/^twitter\.com\//i, "x.com/")
+    .replace(/\/+$/, "");
 }
 
 // ── Utility: Resolve category IDs to { id, name } objects ──

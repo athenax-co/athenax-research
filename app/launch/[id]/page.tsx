@@ -160,8 +160,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const primaryCategory = p.categories[0]?.name ?? "Product";
   const isInvestor = (user?.role as string) === "investor";
 
-  const hasGithub = p.links.some((l) => l.linkType === "github");
-
   const handleApiVote = () => {
     if (!user) {
       showToast("Sign in to upvote.", "error");
@@ -505,6 +503,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
           <WindowCard
             label="TEAM.SYS"
+            bodyClass="window-body px-4! sm:px-6!"
             titleRight={
               isAdmin && (
                 <button

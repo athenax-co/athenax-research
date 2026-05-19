@@ -8,6 +8,7 @@ import { Pencil, Trash2, ChevronUp, ChevronDown, Upload, X, ChevronLeft, Chevron
 import type { ProductMedia, TeamMemberOut, ProductVoice, Bounty, ProductComment, TeamMemberIn, VoiceIn, BountyIn } from "@/features/products";
 import Image from "next/image";
 import Link from "next/link";
+import { prettyUrl } from "@/utils/lib";
 
 type GallerySectionProps = {
   media: ProductMedia[];
@@ -284,11 +285,6 @@ export function TeamSection({
     }
   }, [expanded]);
 
-  const formatLinkLabel = (url: string) => {
-    let label = url.replace(/^https?:\/\//, "").replace(/^www\./, "");
-    label = label.replace(/^twitter\.com\//, "x.com/");
-    return label;
-  };
 
   function openEdit(m: TeamMemberOut) {
     setEditMember(m);
@@ -333,7 +329,11 @@ export function TeamSection({
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <span className="text-[17px] font-bold leading-snug">{m.name}</span>
-                {m.roleLabel && <span className="font-['Space_Mono',monospace] text-[11px] text-[#8A8A8A]">· {m.roleLabel}</span>}
+                {m.roleLabel && (
+                  <span className="font-['Space_Mono',monospace] text-[11px] text-[#8A8A8A] sm:text-[11px]">
+                    · {m.roleLabel.replace(/\s+and\s+/gi, " & ")}
+                  </span>
+                )}
                 {(isAdmin || isOwner) && m.status === "pending" && (
                   <span className="rounded border border-[rgba(0,0,0,0.15)] bg-[#FFF8DC] px-1.5 py-0.5 font-['Space_Mono',monospace] text-[9px] font-semibold tracking-[0.05em] text-[#8B6914]">
                     PENDING
@@ -350,7 +350,7 @@ export function TeamSection({
                       rel="noreferrer"
                       className="text-[#185FA5] hover:underline"
                     >
-                      ↗ {formatLinkLabel(m.linkedinUrl)}
+                      ↗ {prettyUrl(m.linkedinUrl)}
                     </a>
                   )}
                   {m.twitterUrl && (
@@ -360,7 +360,7 @@ export function TeamSection({
                       rel="noreferrer"
                       className="text-[#185FA5] hover:underline"
                     >
-                      ↗ {formatLinkLabel(m.twitterUrl)}
+                      ↗ {prettyUrl(m.twitterUrl)}
                     </a>
                   )}
                   {m.githubUrl && (
@@ -370,7 +370,7 @@ export function TeamSection({
                       rel="noreferrer"
                       className="text-[#185FA5] hover:underline"
                     >
-                      ↗ {formatLinkLabel(m.githubUrl)}
+                      ↗ {prettyUrl(m.githubUrl)}
                     </a>
                   )}
                   {m.otherUrl && (
@@ -380,7 +380,7 @@ export function TeamSection({
                       rel="noreferrer"
                       className="text-[#185FA5] hover:underline"
                     >
-                      ↗ {formatLinkLabel(m.otherUrl)}
+                      ↗ {prettyUrl(m.otherUrl)}
                     </a>
                   )}
                 </div>

@@ -115,6 +115,8 @@ function ArticleEditorForm({ article, articleId, userName, showToast }: FormProp
   const isEdit = articleId != null;
 
   const [title, setTitle] = useState(() => article?.title ?? "");
+  const [slug, setSlug] = useState(() => article?.slug ?? "");
+  const [slugError, setSlugError] = useState<string | null>(null);
   const [articleType, setArticleType] = useState<ArticleType>(() => article?.articleType ?? ArticleType.WHITEPAPER);
   const [content, setContent] = useState(() => article?.content ?? "");
   const [tags, setTags] = useState<string[]>(() => article?.tags ?? []);
@@ -148,6 +150,8 @@ function ArticleEditorForm({ article, articleId, userName, showToast }: FormProp
       return;
     }
 
+    const slugChanged = isEdit && slug !== (article?.slug ?? "");
+
     const data = {
       title: trimmedTitle,
       articleType,
@@ -155,17 +159,24 @@ function ArticleEditorForm({ article, articleId, userName, showToast }: FormProp
       content: content || null,
       tags,
       publishedAt: publishedAt ? new Date(publishedAt).toISOString() : null,
+      ...(slugChanged ? { slug } : {}),
     };
 
     setPendingAction(targetStatus);
+    setSlugError(null);
 
-    const onSuccess = (msg: string) => () => {
+    const onSuccess = (msg: string) => (updated: ArticleOut) => {
       setPendingAction(null);
+      setSlug(updated.slug);
       showToast(msg, "success");
       router.push("/admin/articles");
     };
     const onError = (msg: string) => (err: Error) => {
       setPendingAction(null);
+      if (err.message && /slug/i.test(err.message)) {
+        setSlugError(err.message);
+        return;
+      }
       showToast(err.message || msg, "error");
     };
 
@@ -248,10 +259,31 @@ function ArticleEditorForm({ article, articleId, userName, showToast }: FormProp
 
               {isEdit && (
                 <div>
-                  <div className={FIELD_LABEL}>Slug</div>
-                  <div className="overflow-hidden rounded-lg border-2 border-[#D8D4CC] bg-cream px-4 py-2.5 text-[13px] text-muted">
-                    {article?.slug ?? "—"}
-                  </div>
+                  <label className={FIELD_LABEL}>Slug</label>
+                  <textarea
+                    value={slug}
+                    onChange={(e) => {
+                      setSlug(e.target.value.replace(/\n/g, ""));
+                      if (slugError) setSlugError(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") e.preventDefault();
+                    }}
+                    rows={1}
+                    placeholder="article-slug"
+                    className={cn(
+                      "block w-full resize-none rounded-lg border-2 border-[#D8D4CC] bg-cream px-4 py-2.5 text-[13px] leading-snug text-muted outline-none break-all focus:border-ink focus:text-ink focus:shadow-[3px_3px_0_#1c1c27]",
+                      slugError && "border-red-600 text-red-600",
+                    )}
+                    style={{ wordBreak: "break-all" }}
+                    ref={(el) => {
+                      if (el) {
+                        el.style.height = "auto";
+                        el.style.height = `${el.scrollHeight}px`;
+                      }
+                    }}
+                  />
+                  {slugError && <p className="mt-1 text-[11px] text-red-600">{slugError}</p>}
                 </div>
               )}
 

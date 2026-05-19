@@ -27,6 +27,7 @@ export interface ArticleIn {
 
 export interface ArticleUpdate {
   title?: string | null;
+  slug?: string | null;
   articleType?: ArticleType | null;
   content?: string | null;
   status?: ArticleStatus | null;

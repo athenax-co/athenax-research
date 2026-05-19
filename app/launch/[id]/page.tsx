@@ -294,7 +294,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       />
 
       <div className="page-wrap section" style={{ maxWidth: 1100 }}>
-        <div className="mb-6 flex flex-wrap items-center gap-3">
+        <div className="mb-6 flex flex-col-reverse items-start gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <button
             type="button"
             onClick={() => router.back()}

@@ -330,7 +330,7 @@ export function TeamSection({
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <span className="text-[17px] font-bold leading-snug">{m.name}</span>
                 {m.roleLabel && (
-                  <span className="font-['Space_Mono',monospace] text-[11px] text-[#8A8A8A] sm:text-[11px]">
+                  <span className="font-['Space_Mono',monospace] text-[9px] text-[#8A8A8A] sm:text-[11px]">
                     · {m.roleLabel.replace(/\s+and\s+/gi, " & ")}
                   </span>
                 )}

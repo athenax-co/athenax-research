@@ -23,6 +23,17 @@ function extractMarkdownAbstract(content: string): { abstract: string; remainder
   };
 }
 
+const HR_RE = /^(?:-{3,}|\*{3,})$/;
+
+function stripHorizontalRules(content: string): string {
+  return content
+    .split("\n")
+    .filter((l) => !HR_RE.test(l.trim()))
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function extractMarkdownSection(content: string, name: string): { section: string; remainder: string } {
   const lines = content.split("\n");
   const target = name.trim().toLowerCase();
@@ -31,10 +42,7 @@ function extractMarkdownSection(content: string, name: string): { section: strin
     if (!m) return null;
     return m[1].replace(/[*_`]/g, "").trim().toLowerCase();
   };
-  const isBoundary = (line: string) => {
-    const t = line.trim();
-    return headingText(line) !== null || /^-{3,}$/.test(t) || /^\*{3,}$/.test(t);
-  };
+  const isBoundary = (line: string) => headingText(line) !== null || HR_RE.test(line.trim());
 
   const start = lines.findIndex((l) => headingText(l) === target);
   if (start === -1) return { section: "", remainder: content };
@@ -71,9 +79,12 @@ const ContentDetailPage = ({ kind, item, slug }: { kind: "article" | "research";
     ? extractMarkdownSection(afterAbstract, "Key Takeaways")
     : { section: "", remainder: afterAbstract };
 
-  const { section: guestBio, remainder } = hasGuestBio
+  // Only fall back to Guest Bio when no Key Takeaways were found.
+  const { section: guestBio, remainder: afterGuestBio } = hasGuestBio && !keyTakeaways
     ? extractMarkdownSection(afterTakeaways, "Guest Bio")
     : { section: "", remainder: afterTakeaways };
+
+  const remainder = hasKeyTakeaways || hasGuestBio ? stripHorizontalRules(afterGuestBio) : afterGuestBio;
 
   const related = articles.filter((a) => a.slug !== (item?.slug ?? slug)).slice(0, 2);
 

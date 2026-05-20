@@ -4,6 +4,14 @@ import ReactMarkdown from "react-markdown";
 import { cn } from "@/utils/lib";
 import { slugify } from "@/lib/api";
 
+function nodeText(children: React.ReactNode): string {
+  if (typeof children === "string" || typeof children === "number") return String(children);
+  if (Array.isArray(children)) return children.map(nodeText).join("");
+  if (children && typeof children === "object" && "props" in (children as object))
+    return nodeText((children as { props: { children: React.ReactNode } }).props.children);
+  return "";
+}
+
 interface MarkdownViewerProps {
   content: string;
   className?: string;
@@ -39,8 +47,8 @@ export default function MarkdownViewer({ content, className }: MarkdownViewerPro
     >
       <ReactMarkdown
         components={{
-          h1: ({ children }) => <h1 id={slugify(String(children))}>{children}</h1>,
-          h2: ({ children }) => <h2 id={slugify(String(children))}>{children}</h2>,
+          h1: ({ children }) => <h1 id={slugify(nodeText(children))}>{children}</h1>,
+          h2: ({ children }) => <h2 id={slugify(nodeText(children))}>{children}</h2>,
         }}
       >
         {content}

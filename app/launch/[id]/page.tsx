@@ -10,10 +10,10 @@ import SEOMeta from "@/components/SEOMeta";
 import { IconShare } from "@/components/Icons";
 import { Bookmark, Pencil, Plus } from "lucide-react";
 import { useGlobal } from "@/components/GlobalProvider";
+import VoteButton from "@/components/VoteButton";
 import { prettyUrl } from "@/utils/lib";
 import {
   useProductBySlug,
-  useVoteProduct,
   useInterestProduct,
   useSimilarProducts,
   useComments,
@@ -68,7 +68,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
   const { data: apiProduct, isLoading } = useProductBySlug(id);
 
-  const { mutate: vote, isPending: voting } = useVoteProduct();
   const { mutate: interest, isPending: registeringInterest } = useInterestProduct();
   const apiProductId = apiProduct?.id ?? 0;
   const { data: similarProducts } = useSimilarProducts(apiProductId);
@@ -159,25 +158,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const p: ProductDetailOut = apiProduct;
   const primaryCategory = p.categories[0]?.name ?? "Product";
   const isInvestor = (user?.role as string) === "investor";
-
-  const handleApiVote = () => {
-    if (!user) {
-      showToast("Sign in to upvote.", "error");
-      return;
-    }
-    if (p.status !== ProductStatus.APPROVED) {
-      showToast("Only approved launches can be upvoted.", "error");
-      return;
-    }
-    const newVoted = !p.voted;
-    vote(
-      { id: p.id, voted: newVoted },
-      {
-        onSuccess: () => showToast(newVoted ? `Upvoted ${p.name}!` : "Vote removed.", "success"),
-        onError: () => showToast("Failed to vote. Please try again.", "error"),
-      }
-    );
-  };
 
   const handleBookmark = () => {
     if (!user) {
@@ -346,17 +326,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           </div>
 
           <div className="shrink-0 flex w-full items-center gap-2 sm:w-auto max-[640px]:col-span-2">
-            <button
-              className={
-                p.voted
-                  ? "btn btn-ghost btn-sm bg-success flex-1 justify-center sm:flex-none"
-                  : "btn btn-outline btn-sm flex-1 justify-center sm:flex-none"
-              }
-              onClick={handleApiVote}
-              disabled={voting}
-            >
-              {voting ? "…" : p.voted ? "✓ Voted" : "▲ Upvote"}&nbsp;·&nbsp;{p.voteCount.toLocaleString()}
-            </button>
+            <VoteButton user={user} product={p} showToast={showToast} size="sm" initialVoted={p.voted} showLabel />
             <button className="btn btn-ghost btn-sm flex-1 justify-center sm:flex-none" style={{ fontSize: 12 }} onClick={() => shareLaunch(p.slug)}>
               <IconShare size={14} />
               Share

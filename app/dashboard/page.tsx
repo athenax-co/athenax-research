@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
 import { Button } from "@/components/ui/button";
 import { useGlobal } from "@/components/GlobalProvider";
 import { dbNow, dbRead, dbUid, dbWrite, formatShortDate, notifSvc } from "@/utils/lib";
 import { useMyProducts, useMyVotedProducts, useMyBookmarkedProducts } from "@/features/products";
-import type { ProductSummary } from "@/features/products";
+import { ProductBadge } from "@/components/ui/ProductBadge";
 
 const FOLLOW_KEYS = {
   FOLLOWS: "ax_follows_v1",
@@ -53,19 +54,24 @@ const followSvc = {
   },
 };
 
-function ProductMini({ product }: { product: ProductSummary }) {
+function ProductMini({ product }: { product: { id: number; slug: string; name: string; shortDesc?: string | null; logo?: string | null; categories?: { id: number; name: string }[] } }) {
   return (
-    <Link className="archive-row cursor-pointer no-underline text-inherit" href={`/launch/${product.slug}`}>
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-md border-[1.5px] border-ink bg-paper text-[13px] font-bold">
-        {product.name.charAt(0)}
-      </div>
-      <div className="ml-2.5 flex-1">
-        <div className="archive-title text-sm">{product.name}</div>
-        <div className="archive-meta">
-          {product.stage} · ▲ {product.voteCount}
+    <Link className="archive-row cursor-pointer no-underline text-inherit items-start py-3" href={`/launch/${product.slug}`}>
+      <Avatar className="size-9 shrink-0 rounded-md mt-0.5">
+        <AvatarImage src={product.logo ?? undefined} alt={product.name} className="size-full object-contain" />
+        <AvatarFallback className="rounded-md border border-[#D8D4CC] bg-paper text-[13px] font-bold">
+          {product.name.charAt(0)}
+        </AvatarFallback>
+      </Avatar>
+      <div className="ml-2.5 flex-1 min-w-0">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="archive-title text-sm">{product.name}</span>
+          {product.categories?.[0] && <ProductBadge label={product.categories[0].name} />}
         </div>
+        {product.shortDesc && (
+          <div className="mt-0.5 text-[12px] text-muted line-clamp-1">{product.shortDesc}</div>
+        )}
       </div>
-      <span className="ftag shrink-0 bg-yellow text-[11px] font-semibold">★ {product.bookmarkCount}</span>
     </Link>
   );
 }
@@ -165,7 +171,7 @@ export default function Page() {
       <div className="grid-4 mb-7 gap-3.5">
         {[
           { label: "Saved Products", value: bookmarkedProducts?.length ?? 0 },
-          // { label: "Products Voted", value: votedProducts?.length ?? 0 },
+          { label: "Products Voted", value: votedProducts?.total ?? 0 },
           // { label: "Following", value: follows.length },
           // { label: "Notifications", value: notifSvc.unread(user.id) },
         ].map((s) => (
@@ -195,12 +201,19 @@ export default function Page() {
             </WindowCard>
           </div>
 
-          <div className="mb-8 hidden">
+          <div className="mb-8">
             <WindowCard label="VOTED_PRODUCTS.SYS">
               {votesLoading ? (
                 <p className="text-[13px] text-muted">Loading…</p>
-              ) : votedProducts && votedProducts.length > 0 ? (
-                votedProducts.map((p) => <ProductMini key={p.id} product={p} />)
+              ) : votedProducts && votedProducts.items.length > 0 ? (
+                <>
+                  {votedProducts.items.slice(0, 5).map((p) => <ProductMini key={p.id} product={p} />)}
+                  <div className="mt-3 border-t border-t-[#E8E4DC] pt-3">
+                    <Link className="btn btn-outline btn-sm w-full justify-center" href="/launch?upvoted=true">
+                      View All Upvoted ({votedProducts.total}) →
+                    </Link>
+                  </div>
+                </>
               ) : (
                 <div>
                   <p className="mb-3 text-[13px] text-muted">Vote on launches to build your activity history.</p>

@@ -45,6 +45,7 @@ export default function Page() {
   const [categoryId, setCategoryId] = useQueryState("category", parseAsInteger);
   const [dateFilter, setDateFilter] = useQueryState("date", parseAsString);
   const [search, setSearch] = useQueryState("q", parseAsString);
+  const [upvotedFilter, setUpvotedFilter] = useQueryState("upvoted", parseAsString);
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [searchInput, setSearchInput] = useState(search ?? "");
   const debouncedSearch = useDebounce(searchInput);
@@ -57,6 +58,7 @@ export default function Page() {
     categoryId: categoryId ?? undefined,
     dateFilter: (dateFilter || undefined) as DateFilter,
     search: search ?? undefined,
+    upvoted: upvotedFilter === "true" ? true : undefined,
     page,
     pageSize: PAGE_SIZE,
   });
@@ -69,19 +71,22 @@ export default function Page() {
   const prevCategoryRef = useRef(categoryId);
   const prevDateRef = useRef(dateFilter);
   const prevSearchRef = useRef(search);
+  const prevUpvotedRef = useRef(upvotedFilter);
   useEffect(() => {
     if (
       prevCategoryRef.current !== categoryId ||
       prevDateRef.current !== dateFilter ||
-      prevSearchRef.current !== search
+      prevSearchRef.current !== search ||
+      prevUpvotedRef.current !== upvotedFilter
     ) {
       prevCategoryRef.current = categoryId;
       prevDateRef.current = dateFilter;
       prevSearchRef.current = search;
+      prevUpvotedRef.current = upvotedFilter;
       filterResetRef.current = true;
       setPage(1);
     }
-  }, [categoryId, dateFilter, search, setPage]);
+  }, [categoryId, dateFilter, search, upvotedFilter, setPage]);
 
   // Sync debounced value → URL param
   useEffect(() => {
@@ -173,14 +178,17 @@ export default function Page() {
         </WindowCard>
 
         <div className="mb-5 flex items-center justify-between gap-3 border-b-2 border-b-[#1C1C27] pb-2.5 flex-wrap" id="launch-tabs-section">
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
             {TIME_TABS.map((tab) => (
               <Button
                 key={tab.label}
                 variant={(dateFilter || null) === (tab.key || null) ? "ghost" : "outline"}
                 size="sm"
                 className={(dateFilter || null) === (tab.key || null) ? "bg-yellow" : ""}
-                onClick={() => setDateFilter(tab.key ?? null)}
+                onClick={() => {
+                  setDateFilter(tab.key ?? null);
+                  setUpvotedFilter(null);
+                }}
               >
                 {tab.label}
                 {productStats != null && tab.key == null && (
@@ -193,23 +201,41 @@ export default function Page() {
                 )}
               </Button>
             ))}
+            {user && (
+              <>
+                <div className="h-5 w-[1px] bg-[#1C1C27] opacity-20" />
+                <Button
+                  variant={upvotedFilter === "true" ? "ghost" : "outline"}
+                  size="sm"
+                  className={upvotedFilter === "true" ? "bg-[#D4EDDA]" : ""}
+                  onClick={() => {
+                    setUpvotedFilter(upvotedFilter === "true" ? null : "true");
+                    setDateFilter(null);
+                  }}
+                >
+                  ▲ Upvoted
+                </Button>
+              </>
+            )}
           </div>
-          <div
-            className="flex items-center gap-2 rounded-[8px] border-2 border-[#1C1C27] bg-white px-3.5 py-1.5 shadow-[2px_2px_0_#1C1C27] shrink-0"
-            style={{ width: 280 }}
-          >
-            <Search size={13} className="shrink-0 text-[#888]" />
-            <input
-              ref={searchRef}
-              className="flex-1 bg-transparent text-[13px] placeholder:text-[#aaa] focus:outline-none"
-              placeholder="Search projects..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Escape" && searchRef.current?.blur()}
-            />
-            <kbd className="shrink-0 rounded border border-[#D8D4CC] bg-[#F5F2EC] px-1.5 py-0.5 font-['Space_Mono',monospace] text-[10px] text-[#888]">
-              /
-            </kbd>
+          <div className="flex items-center gap-2 shrink-0">
+            <div
+              className="flex items-center gap-2 rounded-lg border-2 border-[#1C1C27] bg-white px-3.5 py-1.5 shadow-[2px_2px_0_#1C1C27]"
+              style={{ width: 280 }}
+            >
+              <Search size={13} className="shrink-0 text-[#888]" />
+              <input
+                ref={searchRef}
+                className="flex-1 bg-transparent text-[13px] placeholder:text-[#aaa] focus:outline-none"
+                placeholder="Search projects..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Escape" && searchRef.current?.blur()}
+              />
+              <kbd className="shrink-0 rounded border border-[#D8D4CC] bg-[#F5F2EC] px-1.5 py-0.5 font-['Space_Mono',monospace] text-[10px] text-[#888]">
+                /
+              </kbd>
+            </div>
           </div>
         </div>
 
@@ -292,7 +318,7 @@ export default function Page() {
                   </div>
                   <p className="mb-2.5 text-[13px] leading-[1.6] text-[#1C1C27]">{product.shortDesc ?? product.description}</p>
 
-                  <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                  <div className="mt-1.5 flex flex-wrap items-center gap-4">
                     {product.founded != null && <span className="text-xs text-muted">Founded {product.founded}</span>}
                   </div>
                 </div>

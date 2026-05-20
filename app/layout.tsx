@@ -31,7 +31,8 @@ const vt323 = VT323({
 });
 
 export const metadata: Metadata = {
-  title: "AthenaX",
+  title: "AthenaX — Discovery Platform for Frontier Products",
+  description: "AthenaX is a discovery platform for frontier technology products and research across AI, crypto, biotech, infrastructure, robotics, and developer tools.",
   icons: {
       icon: "https://athenax.mypinx.store/favicon.png",
   },

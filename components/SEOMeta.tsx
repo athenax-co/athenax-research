@@ -16,7 +16,7 @@ const SEOMeta = ({ title, description, type="website", image="" }: { title: stri
     setMeta("og:description", description, true);
     setMeta("og:type",        type,        true);
     if(image) setMeta("og:image", image, true);
-    return () => { document.title = "AthenaX — Where New Products Begin"; };
+    return () => { document.title = "AthenaX — Discovery Platform for Frontier Products"; };
   }, [title, description]);
   return null;
 };

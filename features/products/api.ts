@@ -24,6 +24,7 @@ export interface ProductFilters {
   q?: string;
   limit?: number;
   offset?: number;
+  upvoted?: boolean;
 }
 
 export function getProductStats(): Promise<ProductStats> {
@@ -43,6 +44,7 @@ export function getProducts(filters: ProductFilters = {}): Promise<PaginatedResp
   if (filters.q) params.set("q", filters.q);
   if (filters.limit != null) params.set("limit", String(filters.limit));
   if (filters.offset != null) params.set("offset", String(filters.offset));
+  if (filters.upvoted) params.set("upvoted", "true");
   const query = params.toString();
   return http.get<PaginatedResponse<ProductOut>>(`/product${query ? `?${query}` : ""}`, { auth: true });
 }
@@ -63,8 +65,8 @@ export function getMyProducts(status?: ProductStatus): Promise<ProductOut[]> {
   return http.get<ProductOut[]>(status ? `/product/me?status=${status}` : "/product/me", { auth: true });
 }
 
-export function getMyVotedProducts(limit = 50, offset = 0): Promise<ProductSummary[]> {
-  return http.get<ProductSummary[]>(`/product/me/voted?limit=${limit}&offset=${offset}`, { auth: true });
+export function getMyVotedProducts(limit = 50, offset = 0): Promise<PaginatedResponse<ProductOut>> {
+  return http.get<PaginatedResponse<ProductOut>>(`/product/me/voted?limit=${limit}&offset=${offset}`, { auth: true });
 }
 
 export function getMyBookmarkedProducts(limit = 50, offset = 0): Promise<ProductSummary[]> {

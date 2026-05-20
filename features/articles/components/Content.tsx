@@ -12,17 +12,6 @@ import { IconShare } from "@/components/Icons";
 import { ArticleBadges } from "@/components/ui/ArticleMeta";
 import { useArticlesList } from "@/features/articles";
 
-function extractMarkdownAbstract(content: string): { abstract: string; remainder: string } {
-  const blocks = content.split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
-  const firstPara = blocks.find((b) => !b.startsWith("#") && !b.startsWith(">"));
-  const firstQuote = blocks.find((b) => b.startsWith(">"));
-  const abstractParts = new Set([firstPara, firstQuote].filter(Boolean) as string[]);
-  return {
-    abstract: [...abstractParts].join("\n\n"),
-    remainder: blocks.filter((b) => !abstractParts.has(b)).join("\n\n"),
-  };
-}
-
 const HR_RE = /^(?:-{3,}|\*{3,})$/;
 
 function stripHorizontalRules(content: string): string {
@@ -63,28 +52,18 @@ const ContentDetailPage = ({ kind, item, slug }: { kind: "article" | "research";
   const { data: articles = [] } = useArticlesList();
 
   const content: string = typeof item?.content === "string" ? item.content : "";
-  const headings = content ? extractMarkdownHeadings(content) : [];
   const readTime = item ? estimateReadTime(content) : 0;
   const isWhitepaper = kind === "article" && item?.articleType === ArticleType.WHITEPAPER;
   const isLivestream = kind === "article" && item?.articleType === ArticleType.LIVESTREAM;
   const isRoundtable = kind === "article" && item?.articleType === ArticleType.ROUNDTABLE;
-  const hasKeyTakeaways = isLivestream || isRoundtable;
-  const hasGuestBio = isLivestream;
-
-  const { abstract, remainder: afterAbstract } = isWhitepaper && content
-    ? extractMarkdownAbstract(content)
-    : { abstract: "", remainder: content };
+  const hasKeyTakeaways = isWhitepaper || isLivestream || isRoundtable;
 
   const { section: keyTakeaways, remainder: afterTakeaways } = hasKeyTakeaways
-    ? extractMarkdownSection(afterAbstract, "Key Takeaways")
-    : { section: "", remainder: afterAbstract };
+    ? extractMarkdownSection(content, "Key Takeaways")
+    : { section: "", remainder: content };
 
-  // Only fall back to Guest Bio when no Key Takeaways were found.
-  const { section: guestBio, remainder: afterGuestBio } = hasGuestBio && !keyTakeaways
-    ? extractMarkdownSection(afterTakeaways, "Guest Bio")
-    : { section: "", remainder: afterTakeaways };
-
-  const remainder = hasKeyTakeaways || hasGuestBio ? stripHorizontalRules(afterGuestBio) : afterGuestBio;
+  const remainder = hasKeyTakeaways ? stripHorizontalRules(afterTakeaways) : afterTakeaways;
+  const headings = remainder ? extractMarkdownHeadings(remainder) : [];
 
   const related = articles.filter((a) => a.slug !== (item?.slug ?? slug)).slice(0, 2);
 
@@ -139,21 +118,9 @@ const ContentDetailPage = ({ kind, item, slug }: { kind: "article" | "research";
 
             <div className="flex gap-10 items-start">
               <div className="flex-1 min-w-0">
-                {abstract && (
-                  <WindowCard label="Abstract" className="mb-6">
-                    <MarkdownViewer content={abstract} />
-                  </WindowCard>
-                )}
-
                 {keyTakeaways && (
                   <WindowCard label="Key Takeaways" className="mb-6">
                     <MarkdownViewer content={keyTakeaways} />
-                  </WindowCard>
-                )}
-
-                {guestBio && (
-                  <WindowCard label="Guest Bio" className="mb-6">
-                    <MarkdownViewer content={guestBio} />
                   </WindowCard>
                 )}
 

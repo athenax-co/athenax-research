@@ -349,8 +349,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             <button
               className={
                 p.voted
-                  ? "btn btn-ghost btn-sm bg-success flex-1 justify-center sm:flex-none hidden"
-                  : "btn btn-outline btn-sm flex-1 justify-center sm:flex-none hidden"
+                  ? "btn btn-ghost btn-sm bg-success flex-1 justify-center sm:flex-none"
+                  : "btn btn-outline btn-sm flex-1 justify-center sm:flex-none"
               }
               onClick={handleApiVote}
               disabled={voting}

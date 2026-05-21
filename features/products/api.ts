@@ -1,6 +1,7 @@
 import { http, BASE_URL, handleResponse } from "@/api/client";
 import type { ProductIn, ProductOut, ProductDetailOut, ProductStatus, ProductComment, ProductSummary, ProductListItem, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty, ProductMedia, ProductUpdateIn, ProductLinkIn, ProductLink } from "./types";
 import type { VerificationStatus } from "@/enums";
+import { ProductLinkType } from "@/enums";
 
 export interface ProductStats {
   releases: {
@@ -31,8 +32,12 @@ export function getProductStats(): Promise<ProductStats> {
   return http.get<ProductStats>("/product/stats");
 }
 
-export function submitProduct(data: ProductIn): Promise<void> {
-  return http.post<void>("/product", data, { auth: true });
+export async function submitProduct(data: ProductIn): Promise<void> {
+  const { github, ...productData } = data;
+  const product = await http.post<ProductOut>("/product", productData, { auth: true });
+  if (github) {
+    await createProductLink(product.id, { linkType: ProductLinkType.GITHUB, url: github });
+  }
 }
 
 export function getProducts(filters: ProductFilters = {}): Promise<PaginatedResponse<ProductOut>> {

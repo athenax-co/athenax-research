@@ -55,6 +55,7 @@ const VoteButton = ({
         return { ...old, voted: next, voteCount: Math.max(0, old.voteCount + (next ? 1 : -1)) };
       });
       queryClient.invalidateQueries({ queryKey: ["products", "me", "voted"] });
+      queryClient.invalidateQueries({ queryKey: ["products", "paged"] });
       showToast(next ? `Upvoted ${product.name}!` : "Vote removed.", next ? "success" : "info");
     } catch {
       showToast("Failed to vote. Please try again.", "error");

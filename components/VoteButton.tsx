@@ -13,6 +13,7 @@ const VoteButton = ({
   initialVoted,
   showLabel = false,
   className,
+  disabled = false,
 }: {
   user: any;
   product: ProductOut;
@@ -21,6 +22,7 @@ const VoteButton = ({
   initialVoted?: boolean | null;
   showLabel?: boolean;
   className?: string;
+  disabled?: boolean;
 }) => {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
@@ -44,9 +46,7 @@ const VoteButton = ({
         return {
           ...pages,
           pages: pages.pages.map((page: ProductOut[]) =>
-            page.map((p: ProductOut) =>
-              p.id === product.id ? { ...p, voteCount: Math.max(0, p.voteCount + (next ? 1 : -1)) } : p
-            )
+            page.map((p: ProductOut) => (p.id === product.id ? { ...p, voteCount: Math.max(0, p.voteCount + (next ? 1 : -1)) } : p))
           ),
         };
       });
@@ -55,6 +55,7 @@ const VoteButton = ({
         return { ...old, voted: next, voteCount: Math.max(0, old.voteCount + (next ? 1 : -1)) };
       });
       queryClient.invalidateQueries({ queryKey: ["products", "me", "voted"] });
+      queryClient.invalidateQueries({ queryKey: ["products", "paged"] });
       showToast(next ? `Upvoted ${product.name}!` : "Vote removed.", next ? "success" : "info");
     } catch {
       showToast("Failed to vote. Please try again.", "error");
@@ -67,9 +68,9 @@ const VoteButton = ({
     <Button
       variant={voted ? "ghost" : "outline"}
       size={size}
-      className={cn(voted ? "bg-[#D4EDDA]" : "", className)}
+      className={cn(voted ? "bg-[#D4EDDA]" : "", className, "disabled:cursor-not-allowed disabled:opacity-60")}
       onClick={toggle}
-      disabled={loading}
+      disabled={loading || disabled}
     >
       <span className="text-[14px] leading-none">{loading ? "…" : voted ? "✓" : "▲"}</span>
       {showLabel && <span className="ml-1">{voted ? "Voted" : "Upvote"}</span>}

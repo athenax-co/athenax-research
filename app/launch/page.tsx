@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
@@ -126,6 +127,8 @@ export default function Page() {
     if (!productsLoading && totalPages > 0 && page > totalPages) setPage(1);
   }, [productsLoading, totalPages, page, setPage]);
 
+  const isNouns = (name: string) => name.toLowerCase() === "nouns";
+
   return (
     <div>
       <div className="page-wrap section">
@@ -240,7 +243,7 @@ export default function Page() {
         </div>
 
         <div className="mb-2.5 flex gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
-          {[{ id: 0, name: "All" }, ...categories].map((c) => (
+          {[{ id: 0, name: "All" }, ...[...categories].sort((a, b) => (isNouns(a.name) ? 1 : isNouns(b.name) ? -1 : 0))].map((c) => (
             <Button
               key={c.id}
               variant={(categoryId ?? null) === (c.id || null) ? "ghost" : "outline"}
@@ -248,7 +251,11 @@ export default function Page() {
               className={`shrink-0 ${(categoryId ?? null) === (c.id || null) ? "bg-yellow" : ""}`}
               onClick={() => setCategoryId(c.id === 0 ? null : c.id)}
             >
-              {c.name}
+              {isNouns(c.name) ? (
+                <Image src="https://athenax.mypinx.store/Noggles.png" alt="Nouns" width={28} height={16} className="object-contain" />
+              ) : (
+                c.name
+              )}
             </Button>
           ))}
         </div>

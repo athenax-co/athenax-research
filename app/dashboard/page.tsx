@@ -55,23 +55,23 @@ const followSvc = {
   },
 };
 
-function ProductMini({ product }: { product: { id: number; slug: string; name: string; shortDesc?: string | null; logo?: string | null; categories?: { id: number; name: string }[] } }) {
+function ProductMini({
+  product,
+}: {
+  product: { id: number; slug: string; name: string; shortDesc?: string | null; logo?: string | null; categories?: { id: number; name: string }[] };
+}) {
   return (
     <Link className="archive-row cursor-pointer no-underline text-inherit items-start py-3" href={`/launch/${product.slug}`}>
       <Avatar className="size-9 shrink-0 rounded-md mt-0.5">
         <AvatarImage src={product.logo ?? undefined} alt={product.name} className="size-full object-contain" />
-        <AvatarFallback className="rounded-md border border-[#D8D4CC] bg-paper text-[13px] font-bold">
-          {product.name.charAt(0)}
-        </AvatarFallback>
+        <AvatarFallback className="rounded-md border border-[#D8D4CC] bg-paper text-[13px] font-bold">{product.name.charAt(0)}</AvatarFallback>
       </Avatar>
       <div className="ml-2.5 flex-1 min-w-0">
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="archive-title text-sm">{product.name}</span>
           {product.categories?.[0] && <ProductBadge label={product.categories[0].name} />}
         </div>
-        {product.shortDesc && (
-          <div className="mt-0.5 text-[12px] text-muted line-clamp-1">{product.shortDesc}</div>
-        )}
+        {product.shortDesc && <div className="mt-0.5 text-[12px] text-muted line-clamp-1">{product.shortDesc}</div>}
       </div>
     </Link>
   );
@@ -140,9 +140,7 @@ export default function Page() {
         <WindowCard label="SIGN_IN_REQUIRED.SYS" bodyClass="window-body window-body-yellow">
           <p className="mb-4 text-[15px]">Sign in to access your personal dashboard.</p>
           <div className="flex flex-wrap gap-2.5">
-            <Button onClick={() => handleAuthClick("login")}>
-              Sign In to Continue
-            </Button>
+            <Button onClick={() => handleAuthClick("login")}>Sign In to Continue</Button>
             <Link className="btn btn-outline" href="/">
               Back to Home
             </Link>
@@ -162,7 +160,10 @@ export default function Page() {
       <div className="path-badge">/root/dashboard</div>
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-3">
         <h1 className="mb-0 text-5xl">Dashboard</h1>
-        <span className="font-mono text-xs text-muted">Welcome back, {user.name.split(" ")[0]}</span>
+        {/* <p className="font-sans text-right text-sm tracking-[0.04em] text-muted uppercase leading-relaxed">
+          Welcome back,
+          <br /> <span className="font-semibold normal-case">{user.name.split(" ")[0]}</span>
+        </p> */}
       </div>
       <p className="mb-0 text-[17px] text-muted">Your activity in one place.</p>
       <hr className="divider" />
@@ -201,7 +202,6 @@ export default function Page() {
               )}
             </WindowCard>
           </div>
-
         </div>
 
         <div>
@@ -211,7 +211,9 @@ export default function Page() {
                 <p className="text-[13px] text-muted">Loading…</p>
               ) : votedProducts && votedProducts.items.length > 0 ? (
                 <>
-                  {votedProducts.items.slice(0, 5).map((p) => <ProductMini key={p.id} product={p} />)}
+                  {votedProducts.items.slice(0, 5).map((p) => (
+                    <ProductMini key={p.id} product={p} />
+                  ))}
                   <div className="mt-3 border-t border-t-[#E8E4DC] pt-3">
                     <Link className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full justify-center")} href="/launch?upvoted=true">
                       View All Upvoted ({votedProducts.total}) →

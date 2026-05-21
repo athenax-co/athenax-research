@@ -5,12 +5,12 @@ export type { ProductStatus };
 export interface ProductIn {
   name: string;
   url?: string;
-  stage: string;
+  stage?: string;
   funding: number;
-  founded: number;
+  founded?: number;
   shortDesc?: string;
   description?: string;
-  qualityBadge: string;
+  qualityBadge?: string;
   email?: string;
   categoryIds: number[];
   subCategoryIds?: number[];

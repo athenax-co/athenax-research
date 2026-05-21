@@ -8,8 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBo
 import { useCategories, useSubcategories } from "@/hooks/queries/useReference";
 import TagInput from "@/components/ui/TagInput";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { ProductStage, QualityBadge } from "@/enums";
-import { useSubmitProduct } from "@/features/products";
+import { QualityBadge } from "@/enums";
+import { useSubmitProduct, useProductStages } from "@/features/products";
 import { useGlobal } from "@/components/GlobalProvider";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +31,7 @@ const githubSchema = z
 const DEFAULT_FORM = {
   name: "",
   url: "",
-  stage: ProductStage.SEED as string,
+  stage: "Seed",
   shortDesc: "",
   description: "",
   github: "",
@@ -127,6 +127,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
   const draft = loadDraft();
   const [submitForm, setSubmitForm] = useState({ ...DEFAULT_FORM, ...(draft?.form ?? {}) });
   const { data: categories = [] } = useCategories();
+  const { data: stages = [] } = useProductStages();
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(draft?.categoryIds?.[0] ?? null);
   const [subCategoryIds, setSubCategoryIds] = useState<number[]>(draft?.subCategoryIds ?? []);
   const [selectedOther, setSelectedOther] = useState(false);
@@ -304,7 +305,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
                 <div className="inp-group flex-1">
                   <label className="inp-label">Stage</label>
                   <select className="inp" value={submitForm.stage} onChange={set("stage")}>
-                    {Object.values(ProductStage).map((s) => (
+                    {stages.map((s) => (
                       <option key={s}>{s}</option>
                     ))}
                   </select>

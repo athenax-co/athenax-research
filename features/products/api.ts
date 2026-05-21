@@ -31,6 +31,10 @@ export function getProductStats(): Promise<ProductStats> {
   return http.get<ProductStats>("/product/stats");
 }
 
+export function getProductStages(): Promise<string[]> {
+  return http.get<string[]>("/product/stages");
+}
+
 export function submitProduct(data: ProductIn): Promise<void> {
   return http.post<void>("/product", data, { auth: true });
 }

@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ProductStage, ProductLinkType } from "@/enums";
+import { ProductLinkType } from "@/enums";
+import { useProductStages } from "../hooks";
 import type { ProductDetailOut, ProductUpdateIn, ProductLinkIn } from "../types";
 import { Pencil, Trash2, Plus, Upload } from "lucide-react";
 import TagInput from "@/components/ui/TagInput";
@@ -107,8 +108,6 @@ export function EditProductLogoDialog({ product, open, onOpenChange, onUpload, o
 
 // ─── Edit Info Dialog (ABOUT.SYS) ────────────────────────────────────────────
 
-const STAGE_OPTIONS = Object.values(ProductStage);
-
 interface EditInfoProps {
   product: ProductDetailOut;
   open: boolean;
@@ -118,6 +117,7 @@ interface EditInfoProps {
 }
 
 export function EditProductInfoDialog({ product, open, onOpenChange, onSave, saving }: EditInfoProps) {
+  const { data: stages = [] } = useProductStages();
   const [form, setForm] = useState<ProductUpdateIn>({});
 
   useEffect(() => {
@@ -186,7 +186,7 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
             <label className="inp-label">Stage</label>
             <select className="inp" value={form.stage ?? ""} onChange={(e) => set("stage", e.target.value)}>
               <option value="">— none —</option>
-              {STAGE_OPTIONS.map((s) => (
+              {stages.map((s) => (
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>

@@ -34,6 +34,14 @@ export function useProductStats() {
   });
 }
 
+export function useProductStages() {
+  return useQuery<string[]>({
+    queryKey: ["product", "stages"],
+    queryFn: () => productApi.getProductStages(),
+    staleTime: 60 * 60 * 1000,
+  });
+}
+
 export function useSubmitProduct() {
   return useMutation({
     mutationFn: (data: ProductIn) => productApi.submitProduct(data),

@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { useGlobal } from "@/components/GlobalProvider";
 import { dbNow, dbRead, dbUid, dbWrite, formatShortDate, notifSvc } from "@/utils/lib";
 import { useMyProducts, useMyVotedProducts, useMyBookmarkedProducts } from "@/features/products";
@@ -93,7 +94,7 @@ function FounderSubmissions() {
         ) : !products || products.length === 0 ? (
           <div>
             <p className="mb-3 text-[13px] text-muted">No submissions yet.</p>
-            <Link className="btn btn-outline btn-sm" href="/launch">
+            <Link className={buttonVariants({ variant: "outline", size: "sm" })} href="/launch">
               Submit a Product →
             </Link>
           </div>
@@ -191,9 +192,9 @@ export default function Page() {
               ) : bookmarkedProducts && bookmarkedProducts.length > 0 ? (
                 bookmarkedProducts.map((p) => <ProductMini key={p.id} product={p} />)
               ) : (
-                <div className="flex flex-wrap gap-2.5">
-                  <p className="mb-3 text-[13px] text-muted">No saved products yet.</p>
-                  <Link className="btn btn-outline btn-sm" href="/launch">
+                <div className="flex flex-col gap-3">
+                  <p className="text-center text-[13px] text-muted">No saved products yet.</p>
+                  <Link className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full justify-center")} href="/launch">
                     Browse Launches →
                   </Link>
                 </div>
@@ -201,6 +202,9 @@ export default function Page() {
             </WindowCard>
           </div>
 
+        </div>
+
+        <div>
           <div className="mb-8">
             <WindowCard label="VOTED_PRODUCTS.SYS">
               {votesLoading ? (
@@ -209,34 +213,32 @@ export default function Page() {
                 <>
                   {votedProducts.items.slice(0, 5).map((p) => <ProductMini key={p.id} product={p} />)}
                   <div className="mt-3 border-t border-t-[#E8E4DC] pt-3">
-                    <Link className="btn btn-outline btn-sm w-full justify-center" href="/launch?upvoted=true">
+                    <Link className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full justify-center")} href="/launch?upvoted=true">
                       View All Upvoted ({votedProducts.total}) →
                     </Link>
                   </div>
                 </>
               ) : (
-                <div>
-                  <p className="mb-3 text-[13px] text-muted">Vote on launches to build your activity history.</p>
-                  <Link className="btn btn-outline btn-sm" href="/launch">
+                <div className="flex flex-col gap-3">
+                  <p className="text-center text-[13px] text-muted">Vote on launches to build your activity history.</p>
+                  <Link className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full justify-center")} href="/launch">
                     See Today&apos;s Launches →
                   </Link>
                 </div>
               )}
             </WindowCard>
           </div>
-        </div>
 
-        <div>
           <div className="mb-8 hidden">
             <WindowCard label="FOLLOWING.SYS">
               {follows.length === 0 ? (
                 <div>
                   <p className="mb-3 text-[13px] text-muted">Follow researchers, topics, and products to personalise your feed.</p>
                   <div className="flex flex-wrap gap-2">
-                    <Link className="btn btn-outline btn-sm" href="/researchers">
+                    <Link className={buttonVariants({ variant: "outline", size: "sm" })} href="/researchers">
                       Follow Researchers
                     </Link>
-                    <Link className="btn btn-outline btn-sm" href="/launch">
+                    <Link className={buttonVariants({ variant: "outline", size: "sm" })} href="/launch">
                       Follow Products
                     </Link>
                   </div>

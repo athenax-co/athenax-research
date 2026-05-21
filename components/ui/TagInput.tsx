@@ -13,8 +13,12 @@ export default function TagInput({ value, onChange, placeholder = "Type and pres
   const inputRef = useRef<HTMLInputElement>(null);
 
   const add = (raw: string) => {
-    const tag = raw.trim();
-    if (tag && !value.includes(tag)) onChange([...value, tag]);
+    const tags = raw.split(/[,;]+/).map((t) => t.trim()).filter(Boolean);
+    const next = [...value];
+    for (const tag of tags) {
+      if (!next.includes(tag)) next.push(tag);
+    }
+    if (next.length !== value.length) onChange(next);
   };
 
   const remove = (i: number) => onChange(value.filter((_, j) => j !== i));
@@ -44,6 +48,14 @@ export default function TagInput({ value, onChange, placeholder = "Type and pres
             e.currentTarget.value = "";
           } else if (e.key === "Backspace" && !e.currentTarget.value && value.length > 0) {
             remove(value.length - 1);
+          }
+        }}
+        onPaste={(e) => {
+          const text = e.clipboardData.getData("text");
+          if (/[,;]/.test(text)) {
+            e.preventDefault();
+            add(e.currentTarget.value + text);
+            e.currentTarget.value = "";
           }
         }}
         onBlur={(e) => {

@@ -2,6 +2,8 @@ import { voteProduct } from "@/features/products/api";
 import type { ProductOut } from "@/features/products";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const VoteButton = ({
   user,
@@ -9,12 +11,18 @@ const VoteButton = ({
   showToast,
   size = "sm",
   initialVoted,
+  showLabel = false,
+  className,
+  disabled = false,
 }: {
   user: any;
   product: ProductOut;
   showToast: (message: string, type: string) => void;
-  size?: string;
+  size?: "xs" | "sm" | "default" | "lg";
   initialVoted?: boolean | null;
+  showLabel?: boolean;
+  className?: string;
+  disabled?: boolean;
 }) => {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
@@ -38,12 +46,16 @@ const VoteButton = ({
         return {
           ...pages,
           pages: pages.pages.map((page: ProductOut[]) =>
-            page.map((p: ProductOut) =>
-              p.id === product.id ? { ...p, voteCount: Math.max(0, p.voteCount + (next ? 1 : -1)) } : p
-            )
+            page.map((p: ProductOut) => (p.id === product.id ? { ...p, voteCount: Math.max(0, p.voteCount + (next ? 1 : -1)) } : p))
           ),
         };
       });
+      queryClient.setQueriesData({ queryKey: ["product"] }, (old: any) => {
+        if (!old || old.id !== product.id) return old;
+        return { ...old, voted: next, voteCount: Math.max(0, old.voteCount + (next ? 1 : -1)) };
+      });
+      queryClient.invalidateQueries({ queryKey: ["products", "me", "voted"] });
+      queryClient.invalidateQueries({ queryKey: ["products", "paged"] });
       showToast(next ? `Upvoted ${product.name}!` : "Vote removed.", next ? "success" : "info");
     } catch {
       showToast("Failed to vote. Please try again.", "error");
@@ -53,15 +65,17 @@ const VoteButton = ({
   };
 
   return (
-    <button
-      className={`btn btn-${voted ? "ghost" : "outline"} btn-${size} justify-center`}
-      style={{ background: voted ? "#D4EDDA" : "" }}
+    <Button
+      variant={voted ? "ghost" : "outline"}
+      size={size}
+      className={cn(voted ? "bg-[#D4EDDA]" : "", className, "disabled:cursor-not-allowed disabled:opacity-60")}
       onClick={toggle}
-      disabled={loading}
+      disabled={loading || disabled}
     >
-      <span className="text-[14px] leading-none">{loading ? "…" : "▲"}</span>
+      <span className="text-[14px] leading-none">{loading ? "…" : voted ? "✓" : "▲"}</span>
+      {showLabel && <span className="ml-1">{voted ? "Voted" : "Upvote"}</span>}
       <span className="font-['Space_Mono',monospace] text-[10px] font-bold text-[#E8323C] ml-1">{count.toLocaleString()}</span>
-    </button>
+    </Button>
   );
 };
 

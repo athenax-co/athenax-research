@@ -8,8 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBo
 import { useCategories, useSubcategories } from "@/hooks/queries/useReference";
 import TagInput from "@/components/ui/TagInput";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { ProductStage, QualityBadge } from "@/enums";
-import { useSubmitProduct } from "@/features/products";
+import { QualityBadge } from "@/enums";
+import { useSubmitProduct, useProductStages } from "@/features/products";
 import { useGlobal } from "@/components/GlobalProvider";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +17,7 @@ const DRAFT_KEY = "ax_submit_product_draft";
 
 const step1Schema = z.object({
   name: z.string().min(1, "Product name is required"),
-  url: z.url("Invalid URL").min(1, "Product URL is required"),
+  url: z.union([z.url("Invalid URL"), z.literal("")]).optional(),
   shortDesc: z.string().min(1, "One-line description is required"),
   email: z.union([z.email("Must be a valid email"), z.literal("")]).optional(),
 });
@@ -31,14 +31,14 @@ const githubSchema = z
 const DEFAULT_FORM = {
   name: "",
   url: "",
-  stage: ProductStage.SEED as string,
+  stage: "",
   shortDesc: "",
   description: "",
   github: "",
   email: "",
   funding: "",
-  founded: String(new Date().getFullYear()),
-  qualityBadge: QualityBadge.RESEARCH_BASED as string,
+  founded: "",
+  qualityBadge: "",
 };
 
 function loadDraft() {
@@ -127,6 +127,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
   const draft = loadDraft();
   const [submitForm, setSubmitForm] = useState({ ...DEFAULT_FORM, ...(draft?.form ?? {}) });
   const { data: categories = [] } = useCategories();
+  const { data: stages = [] } = useProductStages();
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(draft?.categoryIds?.[0] ?? null);
   const [subCategoryIds, setSubCategoryIds] = useState<number[]>(draft?.subCategoryIds ?? []);
   const [selectedOther, setSelectedOther] = useState(false);
@@ -178,13 +179,13 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
       await submitProductMutation({
         name: submitForm.name,
         url: submitForm.url || undefined,
-        github: submitForm.github || undefined,
-        stage: submitForm.stage,
+        links: submitForm.github ? [{ linkType: "github" as const, url: submitForm.github }] : undefined,
+        stage: submitForm.stage || undefined,
         funding: Number(submitForm.funding) || 0,
-        founded: Number(submitForm.founded) || new Date().getFullYear(),
+        founded: submitForm.founded ? Number(submitForm.founded) : undefined,
         shortDesc: submitForm.shortDesc,
         description: submitForm.description || undefined,
-        qualityBadge: submitForm.qualityBadge,
+        qualityBadge: submitForm.qualityBadge || undefined,
         email: submitForm.email || undefined,
         categoryIds: selectedCategoryId ? [selectedCategoryId] : [],
         subCategoryIds: selectedOther ? [] : subCategoryIds,
@@ -237,7 +238,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
 
               <div className="inp-group">
                 <label className="inp-label">
-                  Product URL / Demo <span className="text-red-500">*</span>
+                  Product URL / Demo
                 </label>
                 <input
                   className={`inp ${errors.url ? "border-red-400" : ""}`}
@@ -304,7 +305,8 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
                 <div className="inp-group flex-1">
                   <label className="inp-label">Stage</label>
                   <select className="inp" value={submitForm.stage} onChange={set("stage")}>
-                    {Object.values(ProductStage).map((s) => (
+                    <option value="">— None —</option>
+                    {stages.map((s) => (
                       <option key={s}>{s}</option>
                     ))}
                   </select>
@@ -312,6 +314,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
                 <div className="inp-group flex-1">
                   <label className="inp-label">Quality Badge</label>
                   <select className="inp" value={submitForm.qualityBadge} onChange={set("qualityBadge")}>
+                    <option value="">— None —</option>
                     {Object.values(QualityBadge).map((b) => (
                       <option key={b}>{b}</option>
                     ))}
@@ -327,6 +330,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
                 <div className="inp-group flex-1">
                   <label className="inp-label">Founded (Year)</label>
                   <select className="inp" value={submitForm.founded} onChange={set("founded")}>
+                    <option value="">— None —</option>
                     {Array.from({ length: new Date().getFullYear() - 2009 + 1 }, (_, i) => new Date().getFullYear() - i).map((y) => (
                       <option key={y} value={y}>
                         {y}

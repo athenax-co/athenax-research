@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { useGlobal } from "@/components/GlobalProvider";
 import { dbNow, dbRead, dbUid, dbWrite, formatShortDate, notifSvc } from "@/utils/lib";
 import { useMyProducts, useMyVotedProducts, useMyBookmarkedProducts } from "@/features/products";
-import type { ProductSummary } from "@/features/products";
+import { ProductBadge } from "@/components/ui/ProductBadge";
 
 const FOLLOW_KEYS = {
   FOLLOWS: "ax_follows_v1",
@@ -53,19 +55,24 @@ const followSvc = {
   },
 };
 
-function ProductMini({ product }: { product: ProductSummary }) {
+function ProductMini({
+  product,
+}: {
+  product: { id: number; slug: string; name: string; shortDesc?: string | null; logo?: string | null; categories?: { id: number; name: string }[] };
+}) {
   return (
-    <Link className="archive-row cursor-pointer no-underline text-inherit" href={`/launch/${product.slug}`}>
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-md border-[1.5px] border-ink bg-paper text-[13px] font-bold">
-        {product.name.charAt(0)}
-      </div>
-      <div className="ml-2.5 flex-1">
-        <div className="archive-title text-sm">{product.name}</div>
-        <div className="archive-meta">
-          {product.stage} · ▲ {product.voteCount}
+    <Link className="archive-row cursor-pointer no-underline text-inherit items-start py-3" href={`/launch/${product.slug}`}>
+      <Avatar className="size-9 shrink-0 rounded-md mt-0.5">
+        <AvatarImage src={product.logo ?? undefined} alt={product.name} className="size-full object-contain" />
+        <AvatarFallback className="rounded-md border border-[#D8D4CC] bg-paper text-[13px] font-bold">{product.name.charAt(0)}</AvatarFallback>
+      </Avatar>
+      <div className="ml-2.5 flex-1 min-w-0">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="archive-title text-sm">{product.name}</span>
+          {product.categories?.[0] && <ProductBadge label={product.categories[0].name} />}
         </div>
+        {product.shortDesc && <div className="mt-0.5 text-[12px] text-muted line-clamp-1">{product.shortDesc}</div>}
       </div>
-      <span className="ftag shrink-0 bg-yellow text-[11px] font-semibold">★ {product.bookmarkCount}</span>
     </Link>
   );
 }
@@ -87,7 +94,7 @@ function FounderSubmissions() {
         ) : !products || products.length === 0 ? (
           <div>
             <p className="mb-3 text-[13px] text-muted">No submissions yet.</p>
-            <Link className="btn btn-outline btn-sm" href="/launch">
+            <Link className={buttonVariants({ variant: "outline", size: "sm" })} href="/launch">
               Submit a Product →
             </Link>
           </div>
@@ -133,9 +140,7 @@ export default function Page() {
         <WindowCard label="SIGN_IN_REQUIRED.SYS" bodyClass="window-body window-body-yellow">
           <p className="mb-4 text-[15px]">Sign in to access your personal dashboard.</p>
           <div className="flex flex-wrap gap-2.5">
-            <Button onClick={() => handleAuthClick("login")}>
-              Sign In to Continue
-            </Button>
+            <Button onClick={() => handleAuthClick("login")}>Sign In to Continue</Button>
             <Link className="btn btn-outline" href="/">
               Back to Home
             </Link>
@@ -155,7 +160,10 @@ export default function Page() {
       <div className="path-badge">/root/dashboard</div>
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-3">
         <h1 className="mb-0 text-5xl">Dashboard</h1>
-        <span className="font-mono text-xs text-muted">Welcome back, {user.name.split(" ")[0]}</span>
+        {/* <p className="font-sans text-right text-sm tracking-[0.04em] text-muted uppercase leading-relaxed">
+          Welcome back,
+          <br /> <span className="font-semibold normal-case">{user.name.split(" ")[0]}</span>
+        </p> */}
       </div>
       <p className="mb-0 text-[17px] text-muted">Your activity in one place.</p>
       <hr className="divider" />
@@ -165,7 +173,7 @@ export default function Page() {
       <div className="grid-4 mb-7 gap-3.5">
         {[
           { label: "Saved Products", value: bookmarkedProducts?.length ?? 0 },
-          // { label: "Products Voted", value: votedProducts?.length ?? 0 },
+          { label: "Products Voted", value: votedProducts?.total ?? 0 },
           // { label: "Following", value: follows.length },
           // { label: "Notifications", value: notifSvc.unread(user.id) },
         ].map((s) => (
@@ -185,27 +193,10 @@ export default function Page() {
               ) : bookmarkedProducts && bookmarkedProducts.length > 0 ? (
                 bookmarkedProducts.map((p) => <ProductMini key={p.id} product={p} />)
               ) : (
-                <div className="flex flex-wrap gap-2.5">
-                  <p className="mb-3 text-[13px] text-muted">No saved products yet.</p>
-                  <Link className="btn btn-outline btn-sm" href="/launch">
+                <div className="flex flex-col gap-3">
+                  <p className="text-center text-[13px] text-muted">No saved products yet.</p>
+                  <Link className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full justify-center")} href="/launch">
                     Browse Launches →
-                  </Link>
-                </div>
-              )}
-            </WindowCard>
-          </div>
-
-          <div className="mb-8 hidden">
-            <WindowCard label="VOTED_PRODUCTS.SYS">
-              {votesLoading ? (
-                <p className="text-[13px] text-muted">Loading…</p>
-              ) : votedProducts && votedProducts.length > 0 ? (
-                votedProducts.map((p) => <ProductMini key={p.id} product={p} />)
-              ) : (
-                <div>
-                  <p className="mb-3 text-[13px] text-muted">Vote on launches to build your activity history.</p>
-                  <Link className="btn btn-outline btn-sm" href="/launch">
-                    See Today&apos;s Launches →
                   </Link>
                 </div>
               )}
@@ -214,16 +205,42 @@ export default function Page() {
         </div>
 
         <div>
+          <div className="mb-8">
+            <WindowCard label="VOTED_PRODUCTS.SYS">
+              {votesLoading ? (
+                <p className="text-[13px] text-muted">Loading…</p>
+              ) : votedProducts && votedProducts.items.length > 0 ? (
+                <>
+                  {votedProducts.items.slice(0, 5).map((p) => (
+                    <ProductMini key={p.id} product={p} />
+                  ))}
+                  <div className="mt-3 border-t border-t-[#E8E4DC] pt-3">
+                    <Link className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full justify-center")} href="/launch?upvoted=true">
+                      View All Upvoted ({votedProducts.total}) →
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <p className="text-center text-[13px] text-muted">Vote on launches to build your activity history.</p>
+                  <Link className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full justify-center")} href="/launch">
+                    See Today&apos;s Launches →
+                  </Link>
+                </div>
+              )}
+            </WindowCard>
+          </div>
+
           <div className="mb-8 hidden">
             <WindowCard label="FOLLOWING.SYS">
               {follows.length === 0 ? (
                 <div>
                   <p className="mb-3 text-[13px] text-muted">Follow researchers, topics, and products to personalise your feed.</p>
                   <div className="flex flex-wrap gap-2">
-                    <Link className="btn btn-outline btn-sm" href="/researchers">
+                    <Link className={buttonVariants({ variant: "outline", size: "sm" })} href="/researchers">
                       Follow Researchers
                     </Link>
-                    <Link className="btn btn-outline btn-sm" href="/launch">
+                    <Link className={buttonVariants({ variant: "outline", size: "sm" })} href="/launch">
                       Follow Products
                     </Link>
                   </div>

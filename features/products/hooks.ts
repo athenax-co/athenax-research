@@ -34,6 +34,14 @@ export function useProductStats() {
   });
 }
 
+export function useProductStages() {
+  return useQuery<string[]>({
+    queryKey: ["product", "stages"],
+    queryFn: () => productApi.getProductStages(),
+    staleTime: 60 * 60 * 1000,
+  });
+}
+
 export function useSubmitProduct() {
   return useMutation({
     mutationFn: (data: ProductIn) => productApi.submitProduct(data),
@@ -60,6 +68,7 @@ export type ProductQueryFilters = {
   dateFilter?: ProductFilters["date_filter"];
   sortBy?: ProductFilters["sort_by"];
   search?: string;
+  upvoted?: boolean;
 };
 
 export function usePagedProducts(
@@ -67,9 +76,9 @@ export function usePagedProducts(
   filters: ProductQueryFilters & { page: number; pageSize: number }
 ) {
   const queryClient = useQueryClient();
-  const { categoryId, dateFilter, sortBy, search, page, pageSize } = filters;
+  const { categoryId, dateFilter, sortBy, search, upvoted, page, pageSize } = filters;
   return useQuery({
-    queryKey: ["products", "paged", status, categoryId, dateFilter, sortBy, search, page, pageSize],
+    queryKey: ["products", "paged", status, categoryId, dateFilter, sortBy, search, upvoted, page, pageSize],
     queryFn: () =>
       productApi.getProducts({
         status,
@@ -79,6 +88,7 @@ export function usePagedProducts(
         q: search || undefined,
         limit: pageSize,
         offset: (page - 1) * pageSize,
+        upvoted: upvoted || undefined,
       }),
     select: (data) => {
       const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
@@ -127,9 +137,14 @@ export function useMyProducts(status?: ProductStatus) {
 }
 
 export function useMyVotedProducts() {
-  return useQuery<ProductSummary[]>({
+  const queryClient = useQueryClient();
+  return useQuery({
     queryKey: ["products", "me", "voted"],
     queryFn: () => productApi.getMyVotedProducts(),
+    select: (data) => {
+      const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
+      return { ...data, items: withCategories(data.items, cats) };
+    },
   });
 }
 
@@ -359,11 +374,11 @@ export function useSwapProductMedia(productId: number, slug: string) {
   });
 }
 
-export function useSimilarProducts(productId: number) {
+export function useSimilarProducts(productId: number, enabled = true) {
   return useQuery<ProductListItem[]>({
     queryKey: ["product", productId, "similar"],
     queryFn: () => productApi.getSimilarProducts(productId),
-    enabled: productId > 0,
+    enabled: productId > 0 && enabled,
     staleTime: 5 * 60 * 1000,
   });
 }

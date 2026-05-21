@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
@@ -45,6 +46,7 @@ export default function Page() {
   const [categoryId, setCategoryId] = useQueryState("category", parseAsInteger);
   const [dateFilter, setDateFilter] = useQueryState("date", parseAsString);
   const [search, setSearch] = useQueryState("q", parseAsString);
+  const [upvotedFilter, setUpvotedFilter] = useQueryState("upvoted", parseAsString);
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [searchInput, setSearchInput] = useState(search ?? "");
   const debouncedSearch = useDebounce(searchInput);
@@ -57,6 +59,7 @@ export default function Page() {
     categoryId: categoryId ?? undefined,
     dateFilter: (dateFilter || undefined) as DateFilter,
     search: search ?? undefined,
+    upvoted: upvotedFilter === "true" ? true : undefined,
     page,
     pageSize: PAGE_SIZE,
   });
@@ -69,19 +72,22 @@ export default function Page() {
   const prevCategoryRef = useRef(categoryId);
   const prevDateRef = useRef(dateFilter);
   const prevSearchRef = useRef(search);
+  const prevUpvotedRef = useRef(upvotedFilter);
   useEffect(() => {
     if (
       prevCategoryRef.current !== categoryId ||
       prevDateRef.current !== dateFilter ||
-      prevSearchRef.current !== search
+      prevSearchRef.current !== search ||
+      prevUpvotedRef.current !== upvotedFilter
     ) {
       prevCategoryRef.current = categoryId;
       prevDateRef.current = dateFilter;
       prevSearchRef.current = search;
+      prevUpvotedRef.current = upvotedFilter;
       filterResetRef.current = true;
       setPage(1);
     }
-  }, [categoryId, dateFilter, search, setPage]);
+  }, [categoryId, dateFilter, search, upvotedFilter, setPage]);
 
   // Sync debounced value → URL param
   useEffect(() => {
@@ -120,6 +126,8 @@ export default function Page() {
   useEffect(() => {
     if (!productsLoading && totalPages > 0 && page > totalPages) setPage(1);
   }, [productsLoading, totalPages, page, setPage]);
+
+  const isNouns = (name: string) => name.toLowerCase() === "nouns";
 
   return (
     <div>
@@ -173,14 +181,17 @@ export default function Page() {
         </WindowCard>
 
         <div className="mb-5 flex items-center justify-between gap-3 border-b-2 border-b-[#1C1C27] pb-2.5 flex-wrap" id="launch-tabs-section">
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
             {TIME_TABS.map((tab) => (
               <Button
                 key={tab.label}
                 variant={(dateFilter || null) === (tab.key || null) ? "ghost" : "outline"}
                 size="sm"
                 className={(dateFilter || null) === (tab.key || null) ? "bg-yellow" : ""}
-                onClick={() => setDateFilter(tab.key ?? null)}
+                onClick={() => {
+                  setDateFilter(tab.key ?? null);
+                  setUpvotedFilter(null);
+                }}
               >
                 {tab.label}
                 {productStats != null && tab.key == null && (
@@ -193,28 +204,46 @@ export default function Page() {
                 )}
               </Button>
             ))}
+            {user && (
+              <>
+                <div className="h-5 w-[1px] bg-[#1C1C27] opacity-20" />
+                <Button
+                  variant={upvotedFilter === "true" ? "ghost" : "outline"}
+                  size="sm"
+                  className={upvotedFilter === "true" ? "bg-[#D4EDDA]" : ""}
+                  onClick={() => {
+                    setUpvotedFilter(upvotedFilter === "true" ? null : "true");
+                    setDateFilter(null);
+                  }}
+                >
+                  ▲ Upvoted
+                </Button>
+              </>
+            )}
           </div>
-          <div
-            className="flex items-center gap-2 rounded-[8px] border-2 border-[#1C1C27] bg-white px-3.5 py-1.5 shadow-[2px_2px_0_#1C1C27] shrink-0"
-            style={{ width: 280 }}
-          >
-            <Search size={13} className="shrink-0 text-[#888]" />
-            <input
-              ref={searchRef}
-              className="flex-1 bg-transparent text-[13px] placeholder:text-[#aaa] focus:outline-none"
-              placeholder="Search projects..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Escape" && searchRef.current?.blur()}
-            />
-            <kbd className="shrink-0 rounded border border-[#D8D4CC] bg-[#F5F2EC] px-1.5 py-0.5 font-['Space_Mono',monospace] text-[10px] text-[#888]">
-              /
-            </kbd>
+          <div className="flex items-center gap-2 shrink-0">
+            <div
+              className="flex items-center gap-2 rounded-lg border-2 border-[#1C1C27] bg-white px-3.5 py-1.5 shadow-[2px_2px_0_#1C1C27]"
+              style={{ width: 280 }}
+            >
+              <Search size={13} className="shrink-0 text-[#888]" />
+              <input
+                ref={searchRef}
+                className="flex-1 bg-transparent text-[13px] placeholder:text-[#aaa] focus:outline-none"
+                placeholder="Search projects..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Escape" && searchRef.current?.blur()}
+              />
+              <kbd className="shrink-0 rounded border border-[#D8D4CC] bg-[#F5F2EC] px-1.5 py-0.5 font-['Space_Mono',monospace] text-[10px] text-[#888]">
+                /
+              </kbd>
+            </div>
           </div>
         </div>
 
         <div className="mb-2.5 flex gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
-          {[{ id: 0, name: "All" }, ...categories].map((c) => (
+          {[{ id: 0, name: "All" }, ...[...categories].sort((a, b) => (isNouns(a.name) ? 1 : isNouns(b.name) ? -1 : 0))].map((c) => (
             <Button
               key={c.id}
               variant={(categoryId ?? null) === (c.id || null) ? "ghost" : "outline"}
@@ -222,7 +251,11 @@ export default function Page() {
               className={`shrink-0 ${(categoryId ?? null) === (c.id || null) ? "bg-yellow" : ""}`}
               onClick={() => setCategoryId(c.id === 0 ? null : c.id)}
             >
-              {c.name}
+              {isNouns(c.name) ? (
+                <Image src="https://athenax.mypinx.store/Noggles.png" alt="Nouns" width={28} height={16} className="object-contain" />
+              ) : (
+                c.name
+              )}
             </Button>
           ))}
         </div>
@@ -267,15 +300,27 @@ export default function Page() {
               <div className="flex flex-wrap gap-5">
                 <div className="min-w-65 flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <Link href={`/launch/${product.slug}`} className="group flex items-center gap-2 no-underline" prefetch={false}>
-                      <Avatar className="size-7 rounded-md overflow-visible">
-                        <AvatarImage src={product.logo ?? undefined} alt={product.name} className="size-full object-contain" />
-                        <AvatarFallback className="rounded-md border border-[#D8D4CC] bg-paper text-xs font-bold">
-                          {product.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-bold text-xl text-ink group-hover:text-danger">{product.name}</span>
-                    </Link>
+                    {(!(product.categories ?? []).some((c) => isNouns(c.name)) || (user?.role as string) === "admin") ? (
+                      <Link href={`/launch/${product.slug}`} className="group flex items-center gap-2 no-underline" prefetch={false}>
+                        <Avatar className="size-7 rounded-md overflow-visible">
+                          <AvatarImage src={product.logo ?? undefined} alt={product.name} className="size-full object-contain" />
+                          <AvatarFallback className="rounded-md border border-[#D8D4CC] bg-paper text-xs font-bold">
+                            {product.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-bold text-xl text-ink group-hover:text-danger">{product.name}</span>
+                      </Link>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Avatar className="size-7 rounded-md overflow-visible">
+                          <AvatarImage src={product.logo ?? undefined} alt={product.name} className="size-full object-contain" />
+                          <AvatarFallback className="rounded-md border border-[#D8D4CC] bg-paper text-xs font-bold">
+                            {product.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-bold text-xl text-ink">{product.name}</span>
+                      </div>
+                    )}
                     {(product.categories ?? []).map((c) => (
                       <ProductBadge key={c.id} label={c.name} />
                     ))}
@@ -283,25 +328,27 @@ export default function Page() {
                       <ProductBadge key={name} label={name} type="subcategory" />
                     ))}
                     {product.qualityBadge && <ProductBadge label={product.qualityBadge} type="stage" />}
-                    {(product.stage != null || product.funding != null) && (
+                    {(product.stage != null || (product.funding != null && product.funding > 0)) && (
                       <ProductBadge
-                        label={[product.stage, product.funding != null ? `$${product.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
+                        label={[product.stage, product.funding != null && product.funding > 0 ? `$${product.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
                         type="stage"
                       />
                     )}
                   </div>
                   <p className="mb-2.5 text-[13px] leading-[1.6] text-[#1C1C27]">{product.shortDesc ?? product.description}</p>
 
-                  <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                  <div className="mt-1.5 flex flex-wrap items-center gap-4">
                     {product.founded != null && <span className="text-xs text-muted">Founded {product.founded}</span>}
                   </div>
                 </div>
 
                 <div className="flex shrink-0 flex-col justify-start gap-1.5 w-full sm:min-w-30 sm:w-auto">
                   <div className="flex gap-1.5 sm:flex-col">
-                    <Link href={`/launch/${product.slug}`} className={cn(buttonVariants({ size: "sm" }), "flex-1 no-underline")} prefetch={false}>
-                      View →
-                    </Link>
+                    {(!(product.categories ?? []).some((c) => isNouns(c.name)) || (user?.role as string) === "admin") && (
+                      <Link href={`/launch/${product.slug}`} className={cn(buttonVariants({ size: "sm" }), "flex-1 no-underline")} prefetch={false}>
+                        View →
+                      </Link>
+                    )}
                     <BookmarkButton user={user} launch={product} showToast={showToast} size="sm" useApi initialBookmarked={product.bookmarked} />
                   </div>
                 </div>

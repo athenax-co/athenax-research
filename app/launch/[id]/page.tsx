@@ -9,9 +9,11 @@ import { ProductBadge } from "@/components/ui/ProductBadge";
 import SEOMeta from "@/components/SEOMeta";
 import { IconShare } from "@/components/Icons";
 import { Bookmark, Pencil, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useGlobal } from "@/components/GlobalProvider";
 import VoteButton from "@/components/VoteButton";
 import { prettyUrl } from "@/utils/lib";
+import { cn } from "@/lib/utils";
 import {
   useProductBySlug,
   useInterestProduct,
@@ -327,18 +329,20 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
           <div className="shrink-0 flex w-full items-center gap-2 sm:w-auto max-[640px]:col-span-2">
             <VoteButton user={user} product={p} showToast={showToast} size="sm" initialVoted={p.voted} showLabel disabled={p.status !== ProductStatus.APPROVED} />
-            <button className="btn btn-ghost btn-sm flex-1 justify-center sm:flex-none" style={{ fontSize: 12 }} onClick={() => shareLaunch(p.slug)}>
+            <Button variant="ghost" size="sm" className="flex-1 justify-center sm:flex-none text-[12px]" onClick={() => shareLaunch(p.slug)}>
               <IconShare size={14} />
               Share
-            </button>
-            <button
-              className={`btn btn-ghost btn-sm aspect-square px-2 sm:flex-none ${p.bookmarked ? "text-[#B45309]" : ""}`}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className={cn(p.bookmarked ? "text-[#B45309]" : "", "disabled:opacity-60")}
               onClick={handleBookmark}
-              disabled={bookmarking}
+              disabled={bookmarking || p.status !== ProductStatus.APPROVED}
               title={p.bookmarked ? "Remove bookmark" : "Bookmark"}
             >
               <Bookmark size={15} fill={p.bookmarked ? "currentColor" : "none"} />
-            </button>
+            </Button>
           </div>
         </div>
 

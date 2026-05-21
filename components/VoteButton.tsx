@@ -46,9 +46,7 @@ const VoteButton = ({
         return {
           ...pages,
           pages: pages.pages.map((page: ProductOut[]) =>
-            page.map((p: ProductOut) =>
-              p.id === product.id ? { ...p, voteCount: Math.max(0, p.voteCount + (next ? 1 : -1)) } : p
-            )
+            page.map((p: ProductOut) => (p.id === product.id ? { ...p, voteCount: Math.max(0, p.voteCount + (next ? 1 : -1)) } : p))
           ),
         };
       });
@@ -70,7 +68,7 @@ const VoteButton = ({
     <Button
       variant={voted ? "ghost" : "outline"}
       size={size}
-      className={cn(voted ? "bg-[#D4EDDA]" : "", className)}
+      className={cn(voted ? "bg-[#D4EDDA]" : "", className, "disabled:cursor-not-allowed disabled:opacity-60")}
       onClick={toggle}
       disabled={loading || disabled}
     >

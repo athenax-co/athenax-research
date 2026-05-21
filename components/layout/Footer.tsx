@@ -3,6 +3,7 @@
 import { subscriberSvc } from "@/utils/lib";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { _globalShowToast, useGlobal } from "@/components/GlobalProvider";
 import { Button } from "@/components/ui/button";
 import BrandLogo from "@/components/layout/BrandLogo";
@@ -160,7 +161,7 @@ const Footer = () => {
         <div className="flex items-center gap-1.5">
           <span className="uppercase">Powered by</span>
           <Link href="https://nouns.wtf/" target="_blank" rel="noopener noreferrer">
-            <img src="https://athenax.mypinx.store/Noggles.png" alt="Noggles" className="h-4 w-auto" />
+            <Image src="https://athenax.mypinx.store/Noggles.png" alt="Noggles" width={56} height={16} className="h-4 w-auto" />
           </Link>
           {/* <span className="uppercase">Nouns</span> */}
         </div>

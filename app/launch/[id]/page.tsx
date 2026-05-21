@@ -326,7 +326,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           </div>
 
           <div className="shrink-0 flex w-full items-center gap-2 sm:w-auto max-[640px]:col-span-2">
-            <VoteButton user={user} product={p} showToast={showToast} size="sm" initialVoted={p.voted} showLabel />
+            <VoteButton user={user} product={p} showToast={showToast} size="sm" initialVoted={p.voted} showLabel disabled={p.status !== ProductStatus.APPROVED} />
             <button className="btn btn-ghost btn-sm flex-1 justify-center sm:flex-none" style={{ fontSize: 12 }} onClick={() => shareLaunch(p.slug)}>
               <IconShare size={14} />
               Share

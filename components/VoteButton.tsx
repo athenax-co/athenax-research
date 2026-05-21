@@ -13,6 +13,7 @@ const VoteButton = ({
   initialVoted,
   showLabel = false,
   className,
+  disabled = false,
 }: {
   user: any;
   product: ProductOut;
@@ -21,6 +22,7 @@ const VoteButton = ({
   initialVoted?: boolean | null;
   showLabel?: boolean;
   className?: string;
+  disabled?: boolean;
 }) => {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
@@ -70,7 +72,7 @@ const VoteButton = ({
       size={size}
       className={cn(voted ? "bg-[#D4EDDA]" : "", className)}
       onClick={toggle}
-      disabled={loading}
+      disabled={loading || disabled}
     >
       <span className="text-[14px] leading-none">{loading ? "…" : voted ? "✓" : "▲"}</span>
       {showLabel && <span className="ml-1">{voted ? "Voted" : "Upvote"}</span>}

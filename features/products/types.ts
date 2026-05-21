@@ -5,7 +5,6 @@ export type { ProductStatus };
 export interface ProductIn {
   name: string;
   url?: string;
-  github?: string;
   stage: string;
   funding: number;
   founded: number;
@@ -17,6 +16,7 @@ export interface ProductIn {
   subCategoryIds?: number[];
   otherSubcategoryName?: string;
   backers?: string[];
+  links?: ProductLinkIn[];
 }
 
 export interface CategoryRef {
@@ -134,6 +134,7 @@ export interface ProductUpdateIn {
   email?: string;
   categoryIds?: number[];
   subCategoryIds?: number[];
+  links?: ProductLinkIn[];
 }
 
 export interface ProductLinkIn {

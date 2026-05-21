@@ -178,7 +178,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
       await submitProductMutation({
         name: submitForm.name,
         url: submitForm.url || undefined,
-        github: submitForm.github || undefined,
+        links: submitForm.github ? [{ linkType: "github" as const, url: submitForm.github }] : undefined,
         stage: submitForm.stage,
         funding: Number(submitForm.funding) || 0,
         founded: Number(submitForm.founded) || new Date().getFullYear(),

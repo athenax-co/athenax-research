@@ -70,7 +70,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
   const { mutate: interest, isPending: registeringInterest } = useInterestProduct();
   const apiProductId = apiProduct?.id ?? 0;
-  const { data: similarProducts } = useSimilarProducts(apiProductId);
+  const { data: similarProducts } = useSimilarProducts(apiProductId, apiProduct?.status === ProductStatus.APPROVED);
   const { data: commentsData, fetchNextPage, hasNextPage, isFetchingNextPage } = useComments(apiProductId);
   const allComments = commentsData?.pages.flatMap((p) => p.items) ?? [];
   const commentsTotal = commentsData?.pages[0]?.total ?? 0;

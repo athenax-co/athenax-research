@@ -374,11 +374,11 @@ export function useSwapProductMedia(productId: number, slug: string) {
   });
 }
 
-export function useSimilarProducts(productId: number) {
+export function useSimilarProducts(productId: number, enabled = true) {
   return useQuery<ProductListItem[]>({
     queryKey: ["product", productId, "similar"],
     queryFn: () => productApi.getSimilarProducts(productId),
-    enabled: productId > 0,
+    enabled: productId > 0 && enabled,
     staleTime: 5 * 60 * 1000,
   });
 }

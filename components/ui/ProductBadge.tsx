@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -99,9 +100,18 @@ function ProductBadge({ label, type = "category", className }: ProductBadgeProps
       ? capitalizeLabel(label)
       : normalizeBadgeLabel(label);
 
+  const isNouns = type === "category" && normalizeBadgeLabel(label) === "NOUNS";
+
   return (
-    <Badge className={cn(baseClasses, type !== "stage" && type !== "tag" && "uppercase", toneClasses[tone], className)} variant="outline">
-      {displayLabel}
+    <Badge
+      className={cn(baseClasses, type !== "stage" && type !== "tag" && "uppercase", toneClasses[tone], isNouns && "bg-white", className)}
+      variant="outline"
+    >
+      {isNouns ? (
+        <Image src="https://athenax.mypinx.store/Noggles.png" alt="Nouns" width={20} height={12} className="object-contain" />
+      ) : (
+        displayLabel
+      )}
     </Badge>
   );
 }

@@ -300,15 +300,27 @@ export default function Page() {
               <div className="flex flex-wrap gap-5">
                 <div className="min-w-65 flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <Link href={`/launch/${product.slug}`} className="group flex items-center gap-2 no-underline" prefetch={false}>
-                      <Avatar className="size-7 rounded-md overflow-visible">
-                        <AvatarImage src={product.logo ?? undefined} alt={product.name} className="size-full object-contain" />
-                        <AvatarFallback className="rounded-md border border-[#D8D4CC] bg-paper text-xs font-bold">
-                          {product.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-bold text-xl text-ink group-hover:text-danger">{product.name}</span>
-                    </Link>
+                    {(product.categories ?? []).some((c) => isNouns(c.name)) ? (
+                      <div className="flex items-center gap-2">
+                        <Avatar className="size-7 rounded-md overflow-visible">
+                          <AvatarImage src={product.logo ?? undefined} alt={product.name} className="size-full object-contain" />
+                          <AvatarFallback className="rounded-md border border-[#D8D4CC] bg-paper text-xs font-bold">
+                            {product.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-bold text-xl text-ink">{product.name}</span>
+                      </div>
+                    ) : (
+                      <Link href={`/launch/${product.slug}`} className="group flex items-center gap-2 no-underline" prefetch={false}>
+                        <Avatar className="size-7 rounded-md overflow-visible">
+                          <AvatarImage src={product.logo ?? undefined} alt={product.name} className="size-full object-contain" />
+                          <AvatarFallback className="rounded-md border border-[#D8D4CC] bg-paper text-xs font-bold">
+                            {product.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-bold text-xl text-ink group-hover:text-danger">{product.name}</span>
+                      </Link>
+                    )}
                     {(product.categories ?? []).map((c) => (
                       <ProductBadge key={c.id} label={c.name} />
                     ))}
@@ -316,9 +328,9 @@ export default function Page() {
                       <ProductBadge key={name} label={name} type="subcategory" />
                     ))}
                     {product.qualityBadge && <ProductBadge label={product.qualityBadge} type="stage" />}
-                    {(product.stage != null || product.funding != null) && (
+                    {(product.stage != null || (product.funding != null && product.funding > 0)) && (
                       <ProductBadge
-                        label={[product.stage, product.funding != null ? `$${product.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
+                        label={[product.stage, product.funding != null && product.funding > 0 ? `$${product.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
                         type="stage"
                       />
                     )}
@@ -332,9 +344,11 @@ export default function Page() {
 
                 <div className="flex shrink-0 flex-col justify-start gap-1.5 w-full sm:min-w-30 sm:w-auto">
                   <div className="flex gap-1.5 sm:flex-col">
-                    <Link href={`/launch/${product.slug}`} className={cn(buttonVariants({ size: "sm" }), "flex-1 no-underline")} prefetch={false}>
-                      View →
-                    </Link>
+                    {(user?.role as string) === "admin" && (
+                      <Link href={`/launch/${product.slug}`} className={cn(buttonVariants({ size: "sm" }), "flex-1 no-underline")} prefetch={false}>
+                        View →
+                      </Link>
+                    )}
                     <BookmarkButton user={user} launch={product} showToast={showToast} size="sm" useApi initialBookmarked={product.bookmarked} />
                   </div>
                 </div>

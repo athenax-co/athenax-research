@@ -135,6 +135,7 @@ export interface ProductUpdateIn {
   categoryIds?: number[];
   subCategoryIds?: number[];
   links?: ProductLinkIn[];
+  backers?: string[];
 }
 
 export interface ProductLinkIn {

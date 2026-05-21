@@ -16,6 +16,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ProductStage, ProductLinkType } from "@/enums";
 import type { ProductDetailOut, ProductUpdateIn, ProductLinkIn } from "../types";
 import { Pencil, Trash2, Plus, Upload } from "lucide-react";
+import TagInput from "@/components/ui/TagInput";
 
 // ─── Edit Logo Dialog (LOGO.SYS) ─────────────────────────────────────────────
 
@@ -128,6 +129,7 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
         stage: product.stage ?? "",
         funding: product.funding ?? undefined,
         founded: product.founded ?? undefined,
+        backers: product.backers.map((b) => b.name),
       });
     }
   }, [open]);
@@ -212,6 +214,15 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
                 onChange={(e) => set("founded", e.target.value ? Number(e.target.value) : undefined)}
               />
             </div>
+          </div>
+
+          <div className="inp-group mb-0">
+            <label className="inp-label">Backers</label>
+            <TagInput
+              value={form.backers ?? []}
+              onChange={(vals) => set("backers", vals)}
+              placeholder="Type backer name and press Enter"
+            />
           </div>
         </DialogBody>
 

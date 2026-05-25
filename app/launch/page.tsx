@@ -5,7 +5,6 @@ import Image from "next/image";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
-import SEOMeta from "@/components/SEOMeta";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useEffect, useRef, useState } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -132,11 +131,7 @@ export default function Page() {
   return (
     <div>
       <div className="page-wrap section">
-        <SEOMeta
-          title="AthenaX Launch — Research-Backed Products Across Frontier Technology"
-          description="Discover research-backed products across AI, robotics, biotech, crypto, and infrastructure. Every founder is ARS-scored. Every product is grounded in indexed research."
-        />
-        <div className="path-badge">/root/launch</div>
+<div className="path-badge">/root/launch</div>
 
         <div className="mb-2 flex flex-wrap items-baseline justify-between gap-3">
           <div>

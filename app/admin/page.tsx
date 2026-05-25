@@ -78,7 +78,7 @@ export default function Page() {
     chips?: string[];
   } | null>(null);
 
-  const { data: pendingProductsData, isLoading: loadingPending } = usePagedProducts("pending", { page: launchPage, pageSize: LAUNCH_PAGE_SIZE });
+  const { data: pendingProductsData, isLoading: loadingPending, isFetching: fetchingPending, refetch: refetchPending } = usePagedProducts("pending", { page: launchPage, pageSize: LAUNCH_PAGE_SIZE });
   const pendingProducts = pendingProductsData?.items ?? [];
   const pendingProductsTotal = pendingProductsData?.total ?? 0;
   const launchTotalPages = Math.ceil(pendingProductsTotal / LAUNCH_PAGE_SIZE);
@@ -175,7 +175,7 @@ export default function Page() {
       {tab === "launches" && (
         <WindowCard label="LAUNCH_MODERATION.SYS">
           <div className="mb-3 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">PENDING LAUNCH SUBMISSIONS</div>
-          {loadingPending ? (
+          {loadingPending || fetchingPending ? (
             <p className="text-sm text-muted">Loading…</p>
           ) : pendingProducts.length === 0 ? (
             <p className="text-sm text-muted">No pending launches.</p>
@@ -190,13 +190,13 @@ export default function Page() {
                   onApprove={() =>
                     updateProductStatus(
                       { id: product.id, status: ProductStatus.APPROVED },
-                      { onSuccess: () => showToast(`Approved: ${product.name}`, "success"), onError: () => showToast("Action failed.", "error") }
+                      { onSuccess: () => { showToast(`Approved: ${product.name}`, "success"); refetchPending(); }, onError: () => showToast("Action failed.", "error") }
                     )
                   }
                   onReject={() =>
                     updateProductStatus(
                       { id: product.id, status: ProductStatus.REJECTED },
-                      { onSuccess: () => showToast(`Rejected: ${product.name}`, "info"), onError: () => showToast("Action failed.", "error") }
+                      { onSuccess: () => { showToast(`Rejected: ${product.name}`, "info"); refetchPending(); }, onError: () => showToast("Action failed.", "error") }
                     )
                   }
                   reviewHref={`/launch/${product.slug}`}

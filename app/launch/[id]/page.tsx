@@ -60,6 +60,7 @@ const LINK_LABELS: Record<string, string> = {
   docs: "Documentation",
   demo: "Demo",
   discord: "Discord",
+  other: "Other",
 };
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {

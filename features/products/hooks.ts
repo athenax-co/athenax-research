@@ -43,8 +43,12 @@ export function useProductStages() {
 }
 
 export function useSubmitProduct() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: ProductIn) => productApi.submitProduct(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
   });
 }
 

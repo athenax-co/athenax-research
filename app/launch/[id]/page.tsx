@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
 import { ProductBadge } from "@/components/ui/ProductBadge";
-import SEOMeta from "@/components/SEOMeta";
 import { IconShare } from "@/components/Icons";
 import { Bookmark, Pencil, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -61,6 +60,7 @@ const LINK_LABELS: Record<string, string> = {
   docs: "Documentation",
   demo: "Demo",
   discord: "Discord",
+  other: "Other",
 };
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
@@ -267,12 +267,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           </div>
         </div>
       )}
-
-      <SEOMeta
-        title={`${p.name} — ${primaryCategory} | AthenaX Launch`}
-        description={`${p.name} launched on AthenaX.${p.description ? ` ${p.description.slice(0, 120)}` : ""}`}
-        type="product"
-      />
 
       <div className="page-wrap section" style={{ maxWidth: 1100 }}>
         <div className="mb-6 flex flex-col-reverse items-start gap-3 sm:flex-row sm:flex-wrap sm:items-center">

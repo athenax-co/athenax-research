@@ -424,6 +424,19 @@ export default function Page() {
             </Link>
           </div>
         </WindowCard>
+
+        <WindowCard label="BROADCASTS.SYS">
+          <div className="mb-1 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">BROADCAST CONTENT</div>
+          <p className="mb-3 text-[13px] text-muted">Create, edit, and manage whitepapers, livestreams, and roundtables.</p>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/admin/broadcasts/editor" className={buttonVariants({ size: "sm" })}>
+              + Create New
+            </Link>
+            <Link href="/admin/broadcasts" className={buttonVariants({ variant: "outline", size: "sm" })}>
+              Manage →
+            </Link>
+          </div>
+        </WindowCard>
       </div>
     </div>
   );

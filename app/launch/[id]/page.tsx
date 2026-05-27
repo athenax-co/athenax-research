@@ -7,7 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
 import { ProductBadge } from "@/components/ui/ProductBadge";
 import { IconShare } from "@/components/Icons";
-import { Bookmark, Pencil, Plus } from "lucide-react";
+import { Bookmark, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGlobal } from "@/components/GlobalProvider";
 import VoteButton from "@/components/VoteButton";
@@ -41,6 +41,7 @@ import {
   useDeleteProductLink,
   useUploadProductLogo,
   useDeleteProductLogo,
+  useDeleteProduct,
   GallerySection,
   TeamSection,
   VoicesSection,
@@ -106,6 +107,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const [bountiesAddOpen, setBountiesAddOpen] = useState(false);
   const { mutate: uploadLogo, isPending: uploadingLogo } = useUploadProductLogo(apiProductId, id);
   const { mutate: deleteLogo, isPending: deletingLogo } = useDeleteProductLogo(apiProductId, id);
+  const { mutate: deleteProduct, isPending: deletingProduct } = useDeleteProduct();
   const { mutate: updateProduct, isPending: updatingProduct } = useUpdateProduct(id);
   const { mutate: createLink, isPending: creatingLink } = useCreateProductLink(apiProductId, id);
   const { mutate: updateLink, isPending: updatingLink } = useUpdateProductLink(apiProductId, id);
@@ -214,6 +216,17 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         onError: () => showToast("Action failed. Please try again.", "error"),
       }
     );
+  };
+
+  const handleDeleteProduct = () => {
+    if (!confirm(`Are you sure you want to delete "${p.name}"? This will permanently remove the project and cannot be undone.`)) return;
+    deleteProduct(p.id, {
+      onSuccess: () => {
+        showToast(`"${p.name}" has been deleted.`, "info");
+        router.push("/launch");
+      },
+      onError: () => showToast("Delete failed. Please try again.", "error"),
+    });
   };
 
   const factRows = [
@@ -346,14 +359,25 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             className="md:row-span-2"
             titleRight={
               isAdmin && (
-                <button
-                  type="button"
-                  onClick={() => setEditInfoOpen(true)}
-                  className="ml-auto p-1 text-[#888] transition-colors hover:text-ink"
-                  title="Edit"
-                >
-                  <Pencil size={12} />
-                </button>
+                <div className="ml-auto flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setEditInfoOpen(true)}
+                    className="p-1 text-[#888] transition-colors hover:text-ink"
+                    title="Edit"
+                  >
+                    <Pencil size={12} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteProduct}
+                    disabled={deletingProduct}
+                    className="p-1 text-[#888] transition-colors hover:text-red-500 disabled:opacity-40"
+                    title="Delete product"
+                  >
+                    {deletingProduct ? <span className="spinner" /> : <Trash2 size={12} />}
+                  </button>
+                </div>
               )
             }
           >

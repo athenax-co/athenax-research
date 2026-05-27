@@ -195,3 +195,7 @@ export async function uploadProductLogo(productId: number, file: File): Promise<
 export function deleteProductLogo(productId: number): Promise<void> {
   return http.del<void>(`/product/${productId}/logo`, { auth: true });
 }
+
+export function deleteProduct(id: number): Promise<void> {
+  return http.del<void>(`/product/${id}`, { auth: true });
+}

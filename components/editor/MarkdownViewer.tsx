@@ -2,7 +2,7 @@
 
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/utils/lib";
-import { slugify } from "@/lib/api";
+import { slugify } from "@/utils/lib";
 
 function nodeText(children: React.ReactNode): string {
   if (typeof children === "string" || typeof children === "number") return String(children);

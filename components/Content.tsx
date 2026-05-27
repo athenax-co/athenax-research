@@ -53,7 +53,7 @@ export const ContentRow = ({
   const tags: string[] = item.tags ?? [];
   const hasBadges =
     (kind === "article" && (item.articleType || tags.length > 0)) ||
-    (kind === "broadcast" && !!item.videoType);
+    (kind === "broadcast" && !!(item.broadcastType ?? item.videoType));
 
   return (
     <div className="archive-row" onClick={onClick}>
@@ -65,7 +65,12 @@ export const ContentRow = ({
         </div>
         <div className="mt-1.5 flex flex-wrap items-center gap-2">
           {kind === "article" && item.articleType && <ProductBadge label={item.articleType} type="kind" />}
-          {kind === "broadcast" && item.videoType && <ProductBadge label={formatVideoType(item.videoType)} type="kind" />}
+          {kind === "broadcast" && (item.broadcastType ?? item.videoType) && (
+            <ProductBadge
+              label={item.broadcastType ?? formatVideoType(item.videoType)}
+              type="kind"
+            />
+          )}
           {tags.map((tag) => (
             <ProductBadge key={tag} label={tag} type="tag" />
           ))}

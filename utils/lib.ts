@@ -25,6 +25,10 @@ export function formatSubmittedDateTime(value: string | number | Date) {
   }).format(new Date(value));
 }
 
+// ── Utility: Slugify a string ───────────────────────────────────────────────
+export const slugify = (text: string) =>
+  text.toLowerCase().replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-");
+
 // ── Utility: Strip protocol, leading www, trailing slash, and twitter→x for display ───
 export function prettyUrl(url: string): string {
   return url

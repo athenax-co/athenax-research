@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/utils/lib";
-import type { TOCHeading } from "@/lib/api";
+import type { TOCHeading } from "../utils";
 import WindowCard from "@/components/ui/WindowCard";
 
 export default function ArticleTOC({ headings }: { headings: TOCHeading[] }) {

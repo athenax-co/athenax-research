@@ -158,7 +158,7 @@ export default function Page() {
             {[
               { label: "Launches This Month", value: productStats?.releases.thisMonth ?? null },
               { label: "Categories", value: categories.length || null },
-              { label: "Investor Intros Made", value: 8 },
+              { label: "Investor Intros Made", value: 11 },
             ].map((s, index, array) => (
               <div
                 key={s.label}

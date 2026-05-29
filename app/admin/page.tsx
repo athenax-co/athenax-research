@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useQueryState, parseAsInteger } from "nuqs";
 import WindowCard from "@/components/ui/WindowCard";
 import { Dialog, DialogBody, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrafficLights } from "@/components/ui/Dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import { PaperVerificationStatus, ProductStatus } from "@/enums";
 import { cn } from "@/utils/lib";
 import { ProductBadge } from "@/components/ui/ProductBadge";
 import Pagination from "@/components/ui/Pagination";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 type AdminTab = "launches" | "papers" | "cohorts" | "bounties" | "platform";
 
@@ -21,6 +23,7 @@ const LAUNCH_PAGE_SIZE = 20;
 type QueueRowProps = {
   name: string;
   meta: string;
+  logo?: string | null;
   chips?: string[];
   onApprove: () => void;
   onReject: () => void;
@@ -28,12 +31,22 @@ type QueueRowProps = {
   onReview?: () => void;
 };
 
-function QueueRow({ name, meta, chips = [], onApprove, onReject, reviewHref, onReview }: QueueRowProps) {
+function QueueRow({ name, meta, logo, chips = [], onApprove, onReject, reviewHref, onReview }: QueueRowProps) {
   return (
     <div className="flex flex-wrap items-center gap-3 border-b border-[#D8D4CC] py-3 last:border-b-0">
+      <Avatar className="size-9 rounded border border-[#D8D4CC]">
+        <AvatarImage src={logo ?? undefined} alt={name} className="object-contain" />
+        <AvatarFallback className="rounded text-[13px] font-semibold bg-white">{name[0]?.toUpperCase()}</AvatarFallback>
+      </Avatar>
       <div className="min-w-0 flex-1">
         <div className="flex gap-4">
-          <div className="mb-1 text-[15px] font-semibold text-ink">{name}</div>
+          {reviewHref ? (
+            <Link href={reviewHref} className="mb-1 text-[15px] font-semibold text-ink hover:text-danger">
+              {name}
+            </Link>
+          ) : (
+            <div className="mb-1 text-[15px] font-semibold text-ink">{name}</div>
+          )}
           {chips.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {chips.map((chip) => (
@@ -69,7 +82,7 @@ function QueueRow({ name, meta, chips = [], onApprove, onReject, reviewHref, onR
 export default function Page() {
   const { user, showToast, handleAuthClick } = useGlobal();
   const [tab, setTab] = useState<AdminTab>("launches");
-  const [launchPage, setLaunchPage] = useState(1);
+  const [launchPage, setLaunchPage] = useQueryState("page", parseAsInteger.withDefault(1).withOptions({ scroll: false, shallow: true }));
   const [reviewItem, setReviewItem] = useState<{
     title: string;
     description?: string;
@@ -185,6 +198,7 @@ export default function Page() {
                 <QueueRow
                   key={product.id}
                   name={product.name}
+                  logo={product.logo}
                   meta={`${product.stage ?? "—"} · Funding ${product.funding != null ? `$${product.funding.toLocaleString()}` : "—"} · Founded ${product.founded ?? "—"} · Submitted ${new Date(product.createdAt).toLocaleDateString("en-CA")}${product.pendingSubcategoryName ? ` · ⚠ Custom sub-category: ${product.pendingSubcategoryName}` : ""}`}
                   chips={(product.categories ?? []).map((category) => category.name)}
                   onApprove={() =>

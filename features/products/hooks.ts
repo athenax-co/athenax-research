@@ -43,8 +43,12 @@ export function useProductStages() {
 }
 
 export function useSubmitProduct() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: ProductIn) => productApi.submitProduct(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
   });
 }
 
@@ -437,5 +441,15 @@ export function useDeleteProductLogo(productId: number, slug: string) {
   return useMutation({
     mutationFn: () => productApi.deleteProductLogo(productId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
+export function useDeleteProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => productApi.deleteProduct(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
   });
 }

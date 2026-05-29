@@ -5,7 +5,6 @@ import Image from "next/image";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
 import BookmarkButton from "@/components/BookmarkButton";
-import SEOMeta from "@/components/SEOMeta";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useEffect, useRef, useState } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -17,6 +16,7 @@ import SubmitProductButton from "@/components/SubmitProductModal";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { usePagedProducts, useProductStats } from "@/features/products";
+import Pagination from "@/components/ui/Pagination";
 import { ProductBadge } from "@/components/ui/ProductBadge";
 
 type DateFilter = "today" | "this_week" | "this_month" | undefined;
@@ -132,11 +132,7 @@ export default function Page() {
   return (
     <div>
       <div className="page-wrap section">
-        <SEOMeta
-          title="AthenaX Launch — Research-Backed Products Across Frontier Technology"
-          description="Discover research-backed products across AI, robotics, biotech, crypto, and infrastructure. Every founder is ARS-scored. Every product is grounded in indexed research."
-        />
-        <div className="path-badge">/root/launch</div>
+<div className="path-badge">/root/launch</div>
 
         <div className="mb-2 flex flex-wrap items-baseline justify-between gap-3">
           <div>
@@ -162,7 +158,7 @@ export default function Page() {
             {[
               { label: "Launches This Month", value: productStats?.releases.thisMonth ?? null },
               { label: "Categories", value: categories.length || null },
-              { label: "Investor Intros Made", value: 8 },
+              { label: "Investor Intros Made", value: 11 },
             ].map((s, index, array) => (
               <div
                 key={s.label}
@@ -356,46 +352,7 @@ export default function Page() {
             </div>
           ))}
 
-        {totalPages >= 1 && (
-          <div className="mt-8 mb-7 flex items-center justify-center gap-1.5 flex-wrap">
-            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(Math.max(1, page - 1))}>
-              ← Prev
-            </Button>
-            {(() => {
-              const items: (number | "ellipsis")[] = [];
-              const delta = 1; // neighbours on each side of current page
-              const rangeStart = Math.max(2, page - delta);
-              const rangeEnd = Math.min(totalPages - 1, page + delta);
-
-              items.push(1);
-              if (rangeStart > 2) items.push("ellipsis");
-              for (let i = rangeStart; i <= rangeEnd; i++) items.push(i);
-              if (rangeEnd < totalPages - 1) items.push("ellipsis");
-              if (totalPages > 1) items.push(totalPages);
-
-              return items.map((item, idx) =>
-                item === "ellipsis" ? (
-                  <span key={`ellipsis-${idx}`} className="font-['Space_Mono',monospace] text-xs text-muted px-1 select-none">
-                    ···
-                  </span>
-                ) : (
-                  <Button
-                    key={item}
-                    variant={item === page ? "ghost" : "outline"}
-                    size="sm"
-                    className={cn("min-w-8", item === page ? "bg-yellow font-bold" : "")}
-                    onClick={() => setPage(item)}
-                  >
-                    {item}
-                  </Button>
-                )
-              );
-            })()}
-            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(Math.min(totalPages, page + 1))}>
-              Next →
-            </Button>
-          </div>
-        )}
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-8 mb-7" />
 
         <WindowCard label="LAUNCH_TIERS.SYS" className="mt-20 hidden">
           <div className="mb-4 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">LAUNCH PROMOTION TIERS</div>

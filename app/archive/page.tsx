@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useQueryState, parseAsString } from "nuqs";
 import { ContentListState, ContentRow } from "@/components/Content";
 import { useArticlesList } from "@/features/articles";
-import { ArticleType } from "@/enums";
-import { useBroadcasts } from "@/hooks/queries/useContent";
+import { ArticleType, BroadcastType } from "@/enums";
+import { useBroadcastsList } from "@/features/broadcasts";
 import { Button } from "@/components/ui/button";
 
 const TABS = [
@@ -20,11 +20,11 @@ const TYPE_FILTERS: { value: ArticleType | null; label: string }[] = [
   { value: ArticleType.ROUNDTABLE, label: "Roundtable" },
 ];
 
-const BROADCAST_FILTERS: { value: string | null; label: string }[] = [
+const BROADCAST_FILTERS: { value: BroadcastType | null; label: string }[] = [
   { value: null, label: "All" },
-  { value: "whitepaper_reading", label: "Whitepaper" },
-  { value: "live_stream", label: "Livestream" },
-  { value: "roundtable", label: "Roundtable" },
+  { value: BroadcastType.WHITEPAPER, label: "Whitepaper" },
+  { value: BroadcastType.LIVESTREAM, label: "Livestream" },
+  { value: BroadcastType.ROUNDTABLE, label: "Roundtable" },
 ];
 
 const ArchivePage = () => {
@@ -33,14 +33,14 @@ const ArchivePage = () => {
   const [broadcastFilter, setBroadcastFilter] = useQueryState("btype", parseAsString);
 
   const activeType = (typeFilter as ArticleType | null) ?? null;
-  const activeBroadcastType = broadcastFilter ?? null;
+  const activeBroadcastType = (broadcastFilter as BroadcastType | null) ?? null;
 
   const { data: items = [], isLoading, isError } = useArticlesList({ articleType: activeType ?? undefined });
-  const { data: allBroadcasts = [], isLoading: broadcastsLoading, isError: broadcastsError } = useBroadcasts();
-
-  const broadcasts = activeBroadcastType
-    ? (allBroadcasts as any[]).filter((b) => b.videoType === activeBroadcastType)
-    : (allBroadcasts as any[]);
+  const {
+    data: broadcasts = [],
+    isLoading: broadcastsLoading,
+    isError: broadcastsError,
+  } = useBroadcastsList(activeBroadcastType ? { broadcastType: activeBroadcastType } : undefined);
 
   return (
     <div>
@@ -125,16 +125,16 @@ const ArchivePage = () => {
                 loading={broadcastsLoading}
                 error={broadcastsError ? "Could not load broadcasts right now." : ""}
                 emptyText={
-                  activeBroadcastType === "whitepaper_reading" ? "No whitepaper readings available yet." :
-                  activeBroadcastType === "live_stream" ? "No live streams available yet." :
-                  activeBroadcastType === "roundtable" ? "No roundtables available yet." :
+                  activeBroadcastType === BroadcastType.WHITEPAPER ? "No whitepaper readings available yet." :
+                  activeBroadcastType === BroadcastType.LIVESTREAM ? "No live streams available yet." :
+                  activeBroadcastType === BroadcastType.ROUNDTABLE ? "No roundtables available yet." :
                   "No broadcast videos available yet."
                 }
               />
             ) : (
               <div>
                 {broadcasts.map((item) => (
-                  <Link key={item.id || item.slug} href={item.id ? `/archive/broadcast/${item.id}` : `/archive/${item.slug}`} className="no-underline">
+                  <Link key={item.id} href={`/archive/broadcast/${item.slug}`} className="no-underline">
                     <ContentRow item={item} kind="broadcast" onClick={() => {}} />
                   </Link>
                 ))}

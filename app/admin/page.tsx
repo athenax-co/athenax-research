@@ -6,14 +6,17 @@ import WindowCard from "@/components/ui/WindowCard";
 import { Dialog, DialogBody, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrafficLights } from "@/components/ui/Dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useGlobal } from "@/components/GlobalProvider";
-import { useProducts, useUpdateProductStatus } from "@/features/products";
+import { usePagedProducts, useUpdateProductStatus } from "@/features/products";
 import { usePapers, useUpdatePaperVerificationStatus } from "@/features/papers";
 import { SEED_BOUNTIES, SEED_LAUNCHES, SEED_PAPERS, SEED_RESEARCHERS, SEED_SPONSORS, SEED_STARTUPS } from "@/data/seed";
 import { PaperVerificationStatus, ProductStatus } from "@/enums";
 import { cn } from "@/utils/lib";
 import { ProductBadge } from "@/components/ui/ProductBadge";
+import Pagination from "@/components/ui/Pagination";
 
 type AdminTab = "launches" | "papers" | "cohorts" | "bounties" | "platform";
+
+const LAUNCH_PAGE_SIZE = 20;
 
 type QueueRowProps = {
   name: string;
@@ -66,6 +69,7 @@ function QueueRow({ name, meta, chips = [], onApprove, onReject, reviewHref, onR
 export default function Page() {
   const { user, showToast, handleAuthClick } = useGlobal();
   const [tab, setTab] = useState<AdminTab>("launches");
+  const [launchPage, setLaunchPage] = useState(1);
   const [reviewItem, setReviewItem] = useState<{
     title: string;
     description?: string;
@@ -74,9 +78,10 @@ export default function Page() {
     chips?: string[];
   } | null>(null);
 
-  const { data: pendingProductsData } = useProducts("pending");
+  const { data: pendingProductsData, isLoading: loadingPending, isFetching: fetchingPending, refetch: refetchPending } = usePagedProducts("pending", { page: launchPage, pageSize: LAUNCH_PAGE_SIZE });
   const pendingProducts = pendingProductsData?.items ?? [];
-  const loadingPending = false;
+  const pendingProductsTotal = pendingProductsData?.total ?? 0;
+  const launchTotalPages = Math.ceil(pendingProductsTotal / LAUNCH_PAGE_SIZE);
   const { data: pendingPapers = [], isLoading: loadingPapers } = usePapers(50, 0, PaperVerificationStatus.PENDING);
   const { mutate: updateVerification } = useUpdatePaperVerificationStatus();
   const { mutate: updateProductStatus } = useUpdateProductStatus();
@@ -106,7 +111,7 @@ export default function Page() {
   ];
 
   const tabs: { id: AdminTab; label: string; count: number }[] = [
-    { id: "launches", label: "Launch Queue", count: pendingProducts.length },
+    { id: "launches", label: "Launch Queue", count: pendingProductsTotal },
     { id: "papers", label: "Paper Queue", count: pendingPapers.length },
     { id: "cohorts", label: "Cohort Apps", count: pendingCohorts.length },
     { id: "bounties", label: "Bounty Review", count: pendingBounties.length },
@@ -140,7 +145,7 @@ export default function Page() {
 
       <div className="mb-7 grid grid-cols-2 gap-3.5 sm:grid-cols-4">
         {[
-          { label: "Pending Launches", value: pendingProducts.length, tone: "text-[#E8323C]" },
+          { label: "Pending Launches", value: pendingProductsTotal, tone: "text-[#E8323C]" },
           { label: "Pending Papers", value: pendingPapers.length, tone: "text-[#E8323C]" },
           { label: "Cohort Apps", value: pendingCohorts.length, tone: "text-[#E8323C]" },
           { label: "Open Bounties", value: SEED_BOUNTIES.length, tone: "text-[#15803D]" },
@@ -159,7 +164,7 @@ export default function Page() {
             size="sm"
             variant={tab === id ? "ghost" : "outline"}
             className={tab === id ? "bg-yellow" : undefined}
-            onClick={() => setTab(id)}
+            onClick={() => { setTab(id); if (id === "launches") setLaunchPage(1); }}
           >
             {label}
             {count > 0 && <span className="ml-1 font-['Space_Mono',monospace] text-[10px] font-bold text-[#E8323C]">({count})</span>}
@@ -170,32 +175,35 @@ export default function Page() {
       {tab === "launches" && (
         <WindowCard label="LAUNCH_MODERATION.SYS">
           <div className="mb-3 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">PENDING LAUNCH SUBMISSIONS</div>
-          {loadingPending ? (
+          {loadingPending || fetchingPending ? (
             <p className="text-sm text-muted">Loading…</p>
           ) : pendingProducts.length === 0 ? (
             <p className="text-sm text-muted">No pending launches.</p>
           ) : (
-            pendingProducts.map((product) => (
-              <QueueRow
-                key={product.id}
-                name={product.name}
-                meta={`${product.stage ?? "—"} · Funding ${product.funding != null ? `$${product.funding.toLocaleString()}` : "—"} · Founded ${product.founded ?? "—"} · Submitted ${new Date(product.createdAt).toLocaleDateString("en-CA")}${product.pendingSubcategoryName ? ` · ⚠ Custom sub-category: ${product.pendingSubcategoryName}` : ""}`}
-                chips={(product.categories ?? []).map((category) => category.name)}
-                onApprove={() =>
-                  updateProductStatus(
-                    { id: product.id, status: ProductStatus.APPROVED },
-                    { onSuccess: () => showToast(`Approved: ${product.name}`, "success"), onError: () => showToast("Action failed.", "error") }
-                  )
-                }
-                onReject={() =>
-                  updateProductStatus(
-                    { id: product.id, status: ProductStatus.REJECTED },
-                    { onSuccess: () => showToast(`Rejected: ${product.name}`, "info"), onError: () => showToast("Action failed.", "error") }
-                  )
-                }
-                reviewHref={`/launch/${product.slug}`}
-              />
-            ))
+            <>
+              {pendingProducts.map((product) => (
+                <QueueRow
+                  key={product.id}
+                  name={product.name}
+                  meta={`${product.stage ?? "—"} · Funding ${product.funding != null ? `$${product.funding.toLocaleString()}` : "—"} · Founded ${product.founded ?? "—"} · Submitted ${new Date(product.createdAt).toLocaleDateString("en-CA")}${product.pendingSubcategoryName ? ` · ⚠ Custom sub-category: ${product.pendingSubcategoryName}` : ""}`}
+                  chips={(product.categories ?? []).map((category) => category.name)}
+                  onApprove={() =>
+                    updateProductStatus(
+                      { id: product.id, status: ProductStatus.APPROVED },
+                      { onSuccess: () => { showToast(`Approved: ${product.name}`, "success"); refetchPending(); }, onError: () => showToast("Action failed.", "error") }
+                    )
+                  }
+                  onReject={() =>
+                    updateProductStatus(
+                      { id: product.id, status: ProductStatus.REJECTED },
+                      { onSuccess: () => { showToast(`Rejected: ${product.name}`, "info"); refetchPending(); }, onError: () => showToast("Action failed.", "error") }
+                    )
+                  }
+                  reviewHref={`/launch/${product.slug}`}
+                />
+              ))}
+              <Pagination page={launchPage} totalPages={launchTotalPages} onPageChange={setLaunchPage} className="mt-4 border-t border-[#D8D4CC] pt-3" />
+            </>
           )}
         </WindowCard>
       )}
@@ -412,6 +420,19 @@ export default function Page() {
               + Create New
             </Link>
             <Link href="/admin/articles" className={buttonVariants({ variant: "outline", size: "sm" })}>
+              Manage →
+            </Link>
+          </div>
+        </WindowCard>
+
+        <WindowCard label="BROADCASTS.SYS">
+          <div className="mb-1 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">BROADCAST CONTENT</div>
+          <p className="mb-3 text-[13px] text-muted">Create, edit, and manage whitepapers, livestreams, and roundtables.</p>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/admin/broadcasts/editor" className={buttonVariants({ size: "sm" })}>
+              + Create New
+            </Link>
+            <Link href="/admin/broadcasts" className={buttonVariants({ variant: "outline", size: "sm" })}>
               Manage →
             </Link>
           </div>

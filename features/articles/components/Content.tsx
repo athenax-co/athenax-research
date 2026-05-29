@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { formatContentDate, extractMarkdownHeadings, estimateReadTime } from "@/lib/api";
+import { formatContentDate, estimateReadTime } from "@/lib/api";
+import { extractMarkdownHeadings } from "../utils";
 import { ArticleType } from "@/enums";
 import WindowCard from "@/components/ui/WindowCard";
 import { ContentListState, ContentRow } from "@/components/Content";

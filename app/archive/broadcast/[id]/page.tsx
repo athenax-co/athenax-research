@@ -1,11 +1,11 @@
 import Link from "next/link";
 import WindowCard from "@/components/ui/WindowCard";
-import { extractContentText, formatContentDate, getBroadcastById } from "@/lib/api";
+import { formatContentDate } from "@/lib/api";
 import { ProductBadge } from "@/components/ui/ProductBadge";
-import { VIDEO_TYPE_ARTICLE_TYPE, ARTICLE_TYPE_LABEL } from "@/components/ui/ArticleMeta";
 import { ShareButton } from "@/components/ui/ShareButton";
+import { getBroadcastBySlug } from "@/features/broadcasts";
 
-const toEmbedUrl = (value?: string) => {
+const toEmbedUrl = (value?: string | null) => {
   if (!value) return "";
 
   try {
@@ -37,7 +37,13 @@ const toEmbedUrl = (value?: string) => {
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const item = await getBroadcastById(id);
+
+  let item;
+  try {
+    item = await getBroadcastBySlug(id);
+  } catch {
+    item = null;
+  }
 
   if (!item) {
     return (
@@ -47,15 +53,12 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     );
   }
 
-  const { type = "Video", videoType, originDate, publishedAt, date, content, description, body, embedUrl: rawEmbedUrl, title, slug } = item;
+  const { title, slug, broadcastType, originDate, publishedAt, description, embedUrl: rawEmbedUrl, tags } = item;
 
-  const itemDate = originDate || publishedAt || date;
-  const contentBlocks = extractContentText(content || description || body);
+  const itemDate = originDate || publishedAt;
   const embedUrl = toEmbedUrl(rawEmbedUrl);
-
-  const articleTypeKey = videoType ? (VIDEO_TYPE_ARTICLE_TYPE[videoType] ?? null) : null;
-  const badgeLabel = articleTypeKey ? (ARTICLE_TYPE_LABEL[articleTypeKey] ?? videoType) : videoType;
-  const shareUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/archive/broadcast/${id}`;
+  const descParagraphs = description ? description.split(/\n\n+/).filter(Boolean) : [];
+  const shareUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/archive/broadcast/${slug}`;
 
   return (
     <div className="w-full">
@@ -66,13 +69,14 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
               <Link href="/archive?tab=broadcast" className="link-arrow inline-flex">
                 ← Back to Broadcast
               </Link>
-              <div className="path-badge mb-0">/root/archive/broadcast/{slug || id}</div>
+              <div className="path-badge mb-0">/root/archive/broadcast/{slug}</div>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
-              {badgeLabel && <ProductBadge label={badgeLabel} type="kind" />}
-              {badgeLabel && <span className="text-sm text-muted">·</span>}
-              <span className="text-sm text-muted">{String(formatContentDate(itemDate))}</span>
+              {broadcastType && <ProductBadge label={broadcastType} type="kind" />}
+              {tags.map((tag) => <ProductBadge key={tag} label={tag} type="tag" />)}
+              {(broadcastType || tags.length > 0) && <span className="text-sm text-muted">·</span>}
+              <span className="text-sm text-muted">{String(formatContentDate(itemDate ?? ""))}</span>
             </div>
 
             <div className="flex items-start justify-between gap-4 mt-4">
@@ -88,26 +92,22 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             <hr className="border-0 border-t border-[#D8D4CC] mt-5" />
           </div>
 
-          {type === "Video" && (
+          {embedUrl && (
             <div className="mb-7 overflow-hidden rounded-[14px] border-2 border-ink bg-ink shadow-[5px_5px_0_#1C1C27]">
-              {embedUrl ? (
-                <iframe
-                  className="aspect-video w-full"
-                  src={embedUrl}
-                  title={title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              ) : (
-                <div className="flex aspect-video items-center justify-center text-white/50">VIDEO PREVIEW UNAVAILABLE</div>
-              )}
+              <iframe
+                className="aspect-video w-full"
+                src={embedUrl}
+                title={title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
             </div>
           )}
 
-          <WindowCard label={`${type.toUpperCase()}_CONTENT.TXT`}>
-            {contentBlocks.length ? (
-              contentBlocks.map((block, i) => (
-                <p key={i} className={`text-base leading-[1.8] text-ink ${i === contentBlocks.length - 1 ? "mb-0" : "mb-4.5"}`}>
+          <WindowCard label="BROADCAST_CONTENT.TXT">
+            {descParagraphs.length > 0 ? (
+              descParagraphs.map((block, i) => (
+                <p key={i} className={`text-base leading-[1.8] text-ink ${i === descParagraphs.length - 1 ? "mb-0" : "mb-4.5"}`}>
                   {block}
                 </p>
               ))

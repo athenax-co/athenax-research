@@ -12,12 +12,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
     const title = `${product.name} - AthenaX`;
     const description: string = product.shortDesc ?? (product.description as string | undefined)?.slice(0, 160) ?? "";
+    const version = encodeURIComponent(product.updatedAt ?? "");
+    const ogImage = `/og/launch/${slug}${version ? `?v=${version}` : ""}`;
 
     return {
       title,
       description,
-      openGraph: { title, description, images: ["/AthenaX_OG.jpg"] },
-      twitter: { card: "summary_large_image", title, description, images: ["/AthenaX_OG.jpg"] },
+      openGraph: { title, description, images: [{ url: ogImage, width: 1200, height: 800, alt: product.name }] },
+      twitter: { card: "summary_large_image", title, description, images: [ogImage] },
     };
   } catch {
     return { title: "AthenaX — Discovery Platform for Frontier Products" };

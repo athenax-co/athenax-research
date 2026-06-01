@@ -58,10 +58,11 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
             ref={fileRef}
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif"
+            multiple
             className="hidden"
             onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file && onUpload) onUpload(file);
+              const files = Array.from(e.target.files ?? []);
+              if (onUpload) files.forEach((file) => onUpload(file));
               e.target.value = "";
             }}
           />
@@ -100,7 +101,7 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
                   </button>
                   <button
                     className="p-1 text-[#aaa] hover:text-[#E8323C]"
-                    onClick={() => onDelete?.(img.id)}
+                    onClick={() => { if (confirm("Delete this image?")) onDelete?.(img.id); }}
                     title="Delete"
                   >
                     <Trash2 size={13} />
@@ -677,7 +678,7 @@ export function VoicesSection({
                     <button onClick={() => openEdit(v)} className="text-[#6B6B7A] hover:text-ink" title="Edit">
                       <Pencil size={13} />
                     </button>
-                    <button onClick={() => onDelete(v.id)} className="text-[#aaa] hover:text-[#E8323C]" title="Delete">
+                    <button onClick={() => { if (confirm("Delete this video?")) onDelete(v.id); }} className="text-[#aaa] hover:text-[#E8323C]" title="Delete">
                       <Trash2 size={13} />
                     </button>
                   </>
@@ -882,7 +883,7 @@ export function BountiesSection({
               ${Number(b.rewardAmount).toLocaleString()}
             </a>
             {isAdmin && (
-              <button onClick={() => onDelete(b.id)} className="text-[#aaa] hover:text-[#E8323C]" title="Delete">
+              <button onClick={() => { if (confirm("Delete this bounty?")) onDelete(b.id); }} className="text-[#aaa] hover:text-[#E8323C]" title="Delete">
                 <Trash2 size={13} />
               </button>
             )}

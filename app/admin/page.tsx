@@ -120,7 +120,7 @@ export default function Page() {
   const pendingBounties = SEED_BOUNTIES.slice(0, 1).map((bounty) => ({ ...bounty, status: "pending_review" }));
   const pendingCohorts = [
     { id: "ca_1", name: "Dr. Sana Mirza", product: "NeuroBench", track: "AI Safety", ars: 7.2, submitted: "2025-03-13" },
-    { id: "ca_2", name: "Team QuantumNet", product: "ProofNet", track: "Crypto & DeFi", ars: 6.8, submitted: "2025-03-12" },
+    { id: "ca_2", name: "Team QuantumNet", product: "ProofNet", track: "Crypto", ars: 6.8, submitted: "2025-03-12" },
   ];
 
   const tabs: { id: AdminTab; label: string; count: number }[] = [

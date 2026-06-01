@@ -32,7 +32,7 @@ type ProductBadgeProps = {
 const CATEGORY_TONE_MAP: Record<string, ProductBadgeTone> = {
   "AI & AGENTS":     "ai-agents",
   "DEVELOPER TOOLS": "dev-tools",
-  "CRYPTO & DEFI":   "crypto",
+  "CRYPTO":   "crypto",
   ROBOTICS:          "robotics",
   BIOTECH:           "biotech",
   INFRASTRUCTURE:    "infrastructure",

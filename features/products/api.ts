@@ -20,7 +20,7 @@ export interface ProductFilters {
   status?: ProductStatus;
   category_id?: number;
   date_filter?: "today" | "this_week" | "this_month" | "this_year";
-  sort_by?: "newest" | "top";
+  sort_by?: "newest" | "top" | "oldest";
   q?: string;
   limit?: number;
   offset?: number;

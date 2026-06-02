@@ -33,6 +33,7 @@ export default function Page() {
   const { user, showToast, openSubmitProductModal } = useGlobal();
   const { data: categories = [] } = useCategories();
   const { data: productStats } = useProductStats();
+  const isNouns = (name: string) => name.toLowerCase() === "nouns";
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -55,9 +56,13 @@ export default function Page() {
   // Track whether a filter change (not a page change) triggered a page reset
   const filterResetRef = useRef(false);
 
+  const selectedCategory = categories.find((c) => c.id === categoryId);
+  const isNounsSelected = selectedCategory ? isNouns(selectedCategory.name) : false;
+
   const { data, isLoading: productsLoading } = usePagedProducts("approved", {
     categoryId: categoryId ?? undefined,
     dateFilter: (dateFilter || undefined) as DateFilter,
+    sortBy: isNounsSelected ? "oldest" : undefined,
     search: search ?? undefined,
     upvoted: upvotedFilter === "true" ? true : undefined,
     page,
@@ -127,8 +132,6 @@ export default function Page() {
     if (!productsLoading && totalPages > 0 && page > totalPages) setPage(1);
   }, [productsLoading, totalPages, page, setPage]);
 
-  const isNouns = (name: string) => name.toLowerCase() === "nouns";
-
   return (
     <div>
       <div className="page-wrap section">
@@ -190,10 +193,10 @@ export default function Page() {
                 }}
               >
                 {tab.label}
-                {productStats != null && tab.key == null && (
+                {productStats != null && tab.key == null && productStats.releases[tab.statsKey] > 0 && (
                   <span className="ml-1 font-['Space_Mono',monospace] text-[10px] opacity-60">({productStats.releases[tab.statsKey]})</span>
                 )}
-                {productStats != null && tab.key != null && (
+                {productStats != null && tab.key != null && productStats.releases[tab.statsKey] > 0 && (
                   <span className="ml-1 font-['Space_Mono',monospace] text-[10px] opacity-60 hidden sm:inline">
                     ({productStats.releases[tab.statsKey]})
                   </span>
@@ -202,7 +205,7 @@ export default function Page() {
             ))}
             {user && (
               <>
-                <div className="h-5 w-[1px] bg-[#1C1C27] opacity-20" />
+                <div className="h-5 w-px bg-[#1C1C27] opacity-20" />
                 <Button
                   variant={upvotedFilter === "true" ? "ghost" : "outline"}
                   size="sm"

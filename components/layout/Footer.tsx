@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import BrandLogo from "@/components/layout/BrandLogo";
 import { IconDiscord, IconInstagram, IconLinkedIn, IconX, IconYouTube } from "../Icons";
 
-const NAV_COLS = [
+type NavLink = { href: string; text: string; disabled?: boolean; external?: boolean };
+type NavCol = { label: string; links: NavLink[] };
+
+const NAV_COLS: NavCol[] = [
   {
     label: "Discover",
     links: [
@@ -32,6 +35,7 @@ const NAV_COLS = [
       { href: "/about", text: "About", disabled: true },
       { href: "/how-it-works", text: "How It Works", disabled: true },
       { href: "/digest", text: "Research Digest", disabled: true },
+      { href: "/llms.txt", text: "AI Index", external: true },
     ],
   },
 ];
@@ -148,6 +152,10 @@ const Footer = () => {
                   <span key={link.href} className="block text-sm text-muted mb-2.25 cursor-not-allowed" aria-disabled="true">
                     {link.text}
                   </span>
+                ) : link.external ? (
+                  <Link key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" className="block text-sm text-ink mb-2.25 hover:text-danger">
+                    {link.text}
+                  </Link>
                 ) : (
                   <FooterSubmitLink key={link.href} href={link.href} text={link.text} />
                 )

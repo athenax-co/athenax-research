@@ -32,23 +32,24 @@ const vt323 = VT323({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://athenax.co"),
-  title: "AthenaX — Discovery Platform for Frontier Products",
+  title: "AthenaX - Discovery Platform for Frontier Products",
   description:
     "AthenaX is a discovery platform for frontier technology products and research across AI, crypto, biotech, infrastructure, robotics, and developer tools.",
+  keywords: ["frontier products", "product discovery", "emerging technology", "AI", "crypto", "biotech", "robotics", "developer tools", "research"],
   icons: {
     icon: "https://athenax.mypinx.store/favicon.png",
   },
   openGraph: {
     type: "website",
     siteName: "AthenaX",
-    title: "AthenaX — Discovery Platform for Frontier Products",
+    title: "AthenaX - Discovery Platform for Frontier Products",
     description:
       "AthenaX is a discovery platform for frontier technology products and research across AI, crypto, biotech, infrastructure, robotics, and developer tools.",
     images: [{ url: "/AthenaX_OG.jpg", width: 1200, height: 630, alt: "AthenaX" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "AthenaX — Discovery Platform for Frontier Products",
+    title: "AthenaX - Discovery Platform for Frontier Products",
     description:
       "AthenaX is a discovery platform for frontier technology products and research across AI, crypto, biotech, infrastructure, robotics, and developer tools.",
     images: ["/AthenaX_OG.jpg"],

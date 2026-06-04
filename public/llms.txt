@@ -1,0 +1,40 @@
+# AthenaX
+
+> AthenaX is a discovery platform for frontier technology products and research. It is where new products begin — a NounsDAO-incubated platform that surfaces research-backed, early-stage products across frontier technology sectors. Currently in public beta.
+
+AthenaX operates at the intersection of research and product discovery. Every product on the platform is grounded in indexed research, and every founder is ARS-scored. The platform is CC0 — no rights reserved, open source — and is powered by NounsDAO.
+
+Sectors covered: AI & Agents, Robotics, Biotech, Crypto & DeFi, Dev Tools, Infrastructure, Climate & Energy, and Real World Assets (RWA).
+
+AthenaX is currently in Phase 00 (Genesis), its operational launch phase. Upcoming platform phases include Network (Q3 2026), Terminal (Q4 2026), Economy (2027), and Autonomy (2028+).
+
+Community channels: X (@athenax_co), Discord, YouTube (@AthenaX_co), LinkedIn (athenaxco), and Instagram (@athenax_co). A weekly newsletter delivers top research papers, bounties, and cohort news every Monday.
+
+## Core pages
+
+- [Home](https://athenax.co/): Platform overview, network activity stats, and the latest product launches.
+- [Launch](https://athenax.co/launch): Directory of early-stage products across AI, robotics, biotech, crypto, developer tools, infrastructure, and climate. Filterable by category and recency, and searchable.
+- [Research](https://athenax.co/archive): Knowledge archive of artifacts, learnings, and broadcasts — Articles (whitepapers, livestreams, roundtables) and Broadcast videos.
+- [Roadmap](https://athenax.co/roadmap): What AthenaX is building now and next, by phase.
+
+## Content detail pages
+
+- Individual product: `https://athenax.co/launch/{slug}`
+- Individual article: `https://athenax.co/archive/{slug}`
+- Individual broadcast: `https://athenax.co/archive/broadcast/{slug}`
+
+## Actions
+
+- Submit a product: open the submission flow from [Launch](https://athenax.co/launch?submit).
+
+## Community & Social
+
+- [X / Twitter](https://x.com/athenax_co): AthenaX official account on X — product updates, research highlights, and community posts.
+- [Discord](https://discord.com/invite/RURu4tTjHZ): AthenaX community server — open to builders, researchers, and frontier tech enthusiasts.
+- [YouTube](https://www.youtube.com/@AthenaX_co): AthenaX video content and broadcasts.
+- [LinkedIn](https://www.linkedin.com/company/athenaxco/): AthenaX company page on LinkedIn.
+- [Instagram](https://www.instagram.com/athenax_co/): AthenaX on Instagram.
+
+## Notes
+
+- Coming soon (not yet live): funding and bounties, builder cohorts, the research Terminal, the researcher network and leaderboard, and protocol docs.

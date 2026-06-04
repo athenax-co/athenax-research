@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "AthenaX Launch — Research-Backed Products Across Frontier Technology",
+  title: "AthenaX - Launch Frontier Products",
   description:
-    "Discover research-backed products across AI, robotics, biotech, crypto, and infrastructure. Every founder is ARS-scored. Every product is grounded in indexed research.",
+    "Launch your product on AthenaX and connect with builders, researchers, investors, and early adopters across frontier technology.",
+  keywords: ["frontier products", "product discovery", "emerging technology", "AI", "crypto", "biotech", "robotics", "developer tools", "research"],
   openGraph: {
-    title: "AthenaX Launch — Research-Backed Products Across Frontier Technology",
+    title: "AthenaX - Launch Frontier Products",
     description:
-      "Discover research-backed products across AI, robotics, biotech, crypto, and infrastructure. Every founder is ARS-scored. Every product is grounded in indexed research.",
+      "Launch your product on AthenaX and connect with builders, researchers, investors, and early adopters across frontier technology.",
     images: ["/AthenaX_OG.jpg"],
   },
   twitter: { card: "summary_large_image" },

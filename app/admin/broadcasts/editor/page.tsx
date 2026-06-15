@@ -345,6 +345,40 @@ function BroadcastEditorForm({ broadcast, broadcastId, userName, showToast }: Fo
               </div>
             </div>
 
+            {isEdit && (
+              <div className="rounded-xl border-2 border-ink bg-white p-5 space-y-3">
+                <div className="font-['Space_Mono',monospace] text-[10px] font-bold uppercase tracking-[0.08em] text-muted">
+                  Article
+                </div>
+                {broadcast?.article ? (
+                  <>
+                    <div>
+                      <div className="text-[13px] font-medium text-ink leading-snug">{broadcast.article.title}</div>
+                      <div className="mt-0.5 text-[11px] capitalize text-muted">{broadcast.article.status}</div>
+                    </div>
+                    <Link
+                      href={`/admin/articles/editor?id=${broadcast.article.slug}`}
+                      className={cn(buttonVariants({ variant: "outline", size: "sm" }), "no-underline w-full justify-center text-xs")}
+                    >
+                      Edit Article
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-[13px] text-muted">No article linked.</p>
+                    {broadcastId != null && (
+                      <Link
+                        href={`/admin/articles/editor?broadcastId=${broadcastId}`}
+                        className={cn(buttonVariants({ size: "sm" }), "no-underline w-full justify-center text-xs")}
+                      >
+                        + Create Article
+                      </Link>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
             <div className="rounded-xl border-2 border-[#D8D4CC] bg-cream p-5 space-y-3 text-[13px] text-muted">
               <div className="font-['Space_Mono',monospace] text-[10px] font-bold uppercase tracking-[0.08em] text-muted">
                 Info

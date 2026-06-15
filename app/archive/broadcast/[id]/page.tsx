@@ -7,6 +7,7 @@ import { ProductBadge } from "@/components/ui/ProductBadge";
 import { ShareButton } from "@/components/ui/ShareButton";
 import { BASE_URL } from "@/api/client";
 import type { BroadcastOut } from "@/features/broadcasts";
+import { ContentRow } from "@/components/Content";
 
 export const revalidate = 300;
 
@@ -126,6 +127,15 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
               <p className="text-base leading-[1.8] text-ink">No content available.</p>
             )}
           </WindowCard>
+
+          {item.article && (
+            <div className="mt-10 pt-6 border-t border-dashed border-[#D8D4CC]">
+              <p className="titlebar-label mb-4">See Also</p>
+              <Link href={`/archive/${item.article.slug}`}>
+                <ContentRow item={item.article} kind="article" />
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>

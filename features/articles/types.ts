@@ -12,6 +12,7 @@ export interface ArticleOut {
   publishedAt: string | null;
   creatorName: string | null;
   tags: string[];
+  broadcastId: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -19,6 +20,7 @@ export interface ArticleOut {
 export interface ArticleIn {
   title: string;
   articleType: ArticleType;
+  broadcastId?: number;
   content?: string | null;
   status?: ArticleStatus;
   publishedAt?: string | null;
@@ -33,6 +35,7 @@ export interface ArticleUpdate {
   status?: ArticleStatus | null;
   publishedAt?: string | null;
   tags?: string[] | null;
+  broadcastId?: number | null;
 }
 
 export interface ArticleListParams {

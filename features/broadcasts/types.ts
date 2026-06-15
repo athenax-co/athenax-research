@@ -1,6 +1,17 @@
-import type { BroadcastType, BroadcastStatus } from "@/enums";
+import type { BroadcastType, BroadcastStatus, ArticleType, ArticleStatus } from "@/enums";
 
 export type { BroadcastType, BroadcastStatus };
+
+export interface BroadcastArticle {
+  id: number;
+  title: string;
+  slug: string;
+  articleType: ArticleType;
+  status: ArticleStatus;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface BroadcastOut {
   id: number;
@@ -15,6 +26,7 @@ export interface BroadcastOut {
   publishedAt: string | null;
   creatorName: string | null;
   tags: string[];
+  article?: BroadcastArticle | null;
   createdAt: string;
   updatedAt: string;
 }

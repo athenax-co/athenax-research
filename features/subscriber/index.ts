@@ -1,2 +1,2 @@
-export { subscribe } from "./api";
-export type { SubscribeResult } from "./types";
+export { subscribe, unsubscribe } from "./api";
+export type { SubscribeResult, UnsubscribeResult } from "./types";

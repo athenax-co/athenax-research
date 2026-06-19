@@ -1,6 +1,8 @@
 import { http } from "@/api/client";
 import type { BroadcastOut, BroadcastIn, BroadcastUpdate, BroadcastListParams } from "./types";
 
+// Backend returns a paginated `{ items, total }` shape; unwrap to the bare list
+// since broadcast consumers don't paginate yet.
 export function getBroadcasts(params: BroadcastListParams = {}, auth = false): Promise<BroadcastOut[]> {
   const p = new URLSearchParams();
   if (params.limit != null) p.set("limit", String(params.limit));
@@ -9,7 +11,9 @@ export function getBroadcasts(params: BroadcastListParams = {}, auth = false): P
   if (params.broadcastType) p.set("broadcastType", params.broadcastType);
   if (params.tag) p.set("tag", params.tag);
   const qs = p.toString();
-  return http.get<BroadcastOut[]>(`/broadcast${qs ? `?${qs}` : ""}`, auth ? { auth: true } : undefined);
+  return http
+    .get<{ items: BroadcastOut[]; total: number }>(`/broadcast${qs ? `?${qs}` : ""}`, auth ? { auth: true } : undefined)
+    .then((r) => r.items ?? []);
 }
 
 export function getBroadcastById(id: number): Promise<BroadcastOut> {

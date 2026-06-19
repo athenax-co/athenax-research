@@ -52,7 +52,7 @@ export const FooterSubscribe = () => {
 
     if (result.status === "subscribed") {
       setEmail("");
-      _globalShowToast("Subscribed to the Weekly Digest!", "success");
+      _globalShowToast("Subscribed to the Bi-Weekly Digest!", "success");
     } else if (result.status === "already_subscribed") {
       setEmail("");
       _globalShowToast("You're already on the list!", "success");
@@ -69,8 +69,8 @@ export const FooterSubscribe = () => {
     <div className="border-b border-[#D8D4CC] pb-10 mb-10">
       <div className="max-w-7xl mx-auto px-10 flex items-center justify-between gap-8 flex-wrap">
         <div>
-          <div className="font-bold text-[17px] mb-1">Weekly Newsletter</div>
-          <div className="text-sm text-muted">Top AI papers, bounties, and cohort news — every Monday.</div>
+          <div className="font-bold text-[17px] mb-1">Bi-Weekly Newsletter</div>
+          <div className="text-sm text-muted">Top AI papers, bounties, and cohort news every second Monday.</div>
         </div>
         <div className="flex w-full sm:w-auto flex-col sm:flex-row gap-2 shrink-0">
           <input

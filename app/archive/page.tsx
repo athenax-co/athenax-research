@@ -1,6 +1,6 @@
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import { BASE_URL } from "@/api/client";
-import { ARTICLE_QUERY_KEYS } from "@/features/articles";
+import { ARTICLE_PAGE_SIZE, ARTICLE_QUERY_KEYS } from "@/features/articles";
 import { BROADCAST_QUERY_KEYS } from "@/features/broadcasts";
 import ArchiveClient from "./ArchiveClient";
 
@@ -10,10 +10,11 @@ export const revalidate = 300;
 
 const cache: RequestInit = { next: { revalidate: 300, tags: ["archive"] } };
 
-async function fetchList(path: string): Promise<unknown[]> {
+// Backend list endpoints return a paginated `{ items, total }` shape.
+async function fetchPage<T>(path: string): Promise<{ items: T[]; total: number }> {
   const res = await fetch(`${BASE_URL}${path}`, cache);
-  if (!res.ok) return [];
-  return res.json().catch(() => []);
+  if (!res.ok) return { items: [], total: 0 };
+  return res.json().catch(() => ({ items: [], total: 0 }));
 }
 
 export default async function Page() {
@@ -21,14 +22,17 @@ export default async function Page() {
 
   // Prefetch the default tab data under the exact query keys the client hooks use,
   // so the first paint shows content. Filtered views fetch client-side on demand.
+  const articleListParams = { articleType: undefined, limit: ARTICLE_PAGE_SIZE, offset: 0 };
   await Promise.all([
+    // Articles: paginated — matches usePagedArticles() for page 1.
     queryClient.prefetchQuery({
-      queryKey: [...ARTICLE_QUERY_KEYS.list({ articleType: undefined }), undefined],
-      queryFn: () => fetchList("/article"),
+      queryKey: [...ARTICLE_QUERY_KEYS.paged(articleListParams), undefined],
+      queryFn: () => fetchPage(`/article?limit=${ARTICLE_PAGE_SIZE}&offset=0`),
     }),
+    // Broadcasts: unwrapped to a bare list — matches useBroadcastsList().
     queryClient.prefetchQuery({
       queryKey: [...BROADCAST_QUERY_KEYS.list(undefined), undefined],
-      queryFn: () => fetchList("/broadcast"),
+      queryFn: () => fetchPage("/broadcast").then((r) => r.items),
     }),
   ]);
 

@@ -45,3 +45,8 @@ export interface ArticleListParams {
   articleType?: ArticleType;
   tag?: string;
 }
+
+export interface ArticlePage {
+  items: ArticleOut[];
+  total: number;
+}

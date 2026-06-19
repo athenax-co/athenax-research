@@ -1,7 +1,7 @@
 import { http } from "@/api/client";
-import type { ArticleOut, ArticleIn, ArticleUpdate, ArticleListParams } from "./types";
+import type { ArticleOut, ArticleIn, ArticleUpdate, ArticleListParams, ArticlePage } from "./types";
 
-export function getArticles(params: ArticleListParams = {}, auth = false): Promise<ArticleOut[]> {
+function buildArticleQuery(params: ArticleListParams): string {
   const p = new URLSearchParams();
   if (params.limit != null) p.set("limit", String(params.limit));
   if (params.offset != null) p.set("offset", String(params.offset));
@@ -9,7 +9,17 @@ export function getArticles(params: ArticleListParams = {}, auth = false): Promi
   if (params.articleType) p.set("articleType", params.articleType);
   if (params.tag) p.set("tag", params.tag);
   const qs = p.toString();
-  return http.get<ArticleOut[]>(`/article${qs ? `?${qs}` : ""}`, auth ? { auth: true } : undefined);
+  return qs ? `?${qs}` : "";
+}
+
+// Backend returns a paginated `{ items, total }` shape; unwrap to the bare list
+// for callers that don't need the total count.
+export function getArticles(params: ArticleListParams = {}, auth = false): Promise<ArticleOut[]> {
+  return getArticlesPaged(params, auth).then((r) => r.items);
+}
+
+export function getArticlesPaged(params: ArticleListParams = {}, auth = false): Promise<ArticlePage> {
+  return http.get<ArticlePage>(`/article${buildArticleQuery(params)}`, auth ? { auth: true } : undefined);
 }
 
 export function getArticleById(id: number): Promise<ArticleOut> {

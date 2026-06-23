@@ -9,6 +9,7 @@ import RegisterModal from "./ui/RegisterModal";
 import CategoryPickerModal from "./ui/CategoryPickerModal";
 import { SubmitProductModal, SubmitProductSuccessModal } from "./SubmitProductModal";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +68,18 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
   const [userOverride, setUserOverride] = useState<any>(undefined);
   const user = userOverride !== undefined ? userOverride : (sessionUser ?? null);
 
+  // ── identify user in PostHog ──────────────────────────────────────────────
+  useEffect(() => {
+    if (user?.id) {
+      posthog.identify(String(user.id), {
+        username: user.username,
+        role: user.role,
+      });
+    } else if (user === null) {
+      posthog.reset();
+    }
+  }, [user?.id]);
+
   // ── show category picker once after email verification ───────────────────
   useEffect(() => {
     if (sessionUser?.verified && sessionUser?.categories?.length === 0) {
@@ -110,6 +123,7 @@ function InnerProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     if (action === "register") {
+      posthog.capture("signup_start");
       setShowRegister(true);
       return;
     }

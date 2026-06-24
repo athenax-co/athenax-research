@@ -678,7 +678,7 @@ export function VoicesSection({
                     <button onClick={() => openEdit(v)} className="text-[#6B6B7A] hover:text-ink" title="Edit">
                       <Pencil size={13} />
                     </button>
-                    <button onClick={() => { if (confirm("Delete this video?")) onDelete(v.id); }} className="text-[#aaa] hover:text-[#E8323C]" title="Delete">
+                    <button onClick={() => { if (confirm("Delete this voice?")) onDelete(v.id); }} className="text-[#aaa] hover:text-[#E8323C]" title="Delete">
                       <Trash2 size={13} />
                     </button>
                   </>
@@ -1006,6 +1006,7 @@ function CommentCard({
   onSubmitReply,
   onChangeReplyText,
   onPin,
+  onDelete,
 }: {
   node: CommentNode;
   depth: number;
@@ -1018,6 +1019,7 @@ function CommentCard({
   onSubmitReply: () => void;
   onChangeReplyText: (v: string) => void;
   onPin?: (commentId: number, pinned: boolean) => void;
+  onDelete?: (commentId: number) => void;
 }) {
   const isReplying = replyingTo === node.id;
   const indent = Math.min(depth, MAX_VISUAL_DEPTH) * INDENT_PX;
@@ -1049,14 +1051,32 @@ function CommentCard({
               PINNED
             </span>
           )}
-          {isAdmin && onPin && (node.pinned || node.children.length === 0) && (
-            <button
-              onClick={() => onPin(node.id, !node.pinned)}
-              className="ml-auto text-[#888] hover:text-ink transition-colors"
-              title={node.pinned ? "Unpin" : "Pin"}
-            >
-              {node.pinned ? <PinOff size={13} /> : <Pin size={13} />}
-            </button>
+          {isAdmin && (onPin || onDelete) && (
+            <div className="ml-auto flex items-center gap-2">
+              {onPin && (node.pinned || node.children.length === 0) && (
+                <button
+                  onClick={() => onPin(node.id, !node.pinned)}
+                  className="text-[#888] hover:text-ink transition-colors"
+                  title={node.pinned ? "Unpin" : "Pin"}
+                >
+                  {node.pinned ? <PinOff size={13} /> : <Pin size={13} />}
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={() => {
+                    const message = node.children.length > 0
+                      ? "Delete this comment?\n\nThis comment has replies. Deleting it will permanently delete all replies (and their replies) as well."
+                      : "Delete this comment?";
+                    if (confirm(message)) onDelete(node.id);
+                  }}
+                  className="text-[#aaa] hover:text-[#E8323C] transition-colors"
+                  title="Delete"
+                >
+                  <Trash2 size={13} />
+                </button>
+              )}
+            </div>
           )}
         </div>
         <div className="text-sm leading-[1.55]">{node.text}</div>
@@ -1106,6 +1126,7 @@ function CommentCard({
           onSubmitReply={onSubmitReply}
           onChangeReplyText={onChangeReplyText}
           onPin={onPin}
+          onDelete={onDelete}
         />
       ))}
     </div>
@@ -1120,6 +1141,7 @@ export function DiscussionSection({
   onPost,
   onReply,
   onPin,
+  onDelete,
   onLoadMore,
   hasMore,
   loadingMore,
@@ -1131,6 +1153,7 @@ export function DiscussionSection({
   onPost: (text: string) => void;
   onReply: (text: string, parentId: number) => void;
   onPin?: (commentId: number, pinned: boolean) => void;
+  onDelete?: (commentId: number) => void;
   onLoadMore?: () => void;
   hasMore?: boolean;
   loadingMore?: boolean;
@@ -1177,6 +1200,7 @@ export function DiscussionSection({
           onSubmitReply={handleSubmitReply}
           onChangeReplyText={setReplyText}
           onPin={onPin}
+          onDelete={onDelete}
         />
       ))}
 

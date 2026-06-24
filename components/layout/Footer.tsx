@@ -1,6 +1,6 @@
 "use client";
 
-import { subscriberSvc } from "@/utils/lib";
+import { subscribe } from "@/features/subscriber";
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -42,19 +42,26 @@ const NAV_COLS: NavCol[] = [
 
 export const FooterSubscribe = () => {
   const [email, setEmail] = useState("");
-  const [done, setDone] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const submit = () => {
-    if (!email.includes("@")) {
-      _globalShowToast("Enter a valid email.", "error");
-      return;
-    }
-    const r = subscriberSvc.subscribe(email.trim(), "weekly-digest");
-    if (r.error) {
-      _globalShowToast("Already subscribed!", "info");
+  const submit = async () => {
+    const trimmed = email.trim();
+    setLoading(true);
+    const result = await subscribe(trimmed);
+    setLoading(false);
+
+    if (result.status === "subscribed") {
+      setEmail("");
+      _globalShowToast("Subscribed to the Bi-Weekly Digest!", "success");
+    } else if (result.status === "already_subscribed") {
+      setEmail("");
+      _globalShowToast("You're already on the list!", "success");
+    } else if (result.status === "invalid_email") {
+      _globalShowToast("Please enter a valid email.", "error");
+    } else if (result.status === "rate_limited") {
+      _globalShowToast("Too many attempts, try again shortly.", "error");
     } else {
-      setDone(true);
-      _globalShowToast("Subscribed to the Weekly Digest!", "success");
+      _globalShowToast(result.message, "error");
     }
   };
 
@@ -62,25 +69,21 @@ export const FooterSubscribe = () => {
     <div className="border-b border-[#D8D4CC] pb-10 mb-10">
       <div className="max-w-7xl mx-auto px-10 flex items-center justify-between gap-8 flex-wrap">
         <div>
-          <div className="font-bold text-[17px] mb-1">Weekly Newsletter</div>
-          <div className="text-sm text-muted">Top AI papers, bounties, and cohort news — every Monday.</div>
+          <div className="font-bold text-[17px] mb-1">Bi-Weekly Newsletter</div>
+          <div className="text-sm text-muted">Top AI papers, bounties, and cohort news every second Monday.</div>
         </div>
-        {done ? (
-          <div className="font-mono text-xs text-green-700 tracking-[0.05em]">✓ YOU&apos;RE IN</div>
-        ) : (
-          <div className="flex w-full sm:w-auto flex-col sm:flex-row gap-2 shrink-0">
-            <input
-              className="inp w-full sm:w-60! py-2.25! px-3.5! text-sm!"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              onKeyDown={(e) => e.key === "Enter" && submit()}
-            />
-            <Button size="sm" className="w-full sm:w-auto" onClick={submit}>
-              Subscribe →
-            </Button>
-          </div>
-        )}
+        <div className="flex w-full sm:w-auto flex-col sm:flex-row gap-2 shrink-0">
+          <input
+            className="inp w-full sm:w-60! py-2.25! px-3.5! text-sm!"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="your@email.com"
+            onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
+          />
+          <Button size="sm" className="w-full sm:w-auto" onClick={submit} disabled={loading}>
+            {loading ? <span className="spinner" /> : "Subscribe →"}
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -35,6 +35,7 @@ import {
   useDeleteProductMedia,
   useSwapVoice,
   usePinComment,
+  useDeleteComment,
   useUpdateProduct,
   useCreateProductLink,
   useUpdateProductLink,
@@ -79,6 +80,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const commentsTotal = commentsData?.pages[0]?.total ?? 0;
   const { mutate: createComment } = useCreateComment(apiProductId);
   const { mutate: pinComment } = usePinComment(apiProductId);
+  const { mutate: deleteComment } = useDeleteComment(apiProductId);
 
   const isAdmin = (user?.role as string) === "admin";
 
@@ -658,6 +660,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             createComment({ text, parentId });
           }}
           onPin={(commentId, pinned) => pinComment({ commentId, pinned })}
+          onDelete={isAdmin ? (commentId) => deleteComment(commentId) : undefined}
           onLoadMore={fetchNextPage}
           hasMore={!!hasNextPage}
           loadingMore={isFetchingNextPage}

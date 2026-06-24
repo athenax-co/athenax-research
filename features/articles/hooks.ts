@@ -1,9 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as articleApi from "./api";
 import type { ArticleIn, ArticleOut, ArticleListParams, ArticleUpdate } from "./types";
 
+export const ARTICLE_PAGE_SIZE = 12;
+
 export const ARTICLE_QUERY_KEYS = {
   list: (params?: ArticleListParams) => ["articles", params] as const,
+  paged: (params?: ArticleListParams) => ["articles", "paged", params] as const,
   bySlug: (slug: string) => ["article", "slug", slug] as const,
   byId: (id: number) => ["article", id] as const,
 };
@@ -12,6 +15,15 @@ export function useArticlesList(params?: ArticleListParams, opts?: { auth?: bool
   return useQuery({
     queryKey: [...ARTICLE_QUERY_KEYS.list(params), opts?.auth],
     queryFn: () => articleApi.getArticles(params, opts?.auth),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function usePagedArticles(params?: ArticleListParams, opts?: { auth?: boolean }) {
+  return useQuery({
+    queryKey: [...ARTICLE_QUERY_KEYS.paged(params), opts?.auth],
+    queryFn: () => articleApi.getArticlesPaged(params, opts?.auth),
+    placeholderData: keepPreviousData,
     staleTime: 5 * 60 * 1000,
   });
 }

@@ -8,7 +8,7 @@ Sectors covered: AI & Agents, Robotics, Biotech, Crypto & DeFi, Dev Tools, Infra
 
 AthenaX is currently in Phase 00 (Genesis), its operational launch phase. Upcoming platform phases include Network (Q3 2026), Terminal (Q4 2026), Economy (2027), and Autonomy (2028+).
 
-Community channels: X (@athenax_co), Discord, YouTube (@AthenaX_co), LinkedIn (athenaxco), and Instagram (@athenax_co). A weekly newsletter delivers top research papers, bounties, and cohort news every Monday.
+Community channels: X (@athenax_co), Discord, YouTube (@AthenaX_co), LinkedIn (athenaxco), and Instagram (@athenax_co). Bi-weekly newsletter delivers top research papers, bounties, and cohort news every Monday.
 
 ## Core pages
 

@@ -17,19 +17,37 @@ interface MarkdownViewerProps {
   className?: string;
 }
 
+// Markdown collapses any run of blank lines into a single paragraph break.
+// Authors expect pressing Enter multiple times to add visible vertical space,
+// so convert each *extra* blank line into a spacer paragraph. Blank lines
+// inside fenced code blocks are left untouched so code stays intact.
+function preserveBlankLines(md: string): string {
+  const normalized = md.replace(/\r\n/g, "\n");
+  return normalized
+    .split(/(```[\s\S]*?```)/g)
+    .map((part, i) =>
+      i % 2 === 1
+        ? part // captured code fences — leave as-is
+        : part.replace(/\n{3,}/g, (run) => "\n\n" + "&nbsp;\n\n".repeat(run.length - 2))
+    )
+    .join("");
+}
+
 export default function MarkdownViewer({ content, className }: MarkdownViewerProps) {
   if (!content?.trim()) {
     return <p className={cn("text-sm leading-7 text-muted", className)}>No content available.</p>;
   }
 
+  const processed = preserveBlankLines(content);
+
   return (
     <div
       className={cn(
         "text-[0.9375rem] text-ink [font-family:var(--font-space-grotesk),sans-serif]",
-        "[&_h1]:mb-3 [&_h1]:text-[1.75rem] [&_h1]:font-bold [&_h1]:leading-[1.2]",
-        "[&_h2]:mb-2 [&_h2]:mt-6 [&_h2]:text-[1.35rem] [&_h2]:font-bold",
-        "[&_h3]:mb-[0.4rem] [&_h3]:mt-5 [&_h3]:text-[1.1rem] [&_h3]:font-semibold",
-        "[&_p]:mb-3 [&_p]:leading-7",
+        "[&_h1]:mb-3 [&_h1]:mt-10 [&_h1:first-child]:mt-0 [&_h1]:text-[1.75rem] [&_h1]:font-bold [&_h1]:leading-[1.2]",
+        "[&_h2]:mb-2 [&_h2]:mt-8 [&_h2:first-child]:mt-0 [&_h2]:text-[1.35rem] [&_h2]:font-bold",
+        "[&_h3]:mb-[0.4rem] [&_h3]:mt-6 [&_h3:first-child]:mt-0 [&_h3]:text-[1.1rem] [&_h3]:font-semibold",
+        "[&_p]:mb-4 [&_p]:leading-7",
         "[&_ul]:mb-3 [&_ul]:list-disc [&_ul]:pl-6",
         "[&_ol]:mb-3 [&_ol]:list-decimal [&_ol]:pl-6",
         "[&_li]:mb-[0.3rem] [&_li]:leading-[1.65]",
@@ -51,7 +69,7 @@ export default function MarkdownViewer({ content, className }: MarkdownViewerPro
           h2: ({ children }) => <h2 id={slugify(nodeText(children))}>{children}</h2>,
         }}
       >
-        {content}
+        {processed}
       </ReactMarkdown>
     </div>
   );

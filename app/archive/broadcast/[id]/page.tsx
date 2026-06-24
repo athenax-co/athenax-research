@@ -1,9 +1,34 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import WindowCard from "@/components/ui/WindowCard";
 import { formatContentDate } from "@/lib/api";
 import { ProductBadge } from "@/components/ui/ProductBadge";
 import { ShareButton } from "@/components/ui/ShareButton";
-import { getBroadcastBySlug } from "@/features/broadcasts";
+import { BASE_URL } from "@/api/client";
+import type { BroadcastOut } from "@/features/broadcasts";
+import { ContentRow } from "@/components/Content";
+
+export const revalidate = 300;
+
+async function getBroadcast(slug: string): Promise<BroadcastOut | null> {
+  const cache: RequestInit = { next: { revalidate: 300, tags: ["archive", `broadcast:${slug}`] } };
+  const res = await fetch(`${BASE_URL}/broadcast/slug/${slug}`, cache);
+  if (!res.ok) return null;
+  return res.json().catch(() => null);
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const item = await getBroadcast(id);
+  if (!item) return { title: "Not found" };
+  return {
+    title: item.title,
+    description: item.description ?? undefined,
+    openGraph: { title: item.title, description: item.description ?? undefined, type: "video.other" },
+    twitter: { card: "summary_large_image", title: item.title, description: item.description ?? undefined },
+  };
+}
 
 const toEmbedUrl = (value?: string | null) => {
   if (!value) return "";
@@ -37,21 +62,8 @@ const toEmbedUrl = (value?: string | null) => {
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-
-  let item;
-  try {
-    item = await getBroadcastBySlug(id);
-  } catch {
-    item = null;
-  }
-
-  if (!item) {
-    return (
-      <div className="mx-auto w-full max-w-7xl px-5 py-14 md:px-7 lg:px-10">
-        <p className="text-base text-muted">Not found.</p>
-      </div>
-    );
-  }
+  const item = await getBroadcast(id);
+  if (!item) notFound();
 
   const { title, slug, broadcastType, originDate, publishedAt, description, embedUrl: rawEmbedUrl, tags } = item;
 
@@ -115,6 +127,15 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
               <p className="text-base leading-[1.8] text-ink">No content available.</p>
             )}
           </WindowCard>
+
+          {item.article && (
+            <div className="mt-10 pt-6 border-t border-dashed border-[#D8D4CC]">
+              <p className="titlebar-label mb-4">See Also</p>
+              <Link href={`/archive/${item.article.slug}`}>
+                <ContentRow item={item.article} kind="article" />
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>

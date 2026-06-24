@@ -5,11 +5,11 @@ import { useGlobal } from "@/components/GlobalProvider";
 import { NEWSLETTERS } from "@/data/seed";
 import NewsletterCard from "@/components/ui/NewsletterCard";
 import { ContentListState, ContentRow } from "@/components/Content";
-import { useArticles } from "@/hooks/queries/useContent";
+import { useArticlesList } from "@/features/articles";
 
 export default function Page() {
   const { user } = useGlobal();
-  const { data: articles = [], isLoading: articlesLoading, isError: articlesError } = useArticles();
+  const { data: articles = [], isLoading: articlesLoading, isError: articlesError } = useArticlesList();
   const pastIssues = articles.slice(0, 5);
 
   return (

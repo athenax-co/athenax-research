@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useGlobal } from "@/components/GlobalProvider";
 import { useArticleById, useCreateArticle, useUpdateArticle, type ArticleOut } from "@/features/articles";
+import { useBroadcastsList } from "@/features/broadcasts";
 import { ArticleType, ArticleStatus } from "@/enums";
 import MarkdownEditor from "@/components/editor/MarkdownEditor";
 import { cn } from "@/utils/lib";
@@ -51,6 +52,7 @@ const toDatetimeLocal = (iso?: string | null) => {
 type FormProps = {
   article?: ArticleOut;
   articleId?: number;
+  broadcastId?: number;
   userName?: string;
   showToast: (text: string, type?: string) => void;
 };
@@ -108,11 +110,16 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
   );
 }
 
-function ArticleEditorForm({ article, articleId, userName, showToast }: FormProps) {
+function ArticleEditorForm({ article, articleId, broadcastId, userName, showToast }: FormProps) {
   const router = useRouter();
   const { mutate: createArticle, isPending: creating } = useCreateArticle();
   const { mutate: updateArticle, isPending: updating } = useUpdateArticle();
   const isEdit = articleId != null;
+
+  const { data: broadcasts = [] } = useBroadcastsList(undefined, { auth: true });
+  const [selectedBroadcastId, setSelectedBroadcastId] = useState<number | null>(
+    () => (isEdit ? (article?.broadcastId ?? null) : (broadcastId ?? null))
+  );
 
   const [title, setTitle] = useState(() => article?.title ?? "");
   const [slug, setSlug] = useState(() => article?.slug ?? "");
@@ -152,7 +159,7 @@ function ArticleEditorForm({ article, articleId, userName, showToast }: FormProp
 
     const slugChanged = isEdit && slug !== (article?.slug ?? "");
 
-    const data = {
+    const baseData = {
       title: trimmedTitle,
       articleType,
       status: targetStatus,
@@ -182,14 +189,14 @@ function ArticleEditorForm({ article, articleId, userName, showToast }: FormProp
 
     if (isEdit && articleId != null) {
       updateArticle(
-        { id: articleId, data },
+        { id: articleId, data: { ...baseData, broadcastId: selectedBroadcastId } },
         { onSuccess: onSuccess("Article updated."), onError: onError("Update failed.") }
       );
     } else {
-      createArticle(data, {
-        onSuccess: onSuccess("Article created."),
-        onError: onError("Create failed."),
-      });
+      createArticle(
+        { ...baseData, ...(selectedBroadcastId != null ? { broadcastId: selectedBroadcastId } : {}) },
+        { onSuccess: onSuccess("Article created."), onError: onError("Create failed.") }
+      );
     }
   };
 
@@ -303,6 +310,20 @@ function ArticleEditorForm({ article, articleId, userName, showToast }: FormProp
               </div>
 
               <div>
+                <label className={FIELD_LABEL}>Broadcast</label>
+                <select
+                  value={selectedBroadcastId ?? ""}
+                  onChange={(e) => setSelectedBroadcastId(e.target.value ? Number(e.target.value) : null)}
+                  className={FIELD_INPUT}
+                >
+                  <option value="">None (standalone)</option>
+                  {broadcasts.map((b) => (
+                    <option key={b.id} value={b.id}>{b.title}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
                 <label className={FIELD_LABEL}>Tags</label>
                 <TagInput tags={tags} onChange={setTags} />
                 <p className="mt-1 text-[11px] text-muted">Press Enter or comma to add.</p>
@@ -382,6 +403,8 @@ export default function Page() {
   const idParam = searchParams.get("id");
   const id = idParam ? Number(idParam) : undefined;
   const isEdit = id != null;
+  const broadcastIdParam = searchParams.get("broadcastId");
+  const broadcastId = broadcastIdParam ? Number(broadcastIdParam) : undefined;
 
   const { user, showToast } = useGlobal();
   const { data: article, isLoading: loadingArticle } = useArticleById(id);
@@ -414,6 +437,7 @@ export default function Page() {
     <ArticleEditorForm
       article={article}
       articleId={id}
+      broadcastId={broadcastId}
       userName={user.name}
       showToast={showToast}
     />

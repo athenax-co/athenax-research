@@ -17,13 +17,16 @@ function withCategoriesOne(p: ProductDetailOut, allCategories: CategoryOut[]): P
 
 const MIN_TODAY = 2;
 const MIN_THIS_WEEK = 3;
+const MIN_THIS_MONTH = 5;
+const FALLBACK_THIS_MONTH = 12;
 
 export function getProductStatsLabel(stats: ProductStats | undefined): string {
   if (!stats) return "";
   const { today, thisWeek, thisMonth } = stats.releases;
   if (today > MIN_TODAY) return `${today} products launched today`;
   if (thisWeek > MIN_THIS_WEEK) return `${thisWeek} products launched this week`;
-  return `${thisMonth} products launched this month`;
+  const monthCount = thisMonth < MIN_THIS_MONTH ? FALLBACK_THIS_MONTH : thisMonth;
+  return `${monthCount} products launched this month`;
 }
 
 export function useProductStats() {

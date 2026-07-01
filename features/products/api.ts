@@ -8,6 +8,7 @@ export interface ProductStats {
     today: number;
     thisWeek: number;
     thisMonth: number;
+    recent: number;
   };
 }
 

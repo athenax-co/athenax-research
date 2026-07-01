@@ -159,7 +159,7 @@ export default function Page() {
         <WindowCard label="LAUNCH_STATS.SYS" className="mb-10" bodyClass="bg-white overflow-hidden">
           <div className="grid sm:grid-cols-3">
             {[
-              { label: "Launches This Month", value: productStats?.releases.thisMonth ?? null },
+              { label: "Launches Recently", value: productStats?.releases.recent ?? null },
               { label: "Categories", value: categories.length || null },
               { label: "Investor Intros Made", value: 11 },
             ].map((s, index, array) => (

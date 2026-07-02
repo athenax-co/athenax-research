@@ -7,7 +7,7 @@ import WindowCard from "@/components/ui/WindowCard";
 import { Dialog, DialogBody, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrafficLights } from "@/components/ui/Dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useGlobal } from "@/components/GlobalProvider";
-import { usePagedProducts, useUpdateProductStatus } from "@/features/products";
+import { usePagedProducts, useUpdateProductStatus, pendingSubcategory } from "@/features/products";
 import { usePapers, useUpdatePaperVerificationStatus } from "@/features/papers";
 import { SEED_BOUNTIES, SEED_LAUNCHES, SEED_PAPERS, SEED_RESEARCHERS, SEED_SPONSORS, SEED_STARTUPS } from "@/data/seed";
 import { PaperVerificationStatus, ProductStatus } from "@/enums";
@@ -194,12 +194,14 @@ export default function Page() {
             <p className="text-sm text-muted">No pending launches.</p>
           ) : (
             <>
-              {pendingProducts.map((product) => (
+              {pendingProducts.map((product) => {
+                const pendingSub = pendingSubcategory(product.categories ?? []);
+                return (
                 <QueueRow
                   key={product.id}
                   name={product.name}
                   logo={product.logo}
-                  meta={`${product.stage ?? "—"} · Funding ${product.funding != null ? `$${product.funding.toLocaleString()}` : "—"} · Founded ${product.founded ?? "—"} · Submitted ${new Date(product.createdAt).toLocaleDateString("en-CA")}${product.pendingSubcategoryName ? ` · ⚠ Custom sub-category: ${product.pendingSubcategoryName}` : ""}`}
+                  meta={`${product.stage ?? "—"} · Funding ${product.funding != null ? `$${product.funding.toLocaleString()}` : "—"} · Founded ${product.founded ?? "—"} · Submitted ${new Date(product.createdAt).toLocaleDateString("en-CA")}${pendingSub ? ` · ⚠ Custom sub-category: ${pendingSub.name}` : ""}`}
                   chips={(product.categories ?? []).map((category) => category.name)}
                   onApprove={() =>
                     updateProductStatus(
@@ -215,7 +217,8 @@ export default function Page() {
                   }
                   reviewHref={`/launch/${product.slug}`}
                 />
-              ))}
+                );
+              })}
               <Pagination page={launchPage} totalPages={launchTotalPages} onPageChange={setLaunchPage} className="mt-4 border-t border-[#D8D4CC] pt-3" />
             </>
           )}

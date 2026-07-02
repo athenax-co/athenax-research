@@ -15,7 +15,7 @@ import { useCategories } from "@/hooks/queries/useReference";
 import SubmitProductButton from "@/components/SubmitProductModal";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { usePagedProducts, useProductStats } from "@/features/products";
+import { usePagedProducts, useProductStats, approvedSubcategories } from "@/features/products";
 import Pagination from "@/components/ui/Pagination";
 import { ProductBadge } from "@/components/ui/ProductBadge";
 
@@ -323,8 +323,8 @@ export default function Page() {
                     {(product.categories ?? []).map((c) => (
                       <ProductBadge key={c.id} label={c.name} />
                     ))}
-                    {(product.subCategories ?? []).map((name) => (
-                      <ProductBadge key={name} label={name} type="subcategory" />
+                    {approvedSubcategories(product.categories ?? []).map((sub) => (
+                      <ProductBadge key={sub.id} label={sub.name} type="subcategory" />
                     ))}
                     {product.qualityBadge && <ProductBadge label={product.qualityBadge} type="stage" />}
                     {(product.stage != null || (product.funding != null && product.funding > 0)) && (

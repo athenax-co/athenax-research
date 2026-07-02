@@ -61,8 +61,7 @@ type ProductApi = {
   founded?: number | null;
   funding?: number | null;
   createdAt?: string | null;
-  categoryIds?: number[];
-  subCategories?: string[] | null;
+  categories?: { id: number; name: string; subcategories: { id: number; name: string; status: string }[] }[];
   voteCount?: number | null;
   media?: { url: string; mediaType: string }[];
   links?: { linkType: string; url: string; label?: string | null }[];
@@ -78,9 +77,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   });
 
   try {
-    const [productRes, catRes, groteskRes, groteskBoldRes, monoRes, monoBoldRes] = await Promise.all([
+    const [productRes, groteskRes, groteskBoldRes, monoRes, monoBoldRes] = await Promise.all([
       fetch(`${API_BASE}/product/slug/${slug}`, { next: { revalidate: 3600 } }),
-      fetch(`${API_BASE}/category`, { next: { revalidate: 86400 } }).catch(() => null),
       fetch(new URL("/fonts/SpaceGrotesk-Regular.ttf", origin)),
       fetch(new URL("/fonts/SpaceGrotesk-Bold.ttf", origin)),
       fetch(new URL("/fonts/SpaceMono-Regular.ttf", origin)),
@@ -97,20 +95,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
       monoBoldRes.arrayBuffer(),
     ]);
 
-    // Resolve category ids → names
-    let categories: { name: string }[] = [];
-    try {
-      if (catRes?.ok) {
-        const cats = (await catRes.json()) as { id: number; name: string }[];
-        const byId = new Map(cats.map((c) => [c.id, c.name]));
-        categories = (product.categoryIds ?? [])
-          .map((id) => byId.get(id))
-          .filter((n): n is string => !!n)
-          .map((name) => ({ name }));
-      }
-    } catch {
-      // category names are optional
-    }
+    const categories = (product.categories ?? []).map((c) => ({ name: c.name }));
+    const subCategories = (product.categories ?? [])
+      .flatMap((c) => c.subcategories)
+      .filter((s) => s.status === "approved")
+      .map((s) => s.name);
 
     const links = (product.links ?? [])
       .filter((l) => l.linkType in LINK_LABELS)
@@ -142,7 +131,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
       funding: product.funding,
       createdAt: product.createdAt,
       categories,
-      subCategories: product.subCategories,
+      subCategories,
       voteCount: product.voteCount,
       backers,
       links,

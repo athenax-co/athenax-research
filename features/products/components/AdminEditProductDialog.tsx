@@ -13,11 +13,12 @@ import {
 } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ProductLinkType } from "@/enums";
+import { PRODUCT_LINK_TYPES, type ProductLinkType } from "@/enums";
 import { useProductStages } from "../hooks";
 import type { ProductDetailOut, ProductUpdateIn, ProductLinkIn } from "../types";
 import { Pencil, Trash2, Plus, Upload } from "lucide-react";
 import TagInput from "@/components/ui/TagInput";
+import { useCategories, useSubcategories } from "@/hooks/queries/useReference";
 
 // ─── Edit Logo Dialog (LOGO.SYS) ─────────────────────────────────────────────
 
@@ -118,7 +119,13 @@ interface EditInfoProps {
 
 export function EditProductInfoDialog({ product, open, onOpenChange, onSave, saving }: EditInfoProps) {
   const { data: stages = [] } = useProductStages();
+  const { data: categories = [] } = useCategories();
   const [form, setForm] = useState<ProductUpdateIn>({});
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [subCategoryIds, setSubCategoryIds] = useState<number[]>([]);
+  const [selectedOther, setSelectedOther] = useState(false);
+  const [otherName, setOtherName] = useState("");
+  const { data: subcategories = [], isPending: loadingSubcategories } = useSubcategories(selectedCategoryId);
 
   useEffect(() => {
     if (open) {
@@ -131,6 +138,10 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
         founded: product.founded ?? undefined,
         backers: product.backers.map((b) => b.name),
       });
+      setSelectedCategoryId(product.categories[0]?.id ?? null);
+      setSubCategoryIds(product.categories[0]?.subcategories.map((s) => s.id) ?? []);
+      setSelectedOther(false);
+      setOtherName("");
     }
   }, [open]);
 
@@ -140,6 +151,11 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
   const handleSave = () => {
     const payload: ProductUpdateIn = { ...form };
     if (!payload.stage) payload.stage = undefined;
+    // Category and sub-category are always sent together (even unchanged) so a stale
+    // sub-category can never be left pointing at a parent the backend no longer sees.
+    payload.categoryIds = selectedCategoryId ? [selectedCategoryId] : [];
+    payload.subCategoryIds = selectedOther ? [] : subCategoryIds;
+    payload.otherSubcategoryName = selectedOther && otherName.trim() ? otherName.trim() : undefined;
     onSave(payload);
   };
 
@@ -192,6 +208,78 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
             </select>
           </div>
 
+          <div className="inp-group mb-0">
+            <label className="inp-label">Category</label>
+            <select
+              className="inp"
+              value={selectedCategoryId ?? ""}
+              onChange={(e) => {
+                const id = e.target.value ? Number(e.target.value) : null;
+                setSelectedCategoryId(id);
+                setSubCategoryIds([]);
+                setSelectedOther(false);
+                setOtherName("");
+              }}
+            >
+              <option value="" disabled>Select a category…</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {selectedCategoryId && (
+            <div className="inp-group mb-0">
+              <label className="inp-label">Sub-category</label>
+              {loadingSubcategories ? (
+                <p className="text-xs text-muted pt-1">Loading…</p>
+              ) : (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {subcategories.map((sub) => (
+                    <button
+                      key={sub.id}
+                      type="button"
+                      onClick={() => {
+                        setSubCategoryIds([sub.id]);
+                        setSelectedOther(false);
+                        setOtherName("");
+                      }}
+                      className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                        subCategoryIds.includes(sub.id) && !selectedOther
+                          ? "bg-ink text-cream border-ink"
+                          : "bg-transparent text-ink border-ink hover:bg-ink/5"
+                      }`}
+                    >
+                      {sub.name}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedOther(true);
+                      setSubCategoryIds([]);
+                    }}
+                    className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                      selectedOther
+                        ? "bg-ink text-cream border-ink"
+                        : "bg-transparent text-ink border-ink hover:bg-ink/5"
+                    }`}
+                  >
+                    Other
+                  </button>
+                </div>
+              )}
+              {selectedOther && (
+                <input
+                  className="inp mt-2"
+                  value={otherName}
+                  onChange={(e) => setOtherName(e.target.value)}
+                  placeholder="Describe your sub-category…"
+                />
+              )}
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-3">
             <div className="inp-group mb-0">
               <label className="inp-label">Funding ($)</label>
@@ -239,7 +327,7 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
 
 // ─── Edit Links Dialog (LINKS.SYS) ───────────────────────────────────────────
 
-const LINK_TYPE_OPTIONS = Object.values(ProductLinkType);
+const LINK_TYPE_OPTIONS = PRODUCT_LINK_TYPES.map((t) => t.value);
 
 interface EditLinksProps {
   product: ProductDetailOut;

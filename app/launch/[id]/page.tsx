@@ -51,19 +51,11 @@ import {
   EditProductInfoDialog,
   EditProductLinksDialog,
   EditProductLogoDialog,
+  approvedSubcategories,
+  pendingSubcategory,
 } from "@/features/products";
 import type { ProductDetailOut } from "@/features/products";
-import { VerificationStatus, ProductStatus } from "@/enums";
-
-const LINK_LABELS: Record<string, string> = {
-  website: "Website",
-  github: "GitHub",
-  twitter: "Twitter / X",
-  docs: "Documentation",
-  demo: "Demo",
-  discord: "Discord",
-  other: "Other",
-};
+import { VerificationStatus, ProductStatus, ProductLinkTypeLabel, sortProductLinksOtherLast } from "@/enums";
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -163,6 +155,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
   const p: ProductDetailOut = apiProduct;
   const primaryCategory = p.categories[0]?.name ?? "Product";
+  const pendingSub = pendingSubcategory(p.categories);
   const isInvestor = (user?.role as string) === "investor";
 
   const handleBookmark = () => {
@@ -238,12 +231,10 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     p.stage ? { label: "Stage", value: p.stage } : null,
   ].filter(Boolean) as { label: string; value: string; isStatus?: boolean }[];
 
-  const links = p.links
-    .filter((l) => l.linkType in LINK_LABELS)
-    .map((l) => ({
-      label: l.label ?? LINK_LABELS[l.linkType],
-      url: l.url,
-    }));
+  const links = sortProductLinksOtherLast(p.links.filter((l) => l.linkType in ProductLinkTypeLabel)).map((l) => ({
+    label: l.label ?? ProductLinkTypeLabel[l.linkType],
+    url: l.url,
+  }));
 
   return (
     <div>
@@ -263,9 +254,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           <span className="h-3 w-px bg-[#D8D4CC]" />
           <p className="flex-1 text-[13px] font-semibold text-ink">
             This launch is pending review — approve or reject below.
-            {p.pendingSubcategoryName && (
+            {pendingSub && (
               <span className="ml-2 font-normal text-[#92400E]">
-                Custom sub-category: <strong>{p.pendingSubcategoryName}</strong>
+                Custom sub-category: <strong>{pendingSub.name}</strong>
               </span>
             )}
           </p>
@@ -317,12 +308,12 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             <div className="mb-1.5 flex flex-wrap items-center gap-2">
               <h1 className="text-[36px] leading-none tracking-tight max-[640px]:text-[28px]">{p.name}</h1>
               {p.categories.length > 0 && <ProductBadge label={p.categories[0].name} />}
-              {(p.subCategories ?? []).map((name) => (
-                <ProductBadge key={name} label={name} type="subcategory" />
+              {approvedSubcategories(p.categories).map((sub) => (
+                <ProductBadge key={sub.id} label={sub.name} type="subcategory" />
               ))}
-              {p.pendingSubcategoryName && (
+              {pendingSub && (
                 <span className="topic-pill bg-[#FEF3C7] text-[10px] border-[#D4A017]/40 text-[#92400E]">
-                  ⚠ {p.pendingSubcategoryName.toUpperCase()} (PENDING)
+                  ⚠ {pendingSub.name.toUpperCase()} (PENDING)
                 </span>
               )}
               {p.qualityBadge && <ProductBadge label={p.qualityBadge} type="stage" />}
@@ -727,7 +718,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       showToast("Product updated.", "success");
                       setEditInfoOpen(false);
                     },
-                    onError: () => showToast("Update failed. Please try again.", "error"),
+                    onError: (err: Error) => showToast(err.message || "Update failed. Please try again.", "error"),
                   }
                 )
               }
@@ -780,8 +771,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     <div className="mb-0.75 text-[15px] font-bold">{s.name}</div>
                   </div>
                   <div className="mb-2 flex flex-wrap gap-1.5">
-                    {s.categories.map((name) => (
-                      <ProductBadge key={name} label={name} />
+                    {s.categories.map((c) => (
+                      <ProductBadge key={c.id} label={c.name} />
                     ))}
                     {s.stage && <ProductBadge label={s.stage} type="stage" />}
                   </div>

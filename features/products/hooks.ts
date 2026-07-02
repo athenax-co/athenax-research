@@ -1,19 +1,8 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as productApi from "./api";
 import type { ProductFilters, ProductStats } from "./api";
-import type { ProductDetailOut, ProductIn, ProductListItem, ProductOut, ProductStatus, ProductSummary, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty, ProductUpdateIn, ProductLinkIn } from "./types";
+import type { ProductDetailOut, ProductIn, ProductListItem, ProductStatus, ProductSummary, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty, ProductUpdateIn, ProductLinkIn } from "./types";
 import type { VerificationStatus } from "@/enums";
-import type { CategoryOut } from "@/types/reference";
-import { resolveCategories } from "@/utils/lib";
-import { REFERENCE_QUERY_KEYS } from "@/hooks/queries/useReference";
-
-function withCategories(products: ProductOut[], allCategories: CategoryOut[]): ProductOut[] {
-  return products.map((p) => ({ ...p, categories: resolveCategories(p.categoryIds ?? [], allCategories) }));
-}
-
-function withCategoriesOne(p: ProductDetailOut, allCategories: CategoryOut[]): ProductDetailOut {
-  return { ...p, categories: resolveCategories(p.categoryIds ?? [], allCategories) };
-}
 
 const MIN_TODAY = 2;
 const MIN_THIS_WEEK = 3;
@@ -56,17 +45,9 @@ export function useSubmitProduct() {
 }
 
 export function useProducts(status: ProductStatus) {
-  const queryClient = useQueryClient();
   return useQuery({
     queryKey: ["products", status],
     queryFn: () => productApi.getProducts({ status }),
-    select: (data) => {
-      const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
-      return {
-        items: withCategories(data.items, cats),
-        total: data.total,
-      };
-    },
   });
 }
 
@@ -82,7 +63,6 @@ export function usePagedProducts(
   status: ProductStatus,
   filters: ProductQueryFilters & { page: number; pageSize: number }
 ) {
-  const queryClient = useQueryClient();
   const { categoryId, dateFilter, sortBy, search, upvoted, page, pageSize } = filters;
   return useQuery({
     queryKey: ["products", "paged", status, categoryId, dateFilter, sortBy, search, upvoted, page, pageSize],
@@ -97,24 +77,15 @@ export function usePagedProducts(
         offset: (page - 1) * pageSize,
         upvoted: upvoted || undefined,
       }),
-    select: (data) => {
-      const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
-      return { ...data, items: withCategories(data.items, cats) };
-    },
   });
 }
 
 
 export function useProductBySlug(slug: string) {
-  const queryClient = useQueryClient();
   return useQuery<ProductDetailOut>({
     queryKey: ["product", slug],
     queryFn: () => productApi.getProductBySlug(slug),
     enabled: !!slug,
-    select: (data) => {
-      const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
-      return withCategoriesOne(data, cats);
-    },
   });
 }
 
@@ -132,26 +103,16 @@ export function useVoteProduct() {
 }
 
 export function useMyProducts(status?: ProductStatus) {
-  const queryClient = useQueryClient();
   return useQuery({
     queryKey: ["products", "me", status],
     queryFn: () => productApi.getMyProducts(status),
-    select: (data) => {
-      const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
-      return withCategories(data, cats);
-    },
   });
 }
 
 export function useMyVotedProducts() {
-  const queryClient = useQueryClient();
   return useQuery({
     queryKey: ["products", "me", "voted"],
     queryFn: () => productApi.getMyVotedProducts(),
-    select: (data) => {
-      const cats: CategoryOut[] = queryClient.getQueryData(REFERENCE_QUERY_KEYS.categories) ?? [];
-      return { ...data, items: withCategories(data.items, cats) };
-    },
   });
 }
 

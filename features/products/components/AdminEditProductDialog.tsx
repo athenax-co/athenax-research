@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ProductLinkType } from "@/enums";
+import { PRODUCT_LINK_TYPES, type ProductLinkType } from "@/enums";
 import { useProductStages } from "../hooks";
 import type { ProductDetailOut, ProductUpdateIn, ProductLinkIn } from "../types";
 import { Pencil, Trash2, Plus, Upload } from "lucide-react";
@@ -327,7 +327,7 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
 
 // ─── Edit Links Dialog (LINKS.SYS) ───────────────────────────────────────────
 
-const LINK_TYPE_OPTIONS = Object.values(ProductLinkType);
+const LINK_TYPE_OPTIONS = PRODUCT_LINK_TYPES.map((t) => t.value);
 
 interface EditLinksProps {
   product: ProductDetailOut;

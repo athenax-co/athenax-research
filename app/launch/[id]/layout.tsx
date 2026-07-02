@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+import { BASE_URL } from "@/api/client" 
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id: slug } = await params;
 
   try {
-    const res = await fetch(`${API_BASE}/product/slug/${slug}`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${BASE_URL}/product/slug/${slug}`, { next: { revalidate: 3600 } });
     if (!res.ok) throw new Error("not found");
     const product = await res.json();
 

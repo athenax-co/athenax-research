@@ -55,17 +55,7 @@ import {
   pendingSubcategory,
 } from "@/features/products";
 import type { ProductDetailOut } from "@/features/products";
-import { VerificationStatus, ProductStatus } from "@/enums";
-
-const LINK_LABELS: Record<string, string> = {
-  website: "Website",
-  github: "GitHub",
-  twitter: "Twitter / X",
-  docs: "Documentation",
-  demo: "Demo",
-  discord: "Discord",
-  other: "Other",
-};
+import { VerificationStatus, ProductStatus, ProductLinkTypeLabel, sortProductLinksOtherLast } from "@/enums";
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -241,12 +231,10 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     p.stage ? { label: "Stage", value: p.stage } : null,
   ].filter(Boolean) as { label: string; value: string; isStatus?: boolean }[];
 
-  const links = p.links
-    .filter((l) => l.linkType in LINK_LABELS)
-    .map((l) => ({
-      label: l.label ?? LINK_LABELS[l.linkType],
-      url: l.url,
-    }));
+  const links = sortProductLinksOtherLast(p.links.filter((l) => l.linkType in ProductLinkTypeLabel)).map((l) => ({
+    label: l.label ?? ProductLinkTypeLabel[l.linkType],
+    url: l.url,
+  }));
 
   return (
     <div>

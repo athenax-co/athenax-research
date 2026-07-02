@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
+import { BASE_URL as API_BASE } from "@/api/client" 
 
 const BASE = "https://athenax.co";
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const STATIC_ROUTES: MetadataRoute.Sitemap = [
   { url: `${BASE}/`,        priority: 1.0, changeFrequency: "daily"  },

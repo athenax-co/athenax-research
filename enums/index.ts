@@ -61,16 +61,32 @@ export const QualityBadge = {
 
 export type QualityBadge = (typeof QualityBadge)[keyof typeof QualityBadge];
 
-export const ProductLinkType = {
-  WEBSITE: "website",
-  GITHUB: "github",
-  TWITTER: "twitter",
-  DOCS: "docs",
-  DEMO: "demo",
-  DISCORD: "discord",
-} as const;
+// Single source of truth for both the `ProductLinkType` union and its display labels.
+export const PRODUCT_LINK_TYPES = [
+  { value: "website", label: "Website" },
+  { value: "github", label: "GitHub" },
+  { value: "twitter", label: "Twitter / X" },
+  { value: "docs", label: "Documentation" },
+  { value: "demo", label: "Demo" },
+  { value: "discord", label: "Discord" },
+  { value: "linkedin", label: "LinkedIn" },
+  { value: "youtube", label: "YouTube" },
+  { value: "instagram", label: "Instagram" },
+  { value: "other", label: "Other" },
+] as const;
 
-export type ProductLinkType = (typeof ProductLinkType)[keyof typeof ProductLinkType];
+export type ProductLinkType = (typeof PRODUCT_LINK_TYPES)[number]["value"];
+
+export const ProductLinkTypeLabel = Object.fromEntries(
+  PRODUCT_LINK_TYPES.map((t) => [t.value, t.label])
+) as Record<ProductLinkType, string>;
+
+const OTHER_LINK_TYPE: ProductLinkType = "other";
+
+// Keeps "other" links last while preserving relative order of everything else.
+export function sortProductLinksOtherLast<T extends { linkType: string }>(links: T[]): T[] {
+  return [...links].sort((a, b) => Number(a.linkType === OTHER_LINK_TYPE) - Number(b.linkType === OTHER_LINK_TYPE));
+}
 
 export const ProductMediaType = {
   IMAGE: "image",

@@ -19,9 +19,16 @@ export interface ProductIn {
   links?: ProductLinkIn[];
 }
 
+export interface SubcategoryRef {
+  id: number;
+  name: string;
+  status: VerificationStatus;
+}
+
 export interface CategoryRef {
   id: number;
   name: string;
+  subcategories: SubcategoryRef[];
 }
 
 export interface ProductOut {
@@ -41,9 +48,6 @@ export interface ProductOut {
   voteCount: number;
   bookmarkCount: number;
   investorInterestCount: number;
-  categoryIds: number[];
-  subCategories?: string[];
-  pendingSubcategoryName?: string | null;
   categories: CategoryRef[];
   bookmarked?: boolean | null;
   createdAt: string;
@@ -112,7 +116,6 @@ export interface ProductDetailOut extends ProductOut {
   interested: boolean | null;
   imported?: boolean | null;
   email?: string | null;
-  subCategoryIds?: number[];
   links: ProductLink[];
   media: ProductMedia[];
   team: TeamMemberOut[];
@@ -134,6 +137,7 @@ export interface ProductUpdateIn {
   email?: string;
   categoryIds?: number[];
   subCategoryIds?: number[];
+  otherSubcategoryName?: string;
   links?: ProductLinkIn[];
   backers?: string[];
 }
@@ -151,7 +155,7 @@ export interface ProductListItem {
   shortDesc: string | null;
   logo: string | null;
   stage: string | null;
-  categories: string[];
+  categories: CategoryRef[];
 }
 
 export interface ProductSummary {
@@ -159,7 +163,7 @@ export interface ProductSummary {
   slug: string;
   name: string;
   stage: string;
-  categoryIds: number[];
+  categories: CategoryRef[];
   bookmarkCount: number;
   voteCount: number;
   createdAt: string;

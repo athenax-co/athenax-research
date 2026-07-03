@@ -9,7 +9,7 @@ import { ProductBadge } from "@/components/ui/ProductBadge";
 import BookmarkButton from "@/components/BookmarkButton";
 import { useGlobal } from "@/components/GlobalProvider";
 import { cn } from "@/lib/utils";
-import { getProductStatsLabel, useProducts, useProductStats } from "@/features/products";
+import { getProductStatsLabel, useProducts, useProductStats, approvedSubcategories } from "@/features/products";
 
 export default function Page() {
   const { user, showToast, openSubmitProductModal } = useGlobal();
@@ -106,8 +106,8 @@ export default function Page() {
                         {(launch.categories ?? []).map((c: any) => (
                           <ProductBadge key={c.id} label={c.name} />
                         ))}
-                        {(launch.subCategories ?? []).map((name: string) => (
-                          <ProductBadge key={name} label={name} type="subcategory" />
+                        {approvedSubcategories(launch.categories ?? []).map((sub) => (
+                          <ProductBadge key={sub.id} label={sub.name} type="subcategory" />
                         ))}
                         {launch.qualityBadge && <ProductBadge label={launch.qualityBadge} type="stage" />}
                         {(launch.stage != null || launch.funding != null) && (

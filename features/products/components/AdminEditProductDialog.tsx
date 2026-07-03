@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { PRODUCT_LINK_TYPES, type ProductLinkType } from "@/enums";
+import { urlSchema } from "@/lib/validators";
 import { useProductStages } from "../hooks";
 import type { ProductDetailOut, ProductUpdateIn, ProductLinkIn } from "../types";
 import { Pencil, Trash2, Plus, Upload } from "lucide-react";
@@ -137,6 +138,7 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
         funding: product.funding ?? undefined,
         founded: product.founded ?? undefined,
         backers: product.backers.map((b) => b.name),
+        grants: product.grants.map((g) => g.name),
       });
       setSelectedCategoryId(product.categories[0]?.id ?? null);
       setSubCategoryIds(product.categories[0]?.subcategories.map((s) => s.id) ?? []);
@@ -312,6 +314,15 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
               placeholder="Type backer name and press Enter"
             />
           </div>
+
+          <div className="inp-group mb-0">
+            <label className="inp-label">Grants</label>
+            <TagInput
+              value={form.grants ?? []}
+              onChange={(vals) => set("grants", vals)}
+              placeholder="Type grant name and press Enter"
+            />
+          </div>
         </DialogBody>
 
         <DialogFooter>
@@ -351,11 +362,13 @@ export function EditProductLinksDialog({
   const [addingLink, setAddingLink] = useState(false);
   const [editingLinkId, setEditingLinkId] = useState<number | null>(null);
   const [editUrl, setEditUrl] = useState("");
+  const [editUrlError, setEditUrlError] = useState<string | null>(null);
 
   const usedTypes = new Set(product.links.map((l) => l.linkType));
   const availableTypes = LINK_TYPE_OPTIONS.filter((t) => !usedTypes.has(t as ProductLinkType));
 
   const [newLink, setNewLink] = useState({ linkType: "", url: "" });
+  const [newLinkUrlError, setNewLinkUrlError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) {
@@ -367,23 +380,37 @@ export function EditProductLinksDialog({
   useEffect(() => {
     if (addingLink) {
       setNewLink({ linkType: availableTypes[0] ?? "", url: "" });
+      setNewLinkUrlError(null);
     }
   }, [addingLink]);
 
   const handleAddLink = () => {
-    if (!newLink.url.trim() || !newLink.linkType) return;
-    onCreateLink({ linkType: newLink.linkType as ProductLinkType, url: newLink.url.trim() });
+    const url = newLink.url.trim();
+    if (!url || !newLink.linkType) return;
+    const result = urlSchema.safeParse(url);
+    if (!result.success) {
+      setNewLinkUrlError(result.error.issues[0].message);
+      return;
+    }
+    onCreateLink({ linkType: newLink.linkType as ProductLinkType, url });
     setAddingLink(false);
   };
 
   const startEditLink = (link: { id: number; url: string }) => {
     setEditingLinkId(link.id);
     setEditUrl(link.url);
+    setEditUrlError(null);
   };
 
   const handleUpdateLink = (linkId: number) => {
-    if (!editUrl.trim()) return;
-    onUpdateLink(linkId, { url: editUrl.trim() });
+    const url = editUrl.trim();
+    if (!url) return;
+    const result = urlSchema.safeParse(url);
+    if (!result.success) {
+      setEditUrlError(result.error.issues[0].message);
+      return;
+    }
+    onUpdateLink(linkId, { url });
     setEditingLinkId(null);
   };
 
@@ -404,24 +431,27 @@ export function EditProductLinksDialog({
           {product.links.map((link) => (
             <div key={link.id} className="rounded-lg border border-[rgba(0,0,0,0.1)] bg-white p-3">
               {editingLinkId === link.id ? (
-                <div className="flex items-center gap-2">
-                  <span className="w-20 shrink-0 font-['Space_Mono',monospace] text-[10px] uppercase tracking-wider text-[#888]">
-                    {link.linkType}
-                  </span>
-                  <input
-                    className="inp flex-1 py-1 text-sm"
-                    style={{ marginTop: 0 }}
-                    value={editUrl}
-                    onChange={(e) => setEditUrl(e.target.value)}
-                    placeholder="URL"
-                    autoFocus
-                  />
-                  <Button size="sm" onClick={() => handleUpdateLink(link.id)} disabled={linkPending}>
-                    Save
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setEditingLinkId(null)}>
-                    Cancel
-                  </Button>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-20 shrink-0 font-['Space_Mono',monospace] text-[10px] uppercase tracking-wider text-[#888]">
+                      {link.linkType}
+                    </span>
+                    <input
+                      className="inp flex-1 py-1 text-sm"
+                      style={{ marginTop: 0 }}
+                      value={editUrl}
+                      onChange={(e) => { setEditUrl(e.target.value); setEditUrlError(null); }}
+                      placeholder="URL"
+                      autoFocus
+                    />
+                    <Button size="sm" onClick={() => handleUpdateLink(link.id)} disabled={linkPending}>
+                      Save
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setEditingLinkId(null)}>
+                      Cancel
+                    </Button>
+                  </div>
+                  {editUrlError && <p className="pl-22 text-xs text-red-500">{editUrlError}</p>}
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
@@ -470,10 +500,11 @@ export function EditProductLinksDialog({
                     <input
                       className="inp py-1 text-sm"
                       value={newLink.url}
-                      onChange={(e) => setNewLink((f) => ({ ...f, url: e.target.value }))}
+                      onChange={(e) => { setNewLink((f) => ({ ...f, url: e.target.value })); setNewLinkUrlError(null); }}
                       placeholder="https://…"
                       autoFocus
                     />
+                    {newLinkUrlError && <p className="mt-1 text-xs text-red-500">{newLinkUrlError}</p>}
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">

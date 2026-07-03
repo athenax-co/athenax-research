@@ -72,6 +72,9 @@ export const PRODUCT_LINK_TYPES = [
   { value: "linkedin", label: "LinkedIn" },
   { value: "youtube", label: "YouTube" },
   { value: "instagram", label: "Instagram" },
+  { value: "telegram", label: "Telegram" },
+  { value: "medium", label: "Medium" },
+  { value: "tiktok", label: "TikTok" },
   { value: "other", label: "Other" },
 ] as const;
 

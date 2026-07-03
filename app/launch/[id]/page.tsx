@@ -389,12 +389,25 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             </div>
 
             {p.backers.length > 0 && (
-              <div>
-                <div className="mb-2.5 font-['Space_Mono',monospace] text-[11px] uppercase tracking-[0.06em] text-[#888]">Backers</div>
+              <div className="mb-3">
+                <div className="mb-1 font-['Space_Mono',monospace] text-[11px] uppercase tracking-[0.06em] text-[#888]">Backers</div>
                 <div className="flex flex-wrap gap-2">
                   {p.backers.map((b) => (
-                    <span key={b.id} className="rounded-full border border-[rgba(0,0,0,0.15)] bg-white px-4 py-1.5 text-[13px] font-medium">
+                    <span key={b.id} className="rounded-full border border-[rgba(0,0,0,0.15)] bg-white px-2 py-1 text-xs font-medium">
                       {b.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {p.grants.length > 0 && (
+              <div>
+                <div className="mb-1 font-['Space_Mono',monospace] text-[11px] uppercase tracking-[0.06em] text-[#888]">Grants</div>
+                <div className="flex flex-wrap gap-2">
+                  {p.grants.map((g) => (
+                    <span key={g.id} className="rounded-full border border-[rgba(0,0,0,0.15)] bg-white px-2 py-1 text-xs font-medium">
+                      {g.name}
                     </span>
                   ))}
                 </div>

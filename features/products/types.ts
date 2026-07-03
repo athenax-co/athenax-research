@@ -16,6 +16,7 @@ export interface ProductIn {
   subCategoryIds?: number[];
   otherSubcategoryName?: string;
   backers?: string[];
+  grants?: string[];
   links?: ProductLinkIn[];
 }
 
@@ -89,6 +90,12 @@ export interface ProductBacker {
   name: string;
 }
 
+export interface ProductGrant {
+  id: number;
+  productId: number;
+  name: string;
+}
+
 export interface ProductVoice {
   id: number;
   productId: number;
@@ -120,6 +127,7 @@ export interface ProductDetailOut extends ProductOut {
   media: ProductMedia[];
   team: TeamMemberOut[];
   backers: ProductBacker[];
+  grants: ProductGrant[];
   voices: ProductVoice[];
   bounties: Bounty[];
 }
@@ -140,6 +148,7 @@ export interface ProductUpdateIn {
   otherSubcategoryName?: string;
   links?: ProductLinkIn[];
   backers?: string[];
+  grants?: string[];
 }
 
 export interface ProductLinkIn {

@@ -12,12 +12,13 @@ import { QualityBadge } from "@/enums";
 import { useSubmitProduct, useProductStages } from "@/features/products";
 import { useGlobal } from "@/components/GlobalProvider";
 import { cn } from "@/lib/utils";
+import { urlSchema } from "@/lib/validators";
 
 const DRAFT_KEY = "ax_submit_product_draft";
 
 const step1Schema = z.object({
   name: z.string().min(1, "Product name is required"),
-  url: z.union([z.url("Invalid URL"), z.literal("")]).optional(),
+  url: z.union([urlSchema, z.literal("")]).optional(),
   shortDesc: z.string().min(1, "One-line description is required"),
   email: z.union([z.email("Must be a valid email"), z.literal("")]).optional(),
 });
@@ -45,15 +46,15 @@ function loadDraft() {
   try {
     const raw = localStorage.getItem(DRAFT_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as { form: typeof DEFAULT_FORM; categoryIds: number[]; subCategoryIds: number[]; backers: string[] };
+    return JSON.parse(raw) as { form: typeof DEFAULT_FORM; categoryIds: number[]; subCategoryIds: number[]; backers: string[]; grants: string[] };
   } catch {
     return null;
   }
 }
 
-function saveDraft(form: typeof DEFAULT_FORM, categoryIds: number[], subCategoryIds: number[], backers: string[]) {
+function saveDraft(form: typeof DEFAULT_FORM, categoryIds: number[], subCategoryIds: number[], backers: string[], grants: string[]) {
   try {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, categoryIds, subCategoryIds, backers }));
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, categoryIds, subCategoryIds, backers, grants }));
   } catch {}
 }
 
@@ -134,12 +135,13 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
   const [otherName, setOtherName] = useState("");
   const { data: subcategories = [], isPending: loadingSubcategories } = useSubcategories(selectedCategoryId);
   const [backers, setBackers] = useState<string[]>(draft?.backers ?? []);
+  const [grants, setGrants] = useState<string[]>(draft?.grants ?? []);
   const [errors, setErrors] = useState<Partial<Record<"name" | "url" | "shortDesc" | "email" | "github", string>>>({});
 
   const set = (k: keyof typeof DEFAULT_FORM) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setSubmitForm((f) => {
       const next = { ...f, [k]: e.target.value };
-      saveDraft(next, selectedCategoryId ? [selectedCategoryId] : [], subCategoryIds, backers);
+      saveDraft(next, selectedCategoryId ? [selectedCategoryId] : [], subCategoryIds, backers, grants);
       return next;
     });
 
@@ -191,6 +193,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
         subCategoryIds: selectedOther ? [] : subCategoryIds,
         otherSubcategoryName: selectedOther && otherName.trim() ? otherName.trim() : undefined,
         backers,
+        grants,
       });
       clearDraft();
       setSubmitForm(DEFAULT_FORM);
@@ -199,6 +202,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
       setSelectedOther(false);
       setOtherName("");
       setBackers([]);
+      setGrants([]);
       setStep(1);
       onOpenChange(false);
       showSubmitProductSuccess(submitForm.name);
@@ -349,7 +353,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
                     const id = e.target.value ? Number(e.target.value) : null;
                     setSelectedCategoryId(id);
                     setSubCategoryIds([]);
-                    saveDraft(submitForm, id ? [id] : [], [], backers);
+                    saveDraft(submitForm, id ? [id] : [], [], backers, grants);
                   }}
                 >
                   <option value="" disabled>Select a category…</option>
@@ -374,7 +378,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
                             setSubCategoryIds([sub.id]);
                             setSelectedOther(false);
                             setOtherName("");
-                            saveDraft(submitForm, [selectedCategoryId], [sub.id], backers);
+                            saveDraft(submitForm, [selectedCategoryId], [sub.id], backers, grants);
                           }}
                           className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
                             subCategoryIds.includes(sub.id) && !selectedOther
@@ -390,7 +394,7 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
                         onClick={() => {
                           setSelectedOther(true);
                           setSubCategoryIds([]);
-                          saveDraft(submitForm, [selectedCategoryId], [], backers);
+                          saveDraft(submitForm, [selectedCategoryId], [], backers, grants);
                         }}
                         className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
                           selectedOther
@@ -419,9 +423,22 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
                   value={backers}
                   onChange={(vals) => {
                     setBackers(vals);
-                    saveDraft(submitForm, selectedCategoryId ? [selectedCategoryId] : [], subCategoryIds, vals);
+                    saveDraft(submitForm, selectedCategoryId ? [selectedCategoryId] : [], subCategoryIds, vals, grants);
                   }}
                   placeholder="Investor or firm name — press Enter to add"
+                  addAnother="Add another…"
+                />
+              </div>
+
+              <div className="inp-group">
+                <label className="inp-label">Grants</label>
+                <TagInput
+                  value={grants}
+                  onChange={(vals) => {
+                    setGrants(vals);
+                    saveDraft(submitForm, selectedCategoryId ? [selectedCategoryId] : [], subCategoryIds, backers, vals);
+                  }}
+                  placeholder="Grant name — press Enter to add"
                   addAnother="Add another…"
                 />
               </div>

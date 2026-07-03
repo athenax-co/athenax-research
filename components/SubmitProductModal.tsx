@@ -12,12 +12,13 @@ import { QualityBadge } from "@/enums";
 import { useSubmitProduct, useProductStages } from "@/features/products";
 import { useGlobal } from "@/components/GlobalProvider";
 import { cn } from "@/lib/utils";
+import { urlSchema } from "@/lib/validators";
 
 const DRAFT_KEY = "ax_submit_product_draft";
 
 const step1Schema = z.object({
   name: z.string().min(1, "Product name is required"),
-  url: z.union([z.url("Invalid URL"), z.literal("")]).optional(),
+  url: z.union([urlSchema, z.literal("")]).optional(),
   shortDesc: z.string().min(1, "One-line description is required"),
   email: z.union([z.email("Must be a valid email"), z.literal("")]).optional(),
 });

@@ -13,6 +13,7 @@ export type {
   TeamMemberOut,
   TeamMemberIn,
   ProductBacker,
+  ProductGrant,
   ProductVoice,
   VoiceIn,
   Bounty,

@@ -12,6 +12,7 @@ export type OGCardProduct = {
   subCategories?: string[] | null;
   voteCount?: number | null;
   backers?: string[];
+  grants?: string[];
   links?: { label: string; url: string }[];
   galleryImages?: (string | null)[];
 };
@@ -169,6 +170,7 @@ export function OGCard({ product: p }: { product: OGCardProduct }) {
 
   const description = clamp(p.description || p.shortDesc || "No description provided.", 215);
   const backers = (p.backers ?? []).slice(0, 8);
+  const grants = (p.grants ?? []).slice(0, 8);
   const links = (p.links ?? []).slice(0, 4);
 
   const factRows: { label: string; value: string }[] = [];
@@ -318,6 +320,40 @@ export function OGCard({ product: p }: { product: OGCardProduct }) {
                       }}
                     >
                       {b}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {grants.length > 0 && (
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ display: "flex", fontFamily: "Space Mono", fontSize: 13, letterSpacing: "0.06em", color: MUTED, marginBottom: 10 }}>GRANTS</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {grants.map((g) => (
+                    <div
+                      key={g}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        backgroundColor: WHITE,
+                        borderWidth: 1,
+                        borderStyle: "solid",
+                        borderColor: "#d9d4cb",
+                        borderTopLeftRadius: 999,
+                        borderTopRightRadius: 999,
+                        borderBottomLeftRadius: 999,
+                        borderBottomRightRadius: 999,
+                        paddingTop: 6,
+                        paddingBottom: 6,
+                        paddingLeft: 15,
+                        paddingRight: 15,
+                        fontSize: 15,
+                        fontWeight: 500,
+                        color: INK,
+                      }}
+                    >
+                      {g}
                     </div>
                   ))}
                 </div>

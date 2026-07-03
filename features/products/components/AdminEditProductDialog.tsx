@@ -138,6 +138,7 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
         funding: product.funding ?? undefined,
         founded: product.founded ?? undefined,
         backers: product.backers.map((b) => b.name),
+        grants: product.grants.map((g) => g.name),
       });
       setSelectedCategoryId(product.categories[0]?.id ?? null);
       setSubCategoryIds(product.categories[0]?.subcategories.map((s) => s.id) ?? []);
@@ -311,6 +312,15 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
               value={form.backers ?? []}
               onChange={(vals) => set("backers", vals)}
               placeholder="Type backer name and press Enter"
+            />
+          </div>
+
+          <div className="inp-group mb-0">
+            <label className="inp-label">Grants</label>
+            <TagInput
+              value={form.grants ?? []}
+              onChange={(vals) => set("grants", vals)}
+              placeholder="Type grant name and press Enter"
             />
           </div>
         </DialogBody>

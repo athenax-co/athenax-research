@@ -48,6 +48,7 @@ type ProductApi = {
   media?: { url: string; mediaType: string }[];
   links?: { linkType: string; url: string; label?: string | null }[];
   backers?: { name: string }[];
+  grants?: { name: string }[];
 };
 
 export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
@@ -90,6 +91,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
       .slice(0, 4);
 
     const backers = (product.backers ?? []).map((b) => b.name);
+    const grants = (product.grants ?? []).map((g) => g.name);
 
     // Pre-fetch up to 3 gallery images as data URIs so Satori can embed them regardless of format
     let galleryImages: (string | null)[] = [];
@@ -117,6 +119,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
       subCategories,
       voteCount: product.voteCount,
       backers,
+      grants,
       links,
       galleryImages,
     };

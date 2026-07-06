@@ -136,10 +136,10 @@ export interface ProductUpdateIn {
   name?: string;
   shortDesc?: string;
   description?: string;
-  stage?: string;
+  stage?: string | null;
   funding?: number;
   founded?: number;
-  qualityBadge?: string;
+  qualityBadge?: string | null;
   imported?: boolean;
   logo?: string;
   email?: string;

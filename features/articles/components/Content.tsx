@@ -6,7 +6,7 @@ import { extractMarkdownHeadings } from "../utils";
 import { ArticleType } from "@/enums";
 import WindowCard from "@/components/ui/WindowCard";
 import { ContentListState, ContentRow } from "@/components/Content";
-import MarkdownViewer from "@/components/editor/MarkdownViewer";
+import MarkdownViewer, { preserveBlankLines } from "@/components/editor/MarkdownViewer";
 import ArticleTOC from "./ArticleTOC";
 import { useGlobal } from "@/components/GlobalProvider";
 import { IconShare } from "@/components/Icons";
@@ -52,7 +52,7 @@ const ContentDetailPage = ({ kind, item, slug }: { kind: "article" | "research";
   const { showToast } = useGlobal();
   const { data: articles = [] } = useArticlesList();
 
-  const content: string = typeof item?.content === "string" ? item.content : "";
+  const content: string = typeof item?.content === "string" ? preserveBlankLines(item.content) : "";
   const readTime = item ? estimateReadTime(content) : 0;
   const isWhitepaper = kind === "article" && item?.articleType === ArticleType.WHITEPAPER;
   const isLivestream = kind === "article" && item?.articleType === ArticleType.LIVESTREAM;

@@ -46,11 +46,14 @@ export default function Page() {
 
   const [categoryId, setCategoryId] = useQueryState("category", parseAsInteger);
   const [dateFilter, setDateFilter] = useQueryState("date", parseAsString);
-  const [search, setSearch] = useQueryState("q", parseAsString);
   const [upvotedFilter, setUpvotedFilter] = useQueryState("upvoted", parseAsString);
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
-  const [searchInput, setSearchInput] = useState(search ?? "");
+  // Search is component-local (not URL-synced), so returning to the Launch page
+  // always starts with an empty search box — even via the browser back button.
+  // The other filters stay in the URL and remain shareable/persistent.
+  const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebounce(searchInput);
+  const search = debouncedSearch.trim() || null;
   const searchRef = useRef<HTMLInputElement>(null);
 
   // Track whether a filter change (not a page change) triggered a page reset
@@ -94,10 +97,6 @@ export default function Page() {
     }
   }, [categoryId, dateFilter, search, upvotedFilter, setPage]);
 
-  // Sync debounced value → URL param
-  useEffect(() => {
-    setSearch(debouncedSearch.trim() || null);
-  }, [debouncedSearch, setSearch]);
 
   // / key focuses the search input
   useEffect(() => {

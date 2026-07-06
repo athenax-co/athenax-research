@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { PRODUCT_LINK_TYPES, type ProductLinkType } from "@/enums";
+import { PRODUCT_LINK_TYPES, QualityBadge, type ProductLinkType } from "@/enums";
 import { urlSchema } from "@/lib/validators";
 import { useProductStages } from "../hooks";
 import type { ProductDetailOut, ProductUpdateIn, ProductLinkIn } from "../types";
@@ -135,6 +135,7 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
         shortDesc: product.shortDesc ?? "",
         description: product.description ?? "",
         stage: product.stage ?? "",
+        qualityBadge: product.qualityBadge ?? "",
         funding: product.funding ?? undefined,
         founded: product.founded ?? undefined,
         backers: product.backers.map((b) => b.name),
@@ -153,6 +154,7 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
   const handleSave = () => {
     const payload: ProductUpdateIn = { ...form };
     if (!payload.stage) payload.stage = undefined;
+    if (!payload.qualityBadge) payload.qualityBadge = undefined;
     // Category and sub-category are always sent together (even unchanged) so a stale
     // sub-category can never be left pointing at a parent the backend no longer sees.
     payload.categoryIds = selectedCategoryId ? [selectedCategoryId] : [];
@@ -200,14 +202,25 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
             />
           </div>
 
-          <div className="inp-group mb-0">
-            <label className="inp-label">Stage</label>
-            <select className="inp" value={form.stage ?? ""} onChange={(e) => set("stage", e.target.value)}>
-              <option value="">— none —</option>
-              {stages.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="inp-group mb-0">
+              <label className="inp-label">Stage</label>
+              <select className="inp" value={form.stage ?? ""} onChange={(e) => set("stage", e.target.value)}>
+                <option value="">— none —</option>
+                {stages.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+            <div className="inp-group mb-0">
+              <label className="inp-label">Quality Badge</label>
+              <select className="inp" value={form.qualityBadge ?? ""} onChange={(e) => set("qualityBadge", e.target.value)}>
+                <option value="">— none —</option>
+                {Object.values(QualityBadge).map((b) => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="inp-group mb-0">

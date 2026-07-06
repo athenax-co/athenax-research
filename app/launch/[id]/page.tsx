@@ -227,7 +227,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const factRows = [
     p.categories.length > 0 ? { label: "Category", value: p.categories[0].name } : null,
     p.founded != null ? { label: "Founded", value: String(p.founded) } : null,
-    p.funding != null ? { label: "Funding", value: `$${p.funding.toLocaleString()}` } : null,
+    p.funding ? { label: "Funding", value: `$${p.funding.toLocaleString()}` } : null,
     p.stage ? { label: "Stage", value: p.stage } : null,
   ].filter(Boolean) as { label: string; value: string; isStatus?: boolean }[];
 

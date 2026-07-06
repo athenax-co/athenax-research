@@ -100,7 +100,7 @@ export function SubmitProductSuccessModal({ open, onOpenChange, productName }: S
             <p className="text-xs text-muted mb-6">
               In the meantime, explore other launches and follow us on{" "}
               <Link
-                href="https://x.com/athenax_co"
+                href="https://x.com/intent/user?screen_name=athenax_co"
                 target="_blank"
                 rel="noreferrer"
                 className="font-semibold text-ink underline underline-offset-2 hover:opacity-80"

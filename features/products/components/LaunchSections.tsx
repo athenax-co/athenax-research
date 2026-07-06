@@ -158,16 +158,10 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
         </button>
 
         <button
-          className="relative aspect-video overflow-hidden rounded border border-[rgba(0,0,0,0.08)] cursor-pointer"
-          onClick={() => openAt(third ? 2 : 0)}
+          className={`relative aspect-video overflow-hidden rounded ${third ? "border border-[rgba(0,0,0,0.08)] cursor-pointer" : "border-0 invisible pointer-events-none"}`}
+          onClick={() => third && openAt(2)}
         >
-          {third ? (
-            third.url ? (
-              <Image fill src={third.url} alt="" className="object-cover" sizes="(max-width: 768px) 40vw, 20vw" />
-            ) : null
-          ) : (
-            <div className="flex h-full items-center justify-center bg-[#E8E4D9] text-[10px] font-['Space_Mono',monospace] text-[#888]">03.png</div>
-          )}
+          {third?.url && <Image fill src={third.url} alt="" className="object-cover" sizes="(max-width: 768px) 40vw, 20vw" />}
           {extra > 0 && (
             <span className="absolute bottom-1.5 right-1.5 rounded bg-[rgba(0,0,0,0.55)] px-1.5 py-0.5 text-[9px] font-['Space_Mono',monospace] text-white">
               + {extra} more

@@ -128,10 +128,6 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
   const [otherName, setOtherName] = useState("");
   const { data: subcategories = [], isPending: loadingSubcategories } = useSubcategories(selectedCategoryId);
 
-  // The sub-category picker lists approved children only (backend filters them),
-  // so a product's own pending custom sub-category has no chip. Surface it
-  // explicitly — but only while the original category is still selected, since
-  // it belongs to that parent.
   const originalCategoryId = product.categories[0]?.id ?? null;
   const productPendingSub = product.categories[0]?.subcategories.find((s) => s.status === VerificationStatus.PENDING) ?? null;
 
@@ -160,8 +156,6 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
 
   const handleSave = () => {
     const payload: ProductUpdateIn = { ...form };
-    // Send explicit null (not undefined) so "— none —" actually clears the field;
-    // undefined would be dropped by JSON.stringify and left unchanged by the backend.
     if (!payload.stage) payload.stage = null;
     if (!payload.qualityBadge) payload.qualityBadge = null;
     // Category and sub-category are always sent together (even unchanged) so a stale

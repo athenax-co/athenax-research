@@ -48,9 +48,6 @@ export default function Page() {
   const [dateFilter, setDateFilter] = useQueryState("date", parseAsString);
   const [upvotedFilter, setUpvotedFilter] = useQueryState("upvoted", parseAsString);
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
-  // Search is component-local (not URL-synced), so returning to the Launch page
-  // always starts with an empty search box — even via the browser back button.
-  // The other filters stay in the URL and remain shareable/persistent.
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebounce(searchInput);
   const search = debouncedSearch.trim() || null;

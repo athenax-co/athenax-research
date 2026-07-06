@@ -13,8 +13,6 @@ export async function createSubcategory(parentId: number, name: string): Promise
   return http.post<CategoryOut>(`/category`, { name, parent_id: parentId }, { auth: true });
 }
 
-// Approve/reject a (sub-)category. Sub-categories are categories with a parent_id,
-// so this drives the same admin-only PATCH /category/{id}/status endpoint.
 export async function updateSubcategoryStatus(id: number, status: VerificationStatus): Promise<CategoryOut> {
   return http.patch<CategoryOut>(`/category/${id}/status`, { status }, { auth: true });
 }

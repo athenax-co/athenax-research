@@ -52,9 +52,6 @@ const ContentDetailPage = ({ kind, item, slug }: { kind: "article" | "research";
   const { showToast } = useGlobal();
   const { data: articles = [] } = useArticlesList();
 
-  // Convert extra blank lines to spacer paragraphs *before* section extraction:
-  // extractMarkdownSection/stripHorizontalRules collapse \n{3,} runs, which
-  // would otherwise erase the author's intentional vertical spacing.
   const content: string = typeof item?.content === "string" ? preserveBlankLines(item.content) : "";
   const readTime = item ? estimateReadTime(content) : 0;
   const isWhitepaper = kind === "article" && item?.articleType === ArticleType.WHITEPAPER;

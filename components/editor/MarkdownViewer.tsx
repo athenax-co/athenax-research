@@ -21,8 +21,6 @@ interface MarkdownViewerProps {
 // Authors expect pressing Enter multiple times to add visible vertical space,
 // so convert each *extra* blank line into a spacer paragraph. Blank lines
 // inside fenced code blocks are left untouched so code stays intact.
-// Idempotent — callers that pre-process content (e.g. section extraction that
-// collapses \n{3,}) can apply it early to lock the author's spacing in place.
 export function preserveBlankLines(md: string): string {
   const normalized = md.replace(/\r\n/g, "\n");
   return normalized

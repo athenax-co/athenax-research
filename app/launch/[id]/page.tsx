@@ -207,7 +207,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     // Force an explicit decision on a custom sub-category before the launch is
     // approved — otherwise the backend would silently auto-approve it on cascade.
     if (status === ProductStatus.APPROVED && pendingSub) {
-      showToast(`Review the pending sub-category "${pendingSub.name}" first — approve or reject it before approving the launch.`, "error");
+      showToast(`Review the pending sub-category "${pendingSub.name}" before approving the launch.`, "error");
       setSubPopoverOpen(true);
       return;
     }

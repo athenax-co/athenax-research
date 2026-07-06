@@ -81,8 +81,6 @@ export function useUpdateSubcategoryStatus() {
     mutationFn: ({ id, status }: { id: number; status: VerificationStatus }) =>
       referenceApi.updateSubcategoryStatus(id, status),
     onSuccess: () => {
-      // A sub-category's status is embedded in product payloads and category lists,
-      // so refresh both feeds after a moderation change.
       queryClient.invalidateQueries({ queryKey: ["product"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["subcategories"] });

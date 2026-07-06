@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { PRODUCT_LINK_TYPES, QualityBadge, type ProductLinkType } from "@/enums";
+import { PRODUCT_LINK_TYPES, QualityBadge, VerificationStatus, type ProductLinkType } from "@/enums";
 import { urlSchema } from "@/lib/validators";
 import { useProductStages } from "../hooks";
 import type { ProductDetailOut, ProductUpdateIn, ProductLinkIn } from "../types";
@@ -127,6 +127,13 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
   const [selectedOther, setSelectedOther] = useState(false);
   const [otherName, setOtherName] = useState("");
   const { data: subcategories = [], isPending: loadingSubcategories } = useSubcategories(selectedCategoryId);
+
+  // The sub-category picker lists approved children only (backend filters them),
+  // so a product's own pending custom sub-category has no chip. Surface it
+  // explicitly — but only while the original category is still selected, since
+  // it belongs to that parent.
+  const originalCategoryId = product.categories[0]?.id ?? null;
+  const productPendingSub = product.categories[0]?.subcategories.find((s) => s.status === VerificationStatus.PENDING) ?? null;
 
   useEffect(() => {
     if (open) {
@@ -268,6 +275,14 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
                       {sub.name}
                     </button>
                   ))}
+                  {productPendingSub && selectedCategoryId === originalCategoryId && (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full border border-[#D4A017]/50 bg-[#FEF3C7] px-3 py-1 text-xs font-medium text-[#92400E]"
+                      title="Custom sub-category awaiting review — approve or reject it from the product page"
+                    >
+                      ⚠ {productPendingSub.name} (pending)
+                    </span>
+                  )}
                   <button
                     type="button"
                     onClick={() => {

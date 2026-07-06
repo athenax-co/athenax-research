@@ -10,6 +10,8 @@ import { IconShare } from "@/components/Icons";
 import { Bookmark, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGlobal } from "@/components/GlobalProvider";
+import { useUpdateSubcategoryStatus } from "@/hooks/queries/useReference";
+import { Popover } from "@base-ui/react";
 import VoteButton from "@/components/VoteButton";
 import { prettyUrl } from "@/utils/lib";
 import { cn } from "@/lib/utils";
@@ -107,6 +109,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { mutate: updateLink, isPending: updatingLink } = useUpdateProductLink(apiProductId, id);
   const { mutate: deleteLink, isPending: deletingLink } = useDeleteProductLink(apiProductId, id);
   const linkPending = creatingLink || updatingLink || deletingLink;
+  const { mutate: updateSubStatus, isPending: updatingSubcategory } = useUpdateSubcategoryStatus();
+  const [subPopoverOpen, setSubPopoverOpen] = useState(false);
 
   const shareLaunch = async (slug: string) => {
     const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
@@ -200,6 +204,13 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const isOwner = user != null && p.createdById != null && user.id === p.createdById;
 
   const handleVerifyProduct = (status: ProductStatus) => {
+    // Force an explicit decision on a custom sub-category before the launch is
+    // approved — otherwise the backend would silently auto-approve it on cascade.
+    if (status === ProductStatus.APPROVED && pendingSub) {
+      showToast(`Review the pending sub-category "${pendingSub.name}" first — approve or reject it before approving the launch.`, "error");
+      setSubPopoverOpen(true);
+      return;
+    }
     updateProductStatus(
       { id: p.id, status },
       {
@@ -208,6 +219,25 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             status === ProductStatus.APPROVED ? "Launch approved." : "Launch rejected.",
             status === ProductStatus.APPROVED ? "success" : "info"
           ),
+        onError: () => showToast("Action failed. Please try again.", "error"),
+      }
+    );
+  };
+
+  const handleSubcategoryStatus = (status: VerificationStatus) => {
+    if (!pendingSub) return;
+    updateSubStatus(
+      { id: pendingSub.id, status },
+      {
+        onSuccess: () => {
+          setSubPopoverOpen(false);
+          showToast(
+            status === VerificationStatus.APPROVED
+              ? `Sub-category approved: ${pendingSub.name}`
+              : `Sub-category rejected: ${pendingSub.name}`,
+            status === VerificationStatus.APPROVED ? "success" : "info"
+          );
+        },
         onError: () => showToast("Action failed. Please try again.", "error"),
       }
     );
@@ -311,11 +341,45 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               {approvedSubcategories(p.categories).map((sub) => (
                 <ProductBadge key={sub.id} label={sub.name} type="subcategory" />
               ))}
-              {pendingSub && (
-                <span className="topic-pill bg-[#FEF3C7] text-[10px] border-[#D4A017]/40 text-[#92400E]">
-                  ⚠ {pendingSub.name.toUpperCase()} (PENDING)
-                </span>
-              )}
+              {pendingSub &&
+                (isAdmin ? (
+                  <Popover.Root open={subPopoverOpen} onOpenChange={setSubPopoverOpen}>
+                    <Popover.Trigger
+                      className="topic-pill cursor-pointer bg-[#FEF3C7] text-[10px] border-[#D4A017]/40 text-[#92400E] hover:bg-[#FDE9A8]"
+                      title="Review pending sub-category"
+                    >
+                      ⚠ {pendingSub.name.toUpperCase()} (PENDING) ▾
+                    </Popover.Trigger>
+                    <Popover.Portal>
+                      <Popover.Positioner sideOffset={6} align="start">
+                        <Popover.Popup className="z-50 w-64 rounded-[10px] border-2 border-ink bg-cream p-4 shadow-[6px_6px_0_#1c1c27] outline-none data-ending-style:opacity-0 data-starting-style:opacity-0 transition-opacity duration-150">
+                          <p className="font-mono text-[10px] uppercase tracking-widest text-muted">Custom sub-category</p>
+                          <p className="mt-1 font-bold text-ink">{pendingSub.name}</p>
+                          <p className="mt-1 text-xs text-muted">Approve to publish it as a badge, or reject to discard it.</p>
+                          <div className="mt-3 flex gap-2">
+                            <Button
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => handleSubcategoryStatus(VerificationStatus.APPROVED)}
+                              disabled={updatingSubcategory}
+                            >
+                              ✓ Approve
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => handleSubcategoryStatus(VerificationStatus.REJECTED)}
+                              disabled={updatingSubcategory}
+                            >
+                              ✗ Reject
+                            </Button>
+                          </div>
+                        </Popover.Popup>
+                      </Popover.Positioner>
+                    </Popover.Portal>
+                  </Popover.Root>
+                ): (<p/>))}
               {p.qualityBadge && <ProductBadge label={p.qualityBadge} type="stage" />}
               {p.stage && <ProductBadge label={p.stage} type="stage" />}
             </div>

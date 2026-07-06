@@ -160,8 +160,10 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
 
   const handleSave = () => {
     const payload: ProductUpdateIn = { ...form };
-    if (!payload.stage) payload.stage = undefined;
-    if (!payload.qualityBadge) payload.qualityBadge = undefined;
+    // Send explicit null (not undefined) so "— none —" actually clears the field;
+    // undefined would be dropped by JSON.stringify and left unchanged by the backend.
+    if (!payload.stage) payload.stage = null;
+    if (!payload.qualityBadge) payload.qualityBadge = null;
     // Category and sub-category are always sent together (even unchanged) so a stale
     // sub-category can never be left pointing at a parent the backend no longer sees.
     payload.categoryIds = selectedCategoryId ? [selectedCategoryId] : [];

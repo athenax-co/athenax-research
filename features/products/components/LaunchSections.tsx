@@ -4,11 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import WindowCard from "@/components/ui/WindowCard";
 import { Dialog, DialogBody, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrafficLights } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, ChevronUp, ChevronDown, Upload, X, ChevronLeft, ChevronRight, Pin, PinOff } from "lucide-react";
+import { Pencil, Trash2, ChevronUp, ChevronDown, Upload, X, ChevronLeft, ChevronRight, Pin, PinOff, Link as LinkIcon } from "lucide-react";
 import type { ProductMedia, TeamMemberOut, ProductVoice, Bounty, ProductComment, TeamMemberIn, VoiceIn, BountyIn } from "@/features/products";
 import Image from "next/image";
 import Link from "next/link";
-import { prettyUrl } from "@/utils/lib";
+import { urlHandle } from "@/utils/lib";
+import { IconLinkedIn, IconX, IconGithub } from "@/components/Icons";
 
 type GallerySectionProps = {
   media: ProductMedia[];
@@ -343,9 +344,9 @@ export function TeamSection({
                       href={m.linkedinUrl.startsWith("http") ? m.linkedinUrl : `https://${m.linkedinUrl}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[#185FA5] hover:underline"
+                      className="inline-flex items-center gap-1 text-[#185FA5] hover:underline"
                     >
-                      ↗ {prettyUrl(m.linkedinUrl)}
+                      <IconLinkedIn size={13} color="#185FA5" /> {urlHandle(m.linkedinUrl)}
                     </a>
                   )}
                   {m.twitterUrl && (
@@ -353,9 +354,9 @@ export function TeamSection({
                       href={m.twitterUrl.startsWith("http") ? m.twitterUrl : `https://${m.twitterUrl}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[#185FA5] hover:underline"
+                      className="inline-flex items-center gap-1 text-[#185FA5] hover:underline"
                     >
-                      ↗ {prettyUrl(m.twitterUrl)}
+                      <IconX size={13} color="#185FA5" /> {urlHandle(m.twitterUrl)}
                     </a>
                   )}
                   {m.githubUrl && (
@@ -363,9 +364,9 @@ export function TeamSection({
                       href={m.githubUrl.startsWith("http") ? m.githubUrl : `https://${m.githubUrl}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[#185FA5] hover:underline"
+                      className="inline-flex items-center gap-1 text-[#185FA5] hover:underline"
                     >
-                      ↗ {prettyUrl(m.githubUrl)}
+                      <IconGithub size={13} color="#185FA5" /> {urlHandle(m.githubUrl)}
                     </a>
                   )}
                   {m.otherUrl && (
@@ -373,9 +374,9 @@ export function TeamSection({
                       href={m.otherUrl.startsWith("http") ? m.otherUrl : `https://${m.otherUrl}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[#185FA5] hover:underline"
+                      className="inline-flex items-center gap-1 text-[#185FA5] hover:underline"
                     >
-                      ↗ {prettyUrl(m.otherUrl)}
+                      <LinkIcon size={13} /> {urlHandle(m.otherUrl)}
                     </a>
                   )}
                 </div>

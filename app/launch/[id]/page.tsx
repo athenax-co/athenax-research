@@ -534,7 +534,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     target="_blank"
                     rel="noreferrer"
                     title={l.url}
-                    className="min-w-0 truncate font-['Space_Mono',monospace] text-xs text-[#C4605C] no-underline hover:underline"
+                    className="max-w-70 min-w-0 truncate font-['Space_Mono',monospace] text-xs text-[#C4605C] no-underline hover:underline"
                   >
                     ↗ {prettyUrl(l.url)}
                   </Link>

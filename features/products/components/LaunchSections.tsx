@@ -648,7 +648,7 @@ export function VoicesSection({
               <div className="flex items-center gap-3">
                 {v.sourceUrl && (
                   <Link href={v.sourceUrl} target="_blank" rel="noreferrer" className="text-[#185FA5] hover:underline">
-                    ↗ open thread
+                    ↗ open post
                   </Link>
                 )}
                 {isAdmin && (

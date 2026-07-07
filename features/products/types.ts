@@ -100,9 +100,8 @@ export interface ProductVoice {
   id: number;
   productId: number;
   quote: string;
-  authorHandle: string;
   authorName: string | null;
-  sourceUrl: string | null;
+  sourceUrl: string;
   sortOrder: number;
 }
 
@@ -190,9 +189,8 @@ export interface TeamMemberIn {
 
 export interface VoiceIn {
   quote: string;
-  authorHandle: string;
+  sourceUrl: string;
   authorName?: string;
-  sourceUrl?: string;
   sortOrder?: number;
 }
 

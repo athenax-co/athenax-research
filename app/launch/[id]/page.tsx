@@ -2,7 +2,7 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
 import { ProductBadge } from "@/components/ui/ProductBadge";
@@ -61,6 +61,8 @@ import { VerificationStatus, ProductStatus, ProductLinkTypeLabel, sortProductLin
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const queuePage = searchParams.get("queuePage");
   const { user, showToast } = useGlobal();
   const { id } = use(params);
 
@@ -291,7 +293,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             )}
           </p>
           <div className="flex shrink-0 gap-2">
-            <Link href="/admin?tab=launches" className="btn btn-ghost btn-sm">
+            <Link href={`/admin?tab=launches${queuePage ? `&page=${queuePage}` : ""}`} className="btn btn-ghost btn-sm">
               ← Queue
             </Link>
             <button className="btn btn-primary btn-sm" onClick={() => handleVerifyProduct(ProductStatus.APPROVED)} disabled={updatingStatus}>

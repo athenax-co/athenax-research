@@ -4,11 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import WindowCard from "@/components/ui/WindowCard";
 import { Dialog, DialogBody, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrafficLights } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, ChevronUp, ChevronDown, Upload, X, ChevronLeft, ChevronRight, Pin, PinOff } from "lucide-react";
+import { Pencil, Trash2, ChevronUp, ChevronDown, Upload, X, ChevronLeft, ChevronRight, Pin, PinOff, Link as LinkIcon } from "lucide-react";
 import type { ProductMedia, TeamMemberOut, ProductVoice, Bounty, ProductComment, TeamMemberIn, VoiceIn, BountyIn } from "@/features/products";
 import Image from "next/image";
 import Link from "next/link";
-import { prettyUrl } from "@/utils/lib";
+import { urlHandle } from "@/utils/lib";
+import { IconLinkedIn, IconX, IconGithub } from "@/components/Icons";
 
 type GallerySectionProps = {
   media: ProductMedia[];
@@ -172,7 +173,7 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
 
       {lightboxIndex != null && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85"
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/85"
           onClick={closeLightbox}
         >
           <button
@@ -343,9 +344,9 @@ export function TeamSection({
                       href={m.linkedinUrl.startsWith("http") ? m.linkedinUrl : `https://${m.linkedinUrl}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[#185FA5] hover:underline"
+                      className="inline-flex items-center gap-1 text-[#185FA5] hover:underline"
                     >
-                      ↗ {prettyUrl(m.linkedinUrl)}
+                      <IconLinkedIn size={13} color="#185FA5" /> {urlHandle(m.linkedinUrl)}
                     </a>
                   )}
                   {m.twitterUrl && (
@@ -353,9 +354,9 @@ export function TeamSection({
                       href={m.twitterUrl.startsWith("http") ? m.twitterUrl : `https://${m.twitterUrl}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[#185FA5] hover:underline"
+                      className="inline-flex items-center gap-1 text-[#185FA5] hover:underline"
                     >
-                      ↗ {prettyUrl(m.twitterUrl)}
+                      <IconX size={13} color="#185FA5" /> {urlHandle(m.twitterUrl)}
                     </a>
                   )}
                   {m.githubUrl && (
@@ -363,9 +364,9 @@ export function TeamSection({
                       href={m.githubUrl.startsWith("http") ? m.githubUrl : `https://${m.githubUrl}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[#185FA5] hover:underline"
+                      className="inline-flex items-center gap-1 text-[#185FA5] hover:underline"
                     >
-                      ↗ {prettyUrl(m.githubUrl)}
+                      <IconGithub size={13} color="#185FA5" /> {urlHandle(m.githubUrl)}
                     </a>
                   )}
                   {m.otherUrl && (
@@ -373,9 +374,9 @@ export function TeamSection({
                       href={m.otherUrl.startsWith("http") ? m.otherUrl : `https://${m.otherUrl}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[#185FA5] hover:underline"
+                      className="inline-flex items-center gap-1 text-[#185FA5] hover:underline"
                     >
-                      ↗ {prettyUrl(m.otherUrl)}
+                      <LinkIcon size={13} /> {urlHandle(m.otherUrl)}
                     </a>
                   )}
                 </div>
@@ -570,7 +571,7 @@ export function TeamSection({
   );
 }
 
-const EMPTY_VOICE: VoiceIn = { quote: "", authorHandle: "", authorName: "", sourceUrl: "" };
+const EMPTY_VOICE: VoiceIn = { quote: "", sourceUrl: "", authorName: "" };
 
 export function VoicesSection({
   voices,
@@ -618,18 +619,18 @@ export function VoicesSection({
 
   function openEdit(v: ProductVoice) {
     setEditVoice(v);
-    setEditForm({ quote: v.quote, authorHandle: v.authorHandle, authorName: v.authorName ?? "", sourceUrl: v.sourceUrl ?? "" });
+    setEditForm({ quote: v.quote, authorName: v.authorName ?? "", sourceUrl: v.sourceUrl });
   }
 
   function submitAdd() {
-    if (!form.quote.trim() || !form.authorHandle.trim()) return;
-    onCreate({ ...form, quote: form.quote.trim(), authorHandle: form.authorHandle.trim() });
+    if (!form.quote.trim() || !form.sourceUrl.trim()) return;
+    onCreate({ ...form, quote: form.quote.trim(), sourceUrl: form.sourceUrl.trim() });
     setForm(EMPTY_VOICE);
     onAddOpenChange(false);
   }
 
   function submitEdit() {
-    if (!editVoice || !editForm.quote?.trim() || !editForm.authorHandle?.trim()) return;
+    if (!editVoice || !editForm.quote?.trim() || !editForm.sourceUrl?.trim()) return;
     onUpdate(editVoice.id, editForm);
     setEditVoice(null);
   }
@@ -644,11 +645,11 @@ export function VoicesSection({
           <div key={v.id} className="mb-2.5 rounded-md border border-[rgba(0,0,0,0.08)] bg-[#FFFCEF] px-4 py-3.5 last:mb-0">
             <p className="text-[13px] italic leading-[1.55]">"{v.quote}"</p>
             <div className="mt-2 flex items-center justify-between font-['Space_Mono',monospace] text-[10px]">
-              <span className="font-medium text-[#1a1a1a]">{v.authorName ?? v.authorHandle}</span>
+              <span className="font-medium text-[#1a1a1a]">{v.authorName}</span>
               <div className="flex items-center gap-3">
                 {v.sourceUrl && (
                   <Link href={v.sourceUrl} target="_blank" rel="noreferrer" className="text-[#185FA5] hover:underline">
-                    ↗ open thread
+                    ↗ open post
                   </Link>
                 )}
                 {isAdmin && (
@@ -724,17 +725,6 @@ export function VoicesSection({
               />
             </div>
             <div className="inp-group">
-              <label className="inp-label">
-                Handle <span className="text-red-500">*</span>
-              </label>
-              <input
-                className="inp"
-                placeholder="@username"
-                value={form.authorHandle}
-                onChange={(e) => setForm({ ...form, authorHandle: e.target.value })}
-              />
-            </div>
-            <div className="inp-group">
               <label className="inp-label">Author name</label>
               <input
                 className="inp"
@@ -744,7 +734,9 @@ export function VoicesSection({
               />
             </div>
             <div className="inp-group">
-              <label className="inp-label">Source URL</label>
+              <label className="inp-label">
+                Source URL <span className="text-red-500">*</span>
+              </label>
               <input
                 className="inp"
                 placeholder="https://twitter.com/…"
@@ -753,7 +745,7 @@ export function VoicesSection({
               />
             </div>
             <div className="flex gap-2.5">
-              <Button className="flex-1" onClick={submitAdd} disabled={creating || !form.quote.trim() || !form.authorHandle.trim()}>
+              <Button className="flex-1" onClick={submitAdd} disabled={creating || !form.quote.trim() || !form.sourceUrl.trim()}>
                 {creating ? <span className="spinner" /> : "Add Voice →"}
               </Button>
               <Button variant="ghost" onClick={() => onAddOpenChange(false)}>
@@ -791,25 +783,17 @@ export function VoicesSection({
               />
             </div>
             <div className="inp-group">
-              <label className="inp-label">
-                Handle <span className="text-red-500">*</span>
-              </label>
-              <input
-                className="inp"
-                value={editForm.authorHandle ?? ""}
-                onChange={(e) => setEditForm({ ...editForm, authorHandle: e.target.value })}
-              />
-            </div>
-            <div className="inp-group">
               <label className="inp-label">Author name</label>
               <input className="inp" value={editForm.authorName ?? ""} onChange={(e) => setEditForm({ ...editForm, authorName: e.target.value })} />
             </div>
             <div className="inp-group">
-              <label className="inp-label">Source URL</label>
+              <label className="inp-label">
+                Source URL <span className="text-red-500">*</span>
+              </label>
               <input className="inp" value={editForm.sourceUrl ?? ""} onChange={(e) => setEditForm({ ...editForm, sourceUrl: e.target.value })} />
             </div>
             <div className="flex gap-2.5">
-              <Button className="flex-1" onClick={submitEdit} disabled={!editForm.quote?.trim() || !editForm.authorHandle?.trim()}>
+              <Button className="flex-1" onClick={submitEdit} disabled={!editForm.quote?.trim() || !editForm.sourceUrl?.trim()}>
                 Save Changes →
               </Button>
               <Button variant="ghost" onClick={() => setEditVoice(null)}>

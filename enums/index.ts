@@ -85,10 +85,17 @@ export const ProductLinkTypeLabel = Object.fromEntries(
 ) as Record<ProductLinkType, string>;
 
 const OTHER_LINK_TYPE: ProductLinkType = "other";
+const DOCS_LINK_TYPE: ProductLinkType = "docs";
 
-// Keeps "other" links last while preserving relative order of everything else.
+function linkTypeRank(linkType: string): number {
+  if (linkType === OTHER_LINK_TYPE) return 2;
+  if (linkType === DOCS_LINK_TYPE) return 1;
+  return 0;
+}
+
+// Keeps "docs" second-to-last and "other" last, preserving relative order of everything else.
 export function sortProductLinksOtherLast<T extends { linkType: string }>(links: T[]): T[] {
-  return [...links].sort((a, b) => Number(a.linkType === OTHER_LINK_TYPE) - Number(b.linkType === OTHER_LINK_TYPE));
+  return [...links].sort((a, b) => linkTypeRank(a.linkType) - linkTypeRank(b.linkType));
 }
 
 export const ProductMediaType = {

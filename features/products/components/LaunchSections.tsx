@@ -173,7 +173,7 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
 
       {lightboxIndex != null && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85"
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/85"
           onClick={closeLightbox}
         >
           <button

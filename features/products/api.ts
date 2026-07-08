@@ -154,8 +154,12 @@ export async function uploadProductMedia(productId: number, file: File, sortOrde
   return handleResponse<ProductMedia>(res);
 }
 
-export function getSimilarProducts(productId: number): Promise<ProductListItem[]> {
-  return http.get(`/product/${productId}/similar?limit=3`);
+export function getSimilarProducts(productId: number, limit = 3): Promise<ProductListItem[]> {
+  return http.get(`/product/${productId}/similar?limit=${limit}`);
+}
+
+export function updateSimilarProducts(id: number, similarProductIds: number[]): Promise<ProductOut> {
+  return http.patch<ProductOut>(`/product/${id}/similar`, { similarProductIds }, { auth: true });
 }
 
 export function updateProductMedia(productId: number, mediaId: number, sortOrder: number): Promise<ProductMedia> {

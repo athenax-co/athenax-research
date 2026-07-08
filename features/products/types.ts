@@ -164,6 +164,7 @@ export interface ProductListItem {
   logo: string | null;
   stage: string | null;
   categories: CategoryRef[];
+  curated: boolean;
 }
 
 export interface ProductSummary {

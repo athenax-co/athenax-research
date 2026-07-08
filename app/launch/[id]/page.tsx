@@ -31,6 +31,7 @@ import {
   useCreateBounty,
   useDeleteBounty,
   useUpdateProductStatus,
+  useUpdateSimilarProducts,
   useBookmarkProduct,
   useUploadProductMedia,
   useSwapProductMedia,
@@ -53,6 +54,7 @@ import {
   EditProductInfoDialog,
   EditProductLinksDialog,
   EditProductLogoDialog,
+  EditSimilarProductsDialog,
   approvedSubcategories,
   pendingSubcategory,
 } from "@/features/products";
@@ -100,6 +102,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const [editLogoOpen, setEditLogoOpen] = useState(false);
   const [editInfoOpen, setEditInfoOpen] = useState(false);
   const [editLinksOpen, setEditLinksOpen] = useState(false);
+  const [editSimilarOpen, setEditSimilarOpen] = useState(false);
   const [teamAddOpen, setTeamAddOpen] = useState(false);
   const [voicesAddOpen, setVoicesAddOpen] = useState(false);
   const [bountiesAddOpen, setBountiesAddOpen] = useState(false);
@@ -107,6 +110,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { mutate: deleteLogo, isPending: deletingLogo } = useDeleteProductLogo(apiProductId, id);
   const { mutate: deleteProduct, isPending: deletingProduct } = useDeleteProduct();
   const { mutate: updateProduct, isPending: updatingProduct } = useUpdateProduct(id);
+  const { mutate: updateSimilarProducts, isPending: updatingSimilar } = useUpdateSimilarProducts(id);
   const { mutate: createLink, isPending: creatingLink } = useCreateProductLink(apiProductId, id);
   const { mutate: updateLink, isPending: updatingLink } = useUpdateProductLink(apiProductId, id);
   const { mutate: deleteLink, isPending: deletingLink } = useDeleteProductLink(apiProductId, id);
@@ -829,12 +833,43 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               }
               linkPending={linkPending}
             />
+            <EditSimilarProductsDialog
+              product={p}
+              similarProducts={similarProducts ?? []}
+              open={editSimilarOpen}
+              onOpenChange={setEditSimilarOpen}
+              saving={updatingSimilar}
+              onSave={(similarProductIds) =>
+                updateSimilarProducts(
+                  { id: p.id, similarProductIds },
+                  {
+                    onSuccess: () => {
+                      showToast("Similar products updated.", "success");
+                      setEditSimilarOpen(false);
+                    },
+                    onError: (err: Error) => showToast(err.message || "Update failed. Please try again.", "error"),
+                  }
+                )
+              }
+            />
           </>
         )}
 
-        {(similarProducts ?? []).length > 0 && (
+        {((similarProducts ?? []).length > 0 || isAdmin) && (
           <div className="mt-14 border-t border-t-[rgba(0,0,0,0.12)] pt-8">
-            <div className="mb-4 font-['Space_Mono',monospace] text-[11px] uppercase tracking-[0.08em] text-[#888]">›_ similar projects</div>
+            <div className="mb-4 flex items-center gap-2">
+              <div className="font-['Space_Mono',monospace] text-[11px] uppercase tracking-[0.08em] text-[#888]">›_ similar projects</div>
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => setEditSimilarOpen(true)}
+                  className="p-0.5 text-[#888] transition-colors hover:text-ink"
+                  title="Edit similar products"
+                >
+                  <Pencil size={12} />
+                </button>
+              )}
+            </div>
             <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
               {(similarProducts ?? []).map((s) => (
                 <Link

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { ProductBadge } from "@/components/ui/ProductBadge";
 import { PRODUCT_LINK_TYPES, QualityBadge, VerificationStatus, type ProductLinkType } from "@/enums";
 import { urlSchema } from "@/lib/validators";
 import { useProductStages, useProductSearch } from "../hooks";
@@ -615,7 +616,11 @@ export function EditSimilarProductsDialog({ product, similarProducts, open, onOp
         <DialogBody className="py-5 space-y-3">
           <div className="inp flex flex-wrap gap-1.5 min-h-10">
             {selected.map((p) => (
-              <span key={p.id} className="inline-flex items-center gap-1 rounded bg-[#F0EDE8] px-2 py-0.5 text-sm font-medium">
+              <span key={p.id} className="inline-flex items-center gap-1.5 rounded bg-[#F0EDE8] py-0.5 pl-1 pr-2 text-sm font-medium">
+                <Avatar className="size-4 shrink-0 rounded-sm border border-ink">
+                  <AvatarImage src={p.logo ?? undefined} alt={p.name} className="size-full object-contain" />
+                  <AvatarFallback className="rounded-sm text-[8px] font-bold">{p.name.charAt(0)}</AvatarFallback>
+                </Avatar>
                 {p.name}
                 <button
                   type="button"
@@ -657,7 +662,14 @@ export function EditSimilarProductsDialog({ product, similarProducts, open, onOp
                         <AvatarImage src={p.logo ?? undefined} alt={p.name} className="size-full object-contain" />
                         <AvatarFallback className="rounded text-[10px] font-bold">{p.name.charAt(0)}</AvatarFallback>
                       </Avatar>
-                      {p.name}
+                      <span className="flex-1 truncate">{p.name}</span>
+                      {p.categories.length > 0 && (
+                        <div className="flex shrink-0 gap-1">
+                          {p.categories.slice(0, 2).map((c) => (
+                            <ProductBadge key={c.id} label={c.name} />
+                          ))}
+                        </div>
+                      )}
                     </button>
                   ))
                 )}

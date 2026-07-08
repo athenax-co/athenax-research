@@ -25,11 +25,15 @@ export function preserveBlankLines(md: string): string {
   const normalized = md.replace(/\r\n/g, "\n");
   return normalized
     .split(/(```[\s\S]*?```)/g)
-    .map((part, i) =>
-      i % 2 === 1
-        ? part // captured code fences — leave as-is
-        : part.replace(/\n{3,}/g, (run) => "\n\n" + "&nbsp;\n\n".repeat(run.length - 2))
-    )
+    .map((part, i) => {
+      if (i % 2 === 1) return part; // captured code fences — leave as-is
+      // A run at the very start of the document has one fewer newline than an
+      // interior run for the same number of blank lines (no block above it),
+      // so it keeps one extra spacer.
+      const withLead =
+        i === 0 ? part.replace(/^\n{2,}/, (run) => "&nbsp;\n\n".repeat(run.length - 1)) : part;
+      return withLead.replace(/\n{3,}/g, (run) => "\n\n" + "&nbsp;\n\n".repeat(run.length - 2));
+    })
     .join("");
 }
 

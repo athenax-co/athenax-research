@@ -75,6 +75,7 @@ export const PRODUCT_LINK_TYPES = [
   { value: "telegram", label: "Telegram" },
   { value: "medium", label: "Medium" },
   { value: "tiktok", label: "TikTok" },
+  { value: "facebook", label: "Facebook" },
   { value: "other", label: "Other" },
 ] as const;
 

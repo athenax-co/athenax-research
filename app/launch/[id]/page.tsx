@@ -714,6 +714,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           </WindowCard>
         </div>
 
+        {(user || commentsTotal > 0) && (
         <DiscussionSection
           user={user}
           isAdmin={isAdmin}
@@ -739,6 +740,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           hasMore={!!hasNextPage}
           loadingMore={isFetchingNextPage}
         />
+        )}
 
         {p.papers && p.papers.length > 0 && (
           <div className="mt-8 hidden">

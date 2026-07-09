@@ -8,7 +8,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBo
 import { useCategories, useSubcategories } from "@/hooks/queries/useReference";
 import TagInput from "@/components/ui/TagInput";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { QualityBadge } from "@/enums";
 import { useSubmitProduct, useProductStages } from "@/features/products";
 import { useGlobal } from "@/components/GlobalProvider";
 import { cn } from "@/lib/utils";
@@ -314,22 +313,6 @@ export function SubmitProductModal({ open, onOpenChange }: SubmitProductModalPro
                       <option key={s}>{s}</option>
                     ))}
                   </select>
-                </div>
-                <div className="inp-group flex-1">
-                  <label className="inp-label">Quality Badge</label>
-                  <select className="inp" value={submitForm.qualityBadge} onChange={set("qualityBadge")}>
-                    <option value="">— None —</option>
-                    {Object.values(QualityBadge).map((b) => (
-                      <option key={b}>{b}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <div className="inp-group flex-1">
-                  <label className="inp-label">Funding Raised ($)</label>
-                  <input className="inp" type="number" min={0} value={submitForm.funding} onChange={set("funding")} placeholder="e.g. 500000" />
                 </div>
                 <div className="inp-group flex-1">
                   <label className="inp-label">Founded (Year)</label>

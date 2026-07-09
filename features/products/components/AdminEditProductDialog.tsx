@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,13 +13,15 @@ import {
 } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { ProductBadge } from "@/components/ui/ProductBadge";
 import { PRODUCT_LINK_TYPES, QualityBadge, VerificationStatus, type ProductLinkType } from "@/enums";
 import { urlSchema } from "@/lib/validators";
-import { useProductStages } from "../hooks";
-import type { ProductDetailOut, ProductUpdateIn, ProductLinkIn } from "../types";
+import { useProductStages, useProductSearch } from "../hooks";
+import type { ProductDetailOut, ProductUpdateIn, ProductLinkIn, ProductListItem } from "../types";
 import { Pencil, Trash2, Plus, Upload } from "lucide-react";
 import TagInput from "@/components/ui/TagInput";
 import { useCategories, useSubcategories } from "@/hooks/queries/useReference";
+import { useDebounce } from "@/hooks/useDebounce";
 
 // ─── Edit Logo Dialog (LOGO.SYS) ─────────────────────────────────────────────
 
@@ -552,6 +554,136 @@ export function EditProductLinksDialog({
             )
           )}
         </DialogBody>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Edit Similar Products Dialog (SIMILAR.SYS) ──────────────────────────────
+
+// Caps the curated set at the same size as the default /similar display limit, so the
+// single fetch the page already makes always contains the full curated set — no second request.
+const MAX_SIMILAR = 3;
+
+interface EditSimilarProps {
+  product: ProductDetailOut;
+  similarProducts: ProductListItem[];
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: (similarProductIds: number[]) => void;
+  saving?: boolean;
+}
+
+type SimilarOption = { id: number; name: string; logo?: string | null };
+
+export function EditSimilarProductsDialog({ product, similarProducts, open, onOpenChange, onSave, saving }: EditSimilarProps) {
+  // Reuses the page's existing /similar fetch (passed in as a prop) rather than
+  // issuing a second request — curated entries are filtered out client-side.
+  const currentSimilar = useMemo(() => similarProducts.filter((s) => s.curated), [similarProducts]);
+  const [selected, setSelected] = useState<SimilarOption[]>([]);
+  const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query);
+  const excludeIds = [product.id, ...selected.map((s) => s.id)];
+  const { data: results, isFetching } = useProductSearch(debouncedQuery, excludeIds);
+
+  useEffect(() => {
+    if (open) setSelected(currentSimilar);
+  }, [open, currentSimilar]);
+
+  useEffect(() => {
+    if (!open) setQuery("");
+  }, [open]);
+
+  const atLimit = selected.length >= MAX_SIMILAR;
+
+  const addProduct = (p: SimilarOption) => {
+    if (atLimit) return;
+    setSelected((prev) => [...prev, p]);
+    setQuery("");
+  };
+
+  const removeProduct = (id: number) => setSelected((prev) => prev.filter((p) => p.id !== id));
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTrafficLights />
+          <DialogTitle>EDIT_SIMILAR.SYS</DialogTitle>
+          <DialogClose />
+        </DialogHeader>
+
+        <DialogBody className="py-5 space-y-3">
+          <div className="inp flex flex-wrap gap-1.5 min-h-10">
+            {selected.map((p) => (
+              <span key={p.id} className="inline-flex items-center gap-1.5 rounded bg-[#F0EDE8] py-0.5 pl-1 pr-2 text-sm font-medium">
+                <Avatar className="size-4 shrink-0 rounded-sm border border-ink">
+                  <AvatarImage src={p.logo ?? undefined} alt={p.name} className="size-full object-contain" />
+                  <AvatarFallback className="rounded-sm text-[8px] font-bold">{p.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                {p.name}
+                <button
+                  type="button"
+                  className="text-muted hover:text-foreground leading-none"
+                  onClick={() => removeProduct(p.id)}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+            {!atLimit && (
+              <input
+                className="flex-1 min-w-32 bg-transparent outline-none text-sm placeholder:text-muted"
+                placeholder={selected.length === 0 ? "Search products…" : "Add another…"}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            )}
+          </div>
+
+          {atLimit ? (
+            <p className="text-xs text-[#888]">Maximum of {MAX_SIMILAR} similar products reached.</p>
+          ) : (
+            query.trim() && (
+              <div className="max-h-48 overflow-y-auto rounded-lg border border-[rgba(0,0,0,0.1)] bg-white">
+                {isFetching ? (
+                  <p className="p-3 text-sm text-[#888]">Searching…</p>
+                ) : (results ?? []).length === 0 ? (
+                  <p className="p-3 text-sm text-[#888]">No products found.</p>
+                ) : (
+                  (results ?? []).map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => addProduct(p)}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-[#F5F3EF]"
+                    >
+                      <Avatar className="size-6 shrink-0 rounded border border-ink">
+                        <AvatarImage src={p.logo ?? undefined} alt={p.name} className="size-full object-contain" />
+                        <AvatarFallback className="rounded text-[10px] font-bold">{p.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <span className="flex-1 truncate">{p.name}</span>
+                      {p.categories.length > 0 && (
+                        <div className="flex shrink-0 gap-1">
+                          {p.categories.slice(0, 2).map((c) => (
+                            <ProductBadge key={c.id} label={c.name} />
+                          ))}
+                        </div>
+                      )}
+                    </button>
+                  ))
+                )}
+              </div>
+            )
+          )}
+        </DialogBody>
+
+        <DialogFooter>
+          <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button size="sm" onClick={() => onSave(selected.map((p) => p.id))} disabled={saving}>
+            {saving ? "Saving…" : "Save Changes"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

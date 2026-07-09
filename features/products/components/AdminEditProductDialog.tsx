@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ProductBadge } from "@/components/ui/ProductBadge";
-import { PRODUCT_LINK_TYPES, QualityBadge, VerificationStatus, type ProductLinkType } from "@/enums";
+import { PRODUCT_LINK_TYPES, VerificationStatus, type ProductLinkType } from "@/enums";
 import { urlSchema } from "@/lib/validators";
 import { useProductStages, useProductSearch } from "../hooks";
 import type { ProductDetailOut, ProductUpdateIn, ProductLinkIn, ProductListItem } from "../types";
@@ -218,13 +218,15 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
               </select>
             </div>
             <div className="inp-group mb-0">
-              <label className="inp-label">Quality Badge</label>
-              <select className="inp" value={form.qualityBadge ?? ""} onChange={(e) => set("qualityBadge", e.target.value)}>
-                <option value="">— none —</option>
-                {Object.values(QualityBadge).map((b) => (
-                  <option key={b} value={b}>{b}</option>
-                ))}
-              </select>
+              <label className="inp-label">Founded (Year)</label>
+              <input
+                className="inp"
+                type="number"
+                min={1900}
+                max={2100}
+                value={form.founded ?? ""}
+                onChange={(e) => set("founded", e.target.value ? Number(e.target.value) : undefined)}
+              />
             </div>
           </div>
 
@@ -308,29 +310,6 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="inp-group mb-0">
-              <label className="inp-label">Funding ($)</label>
-              <input
-                className="inp"
-                type="number"
-                min={0}
-                value={form.funding ?? ""}
-                onChange={(e) => set("funding", e.target.value ? Number(e.target.value) : undefined)}
-              />
-            </div>
-            <div className="inp-group mb-0">
-              <label className="inp-label">Founded (Year)</label>
-              <input
-                className="inp"
-                type="number"
-                min={1900}
-                max={2100}
-                value={form.founded ?? ""}
-                onChange={(e) => set("founded", e.target.value ? Number(e.target.value) : undefined)}
-              />
-            </div>
-          </div>
 
           <div className="inp-group mb-0">
             <label className="inp-label">Backers</label>

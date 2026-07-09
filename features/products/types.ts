@@ -100,9 +100,8 @@ export interface ProductVoice {
   id: number;
   productId: number;
   quote: string;
-  authorHandle: string;
   authorName: string | null;
-  sourceUrl: string | null;
+  sourceUrl: string;
   sortOrder: number;
 }
 
@@ -136,10 +135,10 @@ export interface ProductUpdateIn {
   name?: string;
   shortDesc?: string;
   description?: string;
-  stage?: string;
+  stage?: string | null;
   funding?: number;
   founded?: number;
-  qualityBadge?: string;
+  qualityBadge?: string | null;
   imported?: boolean;
   logo?: string;
   email?: string;
@@ -165,6 +164,7 @@ export interface ProductListItem {
   logo: string | null;
   stage: string | null;
   categories: CategoryRef[];
+  curated: boolean;
 }
 
 export interface ProductSummary {
@@ -190,9 +190,8 @@ export interface TeamMemberIn {
 
 export interface VoiceIn {
   quote: string;
-  authorHandle: string;
+  sourceUrl: string;
   authorName?: string;
-  sourceUrl?: string;
   sortOrder?: number;
 }
 

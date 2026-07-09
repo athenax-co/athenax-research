@@ -2,7 +2,7 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
 import { ProductBadge } from "@/components/ui/ProductBadge";
@@ -10,6 +10,8 @@ import { IconShare } from "@/components/Icons";
 import { Bookmark, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGlobal } from "@/components/GlobalProvider";
+import { useUpdateSubcategoryStatus } from "@/hooks/queries/useReference";
+import { Popover } from "@base-ui/react";
 import VoteButton from "@/components/VoteButton";
 import { prettyUrl } from "@/utils/lib";
 import { cn } from "@/lib/utils";
@@ -29,6 +31,7 @@ import {
   useCreateBounty,
   useDeleteBounty,
   useUpdateProductStatus,
+  useUpdateSimilarProducts,
   useBookmarkProduct,
   useUploadProductMedia,
   useSwapProductMedia,
@@ -51,6 +54,7 @@ import {
   EditProductInfoDialog,
   EditProductLinksDialog,
   EditProductLogoDialog,
+  EditSimilarProductsDialog,
   approvedSubcategories,
   pendingSubcategory,
 } from "@/features/products";
@@ -59,6 +63,8 @@ import { VerificationStatus, ProductStatus, ProductLinkTypeLabel, sortProductLin
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const queuePage = searchParams.get("queuePage");
   const { user, showToast } = useGlobal();
   const { id } = use(params);
 
@@ -96,6 +102,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const [editLogoOpen, setEditLogoOpen] = useState(false);
   const [editInfoOpen, setEditInfoOpen] = useState(false);
   const [editLinksOpen, setEditLinksOpen] = useState(false);
+  const [editSimilarOpen, setEditSimilarOpen] = useState(false);
   const [teamAddOpen, setTeamAddOpen] = useState(false);
   const [voicesAddOpen, setVoicesAddOpen] = useState(false);
   const [bountiesAddOpen, setBountiesAddOpen] = useState(false);
@@ -103,10 +110,13 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { mutate: deleteLogo, isPending: deletingLogo } = useDeleteProductLogo(apiProductId, id);
   const { mutate: deleteProduct, isPending: deletingProduct } = useDeleteProduct();
   const { mutate: updateProduct, isPending: updatingProduct } = useUpdateProduct(id);
+  const { mutate: updateSimilarProducts, isPending: updatingSimilar } = useUpdateSimilarProducts(id);
   const { mutate: createLink, isPending: creatingLink } = useCreateProductLink(apiProductId, id);
   const { mutate: updateLink, isPending: updatingLink } = useUpdateProductLink(apiProductId, id);
   const { mutate: deleteLink, isPending: deletingLink } = useDeleteProductLink(apiProductId, id);
   const linkPending = creatingLink || updatingLink || deletingLink;
+  const { mutate: updateSubStatus, isPending: updatingSubcategory } = useUpdateSubcategoryStatus();
+  const [subPopoverOpen, setSubPopoverOpen] = useState(false);
 
   const shareLaunch = async (slug: string) => {
     const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
@@ -200,6 +210,13 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const isOwner = user != null && p.createdById != null && user.id === p.createdById;
 
   const handleVerifyProduct = (status: ProductStatus) => {
+    // Force an explicit decision on a custom sub-category before the launch is
+    // approved — otherwise the backend would silently auto-approve it on cascade.
+    if (status === ProductStatus.APPROVED && pendingSub) {
+      showToast(`Review the pending sub-category "${pendingSub.name}" before approving the launch.`, "error");
+      setSubPopoverOpen(true);
+      return;
+    }
     updateProductStatus(
       { id: p.id, status },
       {
@@ -208,6 +225,25 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             status === ProductStatus.APPROVED ? "Launch approved." : "Launch rejected.",
             status === ProductStatus.APPROVED ? "success" : "info"
           ),
+        onError: () => showToast("Action failed. Please try again.", "error"),
+      }
+    );
+  };
+
+  const handleSubcategoryStatus = (status: VerificationStatus) => {
+    if (!pendingSub) return;
+    updateSubStatus(
+      { id: pendingSub.id, status },
+      {
+        onSuccess: () => {
+          setSubPopoverOpen(false);
+          showToast(
+            status === VerificationStatus.APPROVED
+              ? `Sub-category approved: ${pendingSub.name}`
+              : `Sub-category rejected: ${pendingSub.name}`,
+            status === VerificationStatus.APPROVED ? "success" : "info"
+          );
+        },
         onError: () => showToast("Action failed. Please try again.", "error"),
       }
     );
@@ -227,7 +263,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const factRows = [
     p.categories.length > 0 ? { label: "Category", value: p.categories[0].name } : null,
     p.founded != null ? { label: "Founded", value: String(p.founded) } : null,
-    p.funding != null ? { label: "Funding", value: `$${p.funding.toLocaleString()}` } : null,
+    p.funding ? { label: "Funding", value: `$${p.funding.toLocaleString()}` } : null,
     p.stage ? { label: "Stage", value: p.stage } : null,
   ].filter(Boolean) as { label: string; value: string; isStatus?: boolean }[];
 
@@ -261,7 +297,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             )}
           </p>
           <div className="flex shrink-0 gap-2">
-            <Link href="/admin?tab=launches" className="btn btn-ghost btn-sm">
+            <Link href={`/admin?tab=launches${queuePage ? `&page=${queuePage}` : ""}`} className="btn btn-ghost btn-sm">
               ← Queue
             </Link>
             <button className="btn btn-primary btn-sm" onClick={() => handleVerifyProduct(ProductStatus.APPROVED)} disabled={updatingStatus}>
@@ -311,11 +347,45 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               {approvedSubcategories(p.categories).map((sub) => (
                 <ProductBadge key={sub.id} label={sub.name} type="subcategory" />
               ))}
-              {pendingSub && (
-                <span className="topic-pill bg-[#FEF3C7] text-[10px] border-[#D4A017]/40 text-[#92400E]">
-                  ⚠ {pendingSub.name.toUpperCase()} (PENDING)
-                </span>
-              )}
+              {pendingSub &&
+                (isAdmin ? (
+                  <Popover.Root open={subPopoverOpen} onOpenChange={setSubPopoverOpen}>
+                    <Popover.Trigger
+                      className="topic-pill cursor-pointer bg-[#FEF3C7] text-[10px] border-[#D4A017]/40 text-[#92400E] hover:bg-[#FDE9A8]"
+                      title="Review pending sub-category"
+                    >
+                      ⚠ {pendingSub.name.toUpperCase()} (PENDING) ▾
+                    </Popover.Trigger>
+                    <Popover.Portal>
+                      <Popover.Positioner sideOffset={6} align="start">
+                        <Popover.Popup className="z-50 w-64 rounded-[10px] border-2 border-ink bg-cream p-4 shadow-[6px_6px_0_#1c1c27] outline-none data-ending-style:opacity-0 data-starting-style:opacity-0 transition-opacity duration-150">
+                          <p className="font-mono text-[10px] uppercase tracking-widest text-muted">Custom sub-category</p>
+                          <p className="mt-1 font-bold text-ink">{pendingSub.name}</p>
+                          <p className="mt-1 text-xs text-muted">Approve to publish it as a badge, or reject to discard it.</p>
+                          <div className="mt-3 flex gap-2">
+                            <Button
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => handleSubcategoryStatus(VerificationStatus.APPROVED)}
+                              disabled={updatingSubcategory}
+                            >
+                              ✓ Approve
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => handleSubcategoryStatus(VerificationStatus.REJECTED)}
+                              disabled={updatingSubcategory}
+                            >
+                              ✗ Reject
+                            </Button>
+                          </div>
+                        </Popover.Popup>
+                      </Popover.Positioner>
+                    </Popover.Portal>
+                  </Popover.Root>
+                ): (<p/>))}
               {p.qualityBadge && <ProductBadge label={p.qualityBadge} type="stage" />}
               {p.stage && <ProductBadge label={p.stage} type="stage" />}
             </div>
@@ -468,7 +538,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     target="_blank"
                     rel="noreferrer"
                     title={l.url}
-                    className="min-w-0 truncate font-['Space_Mono',monospace] text-xs text-[#C4605C] no-underline hover:underline"
+                    className="max-w-70 min-w-0 truncate font-['Space_Mono',monospace] text-xs text-[#C4605C] no-underline hover:underline"
                   >
                     ↗ {prettyUrl(l.url)}
                   </Link>
@@ -763,12 +833,43 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               }
               linkPending={linkPending}
             />
+            <EditSimilarProductsDialog
+              product={p}
+              similarProducts={similarProducts ?? []}
+              open={editSimilarOpen}
+              onOpenChange={setEditSimilarOpen}
+              saving={updatingSimilar}
+              onSave={(similarProductIds) =>
+                updateSimilarProducts(
+                  { id: p.id, similarProductIds },
+                  {
+                    onSuccess: () => {
+                      showToast("Similar products updated.", "success");
+                      setEditSimilarOpen(false);
+                    },
+                    onError: (err: Error) => showToast(err.message || "Update failed. Please try again.", "error"),
+                  }
+                )
+              }
+            />
           </>
         )}
 
-        {(similarProducts ?? []).length > 0 && (
+        {((similarProducts ?? []).length > 0 || isAdmin) && (
           <div className="mt-14 border-t border-t-[rgba(0,0,0,0.12)] pt-8">
-            <div className="mb-4 font-['Space_Mono',monospace] text-[11px] uppercase tracking-[0.08em] text-[#888]">›_ similar projects</div>
+            <div className="mb-4 flex items-center gap-2">
+              <div className="font-['Space_Mono',monospace] text-[11px] uppercase tracking-[0.08em] text-[#888]">›_ similar projects</div>
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => setEditSimilarOpen(true)}
+                  className="p-0.5 text-[#888] transition-colors hover:text-ink"
+                  title="Edit similar products"
+                >
+                  <Pencil size={12} />
+                </button>
+              )}
+            </div>
             <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
               {(similarProducts ?? []).map((s) => (
                 <Link

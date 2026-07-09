@@ -1,5 +1,6 @@
 import { http, BASE_URL, handleResponse } from "@/api/client";
 import type { CategoryOut, UniversityOut, LabOut, CategoryRef } from "@/types/reference";
+import type { VerificationStatus } from "@/enums";
 
 // ─── category ─────────────────────────────────────────────────────────────────
 
@@ -10,6 +11,10 @@ export async function getCategories(parentId?: number): Promise<CategoryOut[]> {
 
 export async function createSubcategory(parentId: number, name: string): Promise<CategoryOut> {
   return http.post<CategoryOut>(`/category`, { name, parent_id: parentId }, { auth: true });
+}
+
+export async function updateSubcategoryStatus(id: number, status: VerificationStatus): Promise<CategoryOut> {
+  return http.patch<CategoryOut>(`/category/${id}/status`, { status }, { auth: true });
 }
 
 // ─── university ───────────────────────────────────────────────────────────────

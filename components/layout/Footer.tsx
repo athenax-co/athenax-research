@@ -90,7 +90,7 @@ export const FooterSubscribe = () => {
 };
 
 const SOCIAL_LINKS = [
-  { href: "https://x.com/athenax_co", label: "X", Icon: IconX },
+  { href: "https://x.com/intent/user?screen_name=athenax_co", label: "X", Icon: IconX },
   { href: "https://discord.com/invite/RURu4tTjHZ", label: "Discord", Icon: IconDiscord },
   { href: "https://www.youtube.com/@AthenaX_co", label: "YouTube", Icon: IconYouTube },
   { href: "https://www.linkedin.com/company/athenaxco/", label: "LinkedIn", Icon: IconLinkedIn },

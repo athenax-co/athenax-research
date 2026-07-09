@@ -39,6 +39,13 @@ export function prettyUrl(url: string): string {
     .replace(/\/+$/, "");
 }
 
+// ── Utility: Extract the trailing @handle/username from a profile URL ──────
+export function urlHandle(url: string): string {
+  const cleaned = url.trim().replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/+$/, "");
+  const parts = cleaned.split("/").filter(Boolean);
+  return parts.length > 1 ? parts[parts.length - 1] : cleaned;
+}
+
 // ── Utility: Resolve category IDs to { id, name } objects ──
 export function resolveCategories(ids: number[], allCategories: { id: number; name: string }[]): { id: number; name: string }[] {
   return ids.flatMap((id) => {

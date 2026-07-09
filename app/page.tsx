@@ -110,9 +110,9 @@ export default function Page() {
                           <ProductBadge key={sub.id} label={sub.name} type="subcategory" />
                         ))}
                         {launch.qualityBadge && <ProductBadge label={launch.qualityBadge} type="stage" />}
-                        {(launch.stage != null || launch.funding != null) && (
+                        {(launch.stage != null || (launch.funding != null && launch.funding > 0)) && (
                           <ProductBadge
-                            label={[launch.stage, launch.funding != null ? `$${launch.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
+                            label={[launch.stage, launch.funding != null && launch.funding > 0 ? `$${launch.funding.toLocaleString()}` : null].filter(Boolean).join(" · ")}
                             type="stage"
                           />
                         )}

@@ -215,7 +215,7 @@ export default function Page() {
                       { onSuccess: () => { showToast(`Rejected: ${product.name}`, "info"); refetchPending(); }, onError: () => showToast("Action failed.", "error") }
                     )
                   }
-                  reviewHref={`/launch/${product.slug}`}
+                  reviewHref={`/launch/${product.slug}?queuePage=${launchPage}`}
                 />
                 );
               })}

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as referenceApi from "@/api/reference";
 import type { CategoryOut } from "@/types/reference";
+import type { VerificationStatus } from "@/enums";
 
 // ─── query keys ──────────────────────────────────────────────────────────────
 
@@ -68,6 +69,22 @@ export function useCreateSubcategory() {
       referenceApi.createSubcategory(parentId, name),
     onSuccess: (newSub, { parentId }) => {
       queryClient.setQueryData<CategoryOut[]>(["subcategories", parentId], (old = []) => [...old, newSub]);
+    },
+  });
+}
+
+// ─── useUpdateSubcategoryStatus ──────────────────────────────────────────────
+
+export function useUpdateSubcategoryStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: number; status: VerificationStatus }) =>
+      referenceApi.updateSubcategoryStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["product"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["subcategories"] });
+      queryClient.invalidateQueries({ queryKey: REFERENCE_QUERY_KEYS.categories });
     },
   });
 }

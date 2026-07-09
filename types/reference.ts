@@ -2,7 +2,7 @@ export interface CategoryOut {
   id: number;
   name: string;
   parentId: number | null;
-  status: "pending" | "approved";
+  status: "pending" | "approved" | "rejected";
 }
 
 export interface UniversityOut {

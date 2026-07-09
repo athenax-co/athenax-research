@@ -2,18 +2,15 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tansta
 import * as productApi from "./api";
 import type { ProductFilters, ProductStats } from "./api";
 import type { ProductDetailOut, ProductIn, ProductListItem, ProductStatus, ProductSummary, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty, ProductUpdateIn, ProductLinkIn } from "./types";
+import { ProductStatus as ProductStatusEnum } from "@/enums";
 import type { VerificationStatus } from "@/enums";
 
-const MIN_TODAY = 2;
-const MIN_THIS_WEEK = 3;
 const MIN_THIS_MONTH = 5;
 const FALLBACK_THIS_MONTH = 12;
 
 export function getProductStatsLabel(stats: ProductStats | undefined): string {
   if (!stats) return "";
-  const { today, thisWeek, thisMonth } = stats.releases;
-  if (today > MIN_TODAY) return `${today} products launched today`;
-  if (thisWeek > MIN_THIS_WEEK) return `${thisWeek} products launched this week`;
+  const { thisMonth } = stats.releases;
   const monthCount = thisMonth < MIN_THIS_MONTH ? FALLBACK_THIS_MONTH : thisMonth;
   return `${monthCount} products launched this month`;
 }
@@ -342,12 +339,34 @@ export function useSwapProductMedia(productId: number, slug: string) {
   });
 }
 
-export function useSimilarProducts(productId: number, enabled = true) {
+export function useSimilarProducts(productId: number, enabled = true, limit = 3) {
   return useQuery<ProductListItem[]>({
-    queryKey: ["product", productId, "similar"],
-    queryFn: () => productApi.getSimilarProducts(productId),
+    queryKey: ["product", productId, "similar", limit],
+    queryFn: () => productApi.getSimilarProducts(productId, limit),
     enabled: productId > 0 && enabled,
     staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useUpdateSimilarProducts(slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, similarProductIds }: { id: number; similarProductIds: number[] }) =>
+      productApi.updateSimilarProducts(id, similarProductIds),
+    onSuccess: (_data, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["product", slug] });
+      queryClient.invalidateQueries({ queryKey: ["product", id, "similar"] });
+    },
+  });
+}
+
+export function useProductSearch(query: string, excludeIds: number[] = []) {
+  return useQuery({
+    queryKey: ["products", "search", query],
+    queryFn: () => productApi.getProducts({ q: query, status: ProductStatusEnum.APPROVED, limit: 10 }),
+    enabled: query.trim().length > 0,
+    select: (data) => data.items.filter((p) => !excludeIds.includes(p.id)),
+    staleTime: 60 * 1000,
   });
 }
 

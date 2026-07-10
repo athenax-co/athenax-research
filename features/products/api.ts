@@ -1,5 +1,5 @@
 import { http, BASE_URL, handleResponse } from "@/api/client";
-import type { ProductIn, ProductOut, ProductDetailOut, ProductStatus, ProductComment, ProductSummary, ProductListItem, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty, ProductMedia, ProductUpdateIn, ProductLinkIn, ProductLink } from "./types";
+import type { ProductIn, ProductOut, ProductDetailOut, ProductStatus, ProductComment, ProductSummary, ProductListItem, ProductRelatedItem, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty, ProductMedia, ProductUpdateIn, ProductLinkIn, ProductLink } from "./types";
 import type { VerificationStatus } from "@/enums";
 
 export interface ProductStats {
@@ -160,6 +160,14 @@ export function getSimilarProducts(productId: number, limit = 3): Promise<Produc
 
 export function updateSimilarProducts(id: number, similarProductIds: number[]): Promise<ProductOut> {
   return http.patch<ProductOut>(`/product/${id}/similar`, { similarProductIds }, { auth: true });
+}
+
+export function getRelatedProducts(productId: number, limit = 3): Promise<ProductRelatedItem[]> {
+  return http.get(`/product/${productId}/related?limit=${limit}`);
+}
+
+export function updateRelatedProducts(id: number, relatedProductIds: number[]): Promise<ProductOut> {
+  return http.patch<ProductOut>(`/product/${id}/related`, { relatedProductIds }, { auth: true });
 }
 
 export function updateProductMedia(productId: number, mediaId: number, sortOrder: number): Promise<ProductMedia> {

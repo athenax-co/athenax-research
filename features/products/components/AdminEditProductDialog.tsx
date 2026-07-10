@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import { ProductBadge } from "@/components/ui/ProductBadge";
 import { PRODUCT_LINK_TYPES, VerificationStatus, type ProductLinkType } from "@/enums";
 import { urlSchema } from "@/lib/validators";
 import { useProductStages, useProductSearch } from "../hooks";
-import type { ProductDetailOut, ProductUpdateIn, ProductLinkIn, ProductListItem } from "../types";
+import type { ProductDetailOut, ProductUpdateIn, ProductLinkIn } from "../types";
 import { Pencil, Trash2, Plus, Upload } from "lucide-react";
 import TagInput from "@/components/ui/TagInput";
 import { useCategories, useSubcategories } from "@/hooks/queries/useReference";
@@ -538,44 +538,47 @@ export function EditProductLinksDialog({
   );
 }
 
-// ─── Edit Similar Products Dialog (SIMILAR.SYS) ──────────────────────────────
+// ─── Edit Curated Products Dialog (shared by "similar" and "related") ───────
 
-// Caps the curated set at the same size as the default /similar display limit, so the
+// Caps the curated set at the default /similar and /related display limit (3), so the
 // single fetch the page already makes always contains the full curated set — no second request.
-const MAX_SIMILAR = 3;
+const MAX_CURATED = 3;
 
-interface EditSimilarProps {
+interface EditCuratedProductsProps {
   product: ProductDetailOut;
-  similarProducts: ProductListItem[];
+  /** Products already curated for this relation — pass pre-filtered (e.g. similar's `curated` flag applied by the caller). */
+  currentItems: { id: number; name: string; logo?: string | null }[];
+  systemTitle: string;
+  noun: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (similarProductIds: number[]) => void;
+  onSave: (productIds: number[]) => void;
   saving?: boolean;
 }
 
-type SimilarOption = { id: number; name: string; logo?: string | null };
+type CuratedOption = { id: number; name: string; logo?: string | null };
 
-export function EditSimilarProductsDialog({ product, similarProducts, open, onOpenChange, onSave, saving }: EditSimilarProps) {
-  // Reuses the page's existing /similar fetch (passed in as a prop) rather than
-  // issuing a second request — curated entries are filtered out client-side.
-  const currentSimilar = useMemo(() => similarProducts.filter((s) => s.curated), [similarProducts]);
-  const [selected, setSelected] = useState<SimilarOption[]>([]);
+export function EditCuratedProductsDialog({
+  product, currentItems, systemTitle, noun, open, onOpenChange, onSave, saving,
+}: EditCuratedProductsProps) {
+  const [selected, setSelected] = useState<CuratedOption[]>([]);
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query);
   const excludeIds = [product.id, ...selected.map((s) => s.id)];
   const { data: results, isFetching } = useProductSearch(debouncedQuery, excludeIds);
 
   useEffect(() => {
-    if (open) setSelected(currentSimilar);
-  }, [open, currentSimilar]);
+    if (open) setSelected(currentItems);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, currentItems]);
 
   useEffect(() => {
     if (!open) setQuery("");
   }, [open]);
 
-  const atLimit = selected.length >= MAX_SIMILAR;
+  const atLimit = selected.length >= MAX_CURATED;
 
-  const addProduct = (p: SimilarOption) => {
+  const addProduct = (p: CuratedOption) => {
     if (atLimit) return;
     setSelected((prev) => [...prev, p]);
     setQuery("");
@@ -588,7 +591,7 @@ export function EditSimilarProductsDialog({ product, similarProducts, open, onOp
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTrafficLights />
-          <DialogTitle>EDIT_SIMILAR.SYS</DialogTitle>
+          <DialogTitle>{systemTitle}</DialogTitle>
           <DialogClose />
         </DialogHeader>
 
@@ -621,7 +624,7 @@ export function EditSimilarProductsDialog({ product, similarProducts, open, onOp
           </div>
 
           {atLimit ? (
-            <p className="text-xs text-[#888]">Maximum of {MAX_SIMILAR} similar products reached.</p>
+            <p className="text-xs text-[#888]">Maximum of {MAX_CURATED} {noun} products reached.</p>
           ) : (
             query.trim() && (
               <div className="max-h-48 overflow-y-auto rounded-lg border border-[rgba(0,0,0,0.1)] bg-white">

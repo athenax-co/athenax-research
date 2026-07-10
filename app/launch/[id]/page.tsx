@@ -19,6 +19,7 @@ import {
   useProductBySlug,
   useInterestProduct,
   useSimilarProducts,
+  useRelatedProducts,
   useComments,
   useCreateComment,
   useCreateTeamMember,
@@ -32,6 +33,7 @@ import {
   useDeleteBounty,
   useUpdateProductStatus,
   useUpdateSimilarProducts,
+  useUpdateRelatedProducts,
   useBookmarkProduct,
   useUploadProductMedia,
   useSwapProductMedia,
@@ -54,7 +56,7 @@ import {
   EditProductInfoDialog,
   EditProductLinksDialog,
   EditProductLogoDialog,
-  EditSimilarProductsDialog,
+  EditCuratedProductsDialog,
   approvedSubcategories,
   pendingSubcategory,
 } from "@/features/products";
@@ -73,6 +75,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { mutate: interest, isPending: registeringInterest } = useInterestProduct();
   const apiProductId = apiProduct?.id ?? 0;
   const { data: similarProducts } = useSimilarProducts(apiProductId, apiProduct?.status === ProductStatus.APPROVED);
+  const { data: relatedProducts } = useRelatedProducts(apiProductId, apiProduct?.status === ProductStatus.APPROVED);
   const { data: commentsData, fetchNextPage, hasNextPage, isFetchingNextPage } = useComments(apiProductId);
   const allComments = commentsData?.pages.flatMap((p) => p.items) ?? [];
   const commentsTotal = commentsData?.pages[0]?.total ?? 0;
@@ -103,6 +106,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const [editInfoOpen, setEditInfoOpen] = useState(false);
   const [editLinksOpen, setEditLinksOpen] = useState(false);
   const [editSimilarOpen, setEditSimilarOpen] = useState(false);
+  const [editRelatedOpen, setEditRelatedOpen] = useState(false);
   const [teamAddOpen, setTeamAddOpen] = useState(false);
   const [voicesAddOpen, setVoicesAddOpen] = useState(false);
   const [teamNaturalHeight, setTeamNaturalHeight] = useState<number | null>(null);
@@ -117,6 +121,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { mutate: deleteProduct, isPending: deletingProduct } = useDeleteProduct();
   const { mutate: updateProduct, isPending: updatingProduct } = useUpdateProduct(id);
   const { mutate: updateSimilarProducts, isPending: updatingSimilar } = useUpdateSimilarProducts(id);
+  const { mutate: updateRelatedProducts, isPending: updatingRelated } = useUpdateRelatedProducts(id);
   const { mutate: createLink, isPending: creatingLink } = useCreateProductLink(apiProductId, id);
   const { mutate: updateLink, isPending: updatingLink } = useUpdateProductLink(apiProductId, id);
   const { mutate: deleteLink, isPending: deletingLink } = useDeleteProductLink(apiProductId, id);
@@ -401,6 +406,37 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               {p.founded != null && p.createdAt && <span className="mx-1 text-[#ccc]">·</span>}
               {p.createdAt && <>launched on AthenaX {new Date(p.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</>}
             </div>
+            {((relatedProducts ?? []).length > 0 || isAdmin) && (
+              <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                {(relatedProducts ?? []).length > 0 && (
+                  <div className="inline-flex items-center gap-2 rounded-full border border-ink px-3 py-1 font-['Space_Mono',monospace] text-[11px] text-[#555]">
+                    see also:
+                    {(relatedProducts ?? []).map((r, i) => (
+                      <span key={r.id} className="inline-flex items-center gap-2">
+                        {i > 0 && <span className="text-[#ccc]">·</span>}
+                        <Link href={`/launch/${r.slug}`} className="inline-flex items-center gap-1.5 transition-colors hover:text-ink">
+                          <Avatar className="size-4 shrink-0 rounded-full overflow-visible border border-ink">
+                            <AvatarImage src={r.logo ?? undefined} alt={r.name} className="size-full object-contain" />
+                            <AvatarFallback className="rounded-full text-[8px] font-bold">{r.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <span className="font-bold text-ink">{r.name}</span> →
+                        </Link>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => setEditRelatedOpen(true)}
+                    className="inline-flex items-center gap-1 rounded-full border border-dashed border-[#888] bg-transparent px-3 py-1 font-['Space_Mono',monospace] text-[11px] text-[#888] transition-colors hover:border-ink hover:text-ink"
+                    title="Edit related products"
+                  >
+                    <Plus size={11} /> see also
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="shrink-0 flex w-full items-center gap-2 sm:w-auto max-[640px]:col-span-2">
@@ -845,9 +881,11 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               }
               linkPending={linkPending}
             />
-            <EditSimilarProductsDialog
+            <EditCuratedProductsDialog
               product={p}
-              similarProducts={similarProducts ?? []}
+              currentItems={(similarProducts ?? []).filter((s) => s.curated)}
+              systemTitle="EDIT_SIMILAR.SYS"
+              noun="similar"
               open={editSimilarOpen}
               onOpenChange={setEditSimilarOpen}
               saving={updatingSimilar}
@@ -858,6 +896,27 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     onSuccess: () => {
                       showToast("Similar products updated.", "success");
                       setEditSimilarOpen(false);
+                    },
+                    onError: (err: Error) => showToast(err.message || "Update failed. Please try again.", "error"),
+                  }
+                )
+              }
+            />
+            <EditCuratedProductsDialog
+              product={p}
+              currentItems={relatedProducts ?? []}
+              systemTitle="EDIT_RELATED.SYS"
+              noun="related"
+              open={editRelatedOpen}
+              onOpenChange={setEditRelatedOpen}
+              saving={updatingRelated}
+              onSave={(relatedProductIds) =>
+                updateRelatedProducts(
+                  { id: p.id, relatedProductIds },
+                  {
+                    onSuccess: () => {
+                      showToast("Related products updated.", "success");
+                      setEditRelatedOpen(false);
                     },
                     onError: (err: Error) => showToast(err.message || "Update failed. Please try again.", "error"),
                   }

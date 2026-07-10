@@ -167,6 +167,13 @@ export interface ProductListItem {
   curated: boolean;
 }
 
+export interface ProductRelatedItem {
+  id: number;
+  slug: string;
+  name: string;
+  logo: string | null;
+}
+
 export interface ProductSummary {
   id: number;
   slug: string;

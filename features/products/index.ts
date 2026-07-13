@@ -4,6 +4,7 @@ export type {
   ProductDetailOut,
   ProductSummary,
   ProductListItem,
+  ProductRelatedItem,
   ProductComment,
   CategoryRef,
   SubcategoryRef,
@@ -25,4 +26,4 @@ export type { ProductStats, ProductFilters, PaginatedResponse } from "./api";
 export * from "./hooks";
 export { approvedSubcategories, pendingSubcategory } from "./utils";
 export { GallerySection, TeamSection, VoicesSection, BountiesSection, DiscussionSection } from "./components/LaunchSections";
-export { EditProductInfoDialog, EditProductLinksDialog, EditProductLogoDialog, EditSimilarProductsDialog } from "./components/AdminEditProductDialog";
+export { EditProductInfoDialog, EditProductLinksDialog, EditProductLogoDialog, EditCuratedProductsDialog } from "./components/AdminEditProductDialog";

@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as productApi from "./api";
 import type { ProductFilters, ProductStats } from "./api";
-import type { ProductDetailOut, ProductIn, ProductListItem, ProductStatus, ProductSummary, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty, ProductUpdateIn, ProductLinkIn } from "./types";
+import type { ProductDetailOut, ProductIn, ProductListItem, ProductRelatedItem, ProductStatus, ProductSummary, TeamMemberIn, TeamMemberOut, VoiceIn, ProductVoice, BountyIn, Bounty, ProductUpdateIn, ProductLinkIn } from "./types";
 import { ProductStatus as ProductStatusEnum } from "@/enums";
 import type { VerificationStatus } from "@/enums";
 
@@ -58,7 +58,8 @@ export type ProductQueryFilters = {
 
 export function usePagedProducts(
   status: ProductStatus,
-  filters: ProductQueryFilters & { page: number; pageSize: number }
+  filters: ProductQueryFilters & { page: number; pageSize: number },
+  options?: { enabled?: boolean }
 ) {
   const { categoryId, dateFilter, sortBy, search, upvoted, page, pageSize } = filters;
   return useQuery({
@@ -74,6 +75,7 @@ export function usePagedProducts(
         offset: (page - 1) * pageSize,
         upvoted: upvoted || undefined,
       }),
+    enabled: options?.enabled ?? true,
   });
 }
 
@@ -356,6 +358,27 @@ export function useUpdateSimilarProducts(slug: string) {
     onSuccess: (_data, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["product", slug] });
       queryClient.invalidateQueries({ queryKey: ["product", id, "similar"] });
+    },
+  });
+}
+
+export function useRelatedProducts(productId: number, enabled = true, limit = 3) {
+  return useQuery<ProductRelatedItem[]>({
+    queryKey: ["product", productId, "related", limit],
+    queryFn: () => productApi.getRelatedProducts(productId, limit),
+    enabled: productId > 0 && enabled,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useUpdateRelatedProducts(slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, relatedProductIds }: { id: number; relatedProductIds: number[] }) =>
+      productApi.updateRelatedProducts(id, relatedProductIds),
+    onSuccess: (_data, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["product", slug] });
+      queryClient.invalidateQueries({ queryKey: ["product", id, "related"] });
     },
   });
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import WindowCard from "@/components/ui/WindowCard";
 import { Dialog, DialogBody, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrafficLights } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/button";
@@ -247,6 +247,8 @@ export function TeamSection({
   onUpdate,
   onCreate,
   creating,
+  collapsedHeight,
+  onNaturalHeight,
 }: {
   members: TeamMemberOut[];
   isAdmin: boolean;
@@ -259,19 +261,43 @@ export function TeamSection({
   onUpdate: (id: number, data: Partial<TeamMemberIn>) => void;
   onCreate: (data: TeamMemberIn) => void;
   creating: boolean;
+  collapsedHeight?: number;
+  onNaturalHeight?: (height: number) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [editMember, setEditMember] = useState<TeamMemberOut | null>(null);
   const [form, setForm] = useState<TeamMemberIn>(EMPTY_MEMBER);
   const [editForm, setEditForm] = useState<Partial<TeamMemberIn>>({});
   const teamScrollRef = useRef<HTMLDivElement>(null);
-  const [teamOverflows, setTeamOverflows] = useState(false);
+  const [naturalHeight, setNaturalHeight] = useState(0);
+  const [fitHeight, setFitHeight] = useState<number | null>(null);
+  const teamOverflows = fitHeight != null && naturalHeight > fitHeight + 4;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = teamScrollRef.current;
-    if (!el || expanded) return;
-    setTeamOverflows(el.scrollHeight > el.clientHeight);
-  }, [members, expanded]);
+    if (!el) return;
+    const h = el.scrollHeight;
+    setNaturalHeight(h);
+    if (members.length > 0) onNaturalHeight?.(h);
+
+    if (collapsedHeight == null) {
+      setFitHeight(null);
+      return;
+    }
+    const children = Array.from(el.children) as HTMLElement[];
+    let total = 0;
+    let shownCount = 0;
+    for (let i = 0; i < children.length; i++) {
+      const marginBottom = parseFloat(getComputedStyle(children[i]).marginBottom) || 0;
+      const childHeight = children[i].getBoundingClientRect().height + marginBottom;
+      if (i > 0 && total + childHeight > collapsedHeight) break;
+      total += childHeight;
+      shownCount++;
+    }
+    const PEEK = 22;
+    const hasHiddenItems = shownCount < children.length;
+    setFitHeight(Math.ceil(total) + (hasHiddenItems ? PEEK : 2));
+  }, [members, collapsedHeight, onNaturalHeight]);
 
   useEffect(() => {
     if (expanded) {
@@ -313,7 +339,11 @@ export function TeamSection({
       {members.length === 0 && <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No team members listed.</p>}
 
       <div className="relative">
-      <div ref={teamScrollRef} className={`max-h-60 ${expanded ? "overflow-y-auto" : "overflow-hidden"}`}>
+      <div
+        ref={teamScrollRef}
+        className={`max-h-60 ${expanded ? "overflow-y-auto" : "overflow-hidden"}`}
+        style={!expanded && fitHeight != null ? { maxHeight: fitHeight } : undefined}
+      >
         {members.map((m, i) => (
           <div key={m.id} className={`flex items-start gap-4 py-4 ${i < members.length - 1 ? "border-b border-b-[rgba(0,0,0,0.08)]" : ""}`}>
             <div
@@ -412,7 +442,7 @@ export function TeamSection({
       </div>
 
       {(teamOverflows || expanded) && (
-        <button onClick={() => setExpanded(!expanded)} className="mt-3 font-['Space_Mono',monospace] text-[11px] text-[#888] hover:text-[#1a1a1a]">
+        <button onClick={() => setExpanded(!expanded)} className="mt-5 font-['Space_Mono',monospace] text-[11px] text-[#888] hover:text-[#1a1a1a]">
           {expanded ? "− show less" : "show more →"}
         </button>
       )}
@@ -583,6 +613,8 @@ export function VoicesSection({
   onUpdate,
   onSwap,
   creating,
+  collapsedHeight,
+  onNaturalHeight,
 }: {
   voices: ProductVoice[];
   isAdmin: boolean;
@@ -593,26 +625,48 @@ export function VoicesSection({
   onUpdate: (id: number, data: Partial<VoiceIn>) => void;
   onSwap?: (idA: number, orderA: number, idB: number, orderB: number) => void;
   creating: boolean;
+  collapsedHeight?: number;
+  onNaturalHeight?: (height: number) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [editVoice, setEditVoice] = useState<ProductVoice | null>(null);
   const [form, setForm] = useState<VoiceIn>(EMPTY_VOICE);
   const [editForm, setEditForm] = useState<Partial<VoiceIn>>({});
   const voicesScrollRef = useRef<HTMLDivElement>(null);
-  const [voicesOverflow, setVoicesOverflow] = useState(false);
+  const [naturalHeight, setNaturalHeight] = useState(0);
+  const [fitHeight, setFitHeight] = useState<number | null>(null);
 
   const sorted = [...voices].sort((a, b) => a.sortOrder - b.sortOrder);
+  const voicesOverflow = fitHeight != null && naturalHeight > fitHeight + 4;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = voicesScrollRef.current;
-    if (!el || expanded) return;
-    setVoicesOverflow(el.scrollHeight > el.clientHeight);
-  }, [voices, expanded]);
+    if (!el) return;
+    const h = el.scrollHeight;
+    setNaturalHeight(h);
+    if (voices.length > 0) onNaturalHeight?.(h);
+
+    if (collapsedHeight == null) {
+      setFitHeight(null);
+      return;
+    }
+    const children = Array.from(el.children) as HTMLElement[];
+    let total = 0;
+    let shownCount = 0;
+    for (let i = 0; i < children.length; i++) {
+      const marginBottom = parseFloat(getComputedStyle(children[i]).marginBottom) || 0;
+      const childHeight = children[i].getBoundingClientRect().height + marginBottom;
+      if (i > 0 && total + childHeight > collapsedHeight) break;
+      total += childHeight;
+      shownCount++;
+    }
+    const PEEK = 22;
+    const hasHiddenItems = shownCount < children.length;
+    setFitHeight(Math.ceil(total) + (hasHiddenItems ? PEEK : 2));
+  }, [voices, collapsedHeight, onNaturalHeight]);
 
   useEffect(() => {
     if (expanded) {
-      voicesScrollRef.current?.scrollTo({ top: 100, behavior: "smooth" });
-    } else {
       voicesScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [expanded]);
@@ -640,7 +694,11 @@ export function VoicesSection({
       {voices.length === 0 && <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No voices yet.</p>}
 
       <div className="relative">
-      <div ref={voicesScrollRef} className={`max-h-70 ${expanded ? "overflow-y-auto" : "overflow-hidden"}`}>
+      <div
+        ref={voicesScrollRef}
+        className={`max-h-70 ${expanded ? "overflow-y-auto" : "overflow-hidden"}`}
+        style={!expanded && fitHeight != null ? { maxHeight: fitHeight } : undefined}
+      >
         {sorted.map((v, i) => (
           <div key={v.id} className="mb-2.5 rounded-md border border-[rgba(0,0,0,0.08)] bg-[#FFFCEF] px-4 py-3.5 last:mb-0">
             <p className="text-[13px] italic leading-[1.55]">"{v.quote}"</p>

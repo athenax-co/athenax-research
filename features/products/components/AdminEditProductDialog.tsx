@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,10 +14,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ProductBadge } from "@/components/ui/ProductBadge";
-import { PRODUCT_LINK_TYPES, QualityBadge, VerificationStatus, type ProductLinkType } from "@/enums";
+import { PRODUCT_LINK_TYPES, VerificationStatus, type ProductLinkType } from "@/enums";
 import { urlSchema } from "@/lib/validators";
 import { useProductStages, useProductSearch } from "../hooks";
-import type { ProductDetailOut, ProductUpdateIn, ProductLinkIn, ProductListItem } from "../types";
+import type { ProductDetailOut, ProductUpdateIn, ProductLinkIn } from "../types";
 import { Pencil, Trash2, Plus, Upload } from "lucide-react";
 import TagInput from "@/components/ui/TagInput";
 import { useCategories, useSubcategories } from "@/hooks/queries/useReference";
@@ -218,13 +218,15 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
               </select>
             </div>
             <div className="inp-group mb-0">
-              <label className="inp-label">Quality Badge</label>
-              <select className="inp" value={form.qualityBadge ?? ""} onChange={(e) => set("qualityBadge", e.target.value)}>
-                <option value="">— none —</option>
-                {Object.values(QualityBadge).map((b) => (
-                  <option key={b} value={b}>{b}</option>
-                ))}
-              </select>
+              <label className="inp-label">Founded (Year)</label>
+              <input
+                className="inp"
+                type="number"
+                min={1900}
+                max={2100}
+                value={form.founded ?? ""}
+                onChange={(e) => set("founded", e.target.value ? Number(e.target.value) : undefined)}
+              />
             </div>
           </div>
 
@@ -308,29 +310,6 @@ export function EditProductInfoDialog({ product, open, onOpenChange, onSave, sav
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="inp-group mb-0">
-              <label className="inp-label">Funding ($)</label>
-              <input
-                className="inp"
-                type="number"
-                min={0}
-                value={form.funding ?? ""}
-                onChange={(e) => set("funding", e.target.value ? Number(e.target.value) : undefined)}
-              />
-            </div>
-            <div className="inp-group mb-0">
-              <label className="inp-label">Founded (Year)</label>
-              <input
-                className="inp"
-                type="number"
-                min={1900}
-                max={2100}
-                value={form.founded ?? ""}
-                onChange={(e) => set("founded", e.target.value ? Number(e.target.value) : undefined)}
-              />
-            </div>
-          </div>
 
           <div className="inp-group mb-0">
             <label className="inp-label">Backers</label>
@@ -559,44 +538,47 @@ export function EditProductLinksDialog({
   );
 }
 
-// ─── Edit Similar Products Dialog (SIMILAR.SYS) ──────────────────────────────
+// ─── Edit Curated Products Dialog (shared by "similar" and "related") ───────
 
-// Caps the curated set at the same size as the default /similar display limit, so the
+// Caps the curated set at the default /similar and /related display limit (3), so the
 // single fetch the page already makes always contains the full curated set — no second request.
-const MAX_SIMILAR = 3;
+const MAX_CURATED = 3;
 
-interface EditSimilarProps {
+interface EditCuratedProductsProps {
   product: ProductDetailOut;
-  similarProducts: ProductListItem[];
+  /** Products already curated for this relation — pass pre-filtered (e.g. similar's `curated` flag applied by the caller). */
+  currentItems: { id: number; name: string; logo?: string | null }[];
+  systemTitle: string;
+  noun: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (similarProductIds: number[]) => void;
+  onSave: (productIds: number[]) => void;
   saving?: boolean;
 }
 
-type SimilarOption = { id: number; name: string; logo?: string | null };
+type CuratedOption = { id: number; name: string; logo?: string | null };
 
-export function EditSimilarProductsDialog({ product, similarProducts, open, onOpenChange, onSave, saving }: EditSimilarProps) {
-  // Reuses the page's existing /similar fetch (passed in as a prop) rather than
-  // issuing a second request — curated entries are filtered out client-side.
-  const currentSimilar = useMemo(() => similarProducts.filter((s) => s.curated), [similarProducts]);
-  const [selected, setSelected] = useState<SimilarOption[]>([]);
+export function EditCuratedProductsDialog({
+  product, currentItems, systemTitle, noun, open, onOpenChange, onSave, saving,
+}: EditCuratedProductsProps) {
+  const [selected, setSelected] = useState<CuratedOption[]>([]);
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query);
   const excludeIds = [product.id, ...selected.map((s) => s.id)];
   const { data: results, isFetching } = useProductSearch(debouncedQuery, excludeIds);
 
   useEffect(() => {
-    if (open) setSelected(currentSimilar);
-  }, [open, currentSimilar]);
+    if (open) setSelected(currentItems);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, currentItems]);
 
   useEffect(() => {
     if (!open) setQuery("");
   }, [open]);
 
-  const atLimit = selected.length >= MAX_SIMILAR;
+  const atLimit = selected.length >= MAX_CURATED;
 
-  const addProduct = (p: SimilarOption) => {
+  const addProduct = (p: CuratedOption) => {
     if (atLimit) return;
     setSelected((prev) => [...prev, p]);
     setQuery("");
@@ -609,7 +591,7 @@ export function EditSimilarProductsDialog({ product, similarProducts, open, onOp
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTrafficLights />
-          <DialogTitle>EDIT_SIMILAR.SYS</DialogTitle>
+          <DialogTitle>{systemTitle}</DialogTitle>
           <DialogClose />
         </DialogHeader>
 
@@ -642,7 +624,7 @@ export function EditSimilarProductsDialog({ product, similarProducts, open, onOp
           </div>
 
           {atLimit ? (
-            <p className="text-xs text-[#888]">Maximum of {MAX_SIMILAR} similar products reached.</p>
+            <p className="text-xs text-[#888]">Maximum of {MAX_CURATED} {noun} products reached.</p>
           ) : (
             query.trim() && (
               <div className="max-h-48 overflow-y-auto rounded-lg border border-[rgba(0,0,0,0.1)] bg-white">

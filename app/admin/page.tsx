@@ -25,13 +25,14 @@ type QueueRowProps = {
   meta: string;
   logo?: string | null;
   chips?: string[];
+  pendingSubName?: string | null;
   onApprove: () => void;
   onReject: () => void;
   reviewHref?: string;
   onReview?: () => void;
 };
 
-function QueueRow({ name, meta, logo, chips = [], onApprove, onReject, reviewHref, onReview }: QueueRowProps) {
+function QueueRow({ name, meta, logo, chips = [], pendingSubName, onApprove, onReject, reviewHref, onReview }: QueueRowProps) {
   return (
     <div className="flex flex-wrap items-center gap-3 border-b border-[#D8D4CC] py-3 last:border-b-0">
       <Avatar className="size-9 rounded border border-[#D8D4CC]">
@@ -47,11 +48,16 @@ function QueueRow({ name, meta, logo, chips = [], onApprove, onReject, reviewHre
           ) : (
             <div className="mb-1 text-[15px] font-semibold text-ink">{name}</div>
           )}
-          {chips.length > 0 && (
+          {(chips.length > 0 || pendingSubName) && (
             <div className="flex flex-wrap gap-1.5">
               {chips.map((chip) => (
                 <ProductBadge key={chip} label={chip} />
               ))}
+              {pendingSubName && (
+                <p className="inline-flex h-5 items-center rounded-full border-[1.5px] border-[#D4A017]/40 bg-[#FEF3C7] px-2.5 font-['Space_Mono',monospace] text-[10px] font-semibold uppercase tracking-[0.04em] text-[#92400E] border-dotted">
+                  ⚠ {pendingSubName.toUpperCase()}
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -201,8 +207,9 @@ export default function Page() {
                   key={product.id}
                   name={product.name}
                   logo={product.logo}
-                  meta={`${product.stage ?? "—"} · Funding ${product.funding != null ? `$${product.funding.toLocaleString()}` : "—"} · Founded ${product.founded ?? "—"} · Submitted ${new Date(product.createdAt).toLocaleDateString("en-CA")}${pendingSub ? ` · ⚠ Custom sub-category: ${pendingSub.name}` : ""}`}
+                  meta={`${product.stage ?? "—"} · Founded ${product.founded ?? "—"} · Submitted ${new Date(product.createdAt).toLocaleDateString("en-CA")}`}
                   chips={(product.categories ?? []).map((category) => category.name)}
+                  pendingSubName={pendingSub?.name}
                   onApprove={() =>
                     updateProductStatus(
                       { id: product.id, status: ProductStatus.APPROVED },

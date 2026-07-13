@@ -58,7 +58,8 @@ export type ProductQueryFilters = {
 
 export function usePagedProducts(
   status: ProductStatus,
-  filters: ProductQueryFilters & { page: number; pageSize: number }
+  filters: ProductQueryFilters & { page: number; pageSize: number },
+  options?: { enabled?: boolean }
 ) {
   const { categoryId, dateFilter, sortBy, search, upvoted, page, pageSize } = filters;
   return useQuery({
@@ -74,6 +75,7 @@ export function usePagedProducts(
         offset: (page - 1) * pageSize,
         upvoted: upvoted || undefined,
       }),
+    enabled: options?.enabled ?? true,
   });
 }
 

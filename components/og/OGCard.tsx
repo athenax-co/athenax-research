@@ -17,13 +17,13 @@ export type OGCardProduct = {
   galleryImages?: (string | null)[];
 };
 
-const INK = "#1c1c27";
-const CREAM = "#f2efe9";
-const WHITE = "#ffffff";
-const MUTED = "#888888";
-const BODY = "#555555";
+export const INK = "#1c1c27";
+export const CREAM = "#f2efe9";
+export const WHITE = "#ffffff";
+export const MUTED = "#888888";
+export const BODY = "#555555";
 const LINK = "#C4605C";
-const HAIR = "#e3ded5";
+export const HAIR = "#e3ded5";
 
 const CATEGORY_BG: Record<string, string> = {
   "AI & AGENTS": "#FFE0CC",
@@ -34,23 +34,23 @@ const CATEGORY_BG: Record<string, string> = {
   ROBOTICS: "#E0D4F0",
 };
 
-function categoryBg(name: string) {
+export function categoryBg(name: string) {
   return CATEGORY_BG[name.toUpperCase().replace(/\s+/g, " ").trim()] ?? "#E8E4D9";
 }
 
-function stageTone(label: string) {
+export function stageTone(label: string) {
   const n = label.toUpperCase().trim();
   if (["LIVE", "ACTIVE", "LAUNCHED"].includes(n)) return { bg: "#C8F7C5", border: "#2D6A2E", color: "#2D6A2E" };
   if (["BETA", "ACTIVE DEVELOPMENT"].includes(n)) return { bg: "#FFF3C4", border: "#8B7000", color: "#8B7000" };
   return { bg: "#E8E4D9", border: "#1a1a1a", color: "#1a1a1a" };
 }
 
-function cap(s: string) {
+export function cap(s: string) {
   const t = s.replace(/\s+/g, " ").trim();
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
 
-function clamp(s: string, max: number) {
+export function clamp(s: string, max: number) {
   const t = s.trim();
   if (t.length <= max) return t;
   const cut = t.slice(0, max);
@@ -58,7 +58,7 @@ function clamp(s: string, max: number) {
   return `${(lastSpace > max - 24 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
 }
 
-function Badge({ label, bg, border, color }: { label: string; bg: string; border: string; color: string }) {
+export function Badge({ label, bg, border, color }: { label: string; bg: string; border: string; color: string }) {
   return (
     <div
       style={{
@@ -89,7 +89,7 @@ function Badge({ label, bg, border, color }: { label: string; bg: string; border
   );
 }
 
-function Dot({ color }: { color: string }) {
+export function Dot({ color }: { color: string }) {
   return <div style={{ display: "flex", width: 12, height: 12, borderRadius: 999, backgroundColor: color }} />;
 }
 

@@ -5,6 +5,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// ── Utility: Category name → URL slug ("AI & Agents" → "ai-agents") ─────────
+// Categories have no slug column, so the ?category= param is derived from the name.
+export function categorySlug(name: string) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 // ── Utility: Format dates like 12 Jan 2026 ──────────────────────────────────
 export function formatShortDate(value: string | number | Date) {
   return new Intl.DateTimeFormat("en-GB", {

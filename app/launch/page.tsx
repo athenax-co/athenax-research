@@ -15,6 +15,7 @@ import { useCategories } from "@/hooks/queries/useReference";
 import SubmitProductButton from "@/components/SubmitProductModal";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { categorySlug } from "@/utils/lib";
 import { usePagedProducts, useProductStats, approvedSubcategories } from "@/features/products";
 import Pagination from "@/components/ui/Pagination";
 import { ProductBadge } from "@/components/ui/ProductBadge";
@@ -31,7 +32,7 @@ const PAGE_SIZE = 21;
 
 export default function Page() {
   const { user, showToast, openSubmitProductModal } = useGlobal();
-  const { data: categories = [] } = useCategories();
+  const { data: categories = [], isLoading: categoriesLoading } = useCategories();
   const { data: productStats } = useProductStats();
   const isNouns = (name: string) => name.toLowerCase() === "nouns";
   const searchParams = useSearchParams();
@@ -44,7 +45,7 @@ export default function Page() {
     }
   }, [searchParams, router, openSubmitProductModal]);
 
-  const [categoryId, setCategoryId] = useQueryState("category", parseAsInteger);
+  const [categoryParam, setCategoryParam] = useQueryState("category", parseAsString);
   const [dateFilter, setDateFilter] = useQueryState("date", parseAsString);
   const [upvotedFilter, setUpvotedFilter] = useQueryState("upvoted", parseAsString);
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
@@ -56,43 +57,68 @@ export default function Page() {
   // Track whether a filter change (not a page change) triggered a page reset
   const filterResetRef = useRef(false);
 
-  const selectedCategory = categories.find((c) => c.id === categoryId);
+  const selectedCategory = categories.find((c) => categorySlug(c.name) === categoryParam);
+  const categoryId = selectedCategory?.id ?? null;
   const isNounsSelected = selectedCategory ? isNouns(selectedCategory.name) : false;
 
-  const { data, isLoading: productsLoading } = usePagedProducts("approved", {
-    categoryId: categoryId ?? undefined,
-    dateFilter: (dateFilter || undefined) as DateFilter,
-    sortBy: isNounsSelected ? "oldest" : undefined,
-    search: search ?? undefined,
-    upvoted: upvotedFilter === "true" ? true : undefined,
-    page,
-    pageSize: PAGE_SIZE,
-  });
+  // A slug can only be resolved once categories load; a legacy numeric param only after it is rewritten below.
+  // Until then the query is held, so a deep link never fires an unfiltered request first.
+  const isLegacyNumeric = !!categoryParam && /^\d+$/.test(categoryParam);
+  const categoryPending = !!categoryParam && (categoriesLoading || isLegacyNumeric);
 
+  const { data, isLoading: productsFetching } = usePagedProducts(
+    "approved",
+    {
+      categoryId: categoryId ?? undefined,
+      dateFilter: (dateFilter || undefined) as DateFilter,
+      sortBy: isNounsSelected ? "oldest" : undefined,
+      search: search ?? undefined,
+      upvoted: upvotedFilter === "true" ? true : undefined,
+      page,
+      pageSize: PAGE_SIZE,
+    },
+    { enabled: !categoryPending }
+  );
+
+  // Legacy /launch?category=<id> links → rewrite to the slug form; drop anything unresolvable.
+  useEffect(() => {
+    if (!categoryParam || categoriesLoading || !categories.length) return;
+    if (isLegacyNumeric) {
+      const legacy = categories.find((c) => c.id === Number(categoryParam));
+      setCategoryParam(legacy ? categorySlug(legacy.name) : null);
+    } else if (!selectedCategory) {
+      setCategoryParam(null);
+    }
+  }, [categoryParam, categoriesLoading, categories, isLegacyNumeric, selectedCategory, setCategoryParam]);
+
+  // A gated query reports isLoading=false, so keep showing skeletons while the category resolves.
+  const productsLoading = productsFetching || categoryPending;
   const pagedProducts = data?.items ?? [];
   const totalCount = data?.total ?? 0;
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   // Reset to page 1 when filters change, scroll stays
-  const prevCategoryRef = useRef(categoryId);
+  // Tracks the URL param, not the resolved id — the id flips null→n when categories load,
+  // which would otherwise knock /launch?category=biotech&page=3 back to page 1.
+  const prevCategoryRef = useRef(categoryParam);
   const prevDateRef = useRef(dateFilter);
   const prevSearchRef = useRef(search);
   const prevUpvotedRef = useRef(upvotedFilter);
   useEffect(() => {
     if (
-      prevCategoryRef.current !== categoryId ||
+      prevCategoryRef.current !== categoryParam ||
       prevDateRef.current !== dateFilter ||
       prevSearchRef.current !== search ||
       prevUpvotedRef.current !== upvotedFilter
     ) {
-      prevCategoryRef.current = categoryId;
+      prevCategoryRef.current = categoryParam;
       prevDateRef.current = dateFilter;
       prevSearchRef.current = search;
       prevUpvotedRef.current = upvotedFilter;
       filterResetRef.current = true;
       setPage(1);
     }
-  }, [categoryId, dateFilter, search, upvotedFilter, setPage]);
+  }, [categoryParam, dateFilter, search, upvotedFilter, setPage]);
 
 
   // / key focuses the search input
@@ -244,7 +270,7 @@ export default function Page() {
               variant={(categoryId ?? null) === (c.id || null) ? "ghost" : "outline"}
               size="xs"
               className={`shrink-0 ${(categoryId ?? null) === (c.id || null) ? "bg-yellow" : ""}`}
-              onClick={() => setCategoryId(c.id === 0 ? null : c.id)}
+              onClick={() => setCategoryParam(c.id === 0 ? null : categorySlug(c.name))}
             >
               {isNouns(c.name) ? (
                 <Image src="https://athenax.mypinx.store/Noggles.png" alt="Nouns" width={28} height={16} className="object-contain" />

@@ -12,6 +12,20 @@ function nodeText(children: React.ReactNode): string {
   return "";
 }
 
+// preserveBlankLines() turns each extra blank line into a paragraph containing
+// only "&nbsp;" (U+00A0). Render those as bare fixed-height spacers rather than
+// real <p> tags — a <p> would collapse its margin with the next block's own
+// margin (e.g. an <h1>'s large top margin), silently swallowing the gap the
+// author asked for.
+function isSpacerParagraph(children: React.ReactNode): boolean {
+  return nodeText(children) === " ";
+}
+
+export const markdownSpacerComponents = {
+  p: ({ children }: { children?: React.ReactNode }) =>
+    isSpacerParagraph(children) ? <div className="h-7" aria-hidden="true" /> : <p>{children}</p>,
+};
+
 interface MarkdownViewerProps {
   content: string;
   className?: string;
@@ -69,6 +83,7 @@ export default function MarkdownViewer({ content, className }: MarkdownViewerPro
     >
       <ReactMarkdown
         components={{
+          ...markdownSpacerComponents,
           h1: ({ children }) => <h1 id={slugify(nodeText(children))}>{children}</h1>,
           h2: ({ children }) => <h2 id={slugify(nodeText(children))}>{children}</h2>,
         }}

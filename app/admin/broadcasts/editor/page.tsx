@@ -204,7 +204,7 @@ function BroadcastEditorForm({ broadcast, broadcastId, userName, showToast }: Fo
   return (
     <>
       <div className="sticky top-17 z-40 flex flex-wrap items-center gap-3 border-b border-[#D8D4CC] bg-paper px-5 py-3">
-        <Link href="/admin/broadcasts" className="font-mono text-xs text-muted no-underline hover:underline">
+        <Link href="/admin/broadcasts" className="font-sans text-xs text-muted no-underline hover:text-ink">
           ← Broadcasts
         </Link>
         <span className="h-3 w-px bg-[#D8D4CC]" />

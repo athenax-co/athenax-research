@@ -152,12 +152,12 @@ export default function Page() {
       <div className="path-badge">/root/admin</div>
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-3">
         <div>
-          <Link href="/dashboard" className="font-mono text-xs text-muted no-underline hover:underline">
+          <Link href="/dashboard" className="font-sans text-xs text-muted no-underline hover:text-ink">
             ← Dashboard
           </Link>
           <h1 className="mb-0 text-5xl">Admin</h1>
         </div>
-        <span className="font-mono text-xs text-muted">Welcome back, {user.name.split(" ")[0]}</span>
+        <span className="font-sans text-xs text-muted">Welcome back, {user.name.split(" ")[0]}</span>
       </div>
       <p className="mb-0 text-[17px] text-muted">Moderation queue, platform operations, and system health.</p>
       <hr className="divider" />

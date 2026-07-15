@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Dialog as BaseDialog } from "@base-ui/react";
+import { X } from 'lucide-react';
 import TrafficLights from "./TrafficLights";
 
 // ─── Dialog ──────────────────────────────────────────────────────────────────
@@ -130,7 +131,7 @@ function DialogClose({ children, className }: { children?: React.ReactNode; clas
     <BaseDialog.Close
       className={["text-ink text-xl leading-none cursor-pointer", "hover:opacity-60 transition-opacity", className].filter(Boolean).join(" ")}
     >
-      {children ?? "×"}
+      {children ?? <X className="size-4" />}
     </BaseDialog.Close>
   );
 }

@@ -57,7 +57,7 @@ export default function Page() {
       <div className="path-badge">/root/admin/broadcasts</div>
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-3">
         <div>
-          <Link href="/admin" className="font-mono text-xs text-muted no-underline hover:underline">
+          <Link href="/admin" className="font-sans text-xs text-muted no-underline hover:text-ink">
             ← Admin
           </Link>
           <h1 className="mb-0 text-5xl">Broadcasts</h1>

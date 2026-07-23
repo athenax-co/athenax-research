@@ -25,7 +25,7 @@ export default function Page() {
       <div className="path-badge">/root/dashboard/voted</div>
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-3">
         <h1 className="mb-0 text-5xl">Upvoted</h1>
-        <Link href="/dashboard" className="font-['Space_Mono',monospace] text-[12px] text-[#888] hover:text-ink">
+        <Link href="/dashboard" className="font-sans text-xs text-[#888] hover:text-ink">
           ← Dashboard
         </Link>
       </div>

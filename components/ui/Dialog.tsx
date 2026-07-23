@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Dialog as BaseDialog } from "@base-ui/react";
+import { X } from 'lucide-react';
 import TrafficLights from "./TrafficLights";
 
 // ─── Dialog ──────────────────────────────────────────────────────────────────
@@ -95,7 +96,7 @@ function DialogHeader({ children, className }: { children: React.ReactNode; clas
 
 function DialogTitle({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <BaseDialog.Title className={["font-mono text-[10px] tracking-widest uppercase text-ink", className].filter(Boolean).join(" ")}>
+    <BaseDialog.Title className={["font-sans text-[10px] tracking-widest uppercase text-ink ps-2", className].filter(Boolean).join(" ")}>
       {children}
     </BaseDialog.Title>
   );
@@ -130,7 +131,7 @@ function DialogClose({ children, className }: { children?: React.ReactNode; clas
     <BaseDialog.Close
       className={["text-ink text-xl leading-none cursor-pointer", "hover:opacity-60 transition-opacity", className].filter(Boolean).join(" ")}
     >
-      {children ?? "×"}
+      {children ?? <X className="size-4" />}
     </BaseDialog.Close>
   );
 }

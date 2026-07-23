@@ -6,20 +6,17 @@ import { IconBounties, IconBuilders, IconLabs, IconTerminal } from "@/components
 import { Button, buttonVariants } from "@/components/ui/button";
 import WindowCard from "@/components/ui/WindowCard";
 import { ProductBadge } from "@/components/ui/ProductBadge";
-import BookmarkButton from "@/components/BookmarkButton";
 import { useGlobal } from "@/components/GlobalProvider";
 import { cn } from "@/lib/utils";
-import { getProductStatsLabel, useProducts, useProductStats, approvedSubcategories } from "@/features/products";
+import { getProductStatsLabel, usePagedProducts, useProductStats, approvedSubcategories } from "@/features/products";
 
 export default function Page() {
-  const { user, showToast, openSubmitProductModal } = useGlobal();
-  const { data: productsData } = useProducts("approved");
-  const apiProducts = productsData?.items ?? [];
+  const { openSubmitProductModal } = useGlobal();
+  const { data: productsData } = usePagedProducts("approved", { page: 1, pageSize: 3 });
+  const latestProducts = productsData?.items ?? [];
   const { data: productStats } = useProductStats();
   const statsLabel = getProductStatsLabel(productStats);
   const liveProductsValue = productStats?.releases.total != null ? String(productStats.releases.total) : "";
-
-  const latestProducts = [...apiProducts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 3);
 
   return (
     <div>

@@ -109,12 +109,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const [editRelatedOpen, setEditRelatedOpen] = useState(false);
   const [teamAddOpen, setTeamAddOpen] = useState(false);
   const [voicesAddOpen, setVoicesAddOpen] = useState(false);
-  const [teamNaturalHeight, setTeamNaturalHeight] = useState<number | null>(null);
-  const [voicesNaturalHeight, setVoicesNaturalHeight] = useState<number | null>(null);
-  const teamVoicesCollapsedHeight =
-    teamNaturalHeight != null && voicesNaturalHeight != null
-      ? Math.min(teamNaturalHeight, voicesNaturalHeight)
-      : undefined;
+  const [teamExpanded, setTeamExpanded] = useState(false);
+  const [voicesExpanded, setVoicesExpanded] = useState(false);
   const [bountiesAddOpen, setBountiesAddOpen] = useState(false);
   const { mutate: uploadLogo, isPending: uploadingLogo } = useUploadProductLogo(apiProductId, id);
   const { mutate: deleteLogo, isPending: deletingLogo } = useDeleteProductLogo(apiProductId, id);
@@ -664,8 +660,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                 })
               }
               creating={creatingTeamMember}
-              collapsedHeight={teamVoicesCollapsedHeight}
-              onNaturalHeight={setTeamNaturalHeight}
+              expanded={teamExpanded}
+              onExpandedChange={setTeamExpanded}
+              siblingExpanded={voicesExpanded}
             />
           </WindowCard>
 
@@ -714,8 +711,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                 swapVoice({ idA, orderA, idB, orderB }, { onError: () => showToast("Failed to reorder.", "error") })
               }
               creating={creatingVoice}
-              collapsedHeight={teamVoicesCollapsedHeight}
-              onNaturalHeight={setVoicesNaturalHeight}
+              expanded={voicesExpanded}
+              onExpandedChange={setVoicesExpanded}
+              siblingExpanded={teamExpanded}
             />
           </WindowCard>
         </div>

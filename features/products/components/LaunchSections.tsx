@@ -233,6 +233,75 @@ export function GallerySection({ media, isAdmin, onUpload, onDelete, onSwap, upl
 
 const AVATAR_COLORS = ["#FFE14D", "#B5D8E9", "#E9C9B5", "#D4C5E2", "#C5DED4"];
 
+/**
+ * Shared show-more/show-less shell for the side-by-side TEAM.SYS / VOICES.SYS cards.
+ *
+ * Height is handled entirely in CSS — no measuring, no heights passed between cards.
+ * Three states:
+ *   - both collapsed        → capped at COLLAPSED_MAX_H, so both cards match.
+ *   - this one expanded     → capped at EXPANDED_MAX_H and scrollable; sets the row height.
+ *   - sibling expanded only → no cap; grows to fill whatever the grid row gives it, so the
+ *                             extra space reveals more rows instead of sitting empty.
+ */
+const COLLAPSED_MAX_H = 260;
+const EXPANDED_MAX_H = 480;
+
+function CollapsibleList({
+  expanded,
+  onExpandedChange,
+  siblingExpanded,
+  children,
+}: {
+  expanded: boolean;
+  onExpandedChange: (expanded: boolean) => void;
+  siblingExpanded: boolean;
+  children: React.ReactNode;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [overflows, setOverflows] = useState(false);
+  const fillsAvailable = !expanded && siblingExpanded;
+
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const check = () => setOverflows(el.scrollHeight > el.clientHeight + 4);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    for (const child of Array.from(el.children)) ro.observe(child);
+    return () => ro.disconnect();
+  });
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }, [expanded]);
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className={`relative ${fillsAvailable ? "h-0 min-h-0 grow" : ""}`}>
+        <div
+          ref={scrollRef}
+          className={`h-full overscroll-contain ${expanded ? "overflow-y-auto" : "overflow-hidden"}`}
+          style={fillsAvailable ? undefined : { maxHeight: expanded ? EXPANDED_MAX_H : COLLAPSED_MAX_H }}
+        >
+          {children}
+        </div>
+        {!expanded && overflows && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-linear-to-t from-white to-transparent" />
+        )}
+      </div>
+      {(overflows || expanded) && (
+        <button
+          onClick={() => onExpandedChange(!expanded)}
+          className="mt-auto shrink-0 pt-4 text-left font-['Space_Mono',monospace] text-[11px] text-[#888] hover:text-[#1a1a1a]"
+        >
+          {expanded ? "− show less" : "show more →"}
+        </button>
+      )}
+    </div>
+  );
+}
+
 const EMPTY_MEMBER: TeamMemberIn = { name: "", roleLabel: "", bioNote: "", linkedinUrl: "", twitterUrl: "", githubUrl: "", otherUrl: "" };
 
 export function TeamSection({
@@ -247,8 +316,9 @@ export function TeamSection({
   onUpdate,
   onCreate,
   creating,
-  collapsedHeight,
-  onNaturalHeight,
+  expanded,
+  onExpandedChange,
+  siblingExpanded,
 }: {
   members: TeamMemberOut[];
   isAdmin: boolean;
@@ -261,52 +331,13 @@ export function TeamSection({
   onUpdate: (id: number, data: Partial<TeamMemberIn>) => void;
   onCreate: (data: TeamMemberIn) => void;
   creating: boolean;
-  collapsedHeight?: number;
-  onNaturalHeight?: (height: number) => void;
+  expanded: boolean;
+  onExpandedChange: (expanded: boolean) => void;
+  siblingExpanded: boolean;
 }) {
-  const [expanded, setExpanded] = useState(false);
   const [editMember, setEditMember] = useState<TeamMemberOut | null>(null);
   const [form, setForm] = useState<TeamMemberIn>(EMPTY_MEMBER);
   const [editForm, setEditForm] = useState<Partial<TeamMemberIn>>({});
-  const teamScrollRef = useRef<HTMLDivElement>(null);
-  const [naturalHeight, setNaturalHeight] = useState(0);
-  const [fitHeight, setFitHeight] = useState<number | null>(null);
-  const teamOverflows = fitHeight != null && naturalHeight > fitHeight + 4;
-
-  useLayoutEffect(() => {
-    const el = teamScrollRef.current;
-    if (!el) return;
-    const h = el.scrollHeight;
-    setNaturalHeight(h);
-    if (members.length > 0) onNaturalHeight?.(h);
-
-    if (collapsedHeight == null) {
-      setFitHeight(null);
-      return;
-    }
-    const children = Array.from(el.children) as HTMLElement[];
-    let total = 0;
-    let shownCount = 0;
-    for (let i = 0; i < children.length; i++) {
-      const marginBottom = parseFloat(getComputedStyle(children[i]).marginBottom) || 0;
-      const childHeight = children[i].getBoundingClientRect().height + marginBottom;
-      if (i > 0 && total + childHeight > collapsedHeight) break;
-      total += childHeight;
-      shownCount++;
-    }
-    const PEEK = 22;
-    const hasHiddenItems = shownCount < children.length;
-    setFitHeight(Math.ceil(total) + (hasHiddenItems ? PEEK : 2));
-  }, [members, collapsedHeight, onNaturalHeight]);
-
-  useEffect(() => {
-    if (expanded) {
-      teamScrollRef.current?.scrollTo({ top: 80, behavior: "smooth" });
-    } else {
-      teamScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }, [expanded]);
-
 
   function openEdit(m: TeamMemberOut) {
     setEditMember(m);
@@ -338,12 +369,7 @@ export function TeamSection({
     <>
       {members.length === 0 && <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No team members listed.</p>}
 
-      <div className="relative">
-      <div
-        ref={teamScrollRef}
-        className={`max-h-60 ${expanded ? "overflow-y-auto" : "overflow-hidden"}`}
-        style={!expanded && fitHeight != null ? { maxHeight: fitHeight } : undefined}
-      >
+      <CollapsibleList expanded={expanded} onExpandedChange={onExpandedChange} siblingExpanded={siblingExpanded}>
         {members.map((m, i) => (
           <div key={m.id} className={`flex items-start gap-4 py-4 ${i < members.length - 1 ? "border-b border-b-[rgba(0,0,0,0.08)]" : ""}`}>
             <div
@@ -435,17 +461,7 @@ export function TeamSection({
             )}
           </div>
         ))}
-      </div>
-      {!expanded && teamOverflows && (
-        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-5 bg-linear-to-t from-white to-transparent" />
-      )}
-      </div>
-
-      {(teamOverflows || expanded) && (
-        <button onClick={() => setExpanded(!expanded)} className="mt-5 font-['Space_Mono',monospace] text-[11px] text-[#888] hover:text-[#1a1a1a]">
-          {expanded ? "− show less" : "show more →"}
-        </button>
-      )}
+      </CollapsibleList>
 
       <Dialog
         open={addOpen}
@@ -613,8 +629,9 @@ export function VoicesSection({
   onUpdate,
   onSwap,
   creating,
-  collapsedHeight,
-  onNaturalHeight,
+  expanded,
+  onExpandedChange,
+  siblingExpanded,
 }: {
   voices: ProductVoice[];
   isAdmin: boolean;
@@ -625,51 +642,15 @@ export function VoicesSection({
   onUpdate: (id: number, data: Partial<VoiceIn>) => void;
   onSwap?: (idA: number, orderA: number, idB: number, orderB: number) => void;
   creating: boolean;
-  collapsedHeight?: number;
-  onNaturalHeight?: (height: number) => void;
+  expanded: boolean;
+  onExpandedChange: (expanded: boolean) => void;
+  siblingExpanded: boolean;
 }) {
-  const [expanded, setExpanded] = useState(false);
   const [editVoice, setEditVoice] = useState<ProductVoice | null>(null);
   const [form, setForm] = useState<VoiceIn>(EMPTY_VOICE);
   const [editForm, setEditForm] = useState<Partial<VoiceIn>>({});
-  const voicesScrollRef = useRef<HTMLDivElement>(null);
-  const [naturalHeight, setNaturalHeight] = useState(0);
-  const [fitHeight, setFitHeight] = useState<number | null>(null);
 
   const sorted = [...voices].sort((a, b) => a.sortOrder - b.sortOrder);
-  const voicesOverflow = fitHeight != null && naturalHeight > fitHeight + 4;
-
-  useLayoutEffect(() => {
-    const el = voicesScrollRef.current;
-    if (!el) return;
-    const h = el.scrollHeight;
-    setNaturalHeight(h);
-    if (voices.length > 0) onNaturalHeight?.(h);
-
-    if (collapsedHeight == null) {
-      setFitHeight(null);
-      return;
-    }
-    const children = Array.from(el.children) as HTMLElement[];
-    let total = 0;
-    let shownCount = 0;
-    for (let i = 0; i < children.length; i++) {
-      const marginBottom = parseFloat(getComputedStyle(children[i]).marginBottom) || 0;
-      const childHeight = children[i].getBoundingClientRect().height + marginBottom;
-      if (i > 0 && total + childHeight > collapsedHeight) break;
-      total += childHeight;
-      shownCount++;
-    }
-    const PEEK = 22;
-    const hasHiddenItems = shownCount < children.length;
-    setFitHeight(Math.ceil(total) + (hasHiddenItems ? PEEK : 2));
-  }, [voices, collapsedHeight, onNaturalHeight]);
-
-  useEffect(() => {
-    if (expanded) {
-      voicesScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }, [expanded]);
 
   function openEdit(v: ProductVoice) {
     setEditVoice(v);
@@ -693,12 +674,7 @@ export function VoicesSection({
     <>
       {voices.length === 0 && <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No voices yet.</p>}
 
-      <div className="relative">
-      <div
-        ref={voicesScrollRef}
-        className={`max-h-70 ${expanded ? "overflow-y-auto" : "overflow-hidden"}`}
-        style={!expanded && fitHeight != null ? { maxHeight: fitHeight } : undefined}
-      >
+      <CollapsibleList expanded={expanded} onExpandedChange={onExpandedChange} siblingExpanded={siblingExpanded}>
         {sorted.map((v, i) => (
           <div key={v.id} className="mb-2.5 rounded-md border border-[rgba(0,0,0,0.08)] bg-[#FFFCEF] px-4 py-3.5 last:mb-0">
             <p className="text-[13px] italic leading-[1.55]">"{v.quote}"</p>
@@ -740,17 +716,7 @@ export function VoicesSection({
             </div>
           </div>
         ))}
-      </div>
-      {!expanded && voicesOverflow && (
-        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-5 bg-linear-to-t from-white to-transparent" />
-      )}
-      </div>
-
-      {(voicesOverflow || expanded) && (
-        <button onClick={() => setExpanded(!expanded)} className="mt-2.5 font-['Space_Mono',monospace] text-[11px] text-[#888] hover:text-[#1a1a1a]">
-          {expanded ? "− show less" : "show more →"}
-        </button>
-      )}
+      </CollapsibleList>
 
       <Dialog
         open={addOpen}

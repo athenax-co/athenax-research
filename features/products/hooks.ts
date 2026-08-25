@@ -258,6 +258,14 @@ export function useUpdateTeamMemberStatus(productId: number, slug: string) {
   });
 }
 
+export function useApproveAllPendingTeamMembers(productId: number, slug: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => productApi.approveAllPendingTeamMembers(productId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["product", slug] }),
+  });
+}
+
 export function useCreateVoice(productId: number, slug: string) {
   const queryClient = useQueryClient();
   return useMutation({

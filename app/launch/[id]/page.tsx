@@ -26,6 +26,7 @@ import {
   useUpdateTeamMember,
   useDeleteTeamMember,
   useUpdateTeamMemberStatus,
+  useApproveAllPendingTeamMembers,
   useCreateVoice,
   useUpdateVoice,
   useDeleteVoice,
@@ -89,6 +90,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { mutate: updateTeamMember } = useUpdateTeamMember(apiProductId, id);
   const { mutate: deleteTeamMember } = useDeleteTeamMember(apiProductId, id);
   const { mutate: updateTeamMemberStatus } = useUpdateTeamMemberStatus(apiProductId, id);
+  const { mutate: approveAllTeamMembers, isPending: approvingAllTeamMembers } = useApproveAllPendingTeamMembers(apiProductId, id);
   const { mutate: createVoice, isPending: creatingVoice } = useCreateVoice(apiProductId, id);
   const { mutate: updateVoice } = useUpdateVoice(apiProductId, id);
   const { mutate: deleteVoice } = useDeleteVoice(apiProductId, id);
@@ -173,6 +175,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const p: ProductDetailOut = apiProduct;
   const primaryCategory = p.categories[0]?.name ?? "Product";
   const pendingSub = pendingSubcategory(p.categories);
+  const pendingMembers = p.team.filter((m) => m.status === VerificationStatus.PENDING);
   const isInvestor = (user?.role as string) === "investor";
 
   const handleBookmark = () => {
@@ -222,6 +225,16 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     if (status === ProductStatus.APPROVED && pendingSub) {
       showToast(`Review the pending sub-category "${pendingSub.name}" before approving the launch.`, "error");
       setSubPopoverOpen(true);
+      return;
+    }
+    // Same reasoning as the sub-category guard above — force an explicit
+    // decision on pending team members before the launch is approved.
+    if (status === ProductStatus.APPROVED && pendingMembers.length > 0) {
+      showToast(
+        `Review ${pendingMembers.length} pending team member${pendingMembers.length > 1 ? "s" : ""} before approving the launch.`,
+        "error"
+      );
+      setTeamExpanded(true);
       return;
     }
     updateProductStatus(
@@ -641,6 +654,13 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   { onSuccess: () => showToast("Member rejected.", "info"), onError: () => showToast("Action failed.", "error") }
                 )
               }
+              onApproveAll={() =>
+                approveAllTeamMembers(undefined, {
+                  onSuccess: () => showToast("All pending members approved.", "success"),
+                  onError: () => showToast("Action failed.", "error"),
+                })
+              }
+              approvingAll={approvingAllTeamMembers}
               onDelete={(memberId) =>
                 deleteTeamMember(memberId, {
                   onSuccess: () => showToast("Member removed.", "info"),

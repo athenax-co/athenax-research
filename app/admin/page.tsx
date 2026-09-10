@@ -27,7 +27,7 @@ type QueueRowProps = {
   chips?: string[];
   pendingSubName?: string | null;
   onApprove: () => void;
-  onReject: () => void;
+  onReject?: () => void;
   reviewHref?: string;
   onReview?: () => void;
 };
@@ -68,9 +68,11 @@ function QueueRow({ name, meta, logo, chips = [], pendingSubName, onApprove, onR
         <Button size="sm" onClick={onApprove}>
           ✓ Approve
         </Button>
-        <Button variant="ghost" size="sm" onClick={onReject}>
-          ✗ Reject
-        </Button>
+        {onReject && (
+          <Button variant="ghost" size="sm" onClick={onReject}>
+            ✗ Reject
+          </Button>
+        )}
         {reviewHref ? (
           <Link href={reviewHref} className="btn btn-outline btn-sm">
             Review →
@@ -88,6 +90,7 @@ function QueueRow({ name, meta, logo, chips = [], pendingSubName, onApprove, onR
 export default function Page() {
   const { user, showToast, handleAuthClick } = useGlobal();
   const [tab, setTab] = useState<AdminTab>("launches");
+  const [launchStatusFilter, setLaunchStatusFilter] = useState<ProductStatus>(ProductStatus.PENDING);
   const [launchPage, setLaunchPage] = useQueryState("page", parseAsInteger.withDefault(1).withOptions({ scroll: false, shallow: true }));
   const [reviewItem, setReviewItem] = useState<{
     title: string;
@@ -100,7 +103,16 @@ export default function Page() {
   const { data: pendingProductsData, isLoading: loadingPending, isFetching: fetchingPending, refetch: refetchPending } = usePagedProducts("pending", { page: launchPage, pageSize: LAUNCH_PAGE_SIZE });
   const pendingProducts = pendingProductsData?.items ?? [];
   const pendingProductsTotal = pendingProductsData?.total ?? 0;
-  const launchTotalPages = Math.ceil(pendingProductsTotal / LAUNCH_PAGE_SIZE);
+  const {
+    data: rejectedProductsData,
+    isLoading: loadingRejected,
+    isFetching: fetchingRejected,
+    refetch: refetchRejected,
+  } = usePagedProducts(ProductStatus.REJECTED, { page: launchPage, pageSize: LAUNCH_PAGE_SIZE }, { enabled: launchStatusFilter === ProductStatus.REJECTED });
+  const rejectedProducts = rejectedProductsData?.items ?? [];
+  const rejectedProductsTotal = rejectedProductsData?.total ?? 0;
+  const launchProductsTotal = launchStatusFilter === ProductStatus.REJECTED ? rejectedProductsTotal : pendingProductsTotal;
+  const launchTotalPages = Math.ceil(launchProductsTotal / LAUNCH_PAGE_SIZE);
   const { data: pendingPapers = [], isLoading: loadingPapers } = usePapers(50, 0, PaperVerificationStatus.PENDING);
   const { mutate: updateVerification } = useUpdatePaperVerificationStatus();
   const { mutate: updateProductStatus } = useUpdateProductStatus();
@@ -193,8 +205,49 @@ export default function Page() {
 
       {tab === "launches" && (
         <WindowCard label="LAUNCH_MODERATION.SYS">
-          <div className="mb-3 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">PENDING LAUNCH SUBMISSIONS</div>
-          {loadingPending || fetchingPending ? (
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <span className="font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">
+              {launchStatusFilter === ProductStatus.REJECTED ? "REJECTED LAUNCH SUBMISSIONS" : "PENDING LAUNCH SUBMISSIONS"}
+            </span>
+            <select
+              value={launchStatusFilter}
+              onChange={(e) => {
+                setLaunchStatusFilter(e.target.value as ProductStatus);
+                setLaunchPage(1);
+              }}
+              className="rounded border border-[#D8D4CC] bg-white px-2 py-1 font-['Space_Mono',monospace] text-[11px] text-ink"
+            >
+              <option value={ProductStatus.PENDING}>Pending</option>
+              <option value={ProductStatus.REJECTED}>Rejected</option>
+            </select>
+          </div>
+          {launchStatusFilter === ProductStatus.REJECTED ? (
+            loadingRejected || fetchingRejected ? (
+              <p className="text-sm text-muted">Loading…</p>
+            ) : rejectedProducts.length === 0 ? (
+              <p className="text-sm text-muted">No rejected launches.</p>
+            ) : (
+              <>
+                {rejectedProducts.map((product) => (
+                  <QueueRow
+                    key={product.id}
+                    name={product.name}
+                    logo={product.logo}
+                    meta={`${product.stage ?? "—"} · Founded ${product.founded ?? "—"} · Submitted ${new Date(product.createdAt).toLocaleDateString("en-CA")}`}
+                    chips={(product.categories ?? []).map((category) => category.name)}
+                    onApprove={() =>
+                      updateProductStatus(
+                        { id: product.id, status: ProductStatus.APPROVED },
+                        { onSuccess: () => { showToast(`Approved: ${product.name}`, "success"); refetchRejected(); }, onError: () => showToast("Action failed.", "error") }
+                      )
+                    }
+                    reviewHref={`/launch/${product.slug}?queuePage=${launchPage}`}
+                  />
+                ))}
+                <Pagination page={launchPage} totalPages={launchTotalPages} onPageChange={setLaunchPage} className="mt-4 border-t border-[#D8D4CC] pt-3" />
+              </>
+            )
+          ) : loadingPending || fetchingPending ? (
             <p className="text-sm text-muted">Loading…</p>
           ) : pendingProducts.length === 0 ? (
             <p className="text-sm text-muted">No pending launches.</p>

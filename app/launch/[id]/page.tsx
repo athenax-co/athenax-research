@@ -269,6 +269,22 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     );
   };
 
+  const handleUnpublishProduct = (status: ProductStatus) => {
+    const target = status === ProductStatus.PENDING ? "send it back to the review queue" : "reject it";
+    if (!confirm(`Unpublish "${p.name}"? This will ${target} and remove it from public view.`)) return;
+    updateProductStatus(
+      { id: p.id, status },
+      {
+        onSuccess: () =>
+          showToast(
+            status === ProductStatus.PENDING ? "Product unpublished — sent back to pending." : "Product unpublished — rejected.",
+            "info"
+          ),
+        onError: () => showToast("Action failed. Please try again.", "error"),
+      }
+    );
+  };
+
   const handleDeleteProduct = () => {
     if (!confirm(`Are you sure you want to delete "${p.name}"? This will permanently remove the project and cannot be undone.`)) return;
     deleteProduct(p.id, {
@@ -325,6 +341,35 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             </button>
             <button className="btn btn-outline btn-sm" onClick={() => handleVerifyProduct(ProductStatus.REJECTED)} disabled={updatingStatus}>
               {updatingStatus ? <span className="spinner" /> : "✗ Reject"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {p.status === ProductStatus.APPROVED && isAdmin && (
+        <div className="sticky top-17 z-40 flex flex-wrap items-center gap-3 border-b border-[#D8D4CC] bg-paper px-5 py-3">
+          <span className="font-['Space_Mono',monospace] text-[10px] font-bold tracking-widest text-[#E8323C]">LIVE_LAUNCH.SYS</span>
+          <span className="h-3 w-px bg-[#D8D4CC]" />
+          <p className="flex-1 text-[13px] font-semibold text-ink">This launch is live. Unpublish to remove it from public view.</p>
+          <div className="flex shrink-0 gap-2">
+            <button className="btn btn-outline btn-sm" onClick={() => handleUnpublishProduct(ProductStatus.PENDING)} disabled={updatingStatus}>
+              {updatingStatus ? <span className="spinner" /> : "Unpublish → Pending"}
+            </button>
+            <button className="btn btn-outline btn-sm" onClick={() => handleUnpublishProduct(ProductStatus.REJECTED)} disabled={updatingStatus}>
+              {updatingStatus ? <span className="spinner" /> : "Unpublish → Reject"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {p.status === ProductStatus.REJECTED && isAdmin && (
+        <div className="sticky top-17 z-40 flex flex-wrap items-center gap-3 border-b border-[#D8D4CC] bg-paper px-5 py-3">
+          <span className="font-['Space_Mono',monospace] text-[10px] font-bold tracking-widest text-[#E8323C]">REJECTED.SYS</span>
+          <span className="h-3 w-px bg-[#D8D4CC]" />
+          <p className="flex-1 text-[13px] font-semibold text-ink">This launch was rejected and isn't publicly visible.</p>
+          <div className="flex shrink-0 gap-2">
+            <button className="btn btn-primary btn-sm" onClick={() => handleVerifyProduct(ProductStatus.APPROVED)} disabled={updatingStatus}>
+              {updatingStatus ? <span className="spinner" /> : "✓ Approve"}
             </button>
           </div>
         </div>

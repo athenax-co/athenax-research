@@ -241,7 +241,7 @@ export default function Page() {
                         { onSuccess: () => { showToast(`Approved: ${product.name}`, "success"); refetchRejected(); }, onError: () => showToast("Action failed.", "error") }
                       )
                     }
-                    reviewHref={`/launch/${product.slug}?queuePage=${launchPage}`}
+                    reviewHref={`/launch/${product.slug}`}
                   />
                 ))}
                 <Pagination page={launchPage} totalPages={launchTotalPages} onPageChange={setLaunchPage} className="mt-4 border-t border-[#D8D4CC] pt-3" />
@@ -275,7 +275,7 @@ export default function Page() {
                       { onSuccess: () => { showToast(`Rejected: ${product.name}`, "info"); refetchPending(); }, onError: () => showToast("Action failed.", "error") }
                     )
                   }
-                  reviewHref={`/launch/${product.slug}?queuePage=${launchPage}`}
+                  reviewHref={`/launch/${product.slug}`}
                 />
                 );
               })}

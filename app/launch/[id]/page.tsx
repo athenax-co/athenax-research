@@ -2,7 +2,7 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
 import { ProductBadge } from "@/components/ui/ProductBadge";
@@ -66,10 +66,15 @@ import { VerificationStatus, ProductStatus, ProductLinkTypeLabel, sortProductLin
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const queuePage = searchParams.get("queuePage");
   const { user, showToast } = useGlobal();
   const { id } = use(params);
+
+  // "← Back to Launch" / "← Queue": go back in history when we got here from within the
+  // app (preserves scroll/queue state); fall back to a route on a direct link / fresh tab.
+  const goBack = (fallback: string) => {
+    if (typeof window !== "undefined" && window.history.length > 2) router.back();
+    else router.push(fallback);
+  };
 
   const { data: apiProduct, isLoading } = useProductBySlug(id);
 
@@ -333,9 +338,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             )}
           </p>
           <div className="flex shrink-0 gap-2">
-            <Link href={`/admin?tab=launches${queuePage ? `&page=${queuePage}` : ""}`} className="btn btn-ghost btn-sm">
+            <button className="btn btn-ghost btn-sm" onClick={() => goBack("/admin?tab=launches")}>
               ← Queue
-            </Link>
+            </button>
             <button className="btn btn-primary btn-sm" onClick={() => handleVerifyProduct(ProductStatus.APPROVED)} disabled={updatingStatus}>
               {updatingStatus ? <span className="spinner" /> : "✓ Approve"}
             </button>
@@ -379,7 +384,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         <div className="mb-6 flex flex-col-reverse items-start gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={() => goBack("/launch")}
             className="inline-flex items-center rounded-full border border-ink bg-white px-4 py-1.5 text-[13px] font-medium shadow-[2px_2px_0_#1a1a1a] transition-transform hover:-translate-x-px hover:-translate-y-px"
           >
             ← Back to Launch

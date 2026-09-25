@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ProductBadge } from "@/components/ui/ProductBadge";
-import { PRODUCT_LINK_TYPES, VerificationStatus, type ProductLinkType } from "@/enums";
+import { PRODUCT_LINK_TYPES, VerificationStatus, detectProductLinkType, type ProductLinkType } from "@/enums";
 import { urlSchema } from "@/lib/validators";
 import { useProductStages, useProductSearch } from "../hooks";
 import type { ProductDetailOut, ProductUpdateIn, ProductLinkIn } from "../types";
@@ -374,6 +374,8 @@ export function EditProductLinksDialog({
 
   const [newLink, setNewLink] = useState({ linkType: "", url: "" });
   const [newLinkUrlError, setNewLinkUrlError] = useState<string | null>(null);
+  // Once the admin picks a type by hand, stop auto-detecting from the URL.
+  const [linkTypeTouched, setLinkTypeTouched] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -386,6 +388,7 @@ export function EditProductLinksDialog({
     if (addingLink) {
       setNewLink({ linkType: availableTypes[0] ?? "", url: "" });
       setNewLinkUrlError(null);
+      setLinkTypeTouched(false);
     }
   }, [addingLink]);
 
@@ -493,7 +496,7 @@ export function EditProductLinksDialog({
                     <select
                       className="inp py-1 text-sm"
                       value={newLink.linkType}
-                      onChange={(e) => setNewLink((f) => ({ ...f, linkType: e.target.value }))}
+                      onChange={(e) => { setLinkTypeTouched(true); setNewLink((f) => ({ ...f, linkType: e.target.value })); }}
                     >
                       {availableTypes.map((t) => (
                         <option key={t} value={t}>{t}</option>
@@ -505,7 +508,16 @@ export function EditProductLinksDialog({
                     <input
                       className="inp py-1 text-sm"
                       value={newLink.url}
-                      onChange={(e) => { setNewLink((f) => ({ ...f, url: e.target.value })); setNewLinkUrlError(null); }}
+                      onChange={(e) => {
+                        const url = e.target.value;
+                        const detected = linkTypeTouched ? null : detectProductLinkType(url);
+                        setNewLink((f) => ({
+                          ...f,
+                          url,
+                          linkType: detected && availableTypes.includes(detected) ? detected : f.linkType,
+                        }));
+                        setNewLinkUrlError(null);
+                      }}
                       placeholder="https://…"
                       autoFocus
                     />

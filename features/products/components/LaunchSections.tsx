@@ -312,6 +312,8 @@ export function TeamSection({
   onAddOpenChange,
   onApprove,
   onReject,
+  onApproveAll,
+  approvingAll,
   onDelete,
   onUpdate,
   onCreate,
@@ -327,6 +329,8 @@ export function TeamSection({
   onAddOpenChange: (open: boolean) => void;
   onApprove: (id: number) => void;
   onReject: (id: number) => void;
+  onApproveAll?: () => void;
+  approvingAll?: boolean;
   onDelete: (id: number) => void;
   onUpdate: (id: number, data: Partial<TeamMemberIn>) => void;
   onCreate: (data: TeamMemberIn) => void;
@@ -338,6 +342,7 @@ export function TeamSection({
   const [editMember, setEditMember] = useState<TeamMemberOut | null>(null);
   const [form, setForm] = useState<TeamMemberIn>(EMPTY_MEMBER);
   const [editForm, setEditForm] = useState<Partial<TeamMemberIn>>({});
+  const pendingCount = members.filter((m) => m.status === "pending").length;
 
   function openEdit(m: TeamMemberOut) {
     setEditMember(m);
@@ -368,6 +373,21 @@ export function TeamSection({
   return (
     <>
       {members.length === 0 && <p className="py-3 font-['Space_Mono',monospace] text-[10px] text-[#888]">No team members listed.</p>}
+
+      {isAdmin && onApproveAll && pendingCount > 1 && (
+        <div className="flex items-center justify-between border-b border-b-[rgba(0,0,0,0.08)] bg-[#FFF8DC] px-3 py-2">
+          <span className="font-['Space_Mono',monospace] text-[10px] font-semibold tracking-[0.05em] text-[#8B6914]">
+            {pendingCount} MEMBERS PENDING
+          </span>
+          <button
+            onClick={onApproveAll}
+            disabled={approvingAll}
+            className="font-['Space_Mono',monospace] text-[10px] font-semibold text-[#639922] hover:underline disabled:opacity-50"
+          >
+            {approvingAll ? "Approving…" : "✓ Approve all"}
+          </button>
+        </div>
+      )}
 
       <CollapsibleList expanded={expanded} onExpandedChange={onExpandedChange} siblingExpanded={siblingExpanded}>
         {members.map((m, i) => (

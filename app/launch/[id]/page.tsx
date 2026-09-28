@@ -2,7 +2,7 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import WindowCard from "@/components/ui/WindowCard";
 import { ProductBadge } from "@/components/ui/ProductBadge";
@@ -26,6 +26,7 @@ import {
   useUpdateTeamMember,
   useDeleteTeamMember,
   useUpdateTeamMemberStatus,
+  useApproveAllPendingTeamMembers,
   useCreateVoice,
   useUpdateVoice,
   useDeleteVoice,
@@ -65,10 +66,15 @@ import { VerificationStatus, ProductStatus, ProductLinkTypeLabel, sortProductLin
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const queuePage = searchParams.get("queuePage");
   const { user, showToast } = useGlobal();
   const { id } = use(params);
+
+  // "← Back to Launch" / "← Queue": go back in history when we got here from within the
+  // app (preserves scroll/queue state); fall back to a route on a direct link / fresh tab.
+  const goBack = (fallback: string) => {
+    if (typeof window !== "undefined" && window.history.length > 2) router.back();
+    else router.push(fallback);
+  };
 
   const { data: apiProduct, isLoading } = useProductBySlug(id);
 
@@ -89,6 +95,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { mutate: updateTeamMember } = useUpdateTeamMember(apiProductId, id);
   const { mutate: deleteTeamMember } = useDeleteTeamMember(apiProductId, id);
   const { mutate: updateTeamMemberStatus } = useUpdateTeamMemberStatus(apiProductId, id);
+  const { mutate: approveAllTeamMembers, isPending: approvingAllTeamMembers } = useApproveAllPendingTeamMembers(apiProductId, id);
   const { mutate: createVoice, isPending: creatingVoice } = useCreateVoice(apiProductId, id);
   const { mutate: updateVoice } = useUpdateVoice(apiProductId, id);
   const { mutate: deleteVoice } = useDeleteVoice(apiProductId, id);
@@ -173,6 +180,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const p: ProductDetailOut = apiProduct;
   const primaryCategory = p.categories[0]?.name ?? "Product";
   const pendingSub = pendingSubcategory(p.categories);
+  const pendingMembers = p.team.filter((m) => m.status === VerificationStatus.PENDING);
   const isInvestor = (user?.role as string) === "investor";
 
   const handleBookmark = () => {
@@ -224,6 +232,16 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       setSubPopoverOpen(true);
       return;
     }
+    // Same reasoning as the sub-category guard above — force an explicit
+    // decision on pending team members before the launch is approved.
+    if (status === ProductStatus.APPROVED && pendingMembers.length > 0) {
+      showToast(
+        `Review ${pendingMembers.length} pending team member${pendingMembers.length > 1 ? "s" : ""} before approving the launch.`,
+        "error"
+      );
+      setTeamExpanded(true);
+      return;
+    }
     updateProductStatus(
       { id: p.id, status },
       {
@@ -251,6 +269,22 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             status === VerificationStatus.APPROVED ? "success" : "info"
           );
         },
+        onError: () => showToast("Action failed. Please try again.", "error"),
+      }
+    );
+  };
+
+  const handleUnpublishProduct = (status: ProductStatus) => {
+    const target = status === ProductStatus.PENDING ? "send it back to the review queue" : "reject it";
+    if (!confirm(`Unpublish "${p.name}"? This will ${target} and remove it from public view.`)) return;
+    updateProductStatus(
+      { id: p.id, status },
+      {
+        onSuccess: () =>
+          showToast(
+            status === ProductStatus.PENDING ? "Product unpublished — sent back to pending." : "Product unpublished — rejected.",
+            "info"
+          ),
         onError: () => showToast("Action failed. Please try again.", "error"),
       }
     );
@@ -304,9 +338,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             )}
           </p>
           <div className="flex shrink-0 gap-2">
-            <Link href={`/admin?tab=launches${queuePage ? `&page=${queuePage}` : ""}`} className="btn btn-ghost btn-sm">
+            <button className="btn btn-ghost btn-sm" onClick={() => goBack("/admin?tab=launches")}>
               ← Queue
-            </Link>
+            </button>
             <button className="btn btn-primary btn-sm" onClick={() => handleVerifyProduct(ProductStatus.APPROVED)} disabled={updatingStatus}>
               {updatingStatus ? <span className="spinner" /> : "✓ Approve"}
             </button>
@@ -317,11 +351,40 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         </div>
       )}
 
+      {p.status === ProductStatus.APPROVED && isAdmin && (
+        <div className="sticky top-17 z-40 flex flex-wrap items-center gap-3 border-b border-[#D8D4CC] bg-paper px-5 py-3">
+          <span className="font-['Space_Mono',monospace] text-[10px] font-bold tracking-widest text-[#E8323C]">LIVE_LAUNCH.SYS</span>
+          <span className="h-3 w-px bg-[#D8D4CC]" />
+          <p className="flex-1 text-[13px] font-semibold text-ink">This launch is live. Unpublish to remove it from public view.</p>
+          <div className="flex shrink-0 gap-2">
+            <button className="btn btn-outline btn-sm" onClick={() => handleUnpublishProduct(ProductStatus.PENDING)} disabled={updatingStatus}>
+              {updatingStatus ? <span className="spinner" /> : "Unpublish → Pending"}
+            </button>
+            <button className="btn btn-outline btn-sm" onClick={() => handleUnpublishProduct(ProductStatus.REJECTED)} disabled={updatingStatus}>
+              {updatingStatus ? <span className="spinner" /> : "Unpublish → Reject"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {p.status === ProductStatus.REJECTED && isAdmin && (
+        <div className="sticky top-17 z-40 flex flex-wrap items-center gap-3 border-b border-[#D8D4CC] bg-paper px-5 py-3">
+          <span className="font-['Space_Mono',monospace] text-[10px] font-bold tracking-widest text-[#E8323C]">REJECTED.SYS</span>
+          <span className="h-3 w-px bg-[#D8D4CC]" />
+          <p className="flex-1 text-[13px] font-semibold text-ink">This launch was rejected and isn't publicly visible.</p>
+          <div className="flex shrink-0 gap-2">
+            <button className="btn btn-primary btn-sm" onClick={() => handleVerifyProduct(ProductStatus.APPROVED)} disabled={updatingStatus}>
+              {updatingStatus ? <span className="spinner" /> : "✓ Approve"}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="page-wrap section" style={{ maxWidth: 1100 }}>
         <div className="mb-6 flex flex-col-reverse items-start gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={() => goBack("/launch")}
             className="inline-flex items-center rounded-full border border-ink bg-white px-4 py-1.5 text-[13px] font-medium shadow-[2px_2px_0_#1a1a1a] transition-transform hover:-translate-x-px hover:-translate-y-px"
           >
             ← Back to Launch
@@ -641,6 +704,13 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   { onSuccess: () => showToast("Member rejected.", "info"), onError: () => showToast("Action failed.", "error") }
                 )
               }
+              onApproveAll={() =>
+                approveAllTeamMembers(undefined, {
+                  onSuccess: () => showToast("All pending members approved.", "success"),
+                  onError: () => showToast("Action failed.", "error"),
+                })
+              }
+              approvingAll={approvingAllTeamMembers}
               onDelete={(memberId) =>
                 deleteTeamMember(memberId, {
                   onSuccess: () => showToast("Member removed.", "info"),

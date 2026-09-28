@@ -122,6 +122,10 @@ export function updateTeamMemberStatus(productId: number, memberId: number, stat
   return http.patch<TeamMemberOut>(`/product/${productId}/team/${memberId}/status`, { status }, { auth: true });
 }
 
+export function approveAllPendingTeamMembers(productId: number): Promise<TeamMemberOut[]> {
+  return http.patch<TeamMemberOut[]>(`/product/${productId}/team/approve-all`, {}, { auth: true });
+}
+
 export function createVoice(productId: number, data: VoiceIn): Promise<ProductVoice> {
   return http.post<ProductVoice>(`/product/${productId}/voices`, data, { auth: true });
 }

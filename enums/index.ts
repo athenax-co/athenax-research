@@ -85,6 +85,34 @@ export const ProductLinkTypeLabel = Object.fromEntries(
   PRODUCT_LINK_TYPES.map((t) => [t.value, t.label])
 ) as Record<ProductLinkType, string>;
 
+// Host substrings → link type, checked in order. First match wins.
+const LINK_TYPE_HOST_PATTERNS: [ProductLinkType, string[]][] = [
+  ["youtube", ["youtube.com", "youtu.be"]],
+  ["github", ["github.com", "github.io"]],
+  ["twitter", ["twitter.com", "x.com"]],
+  ["discord", ["discord.gg", "discord.com"]],
+  ["linkedin", ["linkedin.com"]],
+  ["instagram", ["instagram.com"]],
+  ["telegram", ["t.me", "telegram.me", "telegram.org"]],
+  ["medium", ["medium.com"]],
+  ["tiktok", ["tiktok.com"]],
+  ["facebook", ["facebook.com", "fb.com", "fb.me"]],
+];
+
+// Best-effort guess of a link type from its URL, or null if nothing matches.
+export function detectProductLinkType(rawUrl: string): ProductLinkType | null {
+  let host: string;
+  try {
+    host = new URL(rawUrl.trim()).hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+  for (const [type, hosts] of LINK_TYPE_HOST_PATTERNS) {
+    if (hosts.some((h) => host === h || host.endsWith(`.${h}`))) return type;
+  }
+  return null;
+}
+
 const OTHER_LINK_TYPE: ProductLinkType = "other";
 const DOCS_LINK_TYPE: ProductLinkType = "docs";
 

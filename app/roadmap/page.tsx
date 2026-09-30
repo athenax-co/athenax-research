@@ -17,22 +17,22 @@ type Phase = {
 
 const PHASES: Phase[] = [
   {
-    num: "00", code: "Genesis", status: "OPERATIONAL", dot: "#4CAF50", year: "2025", isLive: true,
+    num: "00", code: "Genesis", status: "OPERATIONAL", dot: "#4CAF50", year: "2027", isLive: true,
     essence: "Research-backed products become visible. Founders submit. Builders connect.",
     unlocks: ["Launch feed", "Research archive", "Founder submission", "Community signal"],
   },
   {
-    num: "01", code: "Network", status: "EMERGING", dot: "#E0A030", year: "Q3 2026",
+    num: "01", code: "Network", status: "EMERGING", dot: "#E0A030", year: "Q2 2027",
     essence: "Researchers become first-class. Products carry the credentials of those behind them.",
     unlocks: ["Researcher identity", "Founder graph", "Personalised feeds", "Curation depth"],
   },
   {
-    num: "02", code: "Terminal", status: "DEPLOYING", dot: "#E0A030", year: "Q4 2026",
+    num: "02", code: "Terminal", status: "DEPLOYING", dot: "#E0A030", year: "Q3 2027",
     essence: "The ecosystem anticipates itself. Reputation and movement across labs become observable.",
     unlocks: ["Research Terminal", "Reputation system", "Founder radar", "Institutional graph"],
   },
   {
-    num: "03", code: "Economy", status: "SEQUENCED", dot: "#B5B0A6", year: "2027",
+    num: "03", code: "Economy", status: "SEQUENCED", dot: "#B5B0A6", year: "Q4 2027",
     essence: "Capital follows the work shaping the future. Research becomes fundable, researchers become founders.",
     unlocks: ["Bounty marketplace", "Builder cohorts", "Placement layer", "Sponsored programs"],
   },

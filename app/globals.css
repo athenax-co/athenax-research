@@ -23,6 +23,27 @@
   --color-badge-yellow: #ffe14d;
   --color-badge-green: #d7e9b5;
   --color-badge-gray: #e8e4d9;
+
+  --animate-film-roll: film-roll 70s linear infinite;
+  --animate-photo-in-next: photo-in-next 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-photo-in-prev: photo-in-prev 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  @keyframes photo-in-next {
+    from {
+      opacity: 0;
+      transform: translateX(12%);
+    }
+  }
+  @keyframes photo-in-prev {
+    from {
+      opacity: 0;
+      transform: translateX(-12%);
+    }
+  }
+  @keyframes film-roll {
+    to {
+      transform: translateX(calc(-50% - 8px));
+    }
+  }
 }
 
 @layer base {

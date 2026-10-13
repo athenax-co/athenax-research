@@ -166,7 +166,7 @@ export default function LaunchClient() {
 
   return (
     <div>
-      <div className="page-wrap section">
+      <div className="page-wrap section pb-0">
 <div className="path-badge">/root/launch</div>
 
         <div className="mb-2 flex flex-wrap items-baseline justify-between gap-3">

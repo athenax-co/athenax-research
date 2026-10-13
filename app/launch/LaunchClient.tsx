@@ -19,6 +19,7 @@ import { categorySlug } from "@/utils/lib";
 import { usePagedProducts, useProductStats, approvedSubcategories } from "@/features/products";
 import Pagination from "@/components/ui/Pagination";
 import { ProductBadge } from "@/components/ui/ProductBadge";
+import { NounsInTheWild, NOUNS_EVENTS_ANCHOR } from "./NounsInTheWild";
 
 type DateFilter = "today" | "this_week" | "this_month" | undefined;
 
@@ -148,6 +149,15 @@ export default function LaunchClient() {
       filterResetRef.current = false;
     }
   }, [page]);
+
+  // The carousel mounts after data loads, too late for the browser's own #events scroll.
+  const showNounsEvents = isNounsSelected && !productsLoading;
+  const eventsScrolledRef = useRef(false);
+  useEffect(() => {
+    if (!showNounsEvents || eventsScrolledRef.current || window.location.hash !== `#${NOUNS_EVENTS_ANCHOR}`) return;
+    eventsScrolledRef.current = true;
+    requestAnimationFrame(() => document.getElementById(NOUNS_EVENTS_ANCHOR)?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  }, [showNounsEvents]);
 
   // Redirect out-of-range page to 1
   useEffect(() => {
@@ -378,6 +388,8 @@ export default function LaunchClient() {
           ))}
 
         <Pagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-8 mb-7" />
+
+        {showNounsEvents && <NounsInTheWild id={NOUNS_EVENTS_ANCHOR} />}
 
         <WindowCard label="LAUNCH_TIERS.SYS" className="mt-20 hidden">
           <div className="mb-4 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">LAUNCH PROMOTION TIERS</div>

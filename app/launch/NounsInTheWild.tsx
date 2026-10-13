@@ -231,7 +231,7 @@ export function NounsInTheWild({
   const isMobile = metrics?.mode === "mobile";
 
   return (
-    <section id={id} className={cn("mt-2.5 scroll-mt-22 text-ink", className)} aria-roledescription="carousel" aria-labelledby={headingId}>
+    <section id={id} className={cn("mt-36 scroll-mt-22 text-ink max-sm:mt-24", className)} aria-roledescription="carousel" aria-labelledby={headingId}>
       <div className="mb-5 flex items-end justify-between gap-4.5 max-sm:mb-3.5 max-sm:flex-col max-sm:items-start max-sm:gap-3.5">
         <div>
           {path && <span className="path-badge mb-0">{path}</span>}
@@ -349,8 +349,6 @@ export function NounsInTheWild({
           </Button>
         ))}
       </div>
-
-      <hr className={cn("border-0 border-t-2 border-ink", isMobile ? "mt-5.5" : "mt-6.5")} />
     </section>
   );
 }

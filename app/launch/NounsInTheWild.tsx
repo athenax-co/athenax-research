@@ -48,7 +48,7 @@ const FAN = {
   desktop: {
     maxCardW: 490,
     cardRatioOfStage: 0.42,
-    stageHeightFactor: 1.3,
+    stageHeightFactor: 1.14,
     perspective: 1400,
     steps: [0.51, 0.82, 1.12],
     sideScale: 0.81,
@@ -258,7 +258,7 @@ export function NounsInTheWild({
         ref={stageRef}
         className={cn(
           "relative h-(--niw-stage-h) touch-pan-y overflow-hidden outline-none select-none perspective-(--niw-perspective)",
-          "[--niw-card-h:306px] [--niw-card-w:490px] [--niw-perspective:1400px] [--niw-stage-h:398px]",
+          "[--niw-card-h:306px] [--niw-card-w:490px] [--niw-perspective:1400px] [--niw-stage-h:349px]",
           "focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-danger",
           isMobile
             ? "[mask-image:linear-gradient(90deg,transparent_0,#000_6%,#000_94%,transparent_100%)]"

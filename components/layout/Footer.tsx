@@ -18,7 +18,7 @@ const NAV_COLS: NavCol[] = [
     links: [
       { href: "/launch", text: "Launch" },
       { href: "/archive", text: "Research" },
-      { href: "/leaderboard", text: "Leaderboard", disabled: true },
+      { href: "/nouns/gallery", text: "Gallery" },
       { href: "/roadmap", text: "Roadmap" },
     ],
   },

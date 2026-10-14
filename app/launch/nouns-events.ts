@@ -1,98 +1,95 @@
+// Copy rule: never name Robinhood Chain together with Nouns in titles, alt text or labels.
 export interface GallerySlide {
   file: string;
-  title: string;
-  place: string;
   alt: string;
+  place: string;
+  title?: string;
+  highlight?: boolean;
 }
 
 export const IMAGE_BASE = "https://admin-athenax.mypinx.store/nouns-images";
 
-const DIGITAL_AF = "Digital AF! · Seoul";
-const T2049 = "Singapore · Token2049";
+export const COMMUNITY_KICKOFF = "Community Kickoff · The Spot";
 
-export const NOUNS_IN_THE_WILD_SLIDES: GallerySlide[] = [
-  {
-    file: "01-antoine-grenez-mia-wallace-von-dalz",
-    title: "Antoine Grenez & Mia Wallace Von Dal’z",
-    place: "FuturaCanvas · KBW 2026",
-    alt: "Antoine Grenez and Mia Wallace Von Dal’z on stage at FuturaCanvas beneath a slide reading “Has new technology actually freed the creator?”",
-  },
-  {
-    file: "02-live-doodle-screen",
-    title: "Live Doodle Screen",
-    place: "FuturaCanvas · KBW 2026",
-    alt: "Large screen filled with colourful hand-drawn doodle faces, one labelled Nouns DAO",
-  },
-  {
-    file: "03-pink-airbrush-by-denis-meyers",
-    title: "Pink Airbrush by Denis Meyers",
-    place: DIGITAL_AF,
-    alt: "Pink airbrushed creature wearing noggles by Denis Meyers, sprayed over the Nouns DAO wall lettering “Art Culture”",
-  },
-  {
-    file: "04-draw-with-nouns-art-exhibition",
-    title: "Draw with Nouns Art Exhibition",
-    place: DIGITAL_AF,
-    alt: "The projected Nouns DAO coloring wall glowing in the dim gallery, line-drawn Nouns around the noggles logo",
-  },
-  {
-    file: "05-mia-wallace-von-dalz-drawing-on-the-wall",
-    title: "Mia Wallace Von Dal’z Drawing on the Wall",
-    place: DIGITAL_AF,
-    alt: "Mia Wallace Von Dal’z drawing on the projected Nouns DAO coloring wall in the gallery",
-  },
-  {
-    file: "06-community-kickoff",
-    title: "Community Kickoff",
-    place: T2049,
-    alt: "Guest in a black noggles bucket hat striking a pose in front of the Nouns DAO photo wall",
-  },
-  {
-    file: "07-meet-the-nouns-flyers",
-    title: "Meet the Nouns Flyers",
-    place: T2049,
-    alt: "“Meet the Nouns” flyers fanned out on a wooden table",
-  },
-  {
-    file: "08-nouns-at-the-spot",
-    title: "Nouns at The Spot",
-    place: T2049,
-    alt: "Standing digital screen reading NOUNS, Singapore 2026, beside the bar at The Spot",
-  },
-  {
-    file: "09-nouns-private-event",
-    title: "Nouns Private Event",
-    place: T2049,
-    alt: "Guests talking beside the Nouns DAO photo wall",
-  },
-  {
-    file: "10-defi-dave-at-nouns-private-event",
-    title: "DeFi Dave at Nouns Private Event",
-    place: T2049,
-    alt: "DeFi Dave in a sakura-print t-shirt smiling in front of the Nouns DAO photo wall",
-  },
-  {
-    file: "11-guest-photoshoot",
-    title: "Guest Photoshoot",
-    place: T2049,
-    alt: "Photographer taking a guest’s portrait at the Nouns DAO photo wall",
-  },
-  {
-    file: "12-guests-at-nouns-private-event",
-    title: "Guests at Nouns Private Event",
-    place: T2049,
-    alt: "Guest in a black noggles bucket hat and white shirt talking with other guests",
-  },
-  {
-    file: "13-guests-at-nouns-private-event",
-    title: "Guests at Nouns Private Event",
-    place: T2049,
-    alt: "Two guests in noggles bucket hats posing at the venue entrance",
-  },
-  {
-    file: "14-guest-in-front-of-nouns-photo-wall",
-    title: "Guest in front of Nouns Photo Wall",
-    place: T2049,
-    alt: "Guest in a noggles bucket hat and sunglasses, holding a glass of wine in front of the Nouns DAO photo wall",
-  },
+export const GALLERY_EVENTS = [{ slug: "community-kickoff", label: "Community Kickoff", place: COMMUNITY_KICKOFF }] as const;
+
+export type GalleryEventSlug = (typeof GALLERY_EVENTS)[number]["slug"];
+
+const KICKOFF_ALT = "Guests at the Community Kickoff at The Spot";
+const STANDEE_ALT = "Table sign at the Community Kickoff at The Spot";
+
+export const NOUNS_PHOTOS: GallerySlide[] = [
+  { file: "Robinhood_Chain_Community/20261006-7", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-9", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-11", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF, highlight: true },
+  { file: "Robinhood_Chain_Community/20261006-12", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-13", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-14", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-15", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-16", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-17", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF, highlight: true },
+  { file: "Robinhood_Chain_Community/20261006-19", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-24", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF, highlight: true },
+  { file: "Robinhood_Chain_Community/20261006-26", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-27", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-29", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-31", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-33a", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-37", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-38", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-41", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-42", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-48", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-50", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-51", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF, highlight: true },
+  { file: "Robinhood_Chain_Community/20261006-52", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-54", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-56", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-58", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-65", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-66", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-68", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-69", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-73", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-74", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-75", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-77", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-78", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-80", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-82", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF, highlight: true },
+  { file: "Robinhood_Chain_Community/20261006-83", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF, highlight: true },
+  { file: "Robinhood_Chain_Community/20261006-84", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-85", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-87", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-88", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-90", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-92", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-93", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-96", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF, highlight: true },
+  { file: "Robinhood_Chain_Community/20261006-97", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF, highlight: true },
+  { file: "Robinhood_Chain_Community/20261006-102", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-105", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-106", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-107", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-108", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-109", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-110", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-111", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-112", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-115", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-116", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-117", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-118", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-120", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-121", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/20261006-124", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF, highlight: true },
+  { file: "Robinhood_Chain_Community/20261006-125", alt: KICKOFF_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/Standees/20260919-b-1", alt: STANDEE_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/Standees/20260919-b-2", alt: STANDEE_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/Standees/20260919-b-3", alt: STANDEE_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/Standees/20260919-b-4", alt: STANDEE_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/Standees/20260919-b-5", alt: STANDEE_ALT, place: COMMUNITY_KICKOFF },
+  { file: "Robinhood_Chain_Community/Standees/20260919-b-6", alt: STANDEE_ALT, place: COMMUNITY_KICKOFF },
 ];
+
+export const NOUNS_PHOTO_HIGHLIGHTS = NOUNS_PHOTOS.filter((p) => p.highlight);

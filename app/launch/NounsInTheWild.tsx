@@ -15,7 +15,7 @@ import {
 import Image from "next/image";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { IMAGE_BASE, NOUNS_IN_THE_WILD_SLIDES, type GallerySlide } from "./nouns-events";
+import { IMAGE_BASE, NOUNS_PHOTOS, type GallerySlide } from "./nouns-events";
 
 export const NOUNS_EVENTS_ANCHOR = "events";
 
@@ -138,13 +138,13 @@ export interface NounsInTheWildProps {
 }
 
 export function NounsInTheWild({
-  slides = NOUNS_IN_THE_WILD_SLIDES,
+  slides = NOUNS_PHOTOS,
   title = "Nouns",
   titleAccent = "in the Wild",
   subtitle = "Where Nouns has been. The calendar says where it turns up next.",
   ctaLabel = "Upcoming events",
   ctaHref = "https://luma.com/nounsdao",
-  path = "/root/launch/nouns/irl",
+  path = "/root/launch/nouns/events",
   imageBase = IMAGE_BASE,
   onSlideChange,
   className,
@@ -231,7 +231,12 @@ export function NounsInTheWild({
   const isMobile = metrics?.mode === "mobile";
 
   return (
-    <section id={id} className={cn("mt-36 scroll-mt-22 text-ink max-sm:mt-24", className)} aria-roledescription="carousel" aria-labelledby={headingId}>
+    <section
+      id={id}
+      className={cn("mt-36 scroll-mt-22 text-ink max-sm:mt-24", className)}
+      aria-roledescription="carousel"
+      aria-labelledby={headingId}
+    >
       <div className="mb-5 flex items-end justify-between gap-4.5 max-sm:mb-3.5 max-sm:flex-col max-sm:items-start max-sm:gap-3.5">
         <div>
           {path && <span className="path-badge mb-0">{path}</span>}
@@ -296,7 +301,7 @@ export function NounsInTheWild({
               )}
               role="group"
               aria-roledescription="slide"
-              aria-label={`${i + 1} of ${count}: ${s.title}`}
+              aria-label={`${i + 1} of ${count}: ${s.title ?? s.alt}`}
               aria-hidden={!isActive}
               style={l ? { transform: l.transform, opacity: l.opacity, zIndex: l.zIndex } : undefined}
               onClick={() => {
@@ -328,7 +333,7 @@ export function NounsInTheWild({
         aria-live="polite"
         aria-atomic="true"
       >
-        <b className={cn("font-bold tracking-[-0.01em]", isMobile ? "text-sm" : "text-[15px]")}>{current.title}</b>
+        {current.title && <b className={cn("font-bold tracking-[-0.01em]", isMobile ? "text-sm" : "text-[15px]")}>{current.title}</b>}
         <span className="font-['Space_Mono',monospace] text-[10px] tracking-widest text-muted uppercase">{current.place}</span>
       </p>
 

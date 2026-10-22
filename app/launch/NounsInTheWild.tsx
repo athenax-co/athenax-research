@@ -327,8 +327,8 @@ export function NounsInTheWild({
 
       <p
         className={cn(
-          "flex text-center",
-          isMobile ? "mt-3 min-h-[3.1em] flex-col items-center gap-1" : "mt-4 min-h-[1.5em] flex-wrap items-baseline justify-center gap-x-2.5 gap-y-1"
+          "flex min-h-[3.1em] flex-col items-center gap-1 text-center",
+          isMobile ? "mt-3" : "mt-4"
         )}
         aria-live="polite"
         aria-atomic="true"

@@ -4,7 +4,7 @@ import { IMAGE_BASE, NOUNS_PHOTOS } from "@/app/launch/nouns-events";
 import NounsGallery from "./NounsGallery";
 
 const TITLE = "Nouns in the Wild — Gallery | AthenaX";
-const DESCRIPTION = "Photos from the Nouns Community Kickoff at The Spot.";
+const DESCRIPTION = "Photos of Nouns from Token2049 Singapore, FuturaCanvas and DIGITAL AF! in Seoul.";
 const OG_IMAGE = `${IMAGE_BASE}/${NOUNS_PHOTOS[0].file}.webp`;
 
 export const metadata: Metadata = {

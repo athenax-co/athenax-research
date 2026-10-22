@@ -99,16 +99,15 @@ export default function NounsGallery() {
           {TITLE} <span className="font-(family-name:--font-londrina) font-normal tracking-normal">{TITLE_ACCENT}</span>
         </h1>
         <p className="m-0 max-w-[52ch] text-[17px] leading-normal text-muted max-sm:text-[15px]">
-          Photos from the Community Kickoff at The Spot — the rooms, walls and people where Nouns showed up.
+          Photos from Token2049 Singapore, FuturaCanvas and DIGITAL AF! in Seoul — the rooms, walls and people where Nouns showed up.
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 max-sm:mt-5">
           <div className="flex flex-wrap gap-2.5 max-sm:gap-2" role="group" aria-label="Filter photos by event">
-            <FilterPill label="All" count={NOUNS_PHOTOS.length} active={!event} onClick={() => filter(null)} />
+            <FilterPill label="All" active={!event} onClick={() => filter(null)} />
             {GALLERY_EVENTS.map((e) => (
               <FilterPill
                 key={e.slug}
                 label={e.label}
-                count={NOUNS_PHOTOS.filter((s) => s.place === e.place).length}
                 active={event?.slug === e.slug}
                 onClick={() => filter(e.slug)}
               />
@@ -123,8 +122,7 @@ export default function NounsGallery() {
       <section className="page-wrap pt-14 pb-18 max-sm:pt-7 max-sm:pb-10" aria-labelledby={`${headingId}-all`}>
         <div className="mb-6 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 max-sm:mb-4.5 max-sm:border-b-2 max-sm:border-ink max-sm:pb-2.5">
           <h2 id={`${headingId}-all`} className="m-0 text-[28px] leading-[1.15] font-bold tracking-[-0.02em] max-sm:text-2xl">
-            {event ? event.label : "All photos"}{" "}
-            <span className={cn(mono, "text-[13px] font-normal tracking-[0.04em] text-muted")}>({slides.length})</span>
+            {event ? event.label : "All photos"}
           </h2>
           <span className={capsLabel}>Click to view full size</span>
         </div>
@@ -167,7 +165,7 @@ function UpcomingEventsLink({ className }: { className?: string }) {
   );
 }
 
-function FilterPill({ label, count, active, onClick }: { label: string; count: number; active: boolean; onClick: () => void }) {
+function FilterPill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
     <button
       type="button"
@@ -181,7 +179,6 @@ function FilterPill({ label, count, active, onClick }: { label: string; count: n
       )}
     >
       {label}
-      <span className={active ? "text-ink" : "text-muted"}>({count})</span>
     </button>
   );
 }
@@ -470,7 +467,7 @@ function Lightbox({ slides, index, onIndexChange, onClose, onDownload }: Lightbo
                 </div>
               </div>
               <figcaption
-                className="flex min-h-[1.5em] flex-wrap items-baseline justify-center gap-x-2.5 gap-y-1 text-center max-sm:min-h-[3.1em] max-sm:flex-col max-sm:items-center"
+                className="flex min-h-[3.1em] flex-col items-center gap-1 text-center"
                 data-keep-open
               >
                 {slide.title && (

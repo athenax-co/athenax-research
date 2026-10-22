@@ -15,7 +15,7 @@ import {
 import Image from "next/image";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { IMAGE_BASE, NOUNS_PHOTOS, type GallerySlide } from "./nouns-events";
+import { IMAGE_BASE, NOUNS_CAROUSEL_PHOTOS, type GallerySlide } from "./nouns-events";
 
 export const NOUNS_EVENTS_ANCHOR = "events";
 
@@ -138,7 +138,7 @@ export interface NounsInTheWildProps {
 }
 
 export function NounsInTheWild({
-  slides = NOUNS_PHOTOS,
+  slides = NOUNS_CAROUSEL_PHOTOS,
   title = "Nouns",
   titleAccent = "in the Wild",
   subtitle = "Where Nouns has been. The calendar says where it turns up next.",
@@ -327,8 +327,8 @@ export function NounsInTheWild({
 
       <p
         className={cn(
-          "flex text-center",
-          isMobile ? "mt-3 min-h-[3.1em] flex-col items-center gap-1" : "mt-4 min-h-[1.5em] flex-wrap items-baseline justify-center gap-x-2.5 gap-y-1"
+          "flex min-h-[3.1em] flex-col items-center gap-1 text-center",
+          isMobile ? "mt-3" : "mt-4"
         )}
         aria-live="polite"
         aria-atomic="true"

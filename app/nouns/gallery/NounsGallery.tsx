@@ -99,7 +99,7 @@ export default function NounsGallery() {
           {TITLE} <span className="font-(family-name:--font-londrina) font-normal tracking-normal">{TITLE_ACCENT}</span>
         </h1>
         <p className="m-0 max-w-[52ch] text-[17px] leading-normal text-muted max-sm:text-[15px]">
-          Photos from Token2049 Singapore, FuturaCanvas and DIGITAL AF! in Seoul — the rooms, walls and people where Nouns showed up.
+          Photos from the Community Kickoff at The Spot — the rooms, walls and people where Nouns showed up.
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 max-sm:mt-5">
           <div className="flex flex-wrap gap-2.5 max-sm:gap-2" role="group" aria-label="Filter photos by event">

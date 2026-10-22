@@ -15,7 +15,7 @@ import {
 import Image from "next/image";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { IMAGE_BASE, NOUNS_PHOTOS, type GallerySlide } from "./nouns-events";
+import { IMAGE_BASE, NOUNS_CAROUSEL_PHOTOS, type GallerySlide } from "./nouns-events";
 
 export const NOUNS_EVENTS_ANCHOR = "events";
 
@@ -138,7 +138,7 @@ export interface NounsInTheWildProps {
 }
 
 export function NounsInTheWild({
-  slides = NOUNS_PHOTOS,
+  slides = NOUNS_CAROUSEL_PHOTOS,
   title = "Nouns",
   titleAccent = "in the Wild",
   subtitle = "Where Nouns has been. The calendar says where it turns up next.",

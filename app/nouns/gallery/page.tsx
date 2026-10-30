@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import NounsGallery from "./NounsGallery";
 
 const TITLE = "Nouns in the Wild — Gallery | AthenaX";
-const DESCRIPTION = "Photos from the Nouns Community Kickoff at The Spot.";
+const DESCRIPTION = "Photos and videos from the Nouns Community Kickoff at The Spot.";
 const OG_IMAGE = "/og/nouns-gallery";
 
 export const metadata: Metadata = {

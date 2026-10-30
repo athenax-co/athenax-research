@@ -94,6 +94,30 @@ export const NOUNS_PHOTOS: GallerySlide[] = [
 
 export const NOUNS_PHOTO_HIGHLIGHTS = NOUNS_PHOTOS.filter((p) => p.highlight);
 
+export interface GalleryVideo {
+  src: string;
+  poster: string;
+  title: string;
+  place: string;
+}
+
+const VIDEO_BASE = `${IMAGE_BASE}/videos`;
+
+export const NOUNS_VIDEOS: GalleryVideo[] = [
+  {
+    src: `${VIDEO_BASE}/Nouns_30s_web.mp4`,
+    poster: `${VIDEO_BASE}/Nouns_30s_poster.jpg`,
+    title: "Community Kickoff highlights",
+    place: COMMUNITY_KICKOFF,
+  },
+  {
+    src: `${VIDEO_BASE}/Nouns_60s_web.mp4`,
+    poster: `${VIDEO_BASE}/Nouns_60s_poster.jpg`,
+    title: "Community Kickoff recap",
+    place: COMMUNITY_KICKOFF,
+  },
+];
+
 export const TOKEN2049_SINGAPORE = "Token2049 · Singapore";
 export const FUTURA_CANVAS = "FuturaCanvas · KBW Seoul";
 export const DIGITAL_AF = "DIGITAL AF! · Seoul";

@@ -1,11 +1,11 @@
 "use client";
 
-import { useCallback, useId, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { useCallback, useId, useRef, useState, type KeyboardEvent, type PointerEvent, type RefObject } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Dialog } from "@base-ui/react";
 import { parseAsInteger, parseAsStringLiteral, useQueryState } from "nuqs";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Download, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Download, Maximize, Pause, Play, Volume2, VolumeX, X } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useGlobal } from "@/components/GlobalProvider";
 import { cn } from "@/lib/utils";
@@ -14,8 +14,10 @@ import {
   IMAGE_BASE,
   NOUNS_PHOTO_HIGHLIGHTS,
   NOUNS_PHOTOS,
+  NOUNS_VIDEOS,
   type GalleryEventSlug,
   type GallerySlide,
+  type GalleryVideo,
 } from "@/app/launch/nouns-events";
 import { featureSpans, type TileSpan } from "./feature-grid";
 
@@ -71,6 +73,8 @@ export default function NounsGallery() {
   const [photo, setPhoto] = useQueryState("photo", parseAsInteger);
   const event = GALLERY_EVENTS.find((e) => e.slug === eventSlug);
   const slides = event ? NOUNS_PHOTOS.filter((s) => s.place === event.place) : NOUNS_PHOTOS;
+  const videos = event ? NOUNS_VIDEOS.filter((v) => v.place === event.place) : NOUNS_VIDEOS;
+  const [video, setVideo] = useState<number | null>(null);
   const active = photo != null && photo >= 1 && photo <= slides.length ? photo - 1 : null;
   const download = useDownload();
   const spans = featureSpans(slides.length);
@@ -80,6 +84,7 @@ export default function NounsGallery() {
   const filter = (slug: GalleryEventSlug | null) => {
     setEventSlug(slug);
     setPhoto(null);
+    setVideo(null);
   };
   const openFromFilm = (p: GallerySlide) => {
     setEventSlug(null);
@@ -99,7 +104,7 @@ export default function NounsGallery() {
           {TITLE} <span className="font-(family-name:--font-londrina) font-normal tracking-normal">{TITLE_ACCENT}</span>
         </h1>
         <p className="m-0 max-w-[52ch] text-[17px] leading-normal text-muted max-sm:text-[15px]">
-          Photos from the Community Kickoff at The Spot — the rooms, walls and people where Nouns showed up.
+          Photos and videos from the Community Kickoff at The Spot — the rooms, walls and people where Nouns showed up.
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 max-sm:mt-5">
           <div className="flex flex-wrap gap-2.5 max-sm:gap-2" role="group" aria-label="Filter photos by event">
@@ -119,13 +124,24 @@ export default function NounsGallery() {
 
       <Filmstrip onOpen={openFromFilm} />
 
-      <section className="page-wrap pt-14 pb-18 max-sm:pt-7 max-sm:pb-10" aria-labelledby={`${headingId}-all`}>
-        <div className="mb-6 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 max-sm:mb-4.5 max-sm:border-b-2 max-sm:border-ink max-sm:pb-2.5">
-          <h2 id={`${headingId}-all`} className="m-0 text-[28px] leading-[1.15] font-bold tracking-[-0.02em] max-sm:text-2xl">
-            {event ? event.label : "All photos"}
-          </h2>
-          <span className={capsLabel}>Click to view full size</span>
-        </div>
+      {videos.length > 0 && (
+        <section className="page-wrap pt-19 max-sm:pt-7" aria-labelledby={`${headingId}-videos`}>
+          <SectionHeader id={`${headingId}-videos`} title="Videos" hint="Click to play" />
+          <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 sm:gap-6">
+            {videos.map((v, i) => (
+              <li key={v.src} className="min-w-0">
+                <VideoTile video={v} onOpen={() => setVideo(i)} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section
+        className={cn("page-wrap pb-18 max-sm:pt-7 max-sm:pb-10", videos.length > 0 ? "pt-20" : "pt-14")}
+        aria-labelledby={`${headingId}-all`}
+      >
+        <SectionHeader id={`${headingId}-all`} title="Photos" hint="Click to view full size" />
 
         <div className="@container">
           <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 lg:grid-cols-4 lg:gap-5 lg:auto-rows-[calc((100cqw-60px)/4/1.5)]">
@@ -152,7 +168,228 @@ export default function NounsGallery() {
       </section>
 
       <Lightbox slides={slides} index={active} onIndexChange={(i) => setPhoto(i + 1)} onClose={() => setPhoto(null)} onDownload={download} />
+      <VideoPlayer videos={videos} index={video} onIndexChange={setVideo} onClose={() => setVideo(null)} />
     </article>
+  );
+}
+
+function SectionHeader({ id, title, hint }: { id: string; title: string; hint: string }) {
+  return (
+    <div className="mb-6 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 max-sm:mb-4.5 max-sm:border-b-2 max-sm:border-ink max-sm:pb-2.5">
+      <h2 id={id} className="m-0 text-[28px] leading-[1.15] font-bold tracking-[-0.02em] max-sm:text-2xl">
+        {title}
+      </h2>
+      <span className={capsLabel}>{hint}</span>
+    </div>
+  );
+}
+
+function VideoTile({ video, onOpen }: { video: GalleryVideo; onOpen: () => void }) {
+  return (
+    <button
+      type="button"
+      className="relative block aspect-video w-full cursor-pointer overflow-hidden rounded-[10px] border-2 border-ink bg-ink p-0 shadow-[3px_3px_0_0_#1C1C27] transition-[translate,box-shadow] duration-250 ease-[cubic-bezier(.16,1,.3,1)] hover:-translate-x-0.75 hover:-translate-y-0.75 hover:shadow-[7px_7px_0_0_#1C1C27] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-danger lg:rounded-xl lg:shadow-[4px_4px_0_0_#1C1C27]"
+      aria-label={`Play video: ${video.title}`}
+      onClick={onOpen}
+    >
+      <Image src={video.poster} alt="" fill sizes="(min-width: 640px) 600px, 100vw" className="object-cover" />
+      <span className="absolute inset-0 bg-ink/16" aria-hidden="true" />
+      <span
+        className="absolute top-1/2 left-1/2 grid size-16 -translate-1/2 place-items-center rounded-[10px] border-2 border-ink bg-white shadow-[4px_4px_0_0_#1C1C27] max-sm:size-13"
+        aria-hidden="true"
+      >
+        <Play className="size-5.5 fill-ink" />
+      </span>
+    </button>
+  );
+}
+
+const formatTime = (t: number) => {
+  const s = Number.isFinite(t) ? Math.floor(t) : 0;
+  return `${Math.floor(s / 60)}:${pad(s % 60)}`;
+};
+
+const togglePlay = (v: HTMLVideoElement | null) => {
+  if (!v) return;
+  if (v.paused) v.play().catch(() => {});
+  else v.pause();
+};
+
+const SEEK_STEP = 5;
+const controlButton =
+  "grid size-9 flex-none cursor-pointer place-items-center rounded-lg border-2 border-ink p-0 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-danger";
+
+interface VideoPlayerProps {
+  videos: GalleryVideo[];
+  index: number | null;
+  onIndexChange: (index: number) => void;
+  onClose: () => void;
+}
+
+function VideoPlayer({ videos, index, onIndexChange, onClose }: VideoPlayerProps) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const closeRef = useRef<HTMLButtonElement | null>(null);
+
+  if (index == null || !videos[index]) return <Dialog.Root open={false} />;
+
+  const video = videos[index];
+  const go = (step: -1 | 1) => {
+    const next = index + step;
+    if (next >= 0 && next < videos.length) onIndexChange(next);
+  };
+
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "ArrowLeft") go(-1);
+    else if (e.key === "ArrowRight") go(1);
+    else if (e.key === " ") togglePlay(videoRef.current);
+    else return;
+    e.preventDefault();
+  };
+
+  // Wrapper keeps the overlay open: a disabled .btn has pointer-events: none, so clicks land on it instead.
+  const arrow = (step: -1 | 1, className: string) => (
+    <span className={className} data-keep-open>
+      <Button
+        variant="outline"
+        className="size-13 p-0"
+        aria-label={step < 0 ? "Previous video" : "Next video"}
+        disabled={step < 0 ? index === 0 : index === videos.length - 1}
+        onClick={() => go(step)}
+      >
+        {step < 0 ? <ArrowLeft className="size-5" /> : <ArrowRight className="size-5" />}
+      </Button>
+    </span>
+  );
+
+  return (
+    <Dialog.Root open onOpenChange={(open) => !open && onClose()}>
+      <Dialog.Portal>
+        <Dialog.Popup
+          className="fixed inset-0 z-150 flex flex-col bg-cream text-ink outline-none transition-opacity duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0"
+          initialFocus={closeRef}
+          onKeyDown={onKeyDown}
+          onClick={(e) => {
+            if (!(e.target as Element).closest("[data-keep-open]")) onClose();
+          }}
+        >
+          <Dialog.Title className="sr-only">{video.title}</Dialog.Title>
+          <div className="flex items-center justify-between gap-4 px-7 py-5 max-sm:px-4 max-sm:py-3" data-keep-open>
+            <span className={capsLabel}>Video</span>
+            <Dialog.Close ref={closeRef} className={cn(buttonVariants({ variant: "outline" }), "size-12 p-0")} aria-label="Close video">
+              <X className="size-5" />
+            </Dialog.Close>
+          </div>
+
+          <div className="grid min-h-0 flex-1 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-8 px-7 pb-10 max-sm:grid-cols-2 max-sm:content-center max-sm:gap-x-3.5 max-sm:gap-y-5 max-sm:px-4 max-sm:pb-6 max-sm:[grid-template-areas:'fig_fig'_'prev_next']">
+            {arrow(-1, "max-sm:[grid-area:prev] max-sm:justify-self-end")}
+            <div className="flex min-w-0 justify-center max-sm:[grid-area:fig]">
+              {/* Keyed so switching videos remounts the element: the old one stops and the controls reset. */}
+              <VideoStage key={video.src} video={video} videoRef={videoRef} />
+            </div>
+            {arrow(1, "max-sm:[grid-area:next] max-sm:justify-self-start")}
+          </div>
+        </Dialog.Popup>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+
+function VideoStage({ video, videoRef }: { video: GalleryVideo; videoRef: RefObject<HTMLVideoElement | null> }) {
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [time, setTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [muted, setMuted] = useState(false);
+
+  const seek = (t: number) => {
+    const v = videoRef.current;
+    if (!v || !duration) return;
+    v.currentTime = clamp(t, 0, duration);
+    setTime(v.currentTime);
+  };
+  const seekAt = (clientX: number, bar: HTMLElement) => {
+    const r = bar.getBoundingClientRect();
+    seek(((clientX - r.left) / r.width) * duration);
+  };
+
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else if (frameRef.current?.requestFullscreen) frameRef.current.requestFullscreen().catch(() => {});
+    // iOS Safari only supports fullscreen on the <video> itself.
+    else (videoRef.current as (HTMLVideoElement & { webkitEnterFullscreen?: () => void }) | null)?.webkitEnterFullscreen?.();
+  };
+
+  return (
+    <div
+      ref={frameRef}
+      className="relative aspect-video w-full max-w-[min(1080px,calc((100dvh-200px)*16/9))] overflow-hidden rounded-xl border-2 border-ink bg-ink shadow-[6px_6px_0_0_#1C1C27] max-sm:shadow-[4px_4px_0_0_#1C1C27] [&:fullscreen]:max-w-none [&:fullscreen]:rounded-none [&:fullscreen]:border-0"
+      data-keep-open
+    >
+      <video
+        ref={videoRef}
+        src={video.src}
+        poster={video.poster}
+        autoPlay
+        playsInline
+        preload="metadata"
+        className="size-full cursor-pointer object-contain"
+        onClick={() => togglePlay(videoRef.current)}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)}
+        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+        onVolumeChange={(e) => setMuted(e.currentTarget.muted)}
+      />
+
+      <div className="absolute inset-x-4 bottom-4 flex items-center gap-4 rounded-[10px] border-2 border-ink bg-white px-3.5 py-2.5 max-sm:inset-x-2 max-sm:bottom-2 max-sm:gap-2.5 max-sm:px-2 max-sm:py-1.5">
+        <button type="button" className={cn(controlButton, "bg-yellow")} aria-label={playing ? "Pause" : "Play"} onClick={() => togglePlay(videoRef.current)}>
+          {playing ? <Pause className="size-4 fill-ink" /> : <Play className="size-4 fill-ink" />}
+        </button>
+        <span className={cn(mono, "text-xs tabular-nums")}>{formatTime(time)}</span>
+        <div
+          role="slider"
+          tabIndex={0}
+          aria-label="Seek"
+          aria-valuemin={0}
+          aria-valuemax={Math.round(duration)}
+          aria-valuenow={Math.round(time)}
+          aria-valuetext={`${formatTime(time)} of ${formatTime(duration)}`}
+          className="min-w-0 flex-1 cursor-pointer touch-none py-2 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-danger"
+          onPointerDown={(e) => {
+            e.currentTarget.setPointerCapture(e.pointerId);
+            seekAt(e.clientX, e.currentTarget);
+          }}
+          onPointerMove={(e) => {
+            if (e.currentTarget.hasPointerCapture(e.pointerId)) seekAt(e.clientX, e.currentTarget);
+          }}
+          onKeyDown={(e) => {
+            if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+            // Stop here so the overlay doesn't switch videos.
+            e.stopPropagation();
+            e.preventDefault();
+            seek(time + (e.key === "ArrowLeft" ? -SEEK_STEP : SEEK_STEP));
+          }}
+        >
+          <div className="relative h-2 overflow-hidden rounded-full border-2 border-ink bg-white">
+            <span className="absolute inset-y-0 left-0 bg-ink" style={{ width: `${duration ? (time / duration) * 100 : 0}%` }} />
+          </div>
+        </div>
+        <span className={cn(mono, "text-xs tabular-nums")}>{formatTime(duration)}</span>
+        <button
+          type="button"
+          className={cn(controlButton, "bg-white")}
+          aria-label={muted ? "Unmute" : "Mute"}
+          onClick={() => {
+            if (videoRef.current) videoRef.current.muted = !videoRef.current.muted;
+          }}
+        >
+          {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+        </button>
+        <button type="button" className={cn(controlButton, "bg-white")} aria-label="Toggle fullscreen" onClick={toggleFullscreen}>
+          <Maximize className="size-4" />
+        </button>
+      </div>
+    </div>
   );
 }
 

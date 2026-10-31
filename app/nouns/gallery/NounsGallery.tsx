@@ -107,7 +107,7 @@ export default function NounsGallery() {
           Photos and videos from the Community Kickoff at The Spot — the rooms, walls and people where Nouns showed up.
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 max-sm:mt-5">
-          <div className="flex flex-wrap gap-2.5 max-sm:gap-2" role="group" aria-label="Filter photos by event">
+          <div className="flex flex-wrap gap-3.5" role="group" aria-label="Filter photos by event">
             <FilterPill label="All" active={!event} onClick={() => filter(null)} />
             {GALLERY_EVENTS.map((e) => (
               <FilterPill
@@ -404,19 +404,9 @@ function UpcomingEventsLink({ className }: { className?: string }) {
 
 function FilterPill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
-    <button
-      type="button"
-      aria-pressed={active}
-      onClick={onClick}
-      className={cn(
-        mono,
-        "inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-full border-2 border-ink px-4 text-[11px] tracking-widest uppercase transition-[background-color,translate,box-shadow] duration-150",
-        "focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-danger",
-        active ? "bg-yellow shadow-[2px_2px_0_0_#1C1C27]" : "bg-white hover:-translate-y-px hover:shadow-[2px_2px_0_0_#1C1C27]"
-      )}
-    >
+    <Button variant={active ? "secondary" : "outline"} aria-pressed={active} onClick={onClick}>
       {label}
-    </button>
+    </Button>
   );
 }
 

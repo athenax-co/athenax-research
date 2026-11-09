@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { IconBounties, IconBuilders, IconLabs, IconTerminal } from "@/components/Icons";
+import { IconEvents, IconExternal, IconGallery, IconLabs, IconRoadmap } from "@/components/Icons";
 import { Button, buttonVariants } from "@/components/ui/button";
 import WindowCard from "@/components/ui/WindowCard";
 import { ProductBadge } from "@/components/ui/ProductBadge";
@@ -126,35 +126,30 @@ export default function Page() {
 
           <div className="border-t-2 border-t-[#D8D4CC] pt-10">
             <div className="mb-4.5 font-['Space_Mono',monospace] text-[10px] tracking-[0.07em] text-muted">EXPLORE ATHENAX</div>
-            <div className="grid-4">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
               {[
-                { icon: <IconLabs />, label: "Research", sub: "Papers & archive", bgClass: "bg-[#EAF0F6]", href: "/archive", comingSoon: false },
-                { icon: <IconTerminal />, label: "Terminal", sub: "Coming soon", bgClass: "bg-[#F9F5DC]", href: "/roadmap", comingSoon: true },
-                { icon: <IconBounties />, label: "Bounties", sub: "Coming soon", bgClass: "bg-[#F2EFE9]", href: "/roadmap", comingSoon: true },
-                { icon: <IconBuilders />, label: "Cohorts", sub: "Coming soon", bgClass: "bg-[#F2EFE9]", href: "/roadmap", comingSoon: true },
-              ].map((item) =>
-                item.comingSoon ? (
-                  <div
-                    key={item.label}
-                    aria-disabled="true"
-                    className={`block rounded-xl border-2 border-[#1C1C27] p-[18px_22px] text-left text-inherit no-underline cursor-default opacity-60 ${item.bgClass}`}
-                  >
-                    <div className="mb-2.5">{item.icon}</div>
-                    <div className="mb-0.75 text-[15px] font-bold">{item.label}</div>
-                    <div className="text-xs text-muted">{item.sub}</div>
-                  </div>
-                ) : (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className={`explore-card block cursor-pointer rounded-xl border-2 border-[#1C1C27] p-[18px_22px] text-left text-inherit no-underline ${item.bgClass}`}
-                  >
-                    <div className="mb-2.5">{item.icon}</div>
-                    <div className="mb-0.75 text-[15px] font-bold">{item.label}</div>
-                    <div className="text-xs text-muted">{item.sub}</div>
-                  </Link>
-                )
-              )}
+                { icon: <IconLabs size={24} />, label: "Research", sub: "Papers & archive", bgClass: "bg-[#E8ECF2]", href: "/archive" },
+                { icon: <IconEvents />, label: "Events", sub: "Upcoming & past", bgClass: "bg-[#F3F0DC]", href: "https://luma.com/nounsdao", external: true },
+                { icon: <IconGallery />, label: "Gallery", sub: "Photos & videos", bgClass: "bg-[#F2E6E2]", href: "/nouns/gallery" },
+                { icon: <IconRoadmap />, label: "Roadmap", sub: "Five phases to autonomy", bgClass: "bg-[#E5ECE5]", href: "/roadmap" },
+              ].map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  className={cn(
+                    "explore-card relative flex min-h-31 flex-col rounded-xl border-2 border-[#1C1C27] p-4 text-left text-inherit no-underline md:min-h-0 md:p-[18px_22px]",
+                    "focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#1C1C27]",
+                    item.bgClass
+                  )}
+                >
+                  {item.external && <IconExternal className="absolute top-4 right-4 text-muted md:top-[18px] md:right-[18px]" />}
+                  <div className="mb-2.5">{item.icon}</div>
+                  <div className="mt-auto mb-0.75 text-[15px] font-bold md:mt-0">{item.label}</div>
+                  <div className="text-xs text-muted">{item.sub}</div>
+                  {item.external && <span className="sr-only">(opens Luma in a new tab)</span>}
+                </Link>
+              ))}
             </div>
           </div>
         </>

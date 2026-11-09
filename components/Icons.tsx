@@ -7,10 +7,10 @@
 
 // Research Labs — flask / beaker silhouette
 const IconLabs = ({ size = 26, color = "#1C1C27" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 3h6" />
-    <path d="M9 3v6l-4 9a1 1 0 0 0 .9 1.45h12.2A1 1 0 0 0 21 18l-4-9V3" />
-    <line x1="6.5" y1="14" x2="17.5" y2="14" />
+    <path d="M10 3v6l-5.2 9.1A2 2 0 0 0 6.5 21h11a2 2 0 0 0 1.7-2.9L14 9V3" />
+    <path d="M7.4 15h9.2" />
   </svg>
 );
 
@@ -461,7 +461,47 @@ const IconGithub = ({ size = 28, color = "#1C1C27" }) => (
   </svg>
 );
 
+// Events — calendar
+const IconEvents = ({ size = 24, color = "#1C1C27" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
+    <path d="M3.5 10h17" />
+    <path d="M8 3v4" />
+    <path d="M16 3v4" />
+  </svg>
+);
+
+// Gallery — image frame
+const IconGallery = ({ size = 24, color = "#1C1C27" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3.5" y="4" width="17" height="16" rx="2" />
+    <circle cx="9" cy="9.5" r="1.6" />
+    <path d="M20.5 15.5l-5-5-9.5 9.5" />
+  </svg>
+);
+
+// Roadmap — route
+const IconRoadmap = ({ size = 24, color = "#1C1C27" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="5.5" cy="18" r="2" />
+    <circle cx="18.5" cy="6" r="2" />
+    <path d="M7.5 18h6a3 3 0 0 0 0-6h-3a3 3 0 0 1 0-6h6" />
+  </svg>
+);
+
+// External link — ↗
+const IconExternal = ({ size = 16, color = "currentColor", className }: { size?: number; color?: string; className?: string }) => (
+  <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M7 17L17 7" />
+    <path d="M9 7h8v8" />
+  </svg>
+);
+
 export {
+  IconEvents,
+  IconGallery,
+  IconRoadmap,
+  IconExternal,
   IconLabs,
   IconUniversities,
   IconSponsors,

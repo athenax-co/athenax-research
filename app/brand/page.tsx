@@ -16,18 +16,19 @@ export const metadata: Metadata = {
 };
 
 const LOGO_FILES_URL = "https://drive.google.com/drive/folders/1Kgwr7FcRINPQWIcKKgdCRPX42enhPTqL?usp=sharing";
-const SVG_URL = "https://drive.google.com/drive/folders/1lxgL-evpDPnYtw1VbCnN9ZLuONRPyg0I";
-const PNG_URL = "https://drive.google.com/drive/folders/1EoW4PA7D7QVv6VYi9YuWluzaprHcKipm";
+// Download files live in R2 under logos/brand-logos/, proxied same-origin via the
+// /brand/files rewrite in next.config.ts so the `download` attribute works.
+const DOWNLOAD_BASE = "/brand/files";
 const CONTACT_EMAIL = "social@athenax.co";
 const BOILERPLATE =
   "AthenaX is a discovery platform for frontier products — where research-backed products become visible, founders submit and builders connect.";
 
 const LOGO_BASE = "https://admin-athenax.mypinx.store/logos/brand-logos";
 const LOGO = {
-  lockupDark: `${LOGO_BASE}/athenax-lockup-dark.png`,
-  lockupWhite: `${LOGO_BASE}/athenax-lockup-white.png`,
-  iconDark: `${LOGO_BASE}/athenax-icon-dark.png`,
-  iconWhite: `${LOGO_BASE}/athenax-icon-white.png`,
+  lockupDark: `${LOGO_BASE}/athenax-lockup-dark.svg`,
+  lockupWhite: `${LOGO_BASE}/athenax-lockup-white.svg`,
+  iconDark: `${LOGO_BASE}/athenax-icon-dark.svg`,
+  iconWhite: `${LOGO_BASE}/athenax-icon-white.svg`,
   wordmarkDark: `${LOGO_BASE}/athenax-wordmark-dark.png`,
 };
 
@@ -44,14 +45,14 @@ const ExtLink = ({ href, className, children }: { href: string; className?: stri
   </a>
 );
 
-const DownloadLinks = () => (
+const DownloadLinks = ({ file }: { file: string }) => (
   <span className="flex gap-5">
-    <ExtLink href={SVG_URL} className={TEXT_LINK}>
+    <a href={`${DOWNLOAD_BASE}/${file}.svg`} download={`${file}.svg`} className={TEXT_LINK}>
       SVG ↓
-    </ExtLink>
-    <ExtLink href={PNG_URL} className={TEXT_LINK}>
+    </a>
+    <a href={`${DOWNLOAD_BASE}/${file}.png`} download={`${file}.png`} className={TEXT_LINK}>
       PNG ↓
-    </ExtLink>
+    </a>
   </span>
 );
 
@@ -86,8 +87,8 @@ const SubTitle = ({ children }: { children: ReactNode }) => (
 /* ---------- data ---------- */
 
 const LOGO_ROWS = [
-  { tone: "light", bg: "bg-white border border-[#E3DED5]", lockup: LOGO.lockupDark, icon: LOGO.iconDark },
-  { tone: "dark", bg: "bg-[#1C1C27]", lockup: LOGO.lockupWhite, icon: LOGO.iconWhite },
+  { tone: "light", bg: "bg-white border border-[#E3DED5]", lockup: LOGO.lockupDark, icon: LOGO.iconDark, variant: "dark" },
+  { tone: "dark", bg: "bg-[#1C1C27]", lockup: LOGO.lockupWhite, icon: LOGO.iconWhite, variant: "white" },
 ] as const;
 
 const CORE_COLOURS = [
@@ -113,7 +114,7 @@ const TYPE_SCALE = [
   { sample: "Where New Products Begin", spec: "DISPLAY · BOLD · 48–70", className: "text-[36px] sm:text-[52px] font-bold leading-none tracking-[-0.03em]", pad: "py-7" },
   { sample: "Research-backed products", spec: "HEADING · BOLD · 28–40", className: "text-[28px] sm:text-[32px] font-bold leading-[1.1] tracking-[-0.02em]", pad: "py-6" },
   { sample: "Founders submit. Builders connect.", spec: "BODY · REGULAR · 16–18", className: "text-[17px] leading-[1.55]", pad: "py-6" },
-  { sample: "EXPLORE ATHENAX", spec: "LABEL · MONO · 11–13 · CAPS", className: cn(MONO, "text-xs tracking-[0.1em]"), pad: "pt-6" },
+  { sample: "EXPLORE ATHENAX", spec: "LABEL · MONO · 11–13 · CAPS", className: cn(MONO, "text-xs tracking-[0.1em]"), pad: "pt-6 pb-10" },
 ];
 
 const LOGO_BACKGROUNDS = [
@@ -251,7 +252,7 @@ export default function BrandPage() {
                     <span className="text-[15px] font-medium">
                       Lockup <span className="text-[#6B6B7A]">— on {row.tone}</span>
                     </span>
-                    <DownloadLinks />
+                    <DownloadLinks file={`athenax-lockup-${row.variant}`} />
                   </figcaption>
                 </figure>
                 <figure className="m-0 flex min-w-0 flex-[1_1_240px] flex-col gap-3.5">
@@ -262,7 +263,7 @@ export default function BrandPage() {
                     <span className="text-[15px] font-medium">
                       Icon <span className="text-[#6B6B7A]">— on {row.tone}</span>
                     </span>
-                    <DownloadLinks />
+                    <DownloadLinks file={`athenax-icon-${row.variant}`} />
                   </figcaption>
                 </figure>
               </div>
@@ -274,7 +275,7 @@ export default function BrandPage() {
         <section id="colour" className="pt-14">
           <SectionHeader
             title="Colour"
-            intro="A warm paper ground with deep ink does most of the work. Red and yellow are accents — a single word, tag or detail at a time."
+            intro="A warm paper background with deep ink does most of the work. Red and yellow serve as the accent colors."
           />
 
           <div className="mt-16 flex flex-wrap gap-5">

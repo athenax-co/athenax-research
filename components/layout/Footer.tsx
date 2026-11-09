@@ -33,6 +33,7 @@ const NAV_COLS: NavCol[] = [
     label: "Company",
     links: [
       { href: "/about", text: "About", disabled: true },
+      { href: "/brand", text: "Brand Kit" },
       { href: "/how-it-works", text: "How It Works", disabled: true },
       { href: "/digest", text: "Research Digest", disabled: true },
       { href: "/llms.txt", text: "AI Index", external: true },

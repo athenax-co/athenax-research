@@ -8,6 +8,7 @@ const STATIC_ROUTES: MetadataRoute.Sitemap = [
   { url: `${BASE}/launch`,  priority: 0.9, changeFrequency: "daily"  },
   { url: `${BASE}/archive`, priority: 0.9, changeFrequency: "daily"  },
   { url: `${BASE}/roadmap`, priority: 0.8, changeFrequency: "weekly" },
+  { url: `${BASE}/brand`,   priority: 0.5, changeFrequency: "monthly" },
 ];
 
 async function fetchProductSlugs(): Promise<MetadataRoute.Sitemap> {

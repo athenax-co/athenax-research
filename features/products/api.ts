@@ -66,8 +66,13 @@ export function voteProduct(id: number, voted: boolean): Promise<void> {
   return http.put<void>(`/product/${id}/vote`, { voted }, { auth: true });
 }
 
-export function getMyProducts(status?: ProductStatus): Promise<ProductOut[]> {
-  return http.get<ProductOut[]>(status ? `/product/me?status=${status}` : "/product/me", { auth: true });
+export async function getMyProducts(status?: ProductStatus): Promise<ProductOut[]> {
+  // Accepts both the paginated { items, total } shape and the legacy plain array.
+  const data = await http.get<PaginatedResponse<ProductOut> | ProductOut[]>(
+    status ? `/product/me?status=${status}` : "/product/me",
+    { auth: true },
+  );
+  return Array.isArray(data) ? data : (data?.items ?? []);
 }
 
 export function getMyVotedProducts(limit = 50, offset = 0): Promise<PaginatedResponse<ProductOut>> {
